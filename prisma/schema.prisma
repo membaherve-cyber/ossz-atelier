@@ -1,0 +1,285 @@
+// OSSZ Atelier — Backoffice schema
+// Staff accounts, authentication, products & garment components,
+// customer orders, and the production tracking module.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Staff accounts & authentication
+// role: ADMIN | MANAGER | INSPECTOR | TAILOR (validated in application layer)
+// ---------------------------------------------------------------------------
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  passwordHash String
+  role         String   @default("TAILOR")
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  assignedTasks       ProductionTask[]     @relation("TaskAssignee")
+  assignedByTasks     ProductionTask[]     @relation("TaskAssigner")
+  blockedTasks        ProductionTask[]     @relation("TaskBlocker")
+  progressUpdates     ProgressUpdate[]
+  inspections         InspectionRecord[]
+  assignmentsAsNew    AssignmentRecord[]   @relation("AssignmentNewStaff")
+  assignmentsAsPrev   AssignmentRecord[]   @relation("AssignmentPrevStaff")
+  assignmentsMade     AssignmentRecord[]   @relation("AssignmentByUser")
+  productionEvents    ProductionEvent[]
+  notifications       Notification[]
+
+  @@index([role, isActive])
+}
+
+// ---------------------------------------------------------------------------
+// Catalog: products & garment components
+// ---------------------------------------------------------------------------
+
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  category    String
+  basePrice   Int      @default(0) // FCFA
+  imageUrl    String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  components ProductComponent[]
+  orderItems OrderItem[]
+
+  @@index([isActive])
+}
+
+/// A garment piece that a product consists of (e.g. Jacket, Trousers, Vest).
+/// Products without components are produced as a single piece.
+model ProductComponent {
+  id                  String @id @default(cuid())
+  productId           String
+  name                String
+  defaultInstructions String?
+  sortOrder           Int    @default(0)
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+}
+
+// ---------------------------------------------------------------------------
+// Customers & orders
+// ---------------------------------------------------------------------------
+
+model Customer {
+  id        String   @id @default(cuid())
+  name      String
+  email     String?
+  phone     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  orders Order[]
+
+  @@index([name])
+}
+
+/// status: PENDING | CONFIRMED | IN_PRODUCTION | READY | DISPATCHED | COMPLETED | CANCELLED
+/// paymentStatus: UNPAID | DEPOSIT_PAID | PAID | REFUNDED
+model Order {
+  id                   String   @id @default(cuid())
+  reference            String   @unique // OSSZ-ORD-001
+  customerId           String
+  status               String   @default("PENDING")
+  paymentStatus        String   @default("UNPAID")
+  totalAmount          Int      @default(0) // FCFA
+  expectedDeliveryDate DateTime?
+  notes                String?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  customer        Customer          @relation(fields: [customerId], references: [id])
+  items           OrderItem[]
+  productionTasks ProductionTask[]
+  events          ProductionEvent[]
+  notifications   Notification[]
+
+  @@index([status])
+  @@index([customerId])
+  @@index([createdAt])
+}
+
+/// One order line. `quantity` multiplies the number of garment pieces produced.
+/// `measurements` stores a JSON object of customer measurements.
+model OrderItem {
+  id           String @id @default(cuid())
+  orderId      String
+  productId    String
+  quantity     Int    @default(1)
+  unitPrice    Int    @default(0) // FCFA
+  measurements String? // JSON
+  instructions String?
+
+  order           Order            @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product         Product          @relation(fields: [productId], references: [id])
+  productionTasks ProductionTask[]
+
+  @@index([orderId])
+}
+
+// ---------------------------------------------------------------------------
+// Production tracking module
+// task status: UNASSIGNED | ASSIGNED | IN_PROGRESS | AWAITING_INSPECTION |
+//              CHANGES_REQUESTED | APPROVED | BLOCKED | CANCELLED
+// ---------------------------------------------------------------------------
+
+model ProductionTask {
+  id                     String    @id @default(cuid())
+  orderId                String
+  orderItemId            String
+  pieceName              String
+  status                 String    @default("UNASSIGNED")
+  progressPercentage     Int       @default(0)
+  assignedStaffId        String?
+  assignedById           String?
+  assignedAt             DateTime?
+  dueAt                  DateTime?
+  productionInstructions String?
+  blockedReason          String?
+  blockedById            String?
+  blockedAt              DateTime?
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+
+  order         Order          @relation(fields: [orderId], references: [id])
+  orderItem     OrderItem      @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
+  assignedStaff User?          @relation("TaskAssignee", fields: [assignedStaffId], references: [id])
+  assignedBy    User?          @relation("TaskAssigner", fields: [assignedById], references: [id])
+  blockedBy     User?          @relation("TaskBlocker", fields: [blockedById], references: [id])
+
+  progressUpdates   ProgressUpdate[]
+  inspections       InspectionRecord[]
+  assignmentRecords AssignmentRecord[]
+  events            ProductionEvent[]
+  notifications     Notification[]
+
+  @@unique([orderItemId, pieceName])
+  @@index([status])
+  @@index([assignedStaffId])
+  @@index([dueAt])
+  @@index([orderId])
+  @@index([updatedAt])
+}
+
+/// Every progress change is recorded as a new, immutable history entry.
+model ProgressUpdate {
+  id               String   @id @default(cuid())
+  taskId           String
+  staffId          String
+  previousProgress Int
+  newProgress      Int
+  previousStatus   String
+  newStatus        String
+  note             String?
+  issueReason      String?
+  isCorrection     Boolean  @default(false)
+  correctionReason String?
+  createdAt        DateTime @default(now())
+
+  task   ProductionTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  staff  User           @relation(fields: [staffId], references: [id])
+
+  @@index([taskId, createdAt])
+  @@index([staffId, createdAt])
+}
+
+/// inspection result: APPROVED | CHANGES_REQUESTED
+model InspectionRecord {
+  id                     String   @id @default(cuid())
+  taskId                 String
+  inspectorId            String
+  result                 String
+  inspectionNotes        String?
+  correctionInstructions String?
+  inspectedAt            DateTime @default(now())
+
+  task      ProductionTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  inspector User           @relation(fields: [inspectorId], references: [id])
+
+  @@index([taskId, inspectedAt])
+}
+
+/// Assignment & reassignment history.
+model AssignmentRecord {
+  id              String   @id @default(cuid())
+  taskId          String
+  previousStaffId String?
+  newStaffId      String
+  assignedById    String
+  reason          String?
+  createdAt       DateTime @default(now())
+
+  task         ProductionTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  newStaff     User           @relation("AssignmentNewStaff", fields: [newStaffId], references: [id])
+  previousStaff User?         @relation("AssignmentPrevStaff", fields: [previousStaffId], references: [id])
+  assignedBy   User           @relation("AssignmentByUser", fields: [assignedById], references: [id])
+
+  @@index([taskId, createdAt])
+  @@index([newStaffId, createdAt])
+}
+
+/// Permanent audit trail.
+/// eventType: TASK_CREATED | PIECE_ASSIGNED | TASK_REASSIGNED | PRODUCTION_STARTED |
+///   PROGRESS_UPDATED | PROGRESS_CORRECTED | PRODUCTION_BLOCKED | BLOCKER_RESOLVED |
+///   SUBMITTED_FOR_INSPECTION | INSPECTION_COMPLETED | CORRECTIONS_REQUESTED |
+///   PIECE_APPROVED | TASK_REOPENED | TASK_CANCELLED | DEADLINE_CHANGED
+model ProductionEvent {
+  id            String   @id @default(cuid())
+  taskId        String
+  orderId       String
+  eventType     String
+  previousValue String?
+  newValue      String?
+  actorId       String
+  reason        String?
+  createdAt     DateTime @default(now())
+
+  task  ProductionTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  order Order          @relation(fields: [orderId], references: [id])
+  actor User           @relation(fields: [actorId], references: [id])
+
+  @@index([taskId, createdAt])
+  @@index([orderId, createdAt])
+  @@index([eventType])
+}
+
+/// Internal notifications.
+/// type: TASK_ASSIGNED | TASK_REASSIGNED | DEADLINE_CHANGED | CORRECTIONS_REQUESTED |
+///   BLOCKER_RESOLVED | TASK_REOPENED | PIECE_APPROVED | SUBMITTED_FOR_INSPECTION |
+///   PROGRESS_COMPLETE | TASK_BLOCKED | TASK_OVERDUE
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  body      String?
+  taskId    String?
+  orderId   String?
+  type      String?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user  User            @relation(fields: [userId], references: [id])
+  task  ProductionTask? @relation(fields: [taskId], references: [id])
+  order Order?          @relation(fields: [orderId], references: [id])
+
+  @@index([userId, isRead, createdAt])
+  @@index([type, taskId])
+}
