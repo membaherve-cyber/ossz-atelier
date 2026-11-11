@@ -1,20 +1,16 @@
-import { Suspense } from "react";
-import OsszApp from "@/components/ossz/ossz-app";
-import { Skeleton } from "@/components/ui/skeleton";
+import AtelierApp from "@/components/atelier/atelier-app";
+import { Scissors } from "lucide-react";
 
 export default function Home() {
   return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-background">
-          <div className="size-16 rounded-2xl bg-primary/10 flex items-center justify-center">
-            <span className="font-display text-3xl font-bold text-primary">O</span>
-          </div>
-          <Skeleton className="h-4 w-48" />
+    <div className="min-h-screen bg-background">
+      <AtelierApp />
+      <noscript>
+        <div className="min-h-screen flex flex-col items-center justify-center gap-4">
+          <Scissors className="size-10 text-primary" />
+          <p className="text-lg font-semibold">OSSZ Atelier requires JavaScript.</p>
         </div>
-      }
-    >
-      <OsszApp />
-    </Suspense>
+      </noscript>
+    </div>
   );
 }

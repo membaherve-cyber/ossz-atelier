@@ -1,10 +1,11 @@
 import { createHmac, randomBytes, scryptSync, timingSafeEqual } from "crypto";
 import { cookies } from "next/headers";
 import { db } from "@/lib/db";
-import { hasPermission, type Permission, type Role } from "@/lib/permissions";
+import { hasPermission, permissionsFor, type Permission, type Role } from "@/lib/permissions";
 import { ApiError } from "@/lib/api";
+import type { SessionUser } from "@/lib/atelier/constants";
 
-const COOKIE_NAME = "ossz_session";
+const COOKIE_NAME = "atelier_session";
 const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
 // ---------------------------------------------------------------------------
@@ -30,7 +31,7 @@ export function verifyPassword(password: string, stored: string): boolean {
 // ---------------------------------------------------------------------------
 
 function authSecret(): string {
-  return process.env.AUTH_SECRET || "ossz-dev-secret-do-not-use-in-production";
+  return process.env.AUTH_SECRET || "ossz-atelier-dev-secret-do-not-use-in-production";
 }
 
 function sign(payload: string): string {
@@ -81,13 +82,6 @@ export async function clearSessionCookie(): Promise<void> {
 // Session retrieval & guards
 // ---------------------------------------------------------------------------
 
-export type SessionUser = {
-  id: string;
-  email: string;
-  name: string;
-  role: Role;
-};
-
 export async function getSessionUser(): Promise<SessionUser | null> {
   const store = await cookies();
   const token = store.get(COOKIE_NAME)?.value;
@@ -96,7 +90,13 @@ export async function getSessionUser(): Promise<SessionUser | null> {
   if (!uid) return null;
   const user = await db.user.findUnique({ where: { id: uid } });
   if (!user || !user.isActive) return null;
-  return { id: user.id, email: user.email, name: user.name, role: user.role as Role };
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.role as Role,
+    permissions: permissionsFor(user.role),
+  };
 }
 
 export async function requireUser(): Promise<SessionUser> {
@@ -109,6 +109,15 @@ export async function requirePermission(permission: Permission): Promise<Session
   const user = await requireUser();
   if (!hasPermission(user.role, permission)) {
     throw new ApiError(403, `Your account is not authorized to perform this action (${permission}).`);
+  }
+  return user;
+}
+
+/** Require one of the given roles. */
+export async function requireRole(...roles: Role[]): Promise<SessionUser> {
+  const user = await requireUser();
+  if (!roles.includes(user.role)) {
+    throw new ApiError(403, "Your account is not authorized to perform this action.");
   }
   return user;
 }

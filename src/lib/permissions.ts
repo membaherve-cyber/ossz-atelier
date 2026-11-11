@@ -1,68 +1,79 @@
-// OSSZ role & permission matrix.
-// Server-side authorization is enforced in every API route via requirePermission().
+// OSSZ ATELIER — role & permission matrix for the independent production
+// management system. Server-side authorization is enforced in every API route
+// via requirePermission(). Staff (production workers) have no global
+// permissions: their access is strictly scoped to their own assigned tasks.
 
-export const ROLES = ["ADMIN", "MANAGER", "INSPECTOR", "TAILOR"] as const;
+export const ROLES = ["MANAGEMENT", "ADMIN", "STAFF"] as const;
 export type Role = (typeof ROLES)[number];
 
 export const ROLE_LABELS: Record<Role, string> = {
-  ADMIN: "Administrator",
-  MANAGER: "Production Manager",
-  INSPECTOR: "Inspector",
-  TAILOR: "Production Staff",
+  MANAGEMENT: "Management",
+  ADMIN: "Admin",
+  STAFF: "Staff",
 };
 
-/** Staff accounts that can be assigned production work. */
-export const ASSIGNABLE_ROLES: Role[] = ["ADMIN", "MANAGER", "TAILOR"];
+export const ROLE_DESCRIPTIONS: Record<Role, string> = {
+  MANAGEMENT:
+    "Full operational and supervisory access, final authority on incentives and critical decisions.",
+  ADMIN:
+    "Operational management of customers, orders, production and staff accounts. Cannot override Management-level controls.",
+  STAFF:
+    "Individual production worker: sees and updates only the tasks assigned to their own account.",
+};
 
 export const PERMISSIONS = [
+  "customers.view",
+  "customers.manage",
   "orders.view",
   "orders.manage",
-  "products.view",
-  "products.manage",
-  "staff.view",
-  "staff.manage",
+  "users.view",
+  "users.manage.staff",
+  "users.manage.all",
   "production.view.all",
   "production.create.tasks",
   "production.assign",
   "production.inspect",
-  "production.resolve.blockers",
-  "production.reopen",
   "production.cancel",
-  "production.correct.progress",
-  "production.manage.deadlines",
+  "production.manage.details",
+  "production.stages.configure",
   "production.reports",
+  "performance.view",
+  "performance.configure",
+  "performance.assess",
+  "incentives.view",
+  "incentives.prepare",
+  "incentives.manage.schemes",
+  "incentives.approve",
+  "incentives.payment",
+  "audit.view",
 ] as const;
 
 export type Permission = (typeof PERMISSIONS)[number];
 
+const ADMIN_PERMISSIONS: readonly Permission[] = [
+  "customers.view",
+  "customers.manage",
+  "orders.view",
+  "orders.manage",
+  "users.view",
+  "users.manage.staff",
+  "production.view.all",
+  "production.create.tasks",
+  "production.assign",
+  "production.inspect",
+  "production.cancel",
+  "production.manage.details",
+  "production.stages.configure",
+  "production.reports",
+  "performance.view",
+  "incentives.view",
+  "incentives.prepare",
+];
+
 const MATRIX: Record<Role, readonly Permission[]> = {
-  ADMIN: PERMISSIONS,
-  MANAGER: [
-    "orders.view",
-    "orders.manage",
-    "products.view",
-    "products.manage",
-    "staff.view",
-    "production.view.all",
-    "production.create.tasks",
-    "production.assign",
-    "production.inspect",
-    "production.resolve.blockers",
-    "production.reopen",
-    "production.cancel",
-    "production.correct.progress",
-    "production.manage.deadlines",
-    "production.reports",
-  ],
-  INSPECTOR: [
-    "orders.view",
-    "products.view",
-    "staff.view",
-    "production.view.all",
-    "production.inspect",
-    "production.reports",
-  ],
-  TAILOR: ["products.view"],
+  MANAGEMENT: PERMISSIONS,
+  ADMIN: ADMIN_PERMISSIONS,
+  STAFF: [],
 };
 
 export function hasPermission(role: string, permission: Permission): boolean {
@@ -73,3 +84,6 @@ export function hasPermission(role: string, permission: Permission): boolean {
 export function permissionsFor(role: string): Permission[] {
   return [...(MATRIX[role as Role] ?? [])];
 }
+
+/** Roles whose accounts can be assigned production work. */
+export const ASSIGNABLE_ROLES: Role[] = ["MANAGEMENT", "ADMIN", "STAFF"];
