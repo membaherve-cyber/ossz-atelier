@@ -1,6 +1,26 @@
 "use client";
 
-// OSSZ ATELIER — client-side API helper (same-origin fetch with cookies).
+// OSSZ ATELIER — client-side API helper (same-origin fetch with cookies +
+// Bearer token fallback for embedded contexts where cookies are blocked).
+
+const TOKEN_KEY = "atelier_token";
+
+export function setStoredToken(token: string | null): void {
+  try {
+    if (token) localStorage.setItem(TOKEN_KEY, token);
+    else localStorage.removeItem(TOKEN_KEY);
+  } catch {
+    // localStorage unavailable (private mode, etc.) — cookies still apply.
+  }
+}
+
+export function getStoredToken(): string | null {
+  try {
+    return localStorage.getItem(TOKEN_KEY);
+  } catch {
+    return null;
+  }
+}
 
 export class ApiClientError extends Error {
   constructor(
@@ -13,9 +33,14 @@ export class ApiClientError extends Error {
 }
 
 async function request<T>(method: string, url: string, body?: unknown): Promise<T> {
+  const token = getStoredToken();
+  const headers: Record<string, string> = {};
+  if (body !== undefined) headers["Content-Type"] = "application/json";
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+
   const res = await fetch(url, {
     method,
-    headers: body !== undefined ? { "Content-Type": "application/json" } : undefined,
+    headers,
     body: body !== undefined ? JSON.stringify(body) : undefined,
     credentials: "same-origin",
   });
@@ -26,6 +51,9 @@ async function request<T>(method: string, url: string, body?: unknown): Promise<
     // non-JSON response
   }
   if (!res.ok) {
+    // Stale/expired token: drop it so subsequent requests rely on the cookie
+    // (or force a clean re-login) instead of repeating the same failure.
+    if (res.status === 401 && token) setStoredToken(null);
     throw new ApiClientError(
       res.status,
       (data.error as string) || `Request failed (${res.status})`,

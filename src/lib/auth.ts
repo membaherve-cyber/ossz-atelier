@@ -1,5 +1,5 @@
 import { createHmac, randomBytes, scryptSync, timingSafeEqual } from "crypto";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { db } from "@/lib/db";
 import { hasPermission, permissionsFor, type Permission, type Role } from "@/lib/permissions";
 import { ApiError } from "@/lib/api";
@@ -66,10 +66,13 @@ export async function setSessionCookie(userId: string): Promise<void> {
   const store = await cookies();
   store.set(COOKIE_NAME, createSessionToken(userId), {
     httpOnly: true,
-    sameSite: "lax",
+    // "none" + secure: required for the session cookie to survive when the
+    // app is displayed inside an embedded (third-party) context such as the
+    // sandbox preview iframe. Browsers drop SameSite=Lax cookies there.
+    sameSite: "none",
     path: "/",
     maxAge: Math.floor(SESSION_TTL_MS / 1000),
-    secure: process.env.NODE_ENV === "production",
+    secure: true,
   });
 }
 
@@ -83,10 +86,27 @@ export async function clearSessionCookie(): Promise<void> {
 // ---------------------------------------------------------------------------
 
 export async function getSessionUser(): Promise<SessionUser | null> {
-  const store = await cookies();
-  const token = store.get(COOKIE_NAME)?.value;
-  if (!token) return null;
-  const uid = verifySessionToken(token);
+  let uid: string | null = null;
+
+  // 1) Bearer token in the Authorization header (works even when third-party
+  //    cookies are blocked entirely, e.g. strict iframe privacy settings).
+  try {
+    const hdrs = await headers();
+    const authHeader = hdrs.get("authorization");
+    if (authHeader?.startsWith("Bearer ")) {
+      uid = verifySessionToken(authHeader.slice(7).trim());
+    }
+  } catch {
+    // headers() unavailable in this context — fall through to the cookie.
+  }
+
+  // 2) Session cookie (primary mechanism in normal first-party usage).
+  if (!uid) {
+    const store = await cookies();
+    const token = store.get(COOKIE_NAME)?.value;
+    if (token) uid = verifySessionToken(token);
+  }
+
   if (!uid) return null;
   const user = await db.user.findUnique({ where: { id: uid } });
   if (!user || !user.isActive) return null;

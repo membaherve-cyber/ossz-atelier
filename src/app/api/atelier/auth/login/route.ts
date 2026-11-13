@@ -4,6 +4,7 @@ import { ApiError, json, parseBody, withApi } from "@/lib/api";
 import {
   checkLoginRateLimit,
   clearLoginFailures,
+  createSessionToken,
   recordLoginFailure,
   setSessionCookie,
   verifyPassword,
@@ -34,6 +35,7 @@ export const POST = withApi(async (req: Request) => {
 
   clearLoginFailures(email);
   await setSessionCookie(user.id);
+  const token = createSessionToken(user.id);
   await logAudit(
     { id: user.id, name: user.name, email: user.email, role: user.role as never, permissions: [] },
     "LOGIN_SUCCESS",
@@ -42,6 +44,10 @@ export const POST = withApi(async (req: Request) => {
   );
 
   return json({
+    // The token mirrors the session cookie. The client keeps it in localStorage
+    // and sends it as a Bearer header so authentication keeps working in
+    // embedded/iframe contexts where third-party cookies are blocked.
+    token,
     user: {
       id: user.id,
       name: user.name,

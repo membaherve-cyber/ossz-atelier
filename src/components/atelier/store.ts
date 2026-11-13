@@ -3,7 +3,7 @@
 // OSSZ ATELIER — global client state (session + view router + notification badge).
 
 import { create } from "zustand";
-import { api } from "./client";
+import { api, setStoredToken } from "./client";
 import type { SessionUser } from "./types";
 
 export type View =
@@ -60,10 +60,13 @@ export const useAppStore = create<AppState>((set) => ({
   },
 
   login: async (email, password) => {
-    const res = await api.post<{ user: SessionUser }>("/api/atelier/auth/login", {
-      email,
-      password,
-    });
+    const res = await api.post<{ user: SessionUser; token: string }>(
+      "/api/atelier/auth/login",
+      { email, password }
+    );
+    // Persist the Bearer token so API calls keep working even when the
+    // browser blocks the session cookie (embedded preview iframe).
+    setStoredToken(res.token);
     set({ user: res.user, status: "authenticated", view: "dashboard", viewParams: {} });
     try {
       const me = await api.get<{ unreadCount: number }>("/api/atelier/notifications?limit=1");
@@ -78,6 +81,7 @@ export const useAppStore = create<AppState>((set) => ({
     try {
       await api.post("/api/atelier/auth/logout");
     } finally {
+      setStoredToken(null);
       set({ user: null, status: "unauthenticated", view: "dashboard", viewParams: {}, unreadCount: 0 });
     }
   },
