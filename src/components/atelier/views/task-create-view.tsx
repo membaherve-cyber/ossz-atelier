@@ -6,15 +6,12 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { format } from "date-fns";
 import { api } from "../client";
+import { useI18n } from "../i18n/use-i18n";
+import { categoryLabel, priorityLabel } from "../i18n/core";
 import { isSupervisor, useAppStore } from "../store";
 import type { OrderSummary, UserRecord } from "../types";
 import { EmptyState, PageHeader, PriorityBadge } from "../ui-bits";
-import {
-  CATEGORY_LABELS,
-  PRIORITIES,
-  PRIORITY_LABELS,
-  TASK_CATEGORIES,
-} from "@/lib/atelier/constants";
+import { PRIORITIES, TASK_CATEGORIES } from "@/lib/atelier/constants";
 import { formatDate } from "@/lib/format";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -81,6 +78,7 @@ export function TaskCreateView() {
   const viewParams = useAppStore((s) => s.viewParams);
   const navigate = useAppStore((s) => s.navigate);
   const { toast } = useToast();
+  const { t, lang } = useI18n();
   const supervisor = isSupervisor(user);
 
   const [orders, setOrders] = useState<OrderSummary[] | null>(null);
@@ -96,9 +94,9 @@ export function TaskCreateView() {
       const res = await api.get<{ orders: OrderSummary[] }>("/api/atelier/orders");
       setOrders(res.orders);
     } catch (e) {
-      setOrdersError(e instanceof Error ? e.message : "Failed to load orders.");
+      setOrdersError(e instanceof Error ? e.message : t("tc.loadOrdersFailed"));
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     if (!supervisor) return;
@@ -142,8 +140,8 @@ export function TaskCreateView() {
   async function submit() {
     if (!selectedOrder) {
       toast({
-        title: "Select an order first",
-        description: "Tasks are always created for a specific customer order.",
+        title: t("tc.selectOrderTitle"),
+        description: t("tc.selectOrderDesc"),
         variant: "destructive",
       });
       return;
@@ -151,8 +149,8 @@ export function TaskCreateView() {
     const names = rows.map((r) => r.garmentPiece.trim());
     if (names.some((n) => !n)) {
       toast({
-        title: "Missing garment piece name",
-        description: "Every garment piece needs a name (e.g. Jacket, Trousers).",
+        title: t("tc.missingNameTitle"),
+        description: t("tc.missingNameDesc"),
         variant: "destructive",
       });
       return;
@@ -162,8 +160,8 @@ export function TaskCreateView() {
       const key = name.toLowerCase();
       if (seen.has(key)) {
         toast({
-          title: "Duplicate garment piece",
-          description: `"${name}" appears more than once in this form.`,
+          title: t("tc.duplicateTitle"),
+          description: t("tc.duplicateDesc", { name }),
           variant: "destructive",
         });
         return;
@@ -185,14 +183,17 @@ export function TaskCreateView() {
         })),
       });
       toast({
-        title: `${rows.length} task${rows.length === 1 ? "" : "s"} created`,
-        description: `Production tasks were created for order ${selectedOrder.orderNumber}.`,
+        title:
+          rows.length === 1
+            ? t("tc.createdOne", { count: rows.length })
+            : t("tc.createdMany", { count: rows.length }),
+        description: t("tc.createdDesc", { order: selectedOrder.orderNumber }),
       });
       navigate("tasks");
     } catch (e) {
       toast({
-        title: "Could not create tasks",
-        description: e instanceof Error ? e.message : "Unexpected error.",
+        title: t("tc.createFailed"),
+        description: e instanceof Error ? e.message : t("tc.unexpectedError"),
         variant: "destructive",
       });
     } finally {
@@ -206,12 +207,12 @@ export function TaskCreateView() {
     return (
       <EmptyState
         icon={Ban}
-        title="Not authorized"
-        description="Only Management and Admin accounts can create production tasks."
+        title={t("tc.notAuthorized")}
+        description={t("tc.notAuthorizedDesc")}
         action={
           <Button variant="outline" size="sm" onClick={() => navigate("tasks")}>
             <ArrowLeft className="size-4" />
-            Back to tasks
+            {t("tc.backToTasks")}
           </Button>
         }
       />
@@ -222,19 +223,19 @@ export function TaskCreateView() {
     return (
       <div>
         <PageHeader
-          title="Create Production Tasks"
-          description="Break a customer order into individual garment-piece tasks."
+          title={t("tc.title")}
+          description={t("tc.description")}
         />
         <Card className="shadow-sm">
           <CardContent className="p-0">
             <EmptyState
               icon={AlertTriangle}
-              title="Could not load orders"
+              title={t("tc.loadOrdersTitle")}
               description={ordersError}
               action={
                 <Button variant="outline" size="sm" onClick={() => loadOrders()}>
                   <RefreshCw className="size-4" />
-                  Retry
+                  {t("common.tryAgain")}
                 </Button>
               }
             />
@@ -250,11 +251,11 @@ export function TaskCreateView() {
     <div>
       <Button variant="ghost" size="sm" className="-ml-2 mb-2" onClick={() => navigate("tasks")}>
         <ArrowLeft className="size-4" />
-        Back to tasks
+        {t("tc.backToTasks")}
       </Button>
       <PageHeader
-        title="Create Production Tasks"
-        description="Break a customer order into individual garment-piece tasks. Each piece becomes a trackable task with its own checklist."
+        title={t("tc.title")}
+        description={t("tc.descriptionFull")}
       />
 
       {orders === null ? (
@@ -266,11 +267,11 @@ export function TaskCreateView() {
         <Card className="shadow-sm">
           <CardContent className="p-0">
             <EmptyState
-              title="No orders yet"
-              description="Register a customer order first — tasks are always created from an order."
+              title={t("tc.noOrders")}
+              description={t("tc.noOrdersDesc")}
               action={
                 <Button variant="outline" size="sm" onClick={() => navigate("orders")}>
-                  Go to Orders
+                  {t("tc.goToOrders")}
                 </Button>
               }
             />
@@ -281,14 +282,14 @@ export function TaskCreateView() {
           {/* ---- Order selection ---- */}
           <Card className="shadow-sm">
             <CardHeader className="pb-3">
-              <CardTitle className="text-base">Customer order</CardTitle>
+              <CardTitle className="text-base">{t("tc.customerOrder")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-1.5">
-                <Label htmlFor="order-select">Order</Label>
+                <Label htmlFor="order-select">{t("tc.order")}</Label>
                 <Select value={selectedOrderId} onValueChange={selectOrder}>
                   <SelectTrigger id="order-select" className="w-full">
-                    <SelectValue placeholder="Select the order to break into tasks" />
+                    <SelectValue placeholder={t("tc.orderPlaceholder")} />
                   </SelectTrigger>
                   <SelectContent>
                     {orders.map((o) => (
@@ -304,25 +305,25 @@ export function TaskCreateView() {
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3 rounded-lg border bg-muted/30 p-4">
                   <div>
                     <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                      Customer
+                      {t("tc.customer")}
                     </p>
                     <p className="text-sm font-medium mt-0.5">{selectedOrder.customerName}</p>
                   </div>
                   <div>
                     <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                      Phone
+                      {t("tc.phone")}
                     </p>
                     <p className="text-sm mt-0.5">{selectedOrder.customerPhone ?? "—"}</p>
                   </div>
                   <div>
                     <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                      Order date
+                      {t("tc.orderDate")}
                     </p>
                     <p className="text-sm mt-0.5">{formatDate(selectedOrder.orderDate)}</p>
                   </div>
                   <div>
                     <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                      Expected delivery
+                      {t("tc.expectedDelivery")}
                     </p>
                     <p className="text-sm mt-0.5">
                       {formatDate(selectedOrder.expectedDeliveryDate)}
@@ -330,7 +331,7 @@ export function TaskCreateView() {
                   </div>
                   <div>
                     <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                      Priority
+                      {t("tc.priority")}
                     </p>
                     <div className="mt-1">
                       <PriorityBadge priority={selectedOrder.priority} />
@@ -338,13 +339,13 @@ export function TaskCreateView() {
                   </div>
                   <div>
                     <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                      Pieces
+                      {t("tc.pieces")}
                     </p>
                     <p className="text-sm mt-0.5">{selectedOrder.numberOfPieces}</p>
                   </div>
                   <div className="col-span-2 md:col-span-3">
                     <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                      Order instructions
+                      {t("tc.orderInstructions")}
                     </p>
                     <p className="text-sm mt-0.5 whitespace-pre-wrap">
                       {selectedOrder.instructions ?? "—"}
@@ -352,14 +353,19 @@ export function TaskCreateView() {
                   </div>
                   <div className="col-span-2 md:col-span-3">
                     <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                      Existing tasks on this order
+                      {t("tc.existingTasks")}
                     </p>
                     <p className="text-sm mt-0.5">
-                      {selectedOrder.taskCount} total ({selectedOrder.completedTaskCount} completed
                       {selectedOrder.taskCount > 0
-                        ? `, ${Math.round(selectedOrder.avgProgress)}% average progress`
-                        : ""}
-                      ) — duplicate piece names are rejected.
+                        ? t("tc.existingTasksSummaryProgress", {
+                            total: selectedOrder.taskCount,
+                            completed: selectedOrder.completedTaskCount,
+                            progress: Math.round(selectedOrder.avgProgress),
+                          })
+                        : t("tc.existingTasksSummary", {
+                            total: selectedOrder.taskCount,
+                            completed: selectedOrder.completedTaskCount,
+                          })}
                     </p>
                   </div>
                 </div>
@@ -371,14 +377,14 @@ export function TaskCreateView() {
           <Card className="shadow-sm">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between gap-2">
-                <CardTitle className="text-base">Garment pieces</CardTitle>
+                <CardTitle className="text-base">{t("tc.garmentPieces")}</CardTitle>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => setRows((rs) => [...rs, makeRow(selectedOrder)])}
                 >
                   <Plus className="size-4" />
-                  Add Piece
+                  {t("tc.addPiece")}
                 </Button>
               </div>
             </CardHeader>
@@ -386,14 +392,16 @@ export function TaskCreateView() {
               {rows.map((row, i) => (
                 <div key={i} className="rounded-lg border p-4 space-y-3">
                   <div className="flex items-center justify-between">
-                    <p className="text-sm font-semibold">Piece {i + 1}</p>
+                    <p className="text-sm font-semibold">
+                      {t("tc.pieceNumber", { number: i + 1 })}
+                    </p>
                     {rows.length > 1 && (
                       <Button
                         variant="ghost"
                         size="icon"
                         className="size-8 text-muted-foreground hover:text-destructive"
                         onClick={() => setRows((rs) => rs.filter((_, j) => j !== i))}
-                        aria-label={`Remove piece ${i + 1}`}
+                        aria-label={t("tc.removePiece", { number: i + 1 })}
                       >
                         <Trash2 className="size-4" />
                       </Button>
@@ -402,28 +410,31 @@ export function TaskCreateView() {
 
                   <div className="grid gap-3 sm:grid-cols-2">
                     <div className="space-y-1.5 sm:col-span-2">
-                      <Label htmlFor={`piece-${i}`}>Garment piece name *</Label>
+                      <Label htmlFor={`piece-${i}`}>{t("tc.pieceName")}</Label>
                       <Input
                         id={`piece-${i}`}
-                        placeholder="e.g. Jacket, Matching Trousers"
+                        placeholder={t("tc.pieceNamePlaceholder")}
                         value={row.garmentPiece}
                         onChange={(e) => updateRow(i, { garmentPiece: e.target.value })}
                       />
                     </div>
 
                     <div className="space-y-1.5">
-                      <Label>Category</Label>
+                      <Label>{t("tc.category")}</Label>
                       <Select
                         value={row.category}
                         onValueChange={(v) => updateRow(i, { category: v })}
                       >
-                        <SelectTrigger className="w-full" aria-label={`Category for piece ${i + 1}`}>
+                        <SelectTrigger
+                          className="w-full"
+                          aria-label={t("tc.categoryForPiece", { number: i + 1 })}
+                        >
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
                           {TASK_CATEGORIES.map((c) => (
                             <SelectItem key={c} value={c}>
-                              {CATEGORY_LABELS[c]}
+                              {categoryLabel(c, lang)}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -431,20 +442,25 @@ export function TaskCreateView() {
                     </div>
 
                     <div className="space-y-1.5">
-                      <Label>Assigned staff</Label>
+                      <Label>{t("tc.assignedStaff")}</Label>
                       <Select
                         value={row.assignedStaffId}
                         onValueChange={(v) => updateRow(i, { assignedStaffId: v })}
                       >
-                        <SelectTrigger className="w-full" aria-label={`Staff for piece ${i + 1}`}>
+                        <SelectTrigger
+                          className="w-full"
+                          aria-label={t("tc.staffForPiece", { number: i + 1 })}
+                        >
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value={UNASSIGNED}>Leave unassigned</SelectItem>
+                          <SelectItem value={UNASSIGNED}>{t("tc.leaveUnassigned")}</SelectItem>
                           {staff.map((u) => (
                             <SelectItem key={u.id} value={u.id}>
                               {u.name}
-                              {u.activeTaskCount != null ? ` (${u.activeTaskCount} active)` : ""}
+                              {u.activeTaskCount != null
+                                ? ` (${t("tc.activeCount", { count: u.activeTaskCount })})`
+                                : ""}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -452,18 +468,21 @@ export function TaskCreateView() {
                     </div>
 
                     <div className="space-y-1.5">
-                      <Label>Priority</Label>
+                      <Label>{t("tc.priority")}</Label>
                       <Select
                         value={row.priority}
                         onValueChange={(v) => updateRow(i, { priority: v })}
                       >
-                        <SelectTrigger className="w-full" aria-label={`Priority for piece ${i + 1}`}>
+                        <SelectTrigger
+                          className="w-full"
+                          aria-label={t("tc.priorityForPiece", { number: i + 1 })}
+                        >
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
                           {PRIORITIES.map((p) => (
                             <SelectItem key={p} value={p}>
-                              {PRIORITY_LABELS[p]}
+                              {priorityLabel(p, lang)}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -471,7 +490,7 @@ export function TaskCreateView() {
                     </div>
 
                     <div className="space-y-1.5">
-                      <Label htmlFor={`deadline-${i}`}>Deadline</Label>
+                      <Label htmlFor={`deadline-${i}`}>{t("tc.deadline")}</Label>
                       <Input
                         id={`deadline-${i}`}
                         type="datetime-local"
@@ -481,10 +500,10 @@ export function TaskCreateView() {
                     </div>
 
                     <div className="space-y-1.5 sm:col-span-2">
-                      <Label htmlFor={`instructions-${i}`}>Instructions (optional)</Label>
+                      <Label htmlFor={`instructions-${i}`}>{t("tc.instructions")}</Label>
                       <Textarea
                         id={`instructions-${i}`}
-                        placeholder="Piece-specific production instructions"
+                        placeholder={t("tc.instructionsPlaceholder")}
                         value={row.instructions}
                         onChange={(e) => updateRow(i, { instructions: e.target.value })}
                       />
@@ -498,12 +517,19 @@ export function TaskCreateView() {
           {/* ---- Submit ---- */}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pb-2">
             <p className="text-sm text-muted-foreground">
-              {rows.length} piece{rows.length === 1 ? "" : "s"} on order{" "}
-              {selectedOrder?.orderNumber ?? "—"}
+              {rows.length === 1
+                ? t("tc.summaryOne", {
+                    count: rows.length,
+                    order: selectedOrder?.orderNumber ?? "—",
+                  })
+                : t("tc.summaryMany", {
+                    count: rows.length,
+                    order: selectedOrder?.orderNumber ?? "—",
+                  })}
             </p>
             <div className="flex gap-2">
               <Button variant="outline" disabled={submitting} onClick={() => navigate("tasks")}>
-                Cancel
+                {t("common.cancel")}
               </Button>
               <Button disabled={submitting || !selectedOrderId} onClick={submit}>
                 {submitting ? (
@@ -511,7 +537,9 @@ export function TaskCreateView() {
                 ) : (
                   <Check className="size-4" />
                 )}
-                Create {rows.length} Task{rows.length === 1 ? "" : "s"}
+                {rows.length === 1
+                  ? t("tc.createOne", { count: rows.length })
+                  : t("tc.createMany", { count: rows.length })}
               </Button>
             </div>
           </div>

@@ -6,6 +6,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { api, ApiClientError, qs } from "../client";
 import { can, useAppStore } from "../store";
+import { useI18n } from "../i18n/use-i18n";
+import { priorityLabel } from "../i18n/core";
 import type { Customer, OrderSummary, TaskSummary } from "../types";
 import { DueDate, EmptyState, PageHeader, PriorityBadge, ProgressCell, StatusBadge } from "../ui-bits";
 import { useToast } from "@/hooks/use-toast";
@@ -39,7 +41,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { PRIORITIES, PRIORITY_LABELS } from "@/lib/atelier/constants";
+import { PRIORITIES } from "@/lib/atelier/constants";
 import { formatDate } from "@/lib/format";
 import { AlertTriangle, ClipboardList, Package, Pencil, Plus, Scissors, Search } from "lucide-react";
 
@@ -104,6 +106,9 @@ export function OrdersView() {
   const user = useAppStore((s) => s.user);
   const navigate = useAppStore((s) => s.navigate);
   const { toast } = useToast();
+  const { t, lang } = useI18n();
+  // Hoisted because the task list below shadows `t` with its map parameter.
+  const unassignedLabel = t("orders.unassigned");
   const canManage = can(user, "orders.manage");
 
   const [orders, setOrders] = useState<OrderSummary[] | null>(null);
@@ -133,9 +138,9 @@ export function OrdersView() {
       setOrders(res.orders);
       setError(null);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to load orders");
+      setError(e instanceof Error ? e.message : t("orders.loadFail"));
     }
-  }, [debouncedSearch, priority, from, to]);
+  }, [debouncedSearch, priority, from, to, t]);
 
   const loadCustomers = useCallback(async () => {
     try {
@@ -163,7 +168,7 @@ export function OrdersView() {
       setDetail(res);
     } catch (e) {
       toast({
-        title: "Could not load order",
+        title: t("orders.loadOrderFailed"),
         description: e instanceof Error ? e.message : undefined,
         variant: "destructive",
       });
@@ -171,7 +176,7 @@ export function OrdersView() {
     } finally {
       setDetailLoading(false);
     }
-  }, [toast]);
+  }, [toast, t]);
 
   function openCreate() {
     setEditing(null);
@@ -210,21 +215,21 @@ export function OrdersView() {
   }
 
   function buildPayload(): Record<string, unknown> | string {
-    if (!form.orderNumber.trim()) return "Order number is required.";
-    if (!form.orderDate) return "Order date is required.";
-    if (!form.description.trim()) return "Description is required.";
-    if (!form.garmentCategory.trim()) return "Garment category is required.";
+    if (!form.orderNumber.trim()) return t("orders.errOrderNumber");
+    if (!form.orderDate) return t("orders.errOrderDate");
+    if (!form.description.trim()) return t("orders.errDescription");
+    if (!form.garmentCategory.trim()) return t("orders.errCategory");
     const pieces = Number.parseInt(form.numberOfPieces, 10);
     if (!Number.isFinite(pieces) || pieces < 1 || pieces > 200) {
-      return "Number of pieces must be between 1 and 200.";
+      return t("orders.errPieces");
     }
     let customer: Record<string, unknown> | undefined;
     if (!editing) {
       if (form.customerMode === "existing") {
-        if (!form.customerId) return "Select an existing customer or choose “New customer”.";
+        if (!form.customerId) return t("orders.errCustomerSelect");
       } else {
         if (!form.ncName.trim() || !form.ncPhone.trim()) {
-          return "New customer name and phone are required.";
+          return t("orders.errNewCustomer");
         }
         customer = {
           name: form.ncName,
@@ -260,10 +265,16 @@ export function OrdersView() {
     try {
       if (editing) {
         await api.patch(`/api/atelier/orders/${editing.id}`, payload);
-        toast({ title: "Order updated", description: `${form.orderNumber} was saved.` });
+        toast({
+          title: t("orders.updatedToast"),
+          description: t("orders.updatedToastDesc", { number: form.orderNumber }),
+        });
       } else {
         await api.post("/api/atelier/orders", payload);
-        toast({ title: "Order registered", description: `${form.orderNumber} was created.` });
+        toast({
+          title: t("orders.registeredToast"),
+          description: t("orders.registeredToastDesc", { number: form.orderNumber }),
+        });
       }
       setFormOpen(false);
       await load();
@@ -272,10 +283,10 @@ export function OrdersView() {
       const message =
         e instanceof ApiClientError
           ? e.details?.issues?.[0]?.message ?? e.message
-          : "Something went wrong. Please try again.";
+          : t("common.somethingWrong");
       setFormError(message);
       toast({
-        title: editing ? "Could not update order" : "Could not register order",
+        title: editing ? t("orders.updateFailed") : t("orders.registerFailed"),
         description: message,
         variant: "destructive",
       });
@@ -289,13 +300,13 @@ export function OrdersView() {
   return (
     <div>
       <PageHeader
-        title="Orders"
-        description="Manually registered production orders and their progress."
+        title={t("orders.title")}
+        description={t("orders.subtitle")}
       >
         {canManage && (
           <Button onClick={openCreate}>
             <Plus className="size-4 mr-1.5" />
-            Register Order
+            {t("orders.register")}
           </Button>
         )}
       </PageHeader>
@@ -306,21 +317,21 @@ export function OrdersView() {
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search order number, customer, description…"
+            placeholder={t("orders.searchPlaceholder")}
             className="pl-8"
-            aria-label="Search orders"
+            aria-label={t("orders.searchLabel")}
           />
         </div>
         <div className="flex flex-wrap gap-2 items-center">
           <Select value={priority || "all"} onValueChange={(v) => setPriority(v === "all" ? "" : v)}>
-            <SelectTrigger className="w-[150px]" aria-label="Filter by priority">
-              <SelectValue placeholder="Priority" />
+            <SelectTrigger className="w-[150px]" aria-label={t("orders.filterPriorityLabel")}>
+              <SelectValue placeholder={t("orders.priorityPlaceholder")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All priorities</SelectItem>
+              <SelectItem value="all">{t("orders.allPriorities")}</SelectItem>
               {PRIORITIES.map((p) => (
                 <SelectItem key={p} value={p}>
-                  {PRIORITY_LABELS[p]}
+                  {priorityLabel(p, lang)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -331,15 +342,15 @@ export function OrdersView() {
               value={from}
               onChange={(e) => setFrom(e.target.value)}
               className="w-[145px]"
-              aria-label="From date"
+              aria-label={t("orders.fromDateLabel")}
             />
-            <span className="text-muted-foreground text-sm">to</span>
+            <span className="text-muted-foreground text-sm">{t("orders.toLabel")}</span>
             <Input
               type="date"
               value={to}
               onChange={(e) => setTo(e.target.value)}
               className="w-[145px]"
-              aria-label="To date"
+              aria-label={t("orders.toDateLabel")}
             />
           </div>
           {hasFilters && (
@@ -353,7 +364,7 @@ export function OrdersView() {
                 setTo("");
               }}
             >
-              Clear
+              {t("orders.clear")}
             </Button>
           )}
         </div>
@@ -362,11 +373,11 @@ export function OrdersView() {
       {error ? (
         <EmptyState
           icon={AlertTriangle}
-          title="Could not load orders"
+          title={t("orders.loadFailedTitle")}
           description={error}
           action={
             <Button variant="outline" size="sm" onClick={load}>
-              Try again
+              {t("common.tryAgain")}
             </Button>
           }
         />
@@ -381,17 +392,17 @@ export function OrdersView() {
         <div className="rounded-lg border">
           <EmptyState
             icon={Package}
-            title={hasFilters ? "No orders match your filters" : "No orders registered yet"}
+            title={hasFilters ? t("orders.emptyFiltersTitle") : t("orders.emptyTitle")}
             description={
               hasFilters
-                ? "Adjust the search or date filters to see more results."
-                : "Register a customer order to start planning production."
+                ? t("orders.emptyFiltersDesc")
+                : t("orders.emptyDesc")
             }
             action={
               canManage && !hasFilters ? (
                 <Button size="sm" onClick={openCreate}>
                   <Plus className="size-4 mr-1.5" />
-                  Register Order
+                  {t("orders.register")}
                 </Button>
               ) : undefined
             }
@@ -402,14 +413,14 @@ export function OrdersView() {
           <Table className="min-w-[980px]">
             <TableHeader>
               <TableRow>
-                <TableHead>Order</TableHead>
-                <TableHead>Customer</TableHead>
-                <TableHead>Garment</TableHead>
-                <TableHead className="text-center">Pieces</TableHead>
-                <TableHead>Priority</TableHead>
-                <TableHead>Expected Delivery</TableHead>
-                <TableHead className="min-w-52">Production</TableHead>
-                <TableHead>Registered</TableHead>
+                <TableHead>{t("orders.colOrder")}</TableHead>
+                <TableHead>{t("orders.colCustomer")}</TableHead>
+                <TableHead>{t("orders.colGarment")}</TableHead>
+                <TableHead className="text-center">{t("orders.colPieces")}</TableHead>
+                <TableHead>{t("orders.colPriority")}</TableHead>
+                <TableHead>{t("orders.colDelivery")}</TableHead>
+                <TableHead className="min-w-52">{t("orders.colProduction")}</TableHead>
+                <TableHead>{t("orders.colRegistered")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -439,8 +450,11 @@ export function OrdersView() {
                     <ProgressCell value={o.avgProgress} />
                     <p className="text-xs text-muted-foreground mt-1">
                       {o.taskCount === 0
-                        ? "No tasks yet"
-                        : `${o.completedTaskCount}/${o.taskCount} task${o.taskCount > 1 ? "s" : ""} done`}
+                        ? t("orders.noTasks")
+                        : t(o.taskCount > 1 ? "orders.tasksDonePlural" : "orders.tasksDone", {
+                            done: o.completedTaskCount,
+                            total: o.taskCount,
+                          })}
                     </p>
                   </TableCell>
                   <TableCell className="text-muted-foreground whitespace-nowrap">
@@ -475,17 +489,20 @@ export function OrdersView() {
                   <PriorityBadge priority={detail.order.priority} />
                 </DialogTitle>
                 <DialogDescription>
-                  Registered {formatDate(detail.order.createdAt)} · {detail.order.customerName}
+                  {t("orders.detailMeta", {
+                    date: formatDate(detail.order.createdAt),
+                    name: detail.order.customerName,
+                  })}
                 </DialogDescription>
               </DialogHeader>
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
                 <div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wide">Order date</p>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wide">{t("orders.statOrderDate")}</p>
                   <p className="font-medium mt-0.5">{formatDate(detail.order.orderDate)}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wide">Expected delivery</p>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wide">{t("orders.statDelivery")}</p>
                   <div className="mt-0.5">
                     <DueDate
                       deadline={detail.order.expectedDeliveryDate}
@@ -494,28 +511,28 @@ export function OrdersView() {
                   </div>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wide">Pieces</p>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wide">{t("orders.statPieces")}</p>
                   <p className="font-medium mt-0.5 tabular-nums">{detail.order.numberOfPieces}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wide">Category</p>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wide">{t("orders.statCategory")}</p>
                   <p className="font-medium mt-0.5">{detail.order.garmentCategory}</p>
                 </div>
               </div>
 
               <div>
-                <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Description</p>
+                <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">{t("orders.descriptionLabel")}</p>
                 <p className="text-sm">{detail.order.description}</p>
               </div>
               {detail.order.instructions && (
                 <div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Instructions</p>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">{t("orders.instructionsLabel")}</p>
                   <p className="text-sm whitespace-pre-line">{detail.order.instructions}</p>
                 </div>
               )}
               {detail.order.notes && (
                 <div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Notes</p>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">{t("orders.notesLabel")}</p>
                   <p className="text-sm whitespace-pre-line text-muted-foreground">{detail.order.notes}</p>
                 </div>
               )}
@@ -524,17 +541,25 @@ export function OrdersView() {
 
               <div>
                 <div className="flex items-center justify-between gap-2 mb-2">
-                  <p className="text-sm font-semibold">Production tasks</p>
+                  <p className="text-sm font-semibold">{t("orders.productionTasks")}</p>
                   <span className="text-xs text-muted-foreground">
-                    {detail.order.completedTaskCount}/{detail.order.taskCount} done · avg{" "}
-                    {detail.order.avgProgress}%
+                    {t(
+                      detail.order.taskCount > 1
+                        ? "orders.summaryDonePlural"
+                        : "orders.summaryDone",
+                      {
+                        done: detail.order.completedTaskCount,
+                        total: detail.order.taskCount,
+                        progress: detail.order.avgProgress,
+                      }
+                    )}
                   </span>
                 </div>
                 {detail.tasks.length === 0 ? (
                   <EmptyState
                     icon={ClipboardList}
-                    title="Not broken into tasks yet"
-                    description="Split this order into garment pieces to start production."
+                    title={t("orders.noTasksTitle")}
+                    description={t("orders.noTasksDesc")}
                   />
                 ) : (
                   <div className="rounded-lg border divide-y overflow-x-auto">
@@ -548,7 +573,7 @@ export function OrdersView() {
                             {t.garmentPiece} <span className="text-muted-foreground font-normal">· {t.code}</span>
                           </p>
                           <p className="text-xs text-muted-foreground truncate">
-                            {t.assignedStaffName ?? "Unassigned"}
+                            {t.assignedStaffName ?? unassignedLabel}
                           </p>
                         </div>
                         <StatusBadge status={t.status} />
@@ -566,13 +591,13 @@ export function OrdersView() {
                       onClick={() => navigate("task-create", { orderId: detail.order.id })}
                     >
                       <Scissors className="size-4 mr-1.5" />
-                      Break into Tasks
+                      {t("orders.breakIntoTasks")}
                     </Button>
                   )}
                   {canManage && (
                     <Button variant="outline" onClick={() => openEdit(detail.order)}>
                       <Pencil className="size-4 mr-1.5" />
-                      Edit
+                      {t("common.edit")}
                     </Button>
                   )}
                 </DialogFooter>
@@ -586,18 +611,20 @@ export function OrdersView() {
       <Dialog open={formOpen} onOpenChange={setFormOpen}>
         <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editing ? `Edit Order ${editing.orderNumber}` : "Register Order"}</DialogTitle>
-            <DialogDescription>
+            <DialogTitle>
               {editing
-                ? "Update order details. The linked customer cannot be changed."
-                : "Enter the business order reference and garment details."}
+                ? t("orders.editTitle", { number: editing.orderNumber })
+                : t("orders.register")}
+            </DialogTitle>
+            <DialogDescription>
+              {editing ? t("orders.editDesc") : t("orders.registerDesc")}
             </DialogDescription>
           </DialogHeader>
 
           {!editing && (
             <>
               <div className="grid gap-1.5">
-                <FormLabel>Customer</FormLabel>
+                <FormLabel>{t("orders.customerLabel")}</FormLabel>
                 <RadioGroup
                   value={form.customerMode}
                   onValueChange={(v) => setForm({ ...form, customerMode: v as OrderForm["customerMode"] })}
@@ -608,26 +635,28 @@ export function OrdersView() {
                     className="flex flex-1 items-center gap-2 rounded-lg border p-3 cursor-pointer has-[button[data-state=checked]]:border-primary has-[button[data-state=checked]]:bg-primary/5"
                   >
                     <RadioGroupItem value="existing" id="cust-existing" />
-                    <span className="text-sm font-medium">Existing customer</span>
+                    <span className="text-sm font-medium">{t("orders.existingCustomer")}</span>
                   </label>
                   <label
                     htmlFor="cust-new"
                     className="flex flex-1 items-center gap-2 rounded-lg border p-3 cursor-pointer has-[button[data-state=checked]]:border-primary has-[button[data-state=checked]]:bg-primary/5"
                   >
                     <RadioGroupItem value="new" id="cust-new" />
-                    <span className="text-sm font-medium">New customer</span>
+                    <span className="text-sm font-medium">{t("orders.newCustomer")}</span>
                   </label>
                 </RadioGroup>
               </div>
               {form.customerMode === "existing" ? (
                 <div className="grid gap-1.5">
-                  <FormLabel htmlFor="order-customer">Select customer *</FormLabel>
+                  <FormLabel htmlFor="order-customer">{t("orders.selectCustomer")}</FormLabel>
                   <Select
                     value={form.customerId}
                     onValueChange={(v) => setForm({ ...form, customerId: v })}
                   >
                     <SelectTrigger id="order-customer">
-                      <SelectValue placeholder={customers.length ? "Select a customer…" : "Loading customers…"} />
+                      <SelectValue
+                        placeholder={customers.length ? t("orders.selectCustomerPlaceholder") : t("orders.loadingCustomers")}
+                      />
                     </SelectTrigger>
                     <SelectContent>
                       {customers.map((c) => (
@@ -641,10 +670,10 @@ export function OrdersView() {
               ) : (
                 <div className="grid gap-4 sm:grid-cols-2 rounded-lg border p-3">
                   <p className="sm:col-span-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                    New customer details
+                    {t("orders.newCustomerDetails")}
                   </p>
                   <div className="grid gap-1.5">
-                    <FormLabel htmlFor="nc-name">Name *</FormLabel>
+                    <FormLabel htmlFor="nc-name">{t("orders.ncName")}</FormLabel>
                     <Input
                       id="nc-name"
                       value={form.ncName}
@@ -653,7 +682,7 @@ export function OrdersView() {
                     />
                   </div>
                   <div className="grid gap-1.5">
-                    <FormLabel htmlFor="nc-phone">Phone *</FormLabel>
+                    <FormLabel htmlFor="nc-phone">{t("orders.ncPhone")}</FormLabel>
                     <Input
                       id="nc-phone"
                       value={form.ncPhone}
@@ -662,7 +691,7 @@ export function OrdersView() {
                     />
                   </div>
                   <div className="grid gap-1.5 sm:col-span-2">
-                    <FormLabel htmlFor="nc-email">Email</FormLabel>
+                    <FormLabel htmlFor="nc-email">{t("orders.ncEmail")}</FormLabel>
                     <Input
                       id="nc-email"
                       type="email"
@@ -671,7 +700,7 @@ export function OrdersView() {
                     />
                   </div>
                   <div className="grid gap-1.5 sm:col-span-2">
-                    <FormLabel htmlFor="nc-address">Address</FormLabel>
+                    <FormLabel htmlFor="nc-address">{t("orders.ncAddress")}</FormLabel>
                     <Input
                       id="nc-address"
                       value={form.ncAddress}
@@ -680,7 +709,7 @@ export function OrdersView() {
                     />
                   </div>
                   <div className="grid gap-1.5 sm:col-span-2">
-                    <FormLabel htmlFor="nc-notes">Customer notes</FormLabel>
+                    <FormLabel htmlFor="nc-notes">{t("orders.ncNotes")}</FormLabel>
                     <Textarea
                       id="nc-notes"
                       rows={2}
@@ -696,7 +725,7 @@ export function OrdersView() {
 
           {editing && (
             <div className="grid gap-1.5">
-              <FormLabel>Customer</FormLabel>
+              <FormLabel>{t("orders.customerLabel")}</FormLabel>
               <p className="text-sm rounded-lg border p-3 bg-muted/40">
                 <span className="font-medium">{editing.customerName}</span>
                 <span className="text-muted-foreground"> · {editing.customerPhone}</span>
@@ -706,17 +735,17 @@ export function OrdersView() {
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="grid gap-1.5">
-              <FormLabel htmlFor="order-number">Order number *</FormLabel>
+              <FormLabel htmlFor="order-number">{t("orders.fieldOrderNumber")}</FormLabel>
               <Input
                 id="order-number"
                 value={form.orderNumber}
                 onChange={(e) => setForm({ ...form, orderNumber: e.target.value })}
-                placeholder="e.g. OSSZ-2026-042"
+                placeholder={t("orders.numberPlaceholder")}
                 maxLength={50}
               />
             </div>
             <div className="grid gap-1.5">
-              <FormLabel htmlFor="order-priority">Priority</FormLabel>
+              <FormLabel htmlFor="order-priority">{t("orders.fieldPriority")}</FormLabel>
               <Select value={form.priority} onValueChange={(v) => setForm({ ...form, priority: v })}>
                 <SelectTrigger id="order-priority">
                   <SelectValue />
@@ -724,14 +753,14 @@ export function OrdersView() {
                 <SelectContent>
                   {PRIORITIES.map((p) => (
                     <SelectItem key={p} value={p}>
-                      {PRIORITY_LABELS[p]}
+                      {priorityLabel(p, lang)}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
             <div className="grid gap-1.5">
-              <FormLabel htmlFor="order-date">Order date *</FormLabel>
+              <FormLabel htmlFor="order-date">{t("orders.fieldOrderDate")}</FormLabel>
               <Input
                 id="order-date"
                 type="date"
@@ -740,7 +769,7 @@ export function OrdersView() {
               />
             </div>
             <div className="grid gap-1.5">
-              <FormLabel htmlFor="order-delivery">Expected delivery</FormLabel>
+              <FormLabel htmlFor="order-delivery">{t("orders.fieldDelivery")}</FormLabel>
               <Input
                 id="order-delivery"
                 type="date"
@@ -749,27 +778,27 @@ export function OrdersView() {
               />
             </div>
             <div className="grid gap-1.5 sm:col-span-2">
-              <FormLabel htmlFor="order-desc">Description *</FormLabel>
+              <FormLabel htmlFor="order-desc">{t("orders.fieldDescription")}</FormLabel>
               <Input
                 id="order-desc"
                 value={form.description}
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
-                placeholder="e.g. Bridal gown with hand embroidery"
+                placeholder={t("orders.descPlaceholder")}
                 maxLength={500}
               />
             </div>
             <div className="grid gap-1.5">
-              <FormLabel htmlFor="order-category">Garment category *</FormLabel>
+              <FormLabel htmlFor="order-category">{t("orders.fieldCategory")}</FormLabel>
               <Input
                 id="order-category"
                 value={form.garmentCategory}
                 onChange={(e) => setForm({ ...form, garmentCategory: e.target.value })}
-                placeholder="e.g. Suiting, Evening wear"
+                placeholder={t("orders.categoryPlaceholder")}
                 maxLength={80}
               />
             </div>
             <div className="grid gap-1.5">
-              <FormLabel htmlFor="order-pieces">Number of pieces *</FormLabel>
+              <FormLabel htmlFor="order-pieces">{t("orders.fieldPieces")}</FormLabel>
               <Input
                 id="order-pieces"
                 type="number"
@@ -780,23 +809,23 @@ export function OrdersView() {
               />
             </div>
             <div className="grid gap-1.5 sm:col-span-2">
-              <FormLabel htmlFor="order-instructions">Production instructions</FormLabel>
+              <FormLabel htmlFor="order-instructions">{t("orders.fieldInstructions")}</FormLabel>
               <Textarea
                 id="order-instructions"
                 rows={3}
                 value={form.instructions}
                 onChange={(e) => setForm({ ...form, instructions: e.target.value })}
-                placeholder="Fabrics, colours, special handling…"
+                placeholder={t("orders.instructionsPlaceholder")}
               />
             </div>
             <div className="grid gap-1.5 sm:col-span-2">
-              <FormLabel htmlFor="order-notes">Notes</FormLabel>
+              <FormLabel htmlFor="order-notes">{t("orders.fieldNotes")}</FormLabel>
               <Textarea
                 id="order-notes"
                 rows={2}
                 value={form.notes}
                 onChange={(e) => setForm({ ...form, notes: e.target.value })}
-                placeholder="Payment terms, follow-ups…"
+                placeholder={t("orders.notesPlaceholder")}
               />
             </div>
             {formError && (
@@ -806,13 +835,13 @@ export function OrdersView() {
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setFormOpen(false)} disabled={submitting}>
-              Cancel
+              {t("common.cancel")}
             </Button>
             <Button onClick={submit} disabled={submitting}>
               {submitting && (
                 <span className="size-4 mr-1.5 animate-spin rounded-full border-2 border-current border-t-transparent" />
               )}
-              {editing ? "Save Changes" : "Register Order"}
+              {editing ? t("common.saveChanges") : t("orders.register")}
             </Button>
           </DialogFooter>
         </DialogContent>

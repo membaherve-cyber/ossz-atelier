@@ -3,11 +3,19 @@
 // OSSZ ATELIER — task detail screen: progress & production checklist,
 // workflow actions, comments/issues and a merged history timeline.
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { format } from "date-fns";
 import type { LucideIcon } from "lucide-react";
 import { ApiClientError, api } from "../client";
+import {
+  inspectionLabel,
+  priorityLabel,
+  stageStateLabel,
+  statusLabel,
+  type Lang,
+} from "../i18n/core";
+import { useI18n, type TranslateFn } from "../i18n/use-i18n";
 import { isSupervisor, useAppStore } from "../store";
 import type { TaskDetail, UserRecord } from "../types";
 import {
@@ -21,14 +29,10 @@ import {
   StatusBadge,
 } from "../ui-bits";
 import {
-  INSPECTION_DECISION_LABELS,
+  INSPECTION_DECISIONS,
   PRIORITIES,
-  PRIORITY_LABELS,
   STAGE_STATES,
-  STAGE_STATE_LABELS,
-  STATUS_LABELS,
   type StageState,
-  type TaskStatus,
 } from "@/lib/atelier/constants";
 import { formatDate, formatDateTime, timeAgo } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -122,10 +126,23 @@ type HistoryEntry = {
 
 const WORK_STATUSES = ["ASSIGNED", "ONGOING", "CHANGES_REQUESTED"];
 
-const STAGE_STATE_OPTIONS = STAGE_STATES.map((s) => ({
-  value: s,
-  label: s === "NOT_APPLICABLE" ? "N/A" : STAGE_STATE_LABELS[s],
-}));
+/** Selectable checklist stage states, localized on demand. */
+function stageStateOptions(lang: Lang): { value: StageState; label: string }[] {
+  return STAGE_STATES.map((s) => ({
+    value: s,
+    label: s === "NOT_APPLICABLE" ? "N/A" : stageStateLabel(s, lang),
+  }));
+}
+
+/** Display label for a progress-history source (falls back to the raw value). */
+function progressSourceLabel(source: string, t: TranslateFn): string {
+  const known: Record<string, string> = {
+    MANUAL: t("td.source.MANUAL"),
+    STAGE: t("td.source.STAGE"),
+    INSPECTION: t("td.source.INSPECTION"),
+  };
+  return known[source] ?? source;
+}
 
 /** Convert an ISO timestamp to a `datetime-local` input value (local time). */
 function toDatetimeLocal(iso: string | null): string {
@@ -133,14 +150,6 @@ function toDatetimeLocal(iso: string | null): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "";
   return format(d, "yyyy-MM-dd'T'HH:mm");
-}
-
-function statusLabel(status: string): string {
-  return STATUS_LABELS[status as TaskStatus] ?? status;
-}
-
-function stageLabel(state: string): string {
-  return STAGE_STATE_LABELS[state as StageState] ?? state;
 }
 
 function MetaRow({ label, children }: { label: string; children: ReactNode }) {
@@ -157,6 +166,13 @@ function MetaRow({ label, children }: { label: string; children: ReactNode }) {
 // --- Component -------------------------------------------------------------------
 
 export function TaskDetailView() {
+  const { t, lang } = useI18n();
+  // Latest translator for stable callbacks — avoids re-creating `load` (and
+  // re-fetching the task) when the language changes.
+  const tRef = useRef(t);
+  useEffect(() => {
+    tRef.current = t;
+  }, [t]);
   const user = useAppStore((s) => s.user);
   const viewParams = useAppStore((s) => s.viewParams);
   const navigate = useAppStore((s) => s.navigate);
@@ -219,7 +235,7 @@ export function TaskDetailView() {
         if (e instanceof ApiClientError && (e.status === 403 || e.status === 404)) {
           setFatal(e.message);
         } else {
-          setFetchError(e instanceof Error ? e.message : "Failed to load task.");
+          setFetchError(e instanceof Error ? e.message : tRef.current("td.loadFailed"));
         }
       } finally {
         if (!silent) setLoading(false);
@@ -249,8 +265,8 @@ export function TaskDetailView() {
         userName: a.assignedByName,
         text:
           a.type === "REASSIGN"
-            ? `reassigned the task to ${a.staffName}`
-            : `assigned the task to ${a.staffName}`,
+            ? t("td.hist.reassigned", { name: a.staffName })
+            : t("td.hist.assigned", { name: a.staffName }),
         detail: a.note,
         icon: UserPlus,
         iconClass: "bg-teal-50 text-teal-700",
@@ -262,7 +278,10 @@ export function TaskDetailView() {
         kind: "status",
         createdAt: s.createdAt,
         userName: s.userName,
-        text: `changed status from ${statusLabel(s.fromStatus)} to ${statusLabel(s.toStatus)}`,
+        text: t("td.hist.statusChange", {
+          from: statusLabel(s.fromStatus, lang),
+          to: statusLabel(s.toStatus, lang),
+        }),
         detail: s.reason,
         icon: ArrowRightLeft,
         iconClass: "bg-amber-50 text-amber-700",
@@ -274,7 +293,11 @@ export function TaskDetailView() {
         kind: "stage",
         createdAt: s.createdAt,
         userName: s.userName,
-        text: `${s.stageName}: ${stageLabel(s.previousState)} → ${stageLabel(s.newState)}`,
+        text: t("td.hist.stageChange", {
+          stage: s.stageName,
+          from: stageStateLabel(s.previousState, lang),
+          to: stageStateLabel(s.newState, lang),
+        }),
         detail: s.comment,
         icon: ListChecks,
         iconClass: "bg-stone-100 text-stone-600",
@@ -286,9 +309,9 @@ export function TaskDetailView() {
         kind: "progress",
         createdAt: p.createdAt,
         userName: p.userName,
-        text: `updated progress ${p.previousProgress}% → ${p.newProgress}%`,
+        text: t("td.hist.progress", { from: p.previousProgress, to: p.newProgress }),
         detail: p.note,
-        badge: p.source,
+        badge: progressSourceLabel(p.source, t),
         icon: TrendingUp,
         iconClass: "bg-emerald-50 text-emerald-700",
       });
@@ -299,7 +322,11 @@ export function TaskDetailView() {
         kind: "inspection",
         createdAt: i.createdAt,
         userName: i.inspectorName,
-        text: `inspection decision — ${INSPECTION_DECISION_LABELS[i.decision as never] ?? i.decision}`,
+        text: t("td.hist.inspection", {
+          decision: (INSPECTION_DECISIONS as readonly string[]).includes(i.decision)
+            ? inspectionLabel(i.decision, lang)
+            : i.decision,
+        }),
         detail: i.comments,
         icon: ShieldCheck,
         iconClass:
@@ -316,7 +343,7 @@ export function TaskDetailView() {
         kind: "comment",
         createdAt: c.createdAt,
         userName: c.userName,
-        text: c.isIssue ? "reported an issue" : "added a note",
+        text: c.isIssue ? t("td.hist.issue") : t("td.hist.note"),
         detail: c.message,
         icon: MessageSquare,
         iconClass: c.isIssue ? "bg-red-50 text-red-700" : "bg-stone-100 text-stone-600",
@@ -325,7 +352,7 @@ export function TaskDetailView() {
     return entries.sort(
       (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     );
-  }, [detail]);
+  }, [detail, t, lang]);
 
   const url = taskId ? `/api/atelier/tasks/${taskId}` : "";
 
@@ -340,15 +367,15 @@ export function TaskDetailView() {
         toast({ title: label });
       } catch (e) {
         toast({
-          title: "Action failed",
-          description: e instanceof Error ? e.message : "Unexpected error.",
+          title: t("td.actionFailed"),
+          description: e instanceof Error ? e.message : t("td.unexpectedError"),
           variant: "destructive",
         });
       } finally {
         setBusy(false);
       }
     },
-    [load, toast]
+    [load, toast, t]
   );
 
   function openDialog(kind: Exclude<DialogKind, null>) {
@@ -382,12 +409,12 @@ export function TaskDetailView() {
   if (!taskId) {
     return (
       <EmptyState
-        title="No task selected"
-        description="Open a task from the production board to see its details."
+        title={t("td.noTask.title")}
+        description={t("td.noTask.desc")}
         action={
           <Button variant="outline" size="sm" onClick={() => navigate("tasks")}>
             <ArrowLeft className="size-4" />
-            Go to tasks
+            {t("td.goToTasks")}
           </Button>
         }
       />
@@ -398,12 +425,12 @@ export function TaskDetailView() {
     return (
       <EmptyState
         icon={AlertTriangle}
-        title="Task unavailable"
+        title={t("td.taskUnavailable")}
         description={fatal}
         action={
           <Button variant="outline" size="sm" onClick={() => navigate("tasks")}>
             <ArrowLeft className="size-4" />
-            Back to tasks
+            {t("td.backToTasks")}
           </Button>
         }
       />
@@ -434,11 +461,11 @@ export function TaskDetailView() {
     return (
       <EmptyState
         icon={AlertTriangle}
-        title="Could not load task"
-        description={fetchError ?? "Unknown error."}
+        title={t("td.couldNotLoad")}
+        description={fetchError ?? t("td.unknownError")}
         action={
           <Button variant="outline" size="sm" onClick={() => load()}>
-            Retry
+            {t("common.tryAgain")}
           </Button>
         }
       />
@@ -509,8 +536,8 @@ export function TaskDetailView() {
   function requireStaff() {
     if (!staffId) {
       toast({
-        title: "Select a staff member",
-        description: "Choose the account responsible for this garment piece.",
+        title: t("td.toast.selectStaff"),
+        description: t("td.toast.selectStaffDesc"),
         variant: "destructive",
       });
       return false;
@@ -521,8 +548,8 @@ export function TaskDetailView() {
   function requireReason(field: string, min = 3) {
     if (reason.trim().length < min) {
       toast({
-        title: "A reason is required",
-        description: `Provide ${field} (at least ${min} characters).`,
+        title: t("td.toast.reasonRequired"),
+        description: t("td.toast.reasonRequiredDesc", { field, min }),
         variant: "destructive",
       });
       return false;
@@ -534,7 +561,9 @@ export function TaskDetailView() {
     if (!requireStaff()) return;
     const target = staff.find((s) => s.id === staffId);
     runAction(
-      `${task.assignedStaffId ? "Reassigned" : "Assigned"} to ${target?.name ?? "staff member"}`,
+      task.assignedStaffId
+        ? t("td.toast.reassignedTo", { name: target?.name ?? t("td.staffMember") })
+        : t("td.toast.assignedTo", { name: target?.name ?? t("td.staffMember") }),
       () =>
         api.patch(url, {
           action: "ASSIGN",
@@ -547,7 +576,7 @@ export function TaskDetailView() {
   const doEdit = () => {
     const piece = editForm.garmentPiece.trim();
     if (!piece) {
-      toast({ title: "Garment piece name is required", variant: "destructive" });
+      toast({ title: t("td.toast.pieceRequired"), variant: "destructive" });
       return;
     }
     const body: Record<string, unknown> = { action: "UPDATE" };
@@ -559,20 +588,23 @@ export function TaskDetailView() {
     }
     if (piece !== task.garmentPiece) body.garmentPiece = piece;
     if (Object.keys(body).length === 1) {
-      toast({ title: "Nothing to update", description: "No field was changed." });
+      toast({
+        title: t("td.toast.nothingToUpdate"),
+        description: t("td.toast.nothingToUpdateDesc"),
+      });
       return;
     }
-    runAction("Task details updated", () => api.patch(url, body));
+    runAction(t("td.toast.detailsUpdated"), () => api.patch(url, body));
   };
 
   const doSubmit = () => {
-    runAction("Submitted for inspection", () =>
+    runAction(t("td.toast.submitted"), () =>
       api.patch(url, { action: "SUBMIT", note: note.trim() || undefined })
     );
   };
 
   const doApprove = () => {
-    runAction("Inspection approved", () =>
+    runAction(t("td.toast.inspectionApproved"), () =>
       api.patch(url, {
         action: "INSPECT",
         decision: "APPROVED",
@@ -584,13 +616,13 @@ export function TaskDetailView() {
   const doRequestChanges = () => {
     if (comments.trim().length < 3) {
       toast({
-        title: "Correction instructions required",
-        description: "Describe what needs to be corrected (at least 3 characters).",
+        title: t("td.toast.correctionsRequired"),
+        description: t("td.toast.correctionsRequiredDesc"),
         variant: "destructive",
       });
       return;
     }
-    runAction("Corrections requested", () =>
+    runAction(t("td.toast.correctionsRequested"), () =>
       api.patch(url, {
         action: "INSPECT",
         decision: "CHANGES_REQUESTED",
@@ -600,11 +632,11 @@ export function TaskDetailView() {
   };
 
   const doReady = () => {
-    runAction("Marked ready for pickup", () => api.patch(url, { action: "READY" }));
+    runAction(t("td.toast.ready"), () => api.patch(url, { action: "READY" }));
   };
 
   const doDeliver = () => {
-    runAction("Marked as delivered/collected", () =>
+    runAction(t("td.toast.delivered"), () =>
       api.patch(url, { action: "DELIVER", note: note.trim() || undefined })
     );
   };
@@ -612,31 +644,35 @@ export function TaskDetailView() {
   const doReopen = () => {
     if (comments.trim().length < 3) {
       toast({
-        title: "Comments are required",
-        description: "Explain why this task is being reopened (at least 3 characters).",
+        title: t("td.toast.reopenCommentsRequired"),
+        description: t("td.toast.reopenCommentsRequiredDesc"),
         variant: "destructive",
       });
       return;
     }
-    runAction("Task reopened", () =>
+    runAction(t("td.toast.reopened"), () =>
       api.patch(url, { action: "INSPECT", decision: "REOPENED", comments: comments.trim() })
     );
   };
 
   const doBlock = () => {
-    if (!requireReason("the reason production is blocked")) return;
-    runAction("Task blocked", () => api.patch(url, { action: "BLOCK", reason: reason.trim() }));
+    if (!requireReason(t("td.reason.block"))) return;
+    runAction(t("td.toast.blocked"), () =>
+      api.patch(url, { action: "BLOCK", reason: reason.trim() })
+    );
   };
 
   const doUnblock = () => {
-    runAction("Task unblocked", () =>
+    runAction(t("td.toast.unblocked"), () =>
       api.patch(url, { action: "UNBLOCK", note: note.trim() || undefined })
     );
   };
 
   const doCancel = () => {
-    if (!requireReason("the cancellation reason")) return;
-    runAction("Task cancelled", () => api.patch(url, { action: "CANCEL", reason: reason.trim() }));
+    if (!requireReason(t("td.reason.cancel"))) return;
+    runAction(t("td.toast.cancelled"), () =>
+      api.patch(url, { action: "CANCEL", reason: reason.trim() })
+    );
   };
 
   const doProgressUpdate = async () => {
@@ -650,11 +686,11 @@ export function TaskDetailView() {
       setProgressInput("");
       setProgressNote("");
       await load(true);
-      toast({ title: `Progress updated to ${progressValue}%` });
+      toast({ title: t("td.toast.progressUpdated", { value: progressValue }) });
     } catch (e) {
       toast({
-        title: "Could not update progress",
-        description: e instanceof Error ? e.message : "Unexpected error.",
+        title: t("td.toast.progressFailed"),
+        description: e instanceof Error ? e.message : t("td.unexpectedError"),
         variant: "destructive",
       });
     } finally {
@@ -676,13 +712,13 @@ export function TaskDetailView() {
       setStageComment("");
       await load(true);
       toast({
-        title: "Checklist updated",
-        description: "Progress was recalculated from the completed stages.",
+        title: t("td.toast.checklistUpdated"),
+        description: t("td.toast.checklistUpdatedDesc"),
       });
     } catch (e) {
       toast({
-        title: "Could not save checklist",
-        description: e instanceof Error ? e.message : "Unexpected error.",
+        title: t("td.toast.checklistFailed"),
+        description: e instanceof Error ? e.message : t("td.unexpectedError"),
         variant: "destructive",
       });
     } finally {
@@ -694,8 +730,8 @@ export function TaskDetailView() {
     const message = commentText.trim();
     if (!message) {
       toast({
-        title: "Write a message first",
-        description: isIssue ? "Describe the problem you encountered." : "Type a note before sending.",
+        title: t("td.toast.emptyComment"),
+        description: isIssue ? t("td.toast.emptyCommentIssue") : t("td.toast.emptyCommentNote"),
         variant: "destructive",
       });
       return;
@@ -706,13 +742,13 @@ export function TaskDetailView() {
       setCommentText("");
       await load(true);
       toast({
-        title: isIssue ? "Issue reported" : "Note added",
-        description: isIssue ? "Management has been notified." : undefined,
+        title: isIssue ? t("td.toast.issueReported") : t("td.toast.noteAdded"),
+        description: isIssue ? t("td.toast.issueReportedDesc") : undefined,
       });
     } catch (e) {
       toast({
-        title: "Could not add comment",
-        description: e instanceof Error ? e.message : "Unexpected error.",
+        title: t("td.toast.commentFailed"),
+        description: e instanceof Error ? e.message : t("td.unexpectedError"),
         variant: "destructive",
       });
     } finally {
@@ -731,7 +767,7 @@ export function TaskDetailView() {
     <div>
       <Button variant="ghost" size="sm" className="-ml-2 mb-2" onClick={() => navigate("tasks")}>
         <ArrowLeft className="size-4" />
-        Back to tasks
+        {t("td.backToTasks")}
       </Button>
 
       {/* ---- Header ---- */}
@@ -746,13 +782,13 @@ export function TaskDetailView() {
                 {task.orderNumber} · {task.customerName}
               </span>
               <span>
-                Assignee:{" "}
+                {t("td.assigneeColon")}{" "}
                 <span className="text-foreground font-medium">
-                  {task.assignedStaffName ?? "Unassigned"}
+                  {task.assignedStaffName ?? t("td.unassigned")}
                 </span>
               </span>
               <DueDate deadline={task.deadline} overdue={task.overdue} />
-              <span>Created {formatDate(task.createdAt)}</span>
+              <span>{t("td.createdOn", { date: formatDate(task.createdAt) })}</span>
             </div>
           </div>
           <div className="flex flex-wrap gap-1.5 shrink-0">
@@ -765,7 +801,7 @@ export function TaskDetailView() {
         {task.status === "BLOCKED" && task.blockedReason && (
           <Alert variant="destructive" className="mt-3">
             <AlertTriangle />
-            <AlertTitle>Task blocked</AlertTitle>
+            <AlertTitle>{t("td.blockedAlert")}</AlertTitle>
             <AlertDescription className="text-destructive/90">
               {task.blockedReason}
             </AlertDescription>
@@ -774,18 +810,18 @@ export function TaskDetailView() {
         {task.status === "CANCELLED" && (
           <Alert className="mt-3 border-stone-300 bg-stone-50 text-stone-700">
             <Ban />
-            <AlertTitle>Task cancelled</AlertTitle>
+            <AlertTitle>{t("td.cancelledAlert")}</AlertTitle>
             <AlertDescription className="text-stone-600">
-              {task.cancelReason ?? "This task was cancelled."}
+              {task.cancelReason ?? t("td.cancelledFallback")}
             </AlertDescription>
           </Alert>
         )}
         {task.status === "CHANGES_REQUESTED" && (
           <Alert className="mt-3 border-amber-300 bg-amber-50 text-amber-800">
             <AlertTriangle />
-            <AlertTitle>Corrections requested</AlertTitle>
+            <AlertTitle>{t("td.correctionsAlert")}</AlertTitle>
             <AlertDescription className="text-amber-700">
-              Corrections were requested — see inspection history below for details.
+              {t("td.correctionsAlertDesc")}
             </AlertDescription>
           </Alert>
         )}
@@ -793,16 +829,16 @@ export function TaskDetailView() {
 
       <div className="grid lg:grid-cols-3 gap-4">
         {/* ---- Progress & checklist (left) ---- */}
-        <SectionCard title="Progress & Checklist" className="lg:col-span-2">
+        <SectionCard title={t("td.progressChecklist")} className="lg:col-span-2">
           <div className="space-y-4">
             <ProgressCell value={task.progress} status={task.status} />
             <p className="text-xs text-muted-foreground -mt-2">
-              Current progress: <span className="font-semibold">{task.progress}%</span>
+              {t("td.currentProgress")} <span className="font-semibold">{task.progress}%</span>
             </p>
 
             {mayUpdateProgress && (
               <div className="rounded-lg border bg-muted/30 p-3 space-y-2">
-                <p className="text-sm font-medium">Update progress manually</p>
+                <p className="text-sm font-medium">{t("td.updateProgressManually")}</p>
                 <div className="flex flex-col sm:flex-row gap-2">
                   <Input
                     type="number"
@@ -813,23 +849,22 @@ export function TaskDetailView() {
                     placeholder={`${task.progress}`}
                     value={progressInput}
                     onChange={(e) => setProgressInput(e.target.value)}
-                    aria-label="New progress percentage"
+                    aria-label={t("td.aria.newProgress")}
                   />
                   <Input
                     className="flex-1"
-                    placeholder="Optional note"
+                    placeholder={t("td.optionalNote")}
                     value={progressNote}
                     onChange={(e) => setProgressNote(e.target.value)}
-                    aria-label="Progress note"
+                    aria-label={t("td.aria.progressNote")}
                   />
                   <Button disabled={!progressValid || busy} onClick={doProgressUpdate}>
-                    Update
+                    {t("td.update")}
                   </Button>
                 </div>
                 {supervisor && (
                   <p className="text-xs text-muted-foreground">
-                    Supervisor correction — manual values are recorded in the history with source
-                    &quot;MANUAL&quot;.
+                    {t("td.manualProgressNote", { source: t("td.source.MANUAL") })}
                   </p>
                 )}
               </div>
@@ -839,24 +874,27 @@ export function TaskDetailView() {
 
             <div>
               <div className="flex items-center justify-between gap-2">
-                <p className="text-sm font-medium">Production checklist</p>
+                <p className="text-sm font-medium">{t("td.checklistTitle")}</p>
                 {changesCount > 0 && (
                   <Badge variant="outline" className="border-amber-300 bg-amber-50 text-amber-800">
-                    {changesCount} pending change{changesCount === 1 ? "" : "s"}
+                    {changesCount === 1
+                      ? t("td.pendingChange")
+                      : t("td.pendingChanges", { count: changesCount })}
                   </Badge>
                 )}
               </div>
               <p className="text-xs text-muted-foreground mt-0.5">
-                Progress is recalculated from completed stages (in-progress counts half
-                {hasWeights ? "; heavier stages count proportionally more" : ""}).
+                {t("td.checklistHelp", {
+                  weights: hasWeights ? t("td.checklistHelpWeights") : "",
+                })}
               </p>
 
               <div className="mt-2 divide-y rounded-lg border">
                 {stages.length === 0 ? (
                   <EmptyState
                     icon={Inbox}
-                    title="No checklist stages"
-                    description="No production stages apply to this task category."
+                    title={t("td.noStages.title")}
+                    description={t("td.noStages.desc")}
                   />
                 ) : (
                   stages.map((s) => {
@@ -872,27 +910,36 @@ export function TaskDetailView() {
                             {s.name}
                             {s.weight > 1 && (
                               <Badge variant="secondary" className="text-xs">
-                                weight ×{s.weight}
+                                {t("td.stageWeight", { weight: s.weight })}
                               </Badge>
                             )}
                           </p>
                           <div className="mt-1 flex items-center gap-2">
                             <StageStateChip state={effective} />
                             {pending && pending !== s.state && (
-                              <span className="text-xs text-amber-700">was {stageLabel(s.state)}</span>
+                              <span className="text-xs text-amber-700">
+                                {t("td.wasState", { state: stageStateLabel(s.state, lang) })}
+                              </span>
                             )}
                           </div>
                         </div>
                         {mayEditChecklist ? (
-                          <div className="flex flex-wrap gap-1 shrink-0" role="group" aria-label={`State for ${s.name}`}>
-                            {STAGE_STATE_OPTIONS.map((o) => {
+                          <div
+                            className="flex flex-wrap gap-1 shrink-0"
+                            role="group"
+                            aria-label={t("td.aria.stateFor", { stage: s.name })}
+                          >
+                            {stageStateOptions(lang).map((o) => {
                               const active = effective === o.value;
                               return (
                                 <button
                                   key={o.value}
                                   type="button"
                                   aria-pressed={active}
-                                  aria-label={`Set ${s.name} to ${o.label}`}
+                                  aria-label={t("td.aria.setState", {
+                                    stage: s.name,
+                                    state: o.label,
+                                  })}
                                   onClick={() =>
                                     setStageChanges((prev) => {
                                       const next = { ...prev };
@@ -927,10 +974,10 @@ export function TaskDetailView() {
               {mayEditChecklist && stages.length > 0 && (
                 <div className="mt-3 space-y-2">
                   <Input
-                    placeholder="Optional comment attached to the next checklist save"
+                    placeholder={t("td.stageCommentPlaceholder")}
                     value={stageComment}
                     onChange={(e) => setStageComment(e.target.value)}
-                    aria-label="Checklist save comment"
+                    aria-label={t("td.aria.stageComment")}
                   />
                   <div className="flex justify-end">
                     <Button
@@ -943,7 +990,8 @@ export function TaskDetailView() {
                       ) : (
                         <Save className="size-4" />
                       )}
-                      Save Checklist{changesCount > 0 ? ` (${changesCount})` : ""}
+                      {t("td.saveChecklist")}
+                      {changesCount > 0 ? ` (${changesCount})` : ""}
                     </Button>
                   </div>
                 </div>
@@ -953,7 +1001,7 @@ export function TaskDetailView() {
         </SectionCard>
 
         {/* ---- Actions (right) ---- */}
-        <SectionCard title="Workflow Actions">
+        <SectionCard title={t("td.workflowActions")}>
           <div className="space-y-2">
             {canSubmit && (
               <div>
@@ -963,31 +1011,29 @@ export function TaskDetailView() {
                   onClick={() => openDialog("submit")}
                 >
                   <ClipboardCheck className="size-4" />
-                  Submit for Inspection
+                  {t("td.submitForInspection")}
                 </Button>
                 {staffSubmitBlocked && (
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Reach 100% progress first.
-                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">{t("td.reach100")}</p>
                 )}
               </div>
             )}
             {canInspect && (
               <Button className="w-full" disabled={busy} onClick={() => openDialog("inspect")}>
                 <ShieldCheck className="size-4" />
-                Inspect Result
+                {t("td.inspectResult")}
               </Button>
             )}
             {canReady && (
               <Button className="w-full" disabled={busy} onClick={doReady}>
                 <ShoppingBag className="size-4" />
-                Mark Ready for Pickup
+                {t("td.markReady")}
               </Button>
             )}
             {canDeliver && (
               <Button className="w-full" disabled={busy} onClick={() => openDialog("deliver")}>
                 <Truck className="size-4" />
-                Mark Delivered/Collected
+                {t("td.markDelivered")}
               </Button>
             )}
 
@@ -1001,7 +1047,7 @@ export function TaskDetailView() {
                 onClick={() => openDialog("assign")}
               >
                 <UserPlus className="size-4" />
-                {task.assignedStaffId ? "Reassign Staff" : "Assign Staff"}
+                {task.assignedStaffId ? t("td.reassignStaff") : t("td.assignStaff")}
               </Button>
             )}
             {canEdit && (
@@ -1012,7 +1058,7 @@ export function TaskDetailView() {
                 onClick={() => openDialog("edit")}
               >
                 <Pencil className="size-4" />
-                Edit Details
+                {t("td.editDetails")}
               </Button>
             )}
 
@@ -1026,7 +1072,7 @@ export function TaskDetailView() {
                 onClick={() => openDialog("block")}
               >
                 <Ban className="size-4" />
-                Block Task
+                {t("td.blockTask")}
               </Button>
             )}
             {canUnblock && (
@@ -1037,7 +1083,7 @@ export function TaskDetailView() {
                 onClick={() => openDialog("unblock")}
               >
                 <RotateCcw className="size-4" />
-                Unblock Task
+                {t("td.unblockTask")}
               </Button>
             )}
             {canReopen && (
@@ -1048,7 +1094,7 @@ export function TaskDetailView() {
                 onClick={() => openDialog("reopen")}
               >
                 <Undo2 className="size-4" />
-                Reopen Task
+                {t("td.reopenTask")}
               </Button>
             )}
             {canCancel && (
@@ -1059,13 +1105,14 @@ export function TaskDetailView() {
                 onClick={() => openDialog("cancel")}
               >
                 <XCircle className="size-4" />
-                Cancel Task
+                {t("td.cancelTask")}
               </Button>
             )}
 
             {noActions && (
               <p className="text-sm text-muted-foreground">
-                No actions available for this task{terminal ? " — it is closed." : ""}
+                {t("td.noActions")}
+                {terminal ? t("td.noActionsClosed") : ""}
               </p>
             )}
           </div>
@@ -1073,11 +1120,11 @@ export function TaskDetailView() {
 
         {/* ---- Comments & issues (left) ---- */}
         <SectionCard
-          title="Comments & Issues"
+          title={t("td.commentsIssues")}
           className="lg:col-span-2"
           action={
             <span className="text-xs text-muted-foreground">
-              {detail.comments.length} total
+              {t("td.commentsTotal", { count: detail.comments.length })}
             </span>
           }
         >
@@ -1085,8 +1132,8 @@ export function TaskDetailView() {
             {detail.comments.length === 0 ? (
               <EmptyState
                 icon={MessageSquare}
-                title="No notes yet"
-                description="Production notes and reported issues will appear here."
+                title={t("td.noComments.title")}
+                description={t("td.noComments.desc")}
               />
             ) : (
               <ScrollArea className="max-h-96 -mx-1 px-1">
@@ -1123,15 +1170,15 @@ export function TaskDetailView() {
             {mayComment && (
               <div className="space-y-2">
                 <Textarea
-                  placeholder="Write a production note or describe a problem..."
+                  placeholder={t("td.commentPlaceholder")}
                   value={commentText}
                   onChange={(e) => setCommentText(e.target.value)}
-                  aria-label="New comment"
+                  aria-label={t("td.aria.newComment")}
                 />
                 <div className="flex flex-col sm:flex-row sm:justify-end gap-2">
                   <Button variant="outline" size="sm" disabled={busy} onClick={() => postComment(false)}>
                     <MessageSquare className="size-4" />
-                    Add Note
+                    {t("td.addNote")}
                   </Button>
                   <Button
                     variant="outline"
@@ -1141,7 +1188,7 @@ export function TaskDetailView() {
                     onClick={() => postComment(true)}
                   >
                     <AlertTriangle className="size-4" />
-                    Report Issue
+                    {t("td.reportIssue")}
                   </Button>
                 </div>
               </div>
@@ -1150,40 +1197,42 @@ export function TaskDetailView() {
         </SectionCard>
 
         {/* ---- Details (right) ---- */}
-        <SectionCard title="Task Details">
+        <SectionCard title={t("td.taskDetails")}>
           <div className="divide-y">
-            <MetaRow label="Order">
+            <MetaRow label={t("td.meta.order")}>
               <span className="font-medium">
                 {task.orderNumber} — {task.customerName}
               </span>
             </MetaRow>
-            <MetaRow label="Garment piece">
+            <MetaRow label={t("td.meta.piece")}>
               <span className="font-medium">{task.garmentPiece}</span>
             </MetaRow>
-            <MetaRow label="Assignee">
-              {task.assignedStaffName ?? <span className="text-muted-foreground">Unassigned</span>}
+            <MetaRow label={t("td.meta.assignee")}>
+              {task.assignedStaffName ?? (
+                <span className="text-muted-foreground">{t("td.unassigned")}</span>
+              )}
             </MetaRow>
-            <MetaRow label="Category">
+            <MetaRow label={t("td.meta.category")}>
               <CategoryBadge category={task.category} />
             </MetaRow>
-            <MetaRow label="Priority">
+            <MetaRow label={t("td.meta.priority")}>
               <PriorityBadge priority={task.priority} />
             </MetaRow>
-            <MetaRow label="Deadline">
+            <MetaRow label={t("td.meta.deadline")}>
               <DueDate deadline={task.deadline} overdue={task.overdue} />
             </MetaRow>
-            <MetaRow label="Created">{formatDate(task.createdAt)}</MetaRow>
-            <MetaRow label="Completed">
+            <MetaRow label={t("td.meta.created")}>{formatDate(task.createdAt)}</MetaRow>
+            <MetaRow label={t("td.meta.completed")}>
               {task.completedAt ? formatDate(task.completedAt) : "—"}
             </MetaRow>
-            <MetaRow label="Delivered">
+            <MetaRow label={t("td.meta.delivered")}>
               {task.deliveredAt ? formatDate(task.deliveredAt) : "—"}
             </MetaRow>
           </div>
           {task.instructions && (
             <div className="mt-3">
               <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                Instructions
+                {t("td.instructions")}
               </p>
               <p className="text-sm mt-1 rounded-lg border bg-muted/30 p-3 whitespace-pre-wrap">
                 {task.instructions}
@@ -1194,33 +1243,35 @@ export function TaskDetailView() {
 
         {/* ---- History (full width) ---- */}
         <SectionCard
-          title="History"
+          title={t("td.history")}
           className="lg:col-span-3"
           action={
-            <span className="text-xs text-muted-foreground">{history.length} events</span>
+            <span className="text-xs text-muted-foreground">
+              {t("td.eventsCount", { count: history.length })}
+            </span>
           }
         >
           <Tabs value={historyTab} onValueChange={(v) => setHistoryTab(v as HistoryTab)}>
             <TabsList className="flex-wrap h-auto">
               <TabsTrigger value="all" className="h-8">
-                All
+                {t("common.all")}
               </TabsTrigger>
               <TabsTrigger value="progress" className="h-8">
-                Progress
+                {t("td.tab.progress")}
               </TabsTrigger>
               <TabsTrigger value="checklist" className="h-8">
-                Checklist
+                {t("td.tab.checklist")}
               </TabsTrigger>
               <TabsTrigger value="status" className="h-8">
-                Status
+                {t("td.tab.status")}
               </TabsTrigger>
               <TabsTrigger value="inspections" className="h-8">
-                Inspections
+                {t("td.tab.inspections")}
               </TabsTrigger>
             </TabsList>
             <TabsContent value={historyTab} className="mt-2">
               {filteredHistory.length === 0 ? (
-                <EmptyState icon={Inbox} title="No events recorded" />
+                <EmptyState icon={Inbox} title={t("td.noEvents")} />
               ) : (
                 <ScrollArea className="max-h-96 rounded-lg border">
                   <div className="divide-y px-4 py-1">
@@ -1275,39 +1326,43 @@ export function TaskDetailView() {
       <Dialog open={dialogOpen("assign")} onOpenChange={closeDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{task.assignedStaffId ? "Reassign Task" : "Assign Task"}</DialogTitle>
+            <DialogTitle>
+              {task.assignedStaffId ? t("td.dialog.reassignTitle") : t("td.dialog.assignTitle")}
+            </DialogTitle>
             <DialogDescription>
-              Select the staff member responsible for {task.garmentPiece} ({task.code}).
+              {t("td.dialog.assignDesc", { piece: task.garmentPiece, code: task.code })}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3">
             <div className="space-y-1.5">
-              <Label>Staff member</Label>
+              <Label>{t("td.dialog.staffMember")}</Label>
               <Select value={staffId} onValueChange={setStaffId}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select staff member" />
+                  <SelectValue placeholder={t("td.dialog.selectStaff")} />
                 </SelectTrigger>
                 <SelectContent>
                   {staff.length === 0 && (
                     <SelectItem value="loading" disabled>
-                      No staff accounts available
+                      {t("td.dialog.noStaff")}
                     </SelectItem>
                   )}
                   {staff.map((u) => (
                     <SelectItem key={u.id} value={u.id} disabled={u.id === task.assignedStaffId}>
                       {u.name}
-                      {u.activeTaskCount != null ? ` (${u.activeTaskCount} active)` : ""}
-                      {u.id === task.assignedStaffId ? " — current" : ""}
+                      {u.activeTaskCount != null
+                        ? ` ${t("td.dialog.activeTasks", { count: u.activeTaskCount })}`
+                        : ""}
+                      {u.id === task.assignedStaffId ? t("td.dialog.currentAssignee") : ""}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="assign-note">Note (optional)</Label>
+              <Label htmlFor="assign-note">{t("td.dialog.noteOptional")}</Label>
               <Input
                 id="assign-note"
-                placeholder="Note sent with the assignment notification"
+                placeholder={t("td.dialog.assignNotePlaceholder")}
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
               />
@@ -1315,11 +1370,11 @@ export function TaskDetailView() {
           </div>
           <DialogFooter>
             <Button variant="outline" disabled={busy} onClick={() => setDialog(null)}>
-              Cancel
+              {t("common.cancel")}
             </Button>
             <Button disabled={busy || !staffId} onClick={doAssign}>
               {busy && <Loader2 className="size-4 animate-spin" />}
-              {task.assignedStaffId ? "Reassign" : "Assign"}
+              {task.assignedStaffId ? t("td.dialog.reassignAction") : t("td.dialog.assignAction")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1329,14 +1384,12 @@ export function TaskDetailView() {
       <Dialog open={dialogOpen("edit")} onOpenChange={closeDialog}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Edit Task Details</DialogTitle>
-            <DialogDescription>
-              Only the fields you change are submitted.
-            </DialogDescription>
+            <DialogTitle>{t("td.dialog.editTitle")}</DialogTitle>
+            <DialogDescription>{t("td.dialog.editDesc")}</DialogDescription>
           </DialogHeader>
           <div className="space-y-3">
             <div className="space-y-1.5">
-              <Label htmlFor="edit-piece">Garment piece</Label>
+              <Label htmlFor="edit-piece">{t("td.meta.piece")}</Label>
               <Input
                 id="edit-piece"
                 value={editForm.garmentPiece}
@@ -1345,7 +1398,7 @@ export function TaskDetailView() {
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="space-y-1.5">
-                <Label htmlFor="edit-deadline">Deadline</Label>
+                <Label htmlFor="edit-deadline">{t("td.meta.deadline")}</Label>
                 <Input
                   id="edit-deadline"
                   type="datetime-local"
@@ -1354,7 +1407,7 @@ export function TaskDetailView() {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label>Priority</Label>
+                <Label>{t("td.meta.priority")}</Label>
                 <Select
                   value={editForm.priority}
                   onValueChange={(v) => setEditForm((f) => ({ ...f, priority: v }))}
@@ -1365,7 +1418,7 @@ export function TaskDetailView() {
                   <SelectContent>
                     {PRIORITIES.map((p) => (
                       <SelectItem key={p} value={p}>
-                        {PRIORITY_LABELS[p]}
+                        {priorityLabel(p, lang)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -1373,10 +1426,10 @@ export function TaskDetailView() {
               </div>
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="edit-instructions">Instructions</Label>
+              <Label htmlFor="edit-instructions">{t("td.instructions")}</Label>
               <Textarea
                 id="edit-instructions"
-                placeholder="Production instructions for this piece"
+                placeholder={t("td.dialog.instructionsPlaceholder")}
                 value={editForm.instructions}
                 onChange={(e) => setEditForm((f) => ({ ...f, instructions: e.target.value }))}
               />
@@ -1384,11 +1437,11 @@ export function TaskDetailView() {
           </div>
           <DialogFooter>
             <Button variant="outline" disabled={busy} onClick={() => setDialog(null)}>
-              Cancel
+              {t("common.cancel")}
             </Button>
             <Button disabled={busy} onClick={doEdit}>
               {busy && <Loader2 className="size-4 animate-spin" />}
-              Save Changes
+              {t("common.saveChanges")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1398,29 +1451,27 @@ export function TaskDetailView() {
       <Dialog open={dialogOpen("submit")} onOpenChange={closeDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Submit for Inspection</DialogTitle>
+            <DialogTitle>{t("td.submitForInspection")}</DialogTitle>
             <DialogDescription>
-              {supervisor
-                ? "The task moves to Awaiting Inspection for quality control."
-                : "Your work will be reviewed by quality control. Make sure the checklist is complete."}
+              {supervisor ? t("td.dialog.submitDescSupervisor") : t("td.dialog.submitDescStaff")}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-1.5">
-            <Label htmlFor="submit-note">Note (optional)</Label>
+            <Label htmlFor="submit-note">{t("td.dialog.noteOptional")}</Label>
             <Textarea
               id="submit-note"
-              placeholder="Anything the inspector should know"
+              placeholder={t("td.dialog.submitNotePlaceholder")}
               value={note}
               onChange={(e) => setNote(e.target.value)}
             />
           </div>
           <DialogFooter>
             <Button variant="outline" disabled={busy} onClick={() => setDialog(null)}>
-              Cancel
+              {t("common.cancel")}
             </Button>
             <Button disabled={busy} onClick={doSubmit}>
               {busy && <Loader2 className="size-4 animate-spin" />}
-              Submit
+              {t("td.dialog.submitAction")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1430,19 +1481,14 @@ export function TaskDetailView() {
       <Dialog open={dialogOpen("inspect")} onOpenChange={closeDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Quality Inspection</DialogTitle>
-            <DialogDescription>
-              Approve passes the garment to the pickup flow. Request changes returns it to the
-              worker with correction instructions.
-            </DialogDescription>
+            <DialogTitle>{t("td.dialog.inspectTitle")}</DialogTitle>
+            <DialogDescription>{t("td.dialog.inspectDesc")}</DialogDescription>
           </DialogHeader>
           <div className="space-y-1.5">
-            <Label htmlFor="inspect-comments">Inspection comments</Label>
+            <Label htmlFor="inspect-comments">{t("td.dialog.inspectionComments")}</Label>
             <Textarea
               id="inspect-comments"
-              placeholder={
-                "Required when requesting changes — describe the corrections needed"
-              }
+              placeholder={t("td.dialog.inspectPlaceholder")}
               value={comments}
               onChange={(e) => setComments(e.target.value)}
             />
@@ -1454,12 +1500,12 @@ export function TaskDetailView() {
               disabled={busy}
               onClick={doRequestChanges}
             >
-              Request Changes
+              {t("td.dialog.requestChanges")}
             </Button>
             <Button disabled={busy} onClick={doApprove}>
               {busy && <Loader2 className="size-4 animate-spin" />}
               <ShieldCheck className="size-4" />
-              Approve
+              {t("td.dialog.approve")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1469,28 +1515,31 @@ export function TaskDetailView() {
       <Dialog open={dialogOpen("deliver")} onOpenChange={closeDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Mark Delivered/Collected</DialogTitle>
+            <DialogTitle>{t("td.markDelivered")}</DialogTitle>
             <DialogDescription>
-              Confirm that {task.customerName} collected {task.garmentPiece}.
+              {t("td.dialog.deliverDesc", {
+                customer: task.customerName,
+                piece: task.garmentPiece,
+              })}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-1.5">
-            <Label htmlFor="deliver-note">Note (optional)</Label>
+            <Label htmlFor="deliver-note">{t("td.dialog.noteOptional")}</Label>
             <Input
               id="deliver-note"
-              placeholder="e.g. Collected by the customer in person"
+              placeholder={t("td.dialog.deliverNotePlaceholder")}
               value={note}
               onChange={(e) => setNote(e.target.value)}
             />
           </div>
           <DialogFooter>
             <Button variant="outline" disabled={busy} onClick={() => setDialog(null)}>
-              Cancel
+              {t("common.cancel")}
             </Button>
             <Button disabled={busy} onClick={doDeliver}>
               {busy && <Loader2 className="size-4 animate-spin" />}
               <Truck className="size-4" />
-              Mark Delivered
+              {t("td.dialog.markDeliveredAction")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1500,28 +1549,26 @@ export function TaskDetailView() {
       <Dialog open={dialogOpen("reopen")} onOpenChange={closeDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Reopen Task</DialogTitle>
-            <DialogDescription>
-              The task returns to Ongoing so production can resume. Comments are required.
-            </DialogDescription>
+            <DialogTitle>{t("td.reopenTask")}</DialogTitle>
+            <DialogDescription>{t("td.dialog.reopenDesc")}</DialogDescription>
           </DialogHeader>
           <div className="space-y-1.5">
-            <Label htmlFor="reopen-comments">Comments</Label>
+            <Label htmlFor="reopen-comments">{t("td.dialog.comments")}</Label>
             <Textarea
               id="reopen-comments"
-              placeholder="Why is this task being reopened?"
+              placeholder={t("td.dialog.reopenPlaceholder")}
               value={comments}
               onChange={(e) => setComments(e.target.value)}
             />
           </div>
           <DialogFooter>
             <Button variant="outline" disabled={busy} onClick={() => setDialog(null)}>
-              Cancel
+              {t("common.cancel")}
             </Button>
             <Button disabled={busy} onClick={doReopen}>
               {busy && <Loader2 className="size-4 animate-spin" />}
               <Undo2 className="size-4" />
-              Reopen
+              {t("td.dialog.reopenAction")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1531,23 +1578,21 @@ export function TaskDetailView() {
       <Dialog open={dialogOpen("block")} onOpenChange={closeDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Block Task</DialogTitle>
-            <DialogDescription>
-              Report what is blocking production. Management is notified immediately.
-            </DialogDescription>
+            <DialogTitle>{t("td.blockTask")}</DialogTitle>
+            <DialogDescription>{t("td.dialog.blockDesc")}</DialogDescription>
           </DialogHeader>
           <div className="space-y-1.5">
-            <Label htmlFor="block-reason">Reason (required)</Label>
+            <Label htmlFor="block-reason">{t("td.dialog.reasonRequired")}</Label>
             <Textarea
               id="block-reason"
-              placeholder="e.g. Missing customer-provided fabric"
+              placeholder={t("td.dialog.blockPlaceholder")}
               value={reason}
               onChange={(e) => setReason(e.target.value)}
             />
           </div>
           <DialogFooter>
             <Button variant="outline" disabled={busy} onClick={() => setDialog(null)}>
-              Cancel
+              {t("common.cancel")}
             </Button>
             <Button
               className="bg-red-600 text-white hover:bg-red-700"
@@ -1556,7 +1601,7 @@ export function TaskDetailView() {
             >
               {busy && <Loader2 className="size-4 animate-spin" />}
               <Ban className="size-4" />
-              Block Task
+              {t("td.blockTask")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1566,28 +1611,26 @@ export function TaskDetailView() {
       <Dialog open={dialogOpen("unblock")} onOpenChange={closeDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Unblock Task</DialogTitle>
-            <DialogDescription>
-              The blocker is cleared and production can resume.
-            </DialogDescription>
+            <DialogTitle>{t("td.unblockTask")}</DialogTitle>
+            <DialogDescription>{t("td.dialog.unblockDesc")}</DialogDescription>
           </DialogHeader>
           <div className="space-y-1.5">
-            <Label htmlFor="unblock-note">Note (optional)</Label>
+            <Label htmlFor="unblock-note">{t("td.dialog.noteOptional")}</Label>
             <Input
               id="unblock-note"
-              placeholder="How the blocker was resolved"
+              placeholder={t("td.dialog.unblockPlaceholder")}
               value={note}
               onChange={(e) => setNote(e.target.value)}
             />
           </div>
           <DialogFooter>
             <Button variant="outline" disabled={busy} onClick={() => setDialog(null)}>
-              Cancel
+              {t("common.cancel")}
             </Button>
             <Button disabled={busy} onClick={doUnblock}>
               {busy && <Loader2 className="size-4 animate-spin" />}
               <RotateCcw className="size-4" />
-              Unblock
+              {t("td.dialog.unblockAction")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1597,23 +1640,26 @@ export function TaskDetailView() {
       <AlertDialog open={dialogOpen("cancel")} onOpenChange={closeDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Cancel this task?</AlertDialogTitle>
+            <AlertDialogTitle>{t("td.dialog.cancelTitle")}</AlertDialogTitle>
             <AlertDialogDescription>
-              {task.code} — {task.garmentPiece} ({task.orderNumber}) will be permanently closed.
-              This cannot be undone.
+              {t("td.dialog.cancelDesc", {
+                code: task.code,
+                piece: task.garmentPiece,
+                order: task.orderNumber,
+              })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="space-y-1.5">
-            <Label htmlFor="cancel-reason">Reason (required)</Label>
+            <Label htmlFor="cancel-reason">{t("td.dialog.reasonRequired")}</Label>
             <Textarea
               id="cancel-reason"
-              placeholder="e.g. Cancelled by the customer"
+              placeholder={t("td.dialog.cancelPlaceholder")}
               value={reason}
               onChange={(e) => setReason(e.target.value)}
             />
           </div>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={busy}>Keep Task</AlertDialogCancel>
+            <AlertDialogCancel disabled={busy}>{t("td.dialog.keepTask")}</AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-white hover:bg-destructive/90"
               disabled={busy || reason.trim().length < 3}
@@ -1624,7 +1670,7 @@ export function TaskDetailView() {
             >
               {busy && <Loader2 className="size-4 animate-spin" />}
               <XCircle className="size-4" />
-              Cancel Task
+              {t("td.cancelTask")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

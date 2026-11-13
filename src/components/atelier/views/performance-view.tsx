@@ -8,6 +8,8 @@ import { useCallback, useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { api, qs } from "../client";
 import { can, useAppStore } from "../store";
+import { useI18n, type TranslateFn } from "../i18n/use-i18n";
+import type { Lang } from "../i18n/core";
 import type { PerformanceResponse, PerformanceWeights, StaffPerformanceRow } from "../types";
 import { EmptyState, PageHeader, SectionCard } from "../ui-bits";
 import { Badge } from "@/components/ui/badge";
@@ -93,6 +95,32 @@ export function downloadCsv(
   URL.revokeObjectURL(url);
 }
 
+/** Localized display label for a server period range (server labels are English-only). */
+export function periodLabel(
+  t: TranslateFn,
+  lang: Lang,
+  range: { type: string; value: string; label: string }
+): string {
+  if (range.type === "MONTH") {
+    const m = /^(\d{4})-(\d{2})$/.exec(range.value);
+    if (m) {
+      const month = new Intl.DateTimeFormat(lang === "fr" ? "fr-FR" : "en-US", {
+        month: "long",
+        timeZone: "UTC",
+      }).format(new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, 1)));
+      return t("perf.rangeMonth", { month, year: m[1] });
+    }
+  }
+  if (range.type === "QUARTER") {
+    const q = /^(\d{4})-Q([1-4])$/.exec(range.value.toUpperCase());
+    if (q) return t("perf.rangeQuarter", { quarter: q[2], year: q[1] });
+  }
+  if (range.type === "YEAR" && /^\d{4}$/.test(range.value)) {
+    return t("perf.rangeYear", { year: range.value });
+  }
+  return range.label;
+}
+
 export function AssessmentReadOnly({ row }: { row: StaffPerformanceRow }) {
   if (!row.managementAssessed) return <span className="text-muted-foreground">—</span>;
   return <span className="font-medium tabular-nums">{row.scores.management}</span>;
@@ -106,41 +134,42 @@ export function StaffPerformanceTable({
   staff: StaffPerformanceRow[];
   assessmentCell?: (row: StaffPerformanceRow) => ReactNode;
 }) {
+  const { t } = useI18n();
   return (
     <div className="overflow-x-auto">
       <Table className="min-w-[1150px]">
         <TableHeader>
           <TableRow>
-            <TableHead rowSpan={2}>Staff</TableHead>
+            <TableHead rowSpan={2}>{t("perf.colStaff")}</TableHead>
             <TableHead colSpan={8} className="text-center border-l">
-              Recorded metrics
+              {t("perf.colRecordedMetrics")}
             </TableHead>
             <TableHead colSpan={5} className="text-center border-l">
-              Scores
+              {t("perf.colScores")}
             </TableHead>
             <TableHead rowSpan={2} className="text-center border-l">
-              Overall
+              {t("perf.colOverall")}
             </TableHead>
             {assessmentCell && (
               <TableHead rowSpan={2} className="border-l min-w-[130px]">
-                Mgmt Assessment
+                {t("perf.colMgmtAssessment")}
               </TableHead>
             )}
           </TableRow>
           <TableRow>
-            <TableHead className="border-l text-center">Assigned</TableHead>
-            <TableHead className="text-center">Completed</TableHead>
-            <TableHead className="text-center">On-time</TableHead>
-            <TableHead className="text-center">Overdue</TableHead>
-            <TableHead className="text-center">Avg Hours</TableHead>
-            <TableHead className="text-center">Quality %</TableHead>
-            <TableHead className="text-center">Corrections</TableHead>
-            <TableHead className="text-center">Blocked</TableHead>
-            <TableHead className="border-l text-center">Productivity</TableHead>
-            <TableHead className="text-center">Timeliness</TableHead>
-            <TableHead className="text-center">Quality</TableHead>
-            <TableHead className="text-center">Reliability</TableHead>
-            <TableHead className="text-center">Mgmt</TableHead>
+            <TableHead className="border-l text-center">{t("perf.colAssigned")}</TableHead>
+            <TableHead className="text-center">{t("perf.colCompleted")}</TableHead>
+            <TableHead className="text-center">{t("perf.colOnTime")}</TableHead>
+            <TableHead className="text-center">{t("perf.colOverdue")}</TableHead>
+            <TableHead className="text-center">{t("perf.colAvgHours")}</TableHead>
+            <TableHead className="text-center">{t("perf.colQualityPct")}</TableHead>
+            <TableHead className="text-center">{t("perf.colCorrections")}</TableHead>
+            <TableHead className="text-center">{t("perf.colBlocked")}</TableHead>
+            <TableHead className="border-l text-center">{t("perf.colProductivity")}</TableHead>
+            <TableHead className="text-center">{t("perf.colTimeliness")}</TableHead>
+            <TableHead className="text-center">{t("perf.colQuality")}</TableHead>
+            <TableHead className="text-center">{t("perf.colReliability")}</TableHead>
+            <TableHead className="text-center">{t("perf.colMgmt")}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -152,7 +181,7 @@ export function StaffPerformanceTable({
                     {row.staffName}
                     {!row.isActive && (
                       <Badge variant="outline" className="bg-stone-50 text-stone-500 border-stone-300 text-[10px] px-1.5">
-                        Inactive
+                        {t("perf.inactive")}
                       </Badge>
                     )}
                   </p>
@@ -206,12 +235,12 @@ export function StaffPerformanceTable({
 
 type WeightsForm = Record<keyof PerformanceWeights, string>;
 
-const WEIGHT_FIELDS: Array<{ key: keyof PerformanceWeights; label: string }> = [
-  { key: "productivityWeight", label: "Productivity %" },
-  { key: "timelyWeight", label: "Timely Completion %" },
-  { key: "qualityWeight", label: "Quality & Approval %" },
-  { key: "reliabilityWeight", label: "Reliability %" },
-  { key: "managementWeight", label: "Management Assessment %" },
+const WEIGHT_FIELDS: Array<{ key: keyof PerformanceWeights; labelKey: string }> = [
+  { key: "productivityWeight", labelKey: "perf.weightProductivity" },
+  { key: "timelyWeight", labelKey: "perf.weightTimely" },
+  { key: "qualityWeight", labelKey: "perf.weightQuality" },
+  { key: "reliabilityWeight", labelKey: "perf.weightReliability" },
+  { key: "managementWeight", labelKey: "perf.weightManagement" },
 ];
 
 function toForm(config: PerformanceWeights): WeightsForm {
@@ -232,6 +261,7 @@ function toForm(config: PerformanceWeights): WeightsForm {
 export function PerformanceView() {
   const user = useAppStore((s) => s.user);
   const { toast } = useToast();
+  const { t, lang } = useI18n();
   const canConfigure = can(user, "performance.configure");
   const canAssess = can(user, "performance.assess");
 
@@ -263,11 +293,11 @@ export function PerformanceView() {
       setData(res);
       setDrafts({});
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to load performance data.");
+      setError(e instanceof Error ? e.message : t("perf.loadErrorFallback"));
     } finally {
       setLoading(false);
     }
-  }, [pType, periodValue]);
+  }, [pType, periodValue, t]);
 
   useEffect(() => {
     void loadPerformance();
@@ -319,14 +349,14 @@ export function PerformanceView() {
       setConfig(res.config);
       setWeightsForm(toForm(res.config));
       toast({
-        title: "Weights saved",
-        description: "Scoring weights updated — all scores were recomputed.",
+        title: t("perf.weightsSaved"),
+        description: t("perf.weightsSavedDesc"),
       });
       await loadPerformance();
     } catch (e) {
       toast({
-        title: "Could not save weights",
-        description: e instanceof Error ? e.message : "Unexpected error.",
+        title: t("perf.weightsSaveError"),
+        description: e instanceof Error ? e.message : t("perf.unexpectedError"),
         variant: "destructive",
       });
     } finally {
@@ -339,8 +369,8 @@ export function PerformanceView() {
     const score = Number(raw);
     if (raw === "" || !Number.isFinite(score) || score < 0 || score > 100) {
       toast({
-        title: "Invalid score",
-        description: "Enter a management assessment between 0 and 100.",
+        title: t("perf.invalidScore"),
+        description: t("perf.invalidScoreDesc"),
         variant: "destructive",
       });
       return;
@@ -353,8 +383,12 @@ export function PerformanceView() {
         score,
       });
       toast({
-        title: "Assessment saved",
-        description: `${row.staffName} — ${score}/100 for ${periodValue}.`,
+        title: t("perf.assessmentSaved"),
+        description: t("perf.assessmentSavedDesc", {
+          name: row.staffName,
+          score,
+          period: periodValue,
+        }),
       });
       setDrafts((prev) => {
         const next = { ...prev };
@@ -364,8 +398,8 @@ export function PerformanceView() {
       await loadPerformance();
     } catch (e) {
       toast({
-        title: "Could not save assessment",
-        description: e instanceof Error ? e.message : "Unexpected error.",
+        title: t("perf.assessmentSaveError"),
+        description: e instanceof Error ? e.message : t("perf.unexpectedError"),
         variant: "destructive",
       });
     } finally {
@@ -383,22 +417,22 @@ export function PerformanceView() {
     if (!data) return;
     downloadCsv(`ossz-performance-${data.range.value}.csv`, [
       [
-        "Staff",
-        "Email",
-        "Assigned",
-        "Completed",
-        "On-time",
-        "Overdue",
-        "Avg Hours",
-        "Quality %",
-        "Corrections",
-        "Blocked",
-        "Productivity",
-        "Timeliness",
-        "Quality",
-        "Reliability",
-        "Management",
-        "Overall",
+        t("perf.colStaff"),
+        t("perf.csvEmail"),
+        t("perf.colAssigned"),
+        t("perf.colCompleted"),
+        t("perf.colOnTime"),
+        t("perf.colOverdue"),
+        t("perf.colAvgHours"),
+        t("perf.colQualityPct"),
+        t("perf.colCorrections"),
+        t("perf.colBlocked"),
+        t("perf.colProductivity"),
+        t("perf.colTimeliness"),
+        t("perf.colQuality"),
+        t("perf.colReliability"),
+        t("perf.csvManagement"),
+        t("perf.colOverall"),
       ],
       ...data.staff.map((s) => [
         s.staffName,
@@ -425,7 +459,7 @@ export function PerformanceView() {
     ? (row: StaffPerformanceRow) => (
         <div className="flex items-center gap-1">
           <Input
-            aria-label={`Management assessment for ${row.staffName}`}
+            aria-label={t("perf.assessmentAria", { name: row.staffName })}
             type="number"
             min={0}
             max={100}
@@ -445,7 +479,7 @@ export function PerformanceView() {
             className="size-8"
             disabled={savingRow === row.staffId}
             onClick={() => void saveAssessment(row)}
-            aria-label={`Save assessment for ${row.staffName}`}
+            aria-label={t("perf.saveAssessmentAria", { name: row.staffName })}
           >
             <Save className="size-4" />
           </Button>
@@ -456,35 +490,35 @@ export function PerformanceView() {
   return (
     <div>
       <PageHeader
-        title="Staff Performance"
-        description="Metrics and weighted scores per staff member, computed from real assignments, completions and inspections."
+        title={t("perf.title")}
+        description={t("perf.subtitle")}
       >
         <Button variant="outline" size="sm" onClick={exportCsv} disabled={!data || data.staff.length === 0}>
           <Download className="size-4 mr-1.5" />
-          Export CSV
+          {t("perf.exportCsv")}
         </Button>
       </PageHeader>
 
       {/* ---------------------------------------------------- period selector */}
-      <SectionCard title="Reporting Period" className="mb-4">
+      <SectionCard title={t("perf.reportingPeriod")} className="mb-4">
         <div className="flex flex-wrap items-end gap-3">
           <div className="space-y-1.5">
-            <Label htmlFor="perf-type">Period type</Label>
+            <Label htmlFor="perf-type">{t("perf.periodType")}</Label>
             <Select value={pType} onValueChange={(v) => setPType(v as PeriodChoice)}>
               <SelectTrigger id="perf-type" className="w-[150px]">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="MONTH">Monthly</SelectItem>
-                <SelectItem value="QUARTER">Quarterly</SelectItem>
-                <SelectItem value="YEAR">Annual</SelectItem>
+                <SelectItem value="MONTH">{t("perf.monthly")}</SelectItem>
+                <SelectItem value="QUARTER">{t("perf.quarterly")}</SelectItem>
+                <SelectItem value="YEAR">{t("perf.annual")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           {pType === "MONTH" && (
             <div className="space-y-1.5">
-              <Label htmlFor="perf-month">Month</Label>
+              <Label htmlFor="perf-month">{t("perf.month")}</Label>
               <Input
                 id="perf-month"
                 type="month"
@@ -498,7 +532,7 @@ export function PerformanceView() {
           {pType === "QUARTER" && (
             <>
               <div className="space-y-1.5">
-                <Label htmlFor="perf-qyear">Year</Label>
+                <Label htmlFor="perf-qyear">{t("perf.year")}</Label>
                 <Input
                   id="perf-qyear"
                   type="number"
@@ -510,7 +544,7 @@ export function PerformanceView() {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="perf-quarter">Quarter</Label>
+                <Label htmlFor="perf-quarter">{t("perf.quarter")}</Label>
                 <Select
                   value={quarterValue.slice(5) || "Q1"}
                   onValueChange={(q) => setQuarterValue(`${quarterValue.slice(0, 4)}-${q}`)}
@@ -519,10 +553,10 @@ export function PerformanceView() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Q1">Q1</SelectItem>
-                    <SelectItem value="Q2">Q2</SelectItem>
-                    <SelectItem value="Q3">Q3</SelectItem>
-                    <SelectItem value="Q4">Q4</SelectItem>
+                    <SelectItem value="Q1">{t("perf.quarter1")}</SelectItem>
+                    <SelectItem value="Q2">{t("perf.quarter2")}</SelectItem>
+                    <SelectItem value="Q3">{t("perf.quarter3")}</SelectItem>
+                    <SelectItem value="Q4">{t("perf.quarter4")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -531,7 +565,7 @@ export function PerformanceView() {
 
           {pType === "YEAR" && (
             <div className="space-y-1.5">
-              <Label htmlFor="perf-year">Year</Label>
+              <Label htmlFor="perf-year">{t("perf.year")}</Label>
               <Input
                 id="perf-year"
                 type="number"
@@ -547,7 +581,7 @@ export function PerformanceView() {
               variant="outline"
               size="icon"
               onClick={() => stepPeriod(-1)}
-              aria-label="Previous period"
+              aria-label={t("perf.prevPeriod")}
             >
               <ChevronLeft className="size-4" />
             </Button>
@@ -555,7 +589,7 @@ export function PerformanceView() {
               variant="outline"
               size="icon"
               onClick={() => stepPeriod(1)}
-              aria-label="Next period"
+              aria-label={t("perf.nextPeriod")}
             >
               <ChevronRight className="size-4" />
             </Button>
@@ -563,7 +597,7 @@ export function PerformanceView() {
 
           {data && (
             <p className="pb-2 text-sm font-medium text-muted-foreground ml-auto">
-              {data.range.label}
+              {periodLabel(t, lang, data.range)}
             </p>
           )}
         </div>
@@ -572,7 +606,7 @@ export function PerformanceView() {
       {/* ------------------------------------------- weights (Management only) */}
       {canConfigure && weightsForm && (
         <SectionCard
-          title="Weights Configuration"
+          title={t("perf.weightsTitle")}
           className="mb-4"
           action={
             <Button
@@ -581,14 +615,14 @@ export function PerformanceView() {
               disabled={!sumOk || !targetOk || savingConfig}
             >
               <Save className="size-4 mr-1.5" />
-              {savingConfig ? "Saving..." : "Save Weights"}
+              {savingConfig ? t("perf.saving") : t("perf.saveWeights")}
             </Button>
           }
         >
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
             {WEIGHT_FIELDS.map((f) => (
               <div key={f.key} className="space-y-1.5">
-                <Label htmlFor={`w-${f.key}`}>{f.label}</Label>
+                <Label htmlFor={`w-${f.key}`}>{t(f.labelKey)}</Label>
                 <Input
                   id={`w-${f.key}`}
                   type="number"
@@ -602,7 +636,7 @@ export function PerformanceView() {
               </div>
             ))}
             <div className="space-y-1.5">
-              <Label htmlFor="w-pieceTarget">Piece Target / month</Label>
+              <Label htmlFor="w-pieceTarget">{t("perf.pieceTargetLabel")}</Label>
               <Input
                 id="w-pieceTarget"
                 type="number"
@@ -619,10 +653,11 @@ export function PerformanceView() {
           </div>
           <div className="flex flex-wrap items-center justify-between gap-2 mt-4">
             <p className={cn("text-sm font-medium", sumOk ? "text-emerald-700" : "text-red-700")}>
-              Total weight: {Math.round(weightSum * 10) / 10}% {sumOk ? "— balanced" : "— must equal 100"}
+              {t("perf.totalWeight", { total: Math.round(weightSum * 10) / 10 })}{" "}
+              {sumOk ? t("perf.balanced") : t("perf.mustEqual100")}
             </p>
             <p className="text-xs text-muted-foreground">
-              Piece target: {config?.pieceTarget ?? "—"} pieces per month for 100% productivity.
+              {t("perf.pieceTargetHint", { target: config?.pieceTarget ?? "—" })}
             </p>
           </div>
         </SectionCard>
@@ -637,31 +672,29 @@ export function PerformanceView() {
       ) : error ? (
         <EmptyState
           icon={AlertTriangle}
-          title="Could not load performance data"
+          title={t("perf.loadError")}
           description={error}
           action={
             <Button variant="outline" size="sm" onClick={() => void loadPerformance()}>
-              Try again
+              {t("common.tryAgain")}
             </Button>
           }
         />
       ) : !data || data.staff.length === 0 ? (
         <EmptyState
           icon={Users}
-          title="No staff accounts"
-          description="Create staff accounts to start tracking production performance."
+          title={t("perf.noStaff")}
+          description={t("perf.noStaffDesc")}
         />
       ) : (
         <SectionCard
-          title={`Staff Performance — ${data.range.label}`}
+          title={t("perf.staffTableTitle", { period: periodLabel(t, lang, data.range) })}
           contentClassName="p-0"
           className="mb-4"
         >
           <StaffPerformanceTable staff={data.staff} assessmentCell={assessmentCell} />
           <p className="text-xs text-muted-foreground px-4 py-3 border-t">
-            Productivity = pieces completed vs monthly target · Timeliness = on-time share of
-            completions · Quality = share of approvals without corrections · Reliability = 100 −
-            (blocks + corrections)/assigned · Overall = weighted sum (weights total 100)
+            {t("perf.formulaNote")}
           </p>
         </SectionCard>
       )}
@@ -669,7 +702,7 @@ export function PerformanceView() {
       {!loading && data && data.staff.length > 0 && (
         <p className="text-xs text-muted-foreground flex items-center gap-1.5">
           <TrendingUp className="size-3.5" />
-          Scores are color coded: emerald 75+, amber 50+, red below 50.
+          {t("perf.colorNote")}
         </p>
       )}
     </div>

@@ -39,6 +39,7 @@ async function activeTaskCounts(): Promise<Map<string, number>> {
 function serializeUser(
   u: {
     id: string;
+    code: string | null;
     name: string;
     email: string;
     phone: string | null;
@@ -51,6 +52,7 @@ function serializeUser(
 ) {
   return {
     id: u.id,
+    code: u.code,
     name: u.name,
     email: u.email,
     phone: u.phone,
@@ -119,10 +121,20 @@ export const POST = withApi(async (req: Request) => {
   const clash = await db.user.findUnique({ where: { email: body.email } });
   if (clash) throw new ApiError(409, "An account with this email already exists.");
 
+  // Next sequential account identifier: USR-001, USR-002, ...
+  const lastUser = await db.user.findFirst({
+    orderBy: { code: "desc" },
+    where: { code: { startsWith: "USR-" } },
+    select: { code: true },
+  });
+  const nextNumber = lastUser ? parseInt(lastUser.code!.slice(4), 10) + 1 : 1;
+  const code = `USR-${String(nextNumber).padStart(3, "0")}`;
+
   let created;
   try {
     created = await db.user.create({
       data: {
+        code,
         name: body.name,
         email: body.email,
         phone: body.phone || null,
@@ -144,6 +156,7 @@ export const POST = withApi(async (req: Request) => {
   }
 
   await logAudit(user, "USER_CREATED", "USER", created.id, {
+    code: created.code,
     name: created.name,
     email: created.email,
     role: created.role,

@@ -1,0 +1,702 @@
+    60→    60→import {
+    61→    61→  Select,
+    62→    62→  SelectContent,
+    63→    63→  SelectItem,
+    64→    64→  SelectTrigger,
+    65→    65→  SelectValue,
+    66→    66→} from "@/components/ui/select";
+    67→    67→import { Separator } from "@/components/ui/separator";
+    68→    68→import { Skeleton } from "@/components/ui/skeleton";
+    69→    69→import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+    70→    70→import { Textarea } from "@/components/ui/textarea";
+    71→    71→import {
+    72→    72→  AlertTriangle,
+    73→    73→  ArrowLeft,
+    74→    74→  ArrowRightLeft,
+    75→    75→  Ban,
+    76→    76→  ClipboardCheck,
+    77→    77→  Inbox,
+    78→    78→  ListChecks,
+    79→    79→  Loader2,
+    80→    80→  MessageSquare,
+    81→    81→  Pencil,
+    82→    82→  RotateCcw,
+    83→    83→  Save,
+    84→    84→  ShieldCheck,
+    85→    85→  ShoppingBag,
+    86→    86→  TrendingUp,
+    87→    87→  Truck,
+    88→    88→  Undo2,
+    89→    89→  UserPlus,
+    90→    90→  XCircle,
+    91→    91→} from "lucide-react";
+    92→    92→
+    93→    93→// --- Types ---------------------------------------------------------------------
+    94→    94→
+    95→    95→type DialogKind =
+    96→    96→  | "assign"
+    97→    97→  | "edit"
+    98→    98→  | "submit"
+    99→    99→  | "inspect"
+   100→   100→  | "deliver"
+   101→   101→  | "reopen"
+   102→   102→  | "block"
+   103→   103→  | "unblock"
+   104→   104→  | "cancel"
+   105→   105→  | null;
+   106→   106→
+   107→   107→type HistoryKind = "assignment" | "status" | "stage" | "progress" | "inspection" | "comment";
+   108→   108→
+   109→   109→type HistoryTab = "all" | "progress" | "checklist" | "status" | "inspections";
+   110→   110→
+   111→   111→type HistoryEntry = {
+   112→   112→  id: string;
+   113→   113→  kind: HistoryKind;
+   114→   114→  createdAt: string;
+   115→   115→  userName: string;
+   116→   116→  text: string;
+   117→   117→  detail?: string | null;
+   118→   118→  badge?: string | null;
+   119→   119→  icon: LucideIcon;
+   120→   120→  iconClass: string;
+   121→   121→};
+   122→   122→
+   123→   123→const WORK_STATUSES = ["ASSIGNED", "ONGOING", "CHANGES_REQUESTED"];
+   124→   124→
+   125→   125→const STAGE_STATE_OPTIONS = STAGE_STATES.map((s) => ({
+   126→   126→  value: s,
+   127→   127→  label: s === "NOT_APPLICABLE" ? "N/A" : STAGE_STATE_LABELS[s],
+   128→   128→}));
+   129→   129→
+   130→   130→/** Convert an ISO timestamp to a `datetime-local` input value (local time). */
+   131→   131→function toDatetimeLocal(iso: string | null): string {
+   132→   132→  if (!iso) return "";
+   133→   133→  const d = new Date(iso);
+   134→   134→  if (Number.isNaN(d.getTime())) return "";
+   135→   135→  return format(d, "yyyy-MM-dd'T'HH:mm");
+   136→   136→}
+   137→   137→
+   138→   138→function statusLabel(status: string): string {
+   139→   139→  return STATUS_LABELS[status as TaskStatus] ?? status;
+   140→   140→}
+   141→   141→
+   142→   142→function stageLabel(state: string): string {
+   143→   143→  return STAGE_STATE_LABELS[state as StageState] ?? state;
+   144→   144→}
+   145→   145→
+   146→   146→function MetaRow({ label, children }: { label: string; children: ReactNode }) {
+   147→   147→  return (
+   148→   148→    <div className="flex items-start justify-between gap-3 py-2">
+   149→   149→      <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide pt-0.5">
+   150→   150→        {label}
+   151→   151→      </span>
+   152→   152→      <span className="text-sm text-right min-w-0">{children}</span>
+   153→   153→    </div>
+   154→   154→  );
+   155→   155→}
+   156→   156→
+   157→   157→// --- Component -------------------------------------------------------------------
+   158→   158→
+   159→   159→export function TaskDetailView() {
+   160→   160→  const user = useAppStore((s) => s.user);
+   161→   161→  const viewParams = useAppStore((s) => s.viewParams);
+   162→   162→  const navigate = useAppStore((s) => s.navigate);
+   163→   163→  const { toast } = useToast();
+   164→   164→  const taskId = viewParams.taskId;
+   165→   165→
+   166→   166→  const [detail, setDetail] = useState<TaskDetail | null>(null);
+   167→   167→  const [loading, setLoading] = useState(true);
+   168→   168→  const [fatal, setFatal] = useState<string | null>(null);
+   169→   169→  const [fetchError, setFetchError] = useState<string | null>(null);
+   170→   170→  const [busy, setBusy] = useState(false);
+   171→   171→
+   172→   172→  // Dialog state
+   173→   173→  const [dialog, setDialog] = useState<DialogKind>(null);
+   174→   174→  const [staffId, setStaffId] = useState("");
+   175→   175→  const [note, setNote] = useState("");
+   176→   176→  const [reason, setReason] = useState("");
+   177→   177→  const [comments, setComments] = useState("");
+   178→   178→  const [editForm, setEditForm] = useState({
+   179→   179→    garmentPiece: "",
+   180→   180→    deadline: "",
+   181→   181→    priority: "",
+   182→   182→    instructions: "",
+   183→   183→  });
+   184→   184→
+   185→   185→  // Progress & checklist state
+   186→   186→  const [progressInput, setProgressInput] = useState("");
+   187→   187→  const [progressNote, setProgressNote] = useState("");
+   188→   188→  const [stageChanges, setStageChanges] = useState<Record<string, StageState>>({});
+   189→   189→  const [stageComment, setStageComment] = useState("");
+   190→   190→
+   191→   191→  // Comments & history state
+   192→   192→  const [commentText, setCommentText] = useState("");
+   193→   193→  const [historyTab, setHistoryTab] = useState<HistoryTab>("all");
+   194→   194→
+   195→   195→  // Staff options for the assign dialog (supervisors only).
+   196→   196→  const [staff, setStaff] = useState<UserRecord[]>([]);
+   197→   197→
+   198→   198→  // Reset transient state when switching to another task.
+   199→   199→  useEffect(() => {
+   200→   200→    setStageChanges({});
+   201→   201→    setStageComment("");
+   202→   202→    setProgressInput("");
+   203→   203→    setProgressNote("");
+   204→   204→    setCommentText("");
+   205→   205→    setHistoryTab("all");
+   206→   206→    setDialog(null);
+   207→   207→  }, [taskId]);
+   208→   208→
+   209→   209→  const load = useCallback(
+   210→   210→    async (silent = false) => {
+   211→   211→      if (!taskId) return;
+   212→   212→      if (!silent) setLoading(true);
+   213→   213→      try {
+   214→   214→        const res = await api.get<TaskDetail>(`/api/atelier/tasks/${taskId}`);
+   215→   215→        setDetail(res);
+   216→   216→        setFatal(null);
+   217→   217→        setFetchError(null);
+   218→   218→      } catch (e) {
+   219→   219→        if (e instanceof ApiClientError && (e.status === 403 || e.status === 404)) {
+   220→   220→          setFatal(e.message);
+   221→   221→        } else {
+   222→   222→          setFetchError(e instanceof Error ? e.message : "Failed to load task.");
+   223→   223→        }
+   224→   224→      } finally {
+   225→   225→        if (!silent) setLoading(false);
+   226→   226→      }
+   227→   227→    },
+   228→   228→    [taskId]
+   229→   229→  );
+   230→   230→
+   231→   231→  useEffect(() => {
+   232→   232→    load();
+   233→   233→  }, [load]);
+   234→   234→
+   235→   235→  // ---- Derived values (hooks must run before any early return) ------------------
+   236→   236→
+   237→   237→  const stages = useMemo(() => {
+   238→   238→    return [...(detail?.stages ?? [])].sort((a, b) => a.sortOrder - b.sortOrder);
+   239→   239→  }, [detail]);
+   240→   240→
+   241→   241→  const history: HistoryEntry[] = useMemo(() => {
+   242→   242→    if (!detail) return [];
+   243→   243→    const entries: HistoryEntry[] = [];
+   244→   244→    for (const a of detail.assignments) {
+   245→   245→      entries.push({
+   246→   246→        id: a.id,
+   247→   247→        kind: "assignment",
+   248→   248→        createdAt: a.createdAt,
+   249→   249→        userName: a.assignedByName,
+   250→   250→        text:
+   251→   251→          a.type === "REASSIGN"
+   252→   252→            ? `reassigned the task to ${a.staffName}`
+   253→   253→            : `assigned the task to ${a.staffName}`,
+   254→   254→        detail: a.note,
+   255→   255→        icon: UserPlus,
+   256→   256→        iconClass: "bg-teal-50 text-teal-700",
+   257→   257→      });
+   258→   258→    }
+   259→   259→    for (const s of detail.statusChanges) {
+   260→   260→      entries.push({
+   261→   261→        id: s.id,
+   262→   262→        kind: "status",
+   263→   263→        createdAt: s.createdAt,
+   264→   264→        userName: s.userName,
+   265→   265→        text: `changed status from ${statusLabel(s.fromStatus)} to ${statusLabel(s.toStatus)}`,
+   266→   266→        detail: s.reason,
+   267→   267→        icon: ArrowRightLeft,
+   268→   268→        iconClass: "bg-amber-50 text-amber-700",
+   269→   269→      });
+   270→   270→    }
+   271→   271→    for (const s of detail.stageUpdates) {
+   272→   272→      entries.push({
+   273→   273→        id: s.id,
+   274→   274→        kind: "stage",
+   275→   275→        createdAt: s.createdAt,
+   276→   276→        userName: s.userName,
+   277→   277→        text: `${s.stageName}: ${stageLabel(s.previousState)} → ${stageLabel(s.newState)}`,
+   278→   278→        detail: s.comment,
+   279→   279→        icon: ListChecks,
+   280→   280→        iconClass: "bg-stone-100 text-stone-600",
+   281→   281→      });
+   282→   282→    }
+   283→   283→    for (const p of detail.progressHistory) {
+   284→   284→      entries.push({
+   285→   285→        id: p.id,
+   286→   286→        kind: "progress",
+   287→   287→        createdAt: p.createdAt,
+   288→   288→        userName: p.userName,
+   289→   289→        text: `updated progress ${p.previousProgress}% → ${p.newProgress}%`,
+   290→   290→        detail: p.note,
+   291→   291→        badge: p.source,
+   292→   292→        icon: TrendingUp,
+   293→   293→        iconClass: "bg-emerald-50 text-emerald-700",
+   294→   294→      });
+   295→   295→    }
+   296→   296→    for (const i of detail.inspections) {
+   297→   297→      entries.push({
+   298→   298→        id: i.id,
+   299→   299→        kind: "inspection",
+   300→   300→        createdAt: i.createdAt,
+   301→   301→        userName: i.inspectorName,
+   302→   302→        text: `inspection decision — ${INSPECTION_DECISION_LABELS[i.decision as never] ?? i.decision}`,
+   303→   303→        detail: i.comments,
+   304→   304→        icon: ShieldCheck,
+   305→   305→        iconClass:
+   306→   306→          i.decision === "APPROVED"
+   307→   307→            ? "bg-emerald-50 text-emerald-700"
+   308→   308→            : i.decision === "CHANGES_REQUESTED"
+   309→   309→              ? "bg-amber-50 text-amber-700"
+   310→   310→              : "bg-stone-100 text-stone-600",
+   311→   311→      });
+   312→   312→    }
+   313→   313→    for (const c of detail.comments) {
+   314→   314→      entries.push({
+   315→   315→        id: c.id,
+   316→   316→        kind: "comment",
+   317→   317→        createdAt: c.createdAt,
+   318→   318→        userName: c.userName,
+   319→   319→        text: c.isIssue ? "reported an issue" : "added a note",
+   320→   320→        detail: c.message,
+   321→   321→        icon: MessageSquare,
+   322→   322→        iconClass: c.isIssue ? "bg-red-50 text-red-700" : "bg-stone-100 text-stone-600",
+   323→   323→      });
+   324→   324→    }
+   325→   325→    return entries.sort(
+   326→   326→      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+   327→   327→    );
+   328→   328→  }, [detail]);
+   329→   329→
+   330→   330→  const url = taskId ? `/api/atelier/tasks/${taskId}` : "";
+   331→   331→
+   332→   332→  /** Run a workflow mutation, refresh the detail and toast the outcome. */
+   333→   333→  const runAction = useCallback(
+   334→   334→    async (label: string, fn: () => Promise<unknown>) => {
+   335→   335→      setBusy(true);
+   336→   336→      try {
+   337→   337→        await fn();
+   338→   338→        await load(true);
+   339→   339→        setDialog(null);
+   340→   340→        toast({ title: label });
+   341→   341→      } catch (e) {
+   342→   342→        toast({
+   343→   343→          title: "Action failed",
+   344→   344→          description: e instanceof Error ? e.message : "Unexpected error.",
+   345→   345→          variant: "destructive",
+   346→   346→        });
+   347→   347→      } finally {
+   348→   348→        setBusy(false);
+   349→   349→      }
+   350→   350→    },
+   351→   351→    [load, toast]
+   352→   352→  );
+   353→   353→
+   354→   354→  function openDialog(kind: Exclude<DialogKind, null>) {
+   355→   355→    if (!detail) return;
+   356→   356→    // Never prefill the current assignee — the server rejects no-op assignments.
+   357→   357→    setStaffId("");
+   358→   358→    setNote("");
+   359→   359→    setReason("");
+   360→   360→    setComments("");
+   361→   361→    if (kind === "edit") {
+   362→   362→      setEditForm({
+   363→   363→        garmentPiece: detail.task.garmentPiece,
+   364→   364→        deadline: toDatetimeLocal(detail.task.deadline),
+   365→   365→        priority: detail.task.priority,
+   366→   366→        instructions: detail.task.instructions ?? "",
+   367→   367→      });
+   368→   368→    }
+   369→   369→    setDialog(kind);
+   370→   370→    if (kind === "assign" && isSupervisor(user) && staff.length === 0) {
+   371→   371→      api
+   372→   372→        .get<{ users: UserRecord[] }>("/api/atelier/users?role=STAFF")
+   373→   373→        .then((res) => setStaff(res.users.filter((u) => u.isActive)))
+   374→   374→        .catch(() => {
+   375→   375→          // Options stay empty; assignment can be retried later.
+   376→   376→        });
+   377→   377→    }
+   378→   378→  }
+   379→   379→
+   380→   380→  // ---- Guards ------------------------------------------------------------------
+   381→   381→
+   382→   382→  if (!taskId) {
+   383→   383→    return (
+   384→   384→      <EmptyState
+   385→   385→        title="No task selected"
+   386→   386→        description="Open a task from the production board to see its details."
+   387→   387→        action={
+   388→   388→          <Button variant="outline" size="sm" onClick={() => navigate("tasks")}>
+   389→   389→            <ArrowLeft className="size-4" />
+   390→   390→            Go to tasks
+   391→   391→          </Button>
+   392→   392→        }
+   393→   393→      />
+   394→   394→    );
+   395→   395→  }
+   396→   396→
+   397→   397→  if (fatal) {
+   398→   398→    return (
+   399→   399→      <EmptyState
+   400→   400→        icon={AlertTriangle}
+   401→   401→        title="Task unavailable"
+   402→   402→        description={fatal}
+   403→   403→        action={
+   404→   404→          <Button variant="outline" size="sm" onClick={() => navigate("tasks")}>
+   405→   405→            <ArrowLeft className="size-4" />
+   406→   406→            Back to tasks
+   407→   407→          </Button>
+   408→   408→        }
+   409→   409→      />
+   410→   410→    );
+   411→   411→  }
+   412→   412→
+   413→   413→  if (loading && !detail) {
+   414→   414→    return (
+   415→   415→      <div className="space-y-4">
+   416→   416→        <Skeleton className="h-8 w-36" />
+   417→   417→        <Skeleton className="h-10 w-2/3" />
+   418→   418→        <Skeleton className="h-6 w-1/2" />
+   419→   419→        <div className="grid lg:grid-cols-3 gap-4">
+   420→   420→          <div className="lg:col-span-2 space-y-4">
+   421→   421→            <Skeleton className="h-80" />
+   422→   422→            <Skeleton className="h-64" />
+   423→   423→          </div>
+   424→   424→          <div className="space-y-4">
+   425→   425→            <Skeleton className="h-72" />
+   426→   426→            <Skeleton className="h-56" />
+   427→   427→          </div>
+   428→   428→        </div>
+   429→   429→      </div>
+   430→   430→    );
+   431→   431→  }
+   432→   432→
+   433→   433→  if (!detail) {
+   434→   434→    return (
+   435→   435→      <EmptyState
+   436→   436→        icon={AlertTriangle}
+   437→   437→        title="Could not load task"
+   438→   438→        description={fetchError ?? "Unknown error."}
+   439→   439→        action={
+   440→   440→          <Button variant="outline" size="sm" onClick={() => load()}>
+   441→   441→            Retry
+   442→   442→          </Button>
+   443→   443→        }
+   444→   444→      />
+   445→   445→    );
+   446→   446→  }
+   447→   447→
+   448→   448→  // ---- Derived values ------------------------------------------------------------
+   449→   449→
+   450→   450→  const task = detail.task;
+   451→   451→  const supervisor = isSupervisor(user);
+   452→   452→  const isAssignee = !!user && task.assignedStaffId === user.id;
+   453→   453→  const terminal = task.status === "DELIVERED" || task.status === "CANCELLED";
+   454→   454→  const inWork = WORK_STATUSES.includes(task.status);
+   455→   455→
+   456→   456→  const mayUpdateProgress = (supervisor || isAssignee) && inWork;
+   457→   457→  const mayEditChecklist =
+   458→   458→    (supervisor && !terminal) || (isAssignee && inWork);
+   459→   459→  const mayComment = (supervisor || isAssignee) && !terminal;
+   460→   460→
+   461→   461→  const canAssign = supervisor && !terminal;
+   462→   462→  const canEdit = supervisor && !terminal;
+   463→   463→  const canSubmit = (supervisor || isAssignee) && inWork;
+   464→   464→  const staffSubmitBlocked = isAssignee && !supervisor && task.progress < 100;
+   465→   465→  const canInspect = supervisor && task.status === "AWAITING_INSPECTION";
+   466→   466→  const canReady = supervisor && task.status === "APPROVED";
+   467→   467→  const canDeliver = supervisor && task.status === "READY_FOR_PICKUP";
+   468→   468→  const canReopen = supervisor && (task.status === "APPROVED" || task.status === "READY_FOR_PICKUP");
+   469→   469→  const canBlock = (supervisor || isAssignee) && inWork;
+   470→   470→  const canUnblock = (supervisor || isAssignee) && task.status === "BLOCKED";
+   471→   471→  const canCancel = supervisor && !terminal;
+   472→   472→  const noActions =
+   473→   473→    !canAssign &&
+   474→   474→    !canEdit &&
+   475→   475→    !canSubmit &&
+   476→   476→    !canInspect &&
+   477→   477→    !canReady &&
+   478→   478→    !canDeliver &&
+   479→   479→    !canReopen &&
+   480→   480→    !canBlock &&
+   481→   481→    !canUnblock &&
+   482→   482→    !canCancel;
+   483→   483→
+   484→   484→  const hasWeights = stages.some((s) => s.weight > 1);
+   485→   485→  const changesCount = Object.keys(stageChanges).length;
+   486→   486→
+   487→   487→  const progressValue = Number(progressInput);
+   488→   488→  const progressValid =
+   489→   489→    progressInput !== "" &&
+   490→   490→    Number.isInteger(progressValue) &&
+   491→   491→    progressValue >= 0 &&
+   492→   492→    progressValue <= 100 &&
+   493→   493→    progressValue !== task.progress;
+   494→   494→
+   495→   495→  // ---- History timeline filter ------------------------------------------------------------
+   496→   496→
+   497→   497→  const filteredHistory =
+   498→   498→    historyTab === "all"
+   499→   499→      ? history
+   500→   500→      : history.filter((e) => {
+   501→   501→          if (historyTab === "progress") return e.kind === "progress";
+   502→   502→          if (historyTab === "checklist") return e.kind === "stage";
+   503→   503→          if (historyTab === "status") return e.kind === "status";
+   504→   504→          return e.kind === "inspection";
+   505→   505→        });
+   506→   506→
+   507→   507→  // ---- Mutations ---------------------------------------------------------------------
+   508→   508→
+   509→   509→  function requireStaff() {
+   510→   510→    if (!staffId) {
+   511→   511→      toast({
+   512→   512→        title: "Select a staff member",
+   513→   513→        description: "Choose the account responsible for this garment piece.",
+   514→   514→        variant: "destructive",
+   515→   515→      });
+   516→   516→      return false;
+   517→   517→    }
+   518→   518→    return true;
+   519→   519→  }
+   520→   520→
+   521→   521→  function requireReason(field: string, min = 3) {
+   522→   522→    if (reason.trim().length < min) {
+   523→   523→      toast({
+   524→   524→        title: "A reason is required",
+   525→   525→        description: `Provide ${field} (at least ${min} characters).`,
+   526→   526→        variant: "destructive",
+   527→   527→      });
+   528→   528→      return false;
+   529→   529→    }
+   530→   530→    return true;
+   531→   531→  }
+   532→   532→
+   533→   533→  const doAssign = () => {
+   534→   534→    if (!requireStaff()) return;
+   535→   535→    const target = staff.find((s) => s.id === staffId);
+   536→   536→    runAction(
+   537→   537→      `${task.assignedStaffId ? "Reassigned" : "Assigned"} to ${target?.name ?? "staff member"}`,
+   538→   538→      () =>
+   539→   539→        api.patch(url, {
+   540→   540→          action: "ASSIGN",
+   541→   541→          staffId,
+   542→   542→          note: note.trim() || undefined,
+   543→   543→        })
+   544→   544→    );
+   545→   545→  };
+   546→   546→
+   547→   547→  const doEdit = () => {
+   548→   548→    const piece = editForm.garmentPiece.trim();
+   549→   549→    if (!piece) {
+   550→   550→      toast({ title: "Garment piece name is required", variant: "destructive" });
+   551→   551→      return;
+   552→   552→    }
+   553→   553→    const body: Record<string, unknown> = { action: "UPDATE" };
+   554→   554→    const deadlineIso = editForm.deadline ? new Date(editForm.deadline).toISOString() : null;
+   555→   555→    if (deadlineIso !== task.deadline) body.deadline = deadlineIso;
+   556→   556→    if (editForm.priority !== task.priority) body.priority = editForm.priority;
+   557→   557→    if (editForm.instructions.trim() !== (task.instructions ?? "")) {
+   558→   558→      body.instructions = editForm.instructions.trim();
+   559→   559→    }
+   560→   560→    if (piece !== task.garmentPiece) body.garmentPiece = piece;
+   561→   561→    if (Object.keys(body).length === 1) {
+   562→   562→      toast({ title: "Nothing to update", description: "No field was changed." });
+   563→   563→      return;
+   564→   564→    }
+   565→   565→    runAction("Task details updated", () => api.patch(url, body));
+   566→   566→  };
+   567→   567→
+   568→   568→  const doSubmit = () => {
+   569→   569→    runAction("Submitted for inspection", () =>
+   570→   570→      api.patch(url, { action: "SUBMIT", note: note.trim() || undefined })
+   571→   571→    );
+   572→   572→  };
+   573→   573→
+   574→   574→  const doApprove = () => {
+   575→   575→    runAction("Inspection approved", () =>
+   576→   576→      api.patch(url, {
+   577→   577→        action: "INSPECT",
+   578→   578→        decision: "APPROVED",
+   579→   579→        comments: comments.trim() || undefined,
+   580→   580→      })
+   581→   581→    );
+   582→   582→  };
+   583→   583→
+   584→   584→  const doRequestChanges = () => {
+   585→   585→    if (comments.trim().length < 3) {
+   586→   586→      toast({
+   587→   587→        title: "Correction instructions required",
+   588→   588→        description: "Describe what needs to be corrected (at least 3 characters).",
+   589→   589→        variant: "destructive",
+   590→   590→      });
+   591→   591→      return;
+   592→   592→    }
+   593→   593→    runAction("Corrections requested", () =>
+   594→   594→      api.patch(url, {
+   595→   595→        action: "INSPECT",
+   596→   596→        decision: "CHANGES_REQUESTED",
+   597→   597→        comments: comments.trim(),
+   598→   598→      })
+   599→   599→    );
+   600→   600→  };
+   601→   601→
+   602→   602→  const doReady = () => {
+   603→   603→    runAction("Marked ready for pickup", () => api.patch(url, { action: "READY" }));
+   604→   604→  };
+   605→   605→
+   606→   606→  const doDeliver = () => {
+   607→   607→    runAction("Marked as delivered/collected", () =>
+   608→   608→      api.patch(url, { action: "DELIVER", note: note.trim() || undefined })
+   609→   609→    );
+   610→   610→  };
+   611→   611→
+   612→   612→  const doReopen = () => {
+   613→   613→    if (comments.trim().length < 3) {
+   614→   614→      toast({
+   615→   615→        title: "Comments are required",
+   616→   616→        description: "Explain why this task is being reopened (at least 3 characters).",
+   617→   617→        variant: "destructive",
+   618→   618→      });
+   619→   619→      return;
+   620→   620→    }
+   621→   621→    runAction("Task reopened", () =>
+   622→   622→      api.patch(url, { action: "INSPECT", decision: "REOPENED", comments: comments.trim() })
+   623→   623→    );
+   624→   624→  };
+   625→   625→
+   626→   626→  const doBlock = () => {
+   627→   627→    if (!requireReason("the reason production is blocked")) return;
+   628→   628→    runAction("Task blocked", () => api.patch(url, { action: "BLOCK", reason: reason.trim() }));
+   629→   629→  };
+   630→   630→
+   631→   631→  const doUnblock = () => {
+   632→   632→    runAction("Task unblocked", () =>
+   633→   633→      api.patch(url, { action: "UNBLOCK", note: note.trim() || undefined })
+   634→   634→    );
+   635→   635→  };
+   636→   636→
+   637→   637→  const doCancel = () => {
+   638→   638→    if (!requireReason("the cancellation reason")) return;
+   639→   639→    runAction("Task cancelled", () => api.patch(url, { action: "CANCEL", reason: reason.trim() }));
+   640→   640→  };
+   641→   641→
+   642→   642→  const doProgressUpdate = async () => {
+   643→   643→    if (!progressValid) return;
+   644→   644→    setBusy(true);
+   645→   645→    try {
+   646→   646→      await api.post(`${url}/progress`, {
+   647→   647→        progress: progressValue,
+   648→   648→        note: progressNote.trim() || null,
+   649→   649→      });
+   650→   650→      setProgressInput("");
+   651→   651→      setProgressNote("");
+   652→   652→      await load(true);
+   653→   653→      toast({ title: `Progress updated to ${progressValue}%` });
+   654→   654→    } catch (e) {
+   655→   655→      toast({
+   656→   656→        title: "Could not update progress",
+   657→   657→        description: e instanceof Error ? e.message : "Unexpected error.",
+   658→   658→        variant: "destructive",
+   659→   659→      });
+   660→   660→    } finally {
+   661→   661→      setBusy(false);
+   662→   662→    }
+   663→   663→  };
+   664→   664→
+   665→   665→  const saveChecklist = async () => {
+   666→   666→    const updates = Object.entries(stageChanges).map(([stageId, state]) => ({
+   667→   667→      stageId,
+   668→   668→      state,
+   669→   669→      comment: stageComment.trim() || null,
+   670→   670→    }));
+   671→   671→    if (updates.length === 0) return;
+   672→   672→    setBusy(true);
+   673→   673→    try {
+   674→   674→      await api.post(`${url}/stages`, { updates });
+   675→   675→      setStageChanges({});
+   676→   676→      setStageComment("");
+   677→   677→      await load(true);
+   678→   678→      toast({
+   679→   679→        title: "Checklist updated",
+   680→   680→        description: "Progress was recalculated from the completed stages.",
+   681→   681→      });
+   682→   682→    } catch (e) {
+   683→   683→      toast({
+   684→   684→        title: "Could not save checklist",
+   685→   685→        description: e instanceof Error ? e.message : "Unexpected error.",
+   686→   686→        variant: "destructive",
+   687→   687→      });
+   688→   688→    } finally {
+   689→   689→      setBusy(false);
+   690→   690→    }
+   691→   691→  };
+   692→   692→
+   693→   693→  const postComment = async (isIssue: boolean) => {
+   694→   694→    const message = commentText.trim();
+   695→   695→    if (!message) {
+   696→   696→      toast({
+   697→   697→        title: "Write a message first",
+   698→   698→        description: isIssue ? "Describe the problem you encountered." : "Type a note before sending.",
+   699→   699→        variant: "destructive",
+   700→   700→      });
+   701→   701→      return;
+   702→   702→    }
+   703→   703→    setBusy(true);
+   704→   704→    try {
+   705→   705→      await api.post(`${url}/comments`, { message, isIssue });
+   706→   706→      setCommentText("");
+   707→   707→      await load(true);
+   708→   708→      toast({
+   709→   709→        title: isIssue ? "Issue reported" : "Note added",
+   710→   710→        description: isIssue ? "Management has been notified." : undefined,
+   711→   711→      });
+   712→   712→    } catch (e) {
+   713→   713→      toast({
+   714→   714→        title: "Could not add comment",
+   715→   715→        description: e instanceof Error ? e.message : "Unexpected error.",
+   716→   716→        variant: "destructive",
+   717→   717→      });
+   718→   718→    } finally {
+   719→   719→      setBusy(false);
+   720→   720→    }
+   721→   721→  };
+   722→   722→
+   723→   723→  const dialogOpen = (kind: Exclude<DialogKind, null>) => dialog === kind;
+   724→   724→  const closeDialog = (open: boolean) => {
+   725→   725→    if (!open && !busy) setDialog(null);
+   726→   726→  };
+   727→   727→
+   728→   728→  // ---- Render ---------------------------------------------------------------------
+   729→   729→
+   730→   730→  return (
+   731→   731→    <div>
+   732→   732→      <Button variant="ghost" size="sm" className="-ml-2 mb-2" onClick={() => navigate("tasks")}>
+   733→   733→        <ArrowLeft className="size-4" />
+   734→   734→        Back to tasks
+   735→   735→      </Button>
+   736→   736→
+   737→   737→      {/* ---- Header ---- */}
+   738→   738→      <div className="mb-4">
+   739→   739→        <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-3">
+   740→   740→          <div className="min-w-0">
+   741→   741→            <h1 className="font-display text-2xl font-bold tracking-tight truncate">
+   742→   742→              {task.code} — {task.garmentPiece}
+   743→   743→            </h1>
+   744→   744→            <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 mt-1.5 text-sm text-muted-foreground">
+   745→   745→              <span>
+   746→   746→                {task.orderNumber} · {task.customerName}
+   747→   747→              </span>
+   748→   748→              <span>
+   749→   749→                Assignee:{" "}
+   750→   750→                <span className="text-foreground font-medium">
+   751→   751→                  {task.assignedStaffName ?? "Unassigned"}
+   752→   752→                </span>
+   753→   753→              </span>
+   754→   754→              <DueDate deadline={task.deadline} overdue={task.overdue} />
+   755→   755→              <span>Created {formatDate(task.createdAt)}</span>
+   756→   756→            </div>
+   757→   757→          </div>
+   758→   758→          <div className="flex flex-wrap gap-1.5 shrink-0">
+   759→   759→            <StatusBadge status={task.status} />
+
+[showing lines 60-759 of 1635; use offset=760 with limit to continue reading]

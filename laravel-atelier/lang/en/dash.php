@@ -1,0 +1,46 @@
+<?php
+
+// OSSZ ATELIER — EN lines, ported from the "dash*" keys of the dict files (see dashboard.ts).
+// Accessed via __('dash.key').
+
+return [
+    'loadError' => 'Could not load dashboard',
+    'welcome' => 'Welcome back, {name}',
+    'staffDesc' => 'Here is your personal production overview. Only your assigned tasks are visible.',
+    'stat' => [
+        'myActive' => 'My Active Tasks',
+        'awaiting' => 'Awaiting Inspection',
+        'completedThisMonth' => 'Completed This Month',
+        'overdue' => 'Overdue',
+        'totalOrders' => 'Registered Orders',
+        'activeTasks' => 'Active Tasks',
+        'unassigned' => 'Unassigned',
+        'ongoing' => 'Ongoing',
+        'approved' => 'Approved',
+        'readyForPickup' => 'Ready for Pickup',
+        'delivered' => 'Delivered',
+        'blocked' => 'Blocked',
+    ],
+    'myTasks' => 'My Production Tasks',
+    'viewAll' => 'View all',
+    'noTasksTitle' => 'No tasks assigned yet',
+    'noTasksDesc' => 'When Management allocates garment pieces to your account, they will appear here.',
+    'managerTitle' => '{role} Dashboard',
+    'managerDesc' => 'Complete production overview across all registered orders and staff.',
+    'createTasks' => 'Create Tasks',
+    'overdueTitle' => 'Overdue Tasks',
+    'productionBoard' => 'Production board',
+    'overdueEmptyTitle' => 'Nothing overdue',
+    'overdueEmptyDesc' => 'All deadlines are under control.',
+    'unassigned' => 'Unassigned',
+    'dueSoonTitle' => 'Due in the Next 7 Days',
+    'dueSoonEmptyTitle' => 'No imminent deadlines',
+    'dueSoonEmptyDesc' => 'No tasks are due within the next seven days.',
+    'workloadTitle' => 'Staff Workload (Active Tasks)',
+    'workloadEmpty' => 'No active staff accounts',
+    'awaitingCount' => '{count} awaiting inspection',
+    'overdueCount' => '{count} overdue',
+    'activityTitle' => 'Recent Activity',
+    'activityEmpty' => 'No activity recorded yet',
+    'system' => 'System',
+];

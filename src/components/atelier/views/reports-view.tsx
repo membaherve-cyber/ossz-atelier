@@ -6,12 +6,14 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { api, qs } from "../client";
+import { useI18n } from "../i18n/use-i18n";
 import type { StaffPerformanceRow } from "../types";
 import { EmptyState, PageHeader, SectionCard, StatCard } from "../ui-bits";
 import {
   AssessmentReadOnly,
   downloadCsv,
   monthNow,
+  periodLabel,
   StaffPerformanceTable,
   yearNow,
 } from "./performance-view";
@@ -48,6 +50,7 @@ type ReportsResponse = {
 
 export function ReportsView() {
   const { toast } = useToast();
+  const { t, lang } = useI18n();
 
   const [rType, setRType] = useState<ReportType>("MONTH");
   const [monthValue, setMonthValue] = useState(monthNow());
@@ -65,11 +68,11 @@ export function ReportsView() {
       const res = await api.get<ReportsResponse>(`/api/atelier/reports${qs({ type: rType, value })}`);
       setData(res);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to load the report.");
+      setError(e instanceof Error ? e.message : t("rep.loadErrorFallback"));
     } finally {
       setLoading(false);
     }
-  }, [rType, value]);
+  }, [rType, value, t]);
 
   useEffect(() => {
     void load();
@@ -78,31 +81,31 @@ export function ReportsView() {
   function exportCsv() {
     if (!data) return;
     downloadCsv(`ossz-report-${data.range.value}.csv`, [
-      ["OSSZ ATELIER — Production Report"],
-      ["Period", data.range.label],
-      ["Orders Registered", data.summary.ordersRegistered],
-      ["Orders Delivered", data.summary.ordersDelivered],
-      ["Tasks Completed", data.summary.tasksCompleted],
-      ["Pieces Completed", data.summary.piecesCompleted],
-      ["On-Time Completion Rate (%)", data.summary.onTimeCompletionRate],
+      [t("rep.csvTitle")],
+      [t("rep.csvPeriod"), periodLabel(t, lang, data.range)],
+      [t("rep.ordersRegistered"), data.summary.ordersRegistered],
+      [t("rep.ordersDelivered"), data.summary.ordersDelivered],
+      [t("rep.tasksCompleted"), data.summary.tasksCompleted],
+      [t("rep.piecesCompleted"), data.summary.piecesCompleted],
+      [t("rep.csvOnTimeRate"), data.summary.onTimeCompletionRate],
       [],
       [
-        "Staff",
-        "Email",
-        "Assigned",
-        "Completed",
-        "On-time",
-        "Overdue",
-        "Avg Hours",
-        "Quality %",
-        "Corrections",
-        "Blocked",
-        "Productivity",
-        "Timeliness",
-        "Quality",
-        "Reliability",
-        "Management",
-        "Overall",
+        t("rep.csvStaff"),
+        t("rep.csvEmail"),
+        t("rep.csvAssigned"),
+        t("rep.csvCompleted"),
+        t("rep.csvOnTime"),
+        t("rep.csvOverdue"),
+        t("rep.csvAvgHours"),
+        t("rep.csvQualityPct"),
+        t("rep.csvCorrections"),
+        t("rep.csvBlocked"),
+        t("rep.csvProductivity"),
+        t("rep.csvTimeliness"),
+        t("rep.csvQuality"),
+        t("rep.csvReliability"),
+        t("rep.csvManagement"),
+        t("rep.csvOverall"),
       ],
       ...data.staff.map((s) => [
         s.staffName,
@@ -124,41 +127,41 @@ export function ReportsView() {
       ]),
     ]);
     toast({
-      title: "Report exported",
-      description: `ossz-report-${data.range.value}.csv downloaded.`,
+      title: t("rep.exported"),
+      description: t("rep.exportedDesc", { file: `ossz-report-${data.range.value}.csv` }),
     });
   }
 
   return (
     <div>
       <PageHeader
-        title="Production Reports"
-        description="Period summary of registered orders, deliveries, completions and staff performance."
+        title={t("rep.title")}
+        description={t("rep.subtitle")}
       >
         <Button variant="outline" size="sm" onClick={exportCsv} disabled={!data}>
           <Download className="size-4 mr-1.5" />
-          Export CSV
+          {t("rep.exportCsv")}
         </Button>
       </PageHeader>
 
       {/* ---------------------------------------------------- period selector */}
-      <SectionCard title="Reporting Period" className="mb-4">
+      <SectionCard title={t("rep.reportingPeriod")} className="mb-4">
         <div className="flex flex-wrap items-end gap-3">
           <div className="space-y-1.5">
-            <Label htmlFor="report-type">Report type</Label>
+            <Label htmlFor="report-type">{t("rep.reportType")}</Label>
             <Select value={rType} onValueChange={(v) => setRType(v as ReportType)}>
               <SelectTrigger id="report-type" className="w-[170px]">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="MONTH">Monthly report</SelectItem>
-                <SelectItem value="YEAR">Annual report</SelectItem>
+                <SelectItem value="MONTH">{t("rep.monthlyReport")}</SelectItem>
+                <SelectItem value="YEAR">{t("rep.annualReport")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
           {rType === "MONTH" ? (
             <div className="space-y-1.5">
-              <Label htmlFor="report-month">Month</Label>
+              <Label htmlFor="report-month">{t("rep.month")}</Label>
               <Input
                 id="report-month"
                 type="month"
@@ -169,7 +172,7 @@ export function ReportsView() {
             </div>
           ) : (
             <div className="space-y-1.5">
-              <Label htmlFor="report-year">Year</Label>
+              <Label htmlFor="report-year">{t("rep.year")}</Label>
               <Input
                 id="report-year"
                 type="number"
@@ -180,7 +183,7 @@ export function ReportsView() {
             </div>
           )}
           {data && (
-            <p className="pb-2 text-sm font-medium text-muted-foreground ml-auto">{data.range.label}</p>
+            <p className="pb-2 text-sm font-medium text-muted-foreground ml-auto">{periodLabel(t, lang, data.range)}</p>
           )}
         </div>
       </SectionCard>
@@ -197,11 +200,11 @@ export function ReportsView() {
       ) : error ? (
         <EmptyState
           icon={AlertTriangle}
-          title="Could not load the report"
+          title={t("rep.loadError")}
           description={error}
           action={
             <Button variant="outline" size="sm" onClick={() => void load()}>
-              Try again
+              {t("common.tryAgain")}
             </Button>
           }
         />
@@ -210,35 +213,35 @@ export function ReportsView() {
           {/* ------------------------------------------------- summary cards */}
           <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3 mb-4">
             <StatCard
-              label="Orders Registered"
+              label={t("rep.ordersRegistered")}
               value={data.summary.ordersRegistered}
-              hint={data.range.label}
+              hint={periodLabel(t, lang, data.range)}
               icon={Package}
             />
             <StatCard
-              label="Orders Delivered"
+              label={t("rep.ordersDelivered")}
               value={data.summary.ordersDelivered}
-              hint="orders with a delivery in period"
+              hint={t("rep.ordersDeliveredHint")}
               icon={Truck}
               tone="success"
             />
             <StatCard
-              label="Tasks Completed"
+              label={t("rep.tasksCompleted")}
               value={data.summary.tasksCompleted}
-              hint="approved in period"
+              hint={t("rep.tasksCompletedHint")}
               icon={CheckCircle2}
               tone="info"
             />
             <StatCard
-              label="Pieces Completed"
+              label={t("rep.piecesCompleted")}
               value={data.summary.piecesCompleted}
-              hint="one task = one garment piece"
+              hint={t("rep.piecesCompletedHint")}
               icon={Shirt}
             />
             <StatCard
-              label="On-Time Completion"
+              label={t("rep.onTimeCompletion")}
               value={`${data.summary.onTimeCompletionRate}%`}
-              hint="completions before deadline"
+              hint={t("rep.onTimeCompletionHint")}
               icon={TrendingUp}
               tone={
                 data.summary.onTimeCompletionRate >= 75
@@ -252,15 +255,15 @@ export function ReportsView() {
 
           {/* -------------------------------------------------- staff table */}
           <SectionCard
-            title={`Staff Performance — ${data.range.label}`}
+            title={t("rep.staffTableTitle", { period: periodLabel(t, lang, data.range) })}
             contentClassName="p-0"
             className="mb-4"
           >
             {data.staff.length === 0 ? (
               <EmptyState
                 icon={Users}
-                title="No staff accounts"
-                description="Create staff accounts to include them in production reports."
+                title={t("rep.noStaff")}
+                description={t("rep.noStaffDesc")}
               />
             ) : (
               <StaffPerformanceTable
@@ -271,8 +274,7 @@ export function ReportsView() {
           </SectionCard>
 
           <p className="text-xs text-muted-foreground">
-            Reports are generated from live production records — assignments, completions and
-            inspection results.
+            {t("rep.footnote")}
           </p>
         </>
       )}

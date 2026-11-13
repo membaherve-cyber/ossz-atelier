@@ -1,25 +1,22 @@
 "use client";
 
 // OSSZ ATELIER — login screen. No public registration: accounts are created
-// by Management/Admin inside the application.
+// by Management/Admin inside the application. Bilingual (EN/FR) with a
+// language switch at the top of the form panel.
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Scissors, Lock, Mail, Eye, EyeOff } from "lucide-react";
+import { Lock, Mail, Eye, EyeOff } from "lucide-react";
 import { useAppStore } from "./store";
 import { ApiClientError } from "./client";
-
-const DEMO_ACCOUNTS = [
-  { label: "Management", email: "management@atelier.com" },
-  { label: "Admin", email: "admin@atelier.com" },
-  { label: "Staff (Hamidou)", email: "hamidou@atelier.com" },
-  { label: "Staff (Lawal)", email: "lawal@atelier.com" },
-];
+import { useI18n } from "./i18n/use-i18n";
+import { LanguageToggle } from "./i18n/language-toggle";
 
 export function LoginView() {
   const login = useAppStore((s) => s.login);
+  const { t } = useI18n();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -33,72 +30,77 @@ export function LoginView() {
     try {
       await login(email.trim(), password);
     } catch (err) {
-      setError(err instanceof ApiClientError ? err.message : "Unable to sign in. Please try again.");
+      setError(err instanceof ApiClientError ? err.message : t("login.error"));
     } finally {
       setLoading(false);
     }
   }
 
+  const demoAccounts = [
+    { label: t("login.demoManagement"), email: "management@atelier.com" },
+    { label: t("login.demoAdmin"), email: "admin@atelier.com" },
+    { label: t("login.demoStaffHamidou"), email: "hamidou@atelier.com" },
+    { label: t("login.demoStaffLawal"), email: "lawal@atelier.com" },
+  ];
+
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row bg-background">
+    <div className="relative min-h-screen flex flex-col lg:flex-row bg-background">
       {/* Brand panel */}
       <div className="relative hidden lg:flex lg:w-[45%] flex-col justify-between p-10 text-sidebar-foreground bg-[url('/atelier-hero.png')] bg-cover bg-center">
-        <div className="absolute inset-0 bg-stone-950/70" aria-hidden="true" />
+        <div className="absolute inset-0 bg-black/75" aria-hidden="true" />
         <div className="relative">
-          <div className="flex items-center gap-3">
-            <div className="rounded-xl bg-amber-500/90 p-2.5">
-              <Scissors className="size-6 text-stone-950" />
-            </div>
-            <div>
-              <p className="font-display text-2xl font-bold leading-none">OSSZ ATELIER</p>
-              <p className="text-xs tracking-[0.25em] text-stone-300 mt-1">PRODUCTION MANAGEMENT</p>
-            </div>
-          </div>
+          <img
+            src="/ossz-logo.png"
+            alt={t("login.logoAlt")}
+            className="h-14 w-auto rounded-lg ring-1 ring-white/20"
+          />
         </div>
         <div className="relative">
           <h1 className="font-display text-4xl font-bold leading-tight max-w-md">
-            From customer order to finished garment, every piece accounted for.
+            {t("login.heroTitle")}
           </h1>
           <p className="mt-4 text-stone-300 max-w-md text-sm leading-relaxed">
-            Independent production management for OSSZ: manual order registration, staff task
-            allocation, checklist tracking, quality control, performance and incentives.
+            {t("login.heroBody")}
           </p>
         </div>
-        <p className="relative text-xs text-stone-400">
-          atelier.osszcollection.com — independent system, own database, own accounts.
-        </p>
+        <p className="relative text-xs text-stone-400">{t("login.heroFooter")}</p>
+      </div>
+
+      {/* Language switch (always visible, top-right) */}
+      <div className="absolute right-4 top-4 z-10">
+        <LanguageToggle />
       </div>
 
       {/* Form panel */}
       <div className="flex-1 flex items-center justify-center p-6">
         <div className="w-full max-w-md">
           <div className="lg:hidden flex items-center gap-3 mb-8">
-            <div className="rounded-xl bg-primary p-2.5">
-              <Scissors className="size-5 text-primary-foreground" />
-            </div>
+            <img
+              src="/ossz-logo.png"
+              alt={t("login.logoAlt")}
+              className="h-11 w-auto rounded-lg ring-1 ring-black/10"
+            />
             <div>
               <p className="font-display text-xl font-bold leading-none">OSSZ ATELIER</p>
               <p className="text-[10px] tracking-[0.25em] text-muted-foreground mt-1">
-                PRODUCTION MANAGEMENT
+                {t("login.brandTag")}
               </p>
             </div>
           </div>
 
-          <h2 className="font-display text-2xl font-bold">Sign in</h2>
-          <p className="text-sm text-muted-foreground mt-1 mb-6">
-            Use the account provided to you by Management.
-          </p>
+          <h2 className="font-display text-2xl font-bold">{t("login.title")}</h2>
+          <p className="text-sm text-muted-foreground mt-1 mb-6">{t("login.subtitle")}</p>
 
           <form onSubmit={handleSubmit} className="space-y-4" noValidate>
             <div className="space-y-2">
-              <Label htmlFor="email">Email address</Label>
+              <Label htmlFor="email">{t("login.email")}</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
                 <Input
                   id="email"
                   type="email"
                   autoComplete="email"
-                  placeholder="you@atelier.com"
+                  placeholder={t("login.emailPlaceholder")}
                   className="pl-9"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -107,14 +109,14 @@ export function LoginView() {
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t("login.password")}</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
                   autoComplete="current-password"
-                  placeholder="Your password"
+                  placeholder={t("login.passwordPlaceholder")}
                   className="pl-9 pr-10"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -124,7 +126,7 @@ export function LoginView() {
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  aria-label={showPassword ? t("login.hidePassword") : t("login.showPassword")}
                 >
                   {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                 </button>
@@ -138,16 +140,16 @@ export function LoginView() {
             )}
 
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Signing in…" : "Sign in"}
+              {loading ? t("login.submitting") : t("login.submit")}
             </Button>
           </form>
 
           <div className="mt-8 rounded-lg border bg-muted/40 p-4">
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
-              Demo accounts (password: Atelier@2026)
+              {t("login.demoTitle")}
             </p>
             <div className="flex flex-wrap gap-2">
-              {DEMO_ACCOUNTS.map((acc) => (
+              {demoAccounts.map((acc) => (
                 <button
                   key={acc.email}
                   type="button"

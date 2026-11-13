@@ -1,0 +1,1635 @@
+     1→"use client";
+     2→
+     3→// OSSZ ATELIER — task detail screen: progress & production checklist,
+     4→// workflow actions, comments/issues and a merged history timeline.
+     5→
+     6→import { useCallback, useEffect, useMemo, useState } from "react";
+     7→import type { ReactNode } from "react";
+     8→import { format } from "date-fns";
+     9→import type { LucideIcon } from "lucide-react";
+    10→import { ApiClientError, api } from "../client";
+    11→import { isSupervisor, useAppStore } from "../store";
+    12→import type { TaskDetail, UserRecord } from "../types";
+    13→import {
+    14→  CategoryBadge,
+    15→  DueDate,
+    16→  EmptyState,
+    17→  PriorityBadge,
+    18→  ProgressCell,
+    19→  SectionCard,
+    20→  StageStateChip,
+    21→  StatusBadge,
+    22→} from "../ui-bits";
+    23→import {
+    24→  INSPECTION_DECISION_LABELS,
+    25→  PRIORITIES,
+    26→  PRIORITY_LABELS,
+    27→  STAGE_STATES,
+    28→  STAGE_STATE_LABELS,
+    29→  STATUS_LABELS,
+    30→  type StageState,
+    31→  type TaskStatus,
+    32→} from "@/lib/atelier/constants";
+    33→import { formatDate, formatDateTime, timeAgo } from "@/lib/format";
+    34→import { cn } from "@/lib/utils";
+    35→import { useToast } from "@/hooks/use-toast";
+    36→import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+    37→import {
+    38→  AlertDialog,
+    39→  AlertDialogAction,
+    40→  AlertDialogCancel,
+    41→  AlertDialogContent,
+    42→  AlertDialogDescription,
+    43→  AlertDialogFooter,
+    44→  AlertDialogHeader,
+    45→  AlertDialogTitle,
+    46→} from "@/components/ui/alert-dialog";
+    47→import { Badge } from "@/components/ui/badge";
+    48→import { Button } from "@/components/ui/button";
+    49→import {
+    50→  Dialog,
+    51→  DialogContent,
+    52→  DialogDescription,
+    53→  DialogFooter,
+    54→  DialogHeader,
+    55→  DialogTitle,
+    56→} from "@/components/ui/dialog";
+    57→import { Input } from "@/components/ui/input";
+    58→import { Label } from "@/components/ui/label";
+    59→import { ScrollArea } from "@/components/ui/scroll-area";
+    60→import {
+    61→  Select,
+    62→  SelectContent,
+    63→  SelectItem,
+    64→  SelectTrigger,
+    65→  SelectValue,
+    66→} from "@/components/ui/select";
+    67→import { Separator } from "@/components/ui/separator";
+    68→import { Skeleton } from "@/components/ui/skeleton";
+    69→import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+    70→import { Textarea } from "@/components/ui/textarea";
+    71→import {
+    72→  AlertTriangle,
+    73→  ArrowLeft,
+    74→  ArrowRightLeft,
+    75→  Ban,
+    76→  ClipboardCheck,
+    77→  Inbox,
+    78→  ListChecks,
+    79→  Loader2,
+    80→  MessageSquare,
+    81→  Pencil,
+    82→  RotateCcw,
+    83→  Save,
+    84→  ShieldCheck,
+    85→  ShoppingBag,
+    86→  TrendingUp,
+    87→  Truck,
+    88→  Undo2,
+    89→  UserPlus,
+    90→  XCircle,
+    91→} from "lucide-react";
+    92→
+    93→// --- Types ---------------------------------------------------------------------
+    94→
+    95→type DialogKind =
+    96→  | "assign"
+    97→  | "edit"
+    98→  | "submit"
+    99→  | "inspect"
+   100→  | "deliver"
+   101→  | "reopen"
+   102→  | "block"
+   103→  | "unblock"
+   104→  | "cancel"
+   105→  | null;
+   106→
+   107→type HistoryKind = "assignment" | "status" | "stage" | "progress" | "inspection" | "comment";
+   108→
+   109→type HistoryTab = "all" | "progress" | "checklist" | "status" | "inspections";
+   110→
+   111→type HistoryEntry = {
+   112→  id: string;
+   113→  kind: HistoryKind;
+   114→  createdAt: string;
+   115→  userName: string;
+   116→  text: string;
+   117→  detail?: string | null;
+   118→  badge?: string | null;
+   119→  icon: LucideIcon;
+   120→  iconClass: string;
+   121→};
+   122→
+   123→const WORK_STATUSES = ["ASSIGNED", "ONGOING", "CHANGES_REQUESTED"];
+   124→
+   125→const STAGE_STATE_OPTIONS = STAGE_STATES.map((s) => ({
+   126→  value: s,
+   127→  label: s === "NOT_APPLICABLE" ? "N/A" : STAGE_STATE_LABELS[s],
+   128→}));
+   129→
+   130→/** Convert an ISO timestamp to a `datetime-local` input value (local time). */
+   131→function toDatetimeLocal(iso: string | null): string {
+   132→  if (!iso) return "";
+   133→  const d = new Date(iso);
+   134→  if (Number.isNaN(d.getTime())) return "";
+   135→  return format(d, "yyyy-MM-dd'T'HH:mm");
+   136→}
+   137→
+   138→function statusLabel(status: string): string {
+   139→  return STATUS_LABELS[status as TaskStatus] ?? status;
+   140→}
+   141→
+   142→function stageLabel(state: string): string {
+   143→  return STAGE_STATE_LABELS[state as StageState] ?? state;
+   144→}
+   145→
+   146→function MetaRow({ label, children }: { label: string; children: ReactNode }) {
+   147→  return (
+   148→    <div className="flex items-start justify-between gap-3 py-2">
+   149→      <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide pt-0.5">
+   150→        {label}
+   151→      </span>
+   152→      <span className="text-sm text-right min-w-0">{children}</span>
+   153→    </div>
+   154→  );
+   155→}
+   156→
+   157→// --- Component -------------------------------------------------------------------
+   158→
+   159→export function TaskDetailView() {
+   160→  const user = useAppStore((s) => s.user);
+   161→  const viewParams = useAppStore((s) => s.viewParams);
+   162→  const navigate = useAppStore((s) => s.navigate);
+   163→  const { toast } = useToast();
+   164→  const taskId = viewParams.taskId;
+   165→
+   166→  const [detail, setDetail] = useState<TaskDetail | null>(null);
+   167→  const [loading, setLoading] = useState(true);
+   168→  const [fatal, setFatal] = useState<string | null>(null);
+   169→  const [fetchError, setFetchError] = useState<string | null>(null);
+   170→  const [busy, setBusy] = useState(false);
+   171→
+   172→  // Dialog state
+   173→  const [dialog, setDialog] = useState<DialogKind>(null);
+   174→  const [staffId, setStaffId] = useState("");
+   175→  const [note, setNote] = useState("");
+   176→  const [reason, setReason] = useState("");
+   177→  const [comments, setComments] = useState("");
+   178→  const [editForm, setEditForm] = useState({
+   179→    garmentPiece: "",
+   180→    deadline: "",
+   181→    priority: "",
+   182→    instructions: "",
+   183→  });
+   184→
+   185→  // Progress & checklist state
+   186→  const [progressInput, setProgressInput] = useState("");
+   187→  const [progressNote, setProgressNote] = useState("");
+   188→  const [stageChanges, setStageChanges] = useState<Record<string, StageState>>({});
+   189→  const [stageComment, setStageComment] = useState("");
+   190→
+   191→  // Comments & history state
+   192→  const [commentText, setCommentText] = useState("");
+   193→  const [historyTab, setHistoryTab] = useState<HistoryTab>("all");
+   194→
+   195→  // Staff options for the assign dialog (supervisors only).
+   196→  const [staff, setStaff] = useState<UserRecord[]>([]);
+   197→
+   198→  // Reset transient state when switching to another task.
+   199→  useEffect(() => {
+   200→    setStageChanges({});
+   201→    setStageComment("");
+   202→    setProgressInput("");
+   203→    setProgressNote("");
+   204→    setCommentText("");
+   205→    setHistoryTab("all");
+   206→    setDialog(null);
+   207→  }, [taskId]);
+   208→
+   209→  const load = useCallback(
+   210→    async (silent = false) => {
+   211→      if (!taskId) return;
+   212→      if (!silent) setLoading(true);
+   213→      try {
+   214→        const res = await api.get<TaskDetail>(`/api/atelier/tasks/${taskId}`);
+   215→        setDetail(res);
+   216→        setFatal(null);
+   217→        setFetchError(null);
+   218→      } catch (e) {
+   219→        if (e instanceof ApiClientError && (e.status === 403 || e.status === 404)) {
+   220→          setFatal(e.message);
+   221→        } else {
+   222→          setFetchError(e instanceof Error ? e.message : "Failed to load task.");
+   223→        }
+   224→      } finally {
+   225→        if (!silent) setLoading(false);
+   226→      }
+   227→    },
+   228→    [taskId]
+   229→  );
+   230→
+   231→  useEffect(() => {
+   232→    load();
+   233→  }, [load]);
+   234→
+   235→  // ---- Derived values (hooks must run before any early return) ------------------
+   236→
+   237→  const stages = useMemo(() => {
+   238→    return [...(detail?.stages ?? [])].sort((a, b) => a.sortOrder - b.sortOrder);
+   239→  }, [detail]);
+   240→
+   241→  const history: HistoryEntry[] = useMemo(() => {
+   242→    if (!detail) return [];
+   243→    const entries: HistoryEntry[] = [];
+   244→    for (const a of detail.assignments) {
+   245→      entries.push({
+   246→        id: a.id,
+   247→        kind: "assignment",
+   248→        createdAt: a.createdAt,
+   249→        userName: a.assignedByName,
+   250→        text:
+   251→          a.type === "REASSIGN"
+   252→            ? `reassigned the task to ${a.staffName}`
+   253→            : `assigned the task to ${a.staffName}`,
+   254→        detail: a.note,
+   255→        icon: UserPlus,
+   256→        iconClass: "bg-teal-50 text-teal-700",
+   257→      });
+   258→    }
+   259→    for (const s of detail.statusChanges) {
+   260→      entries.push({
+   261→        id: s.id,
+   262→        kind: "status",
+   263→        createdAt: s.createdAt,
+   264→        userName: s.userName,
+   265→        text: `changed status from ${statusLabel(s.fromStatus)} to ${statusLabel(s.toStatus)}`,
+   266→        detail: s.reason,
+   267→        icon: ArrowRightLeft,
+   268→        iconClass: "bg-amber-50 text-amber-700",
+   269→      });
+   270→    }
+   271→    for (const s of detail.stageUpdates) {
+   272→      entries.push({
+   273→        id: s.id,
+   274→        kind: "stage",
+   275→        createdAt: s.createdAt,
+   276→        userName: s.userName,
+   277→        text: `${s.stageName}: ${stageLabel(s.previousState)} → ${stageLabel(s.newState)}`,
+   278→        detail: s.comment,
+   279→        icon: ListChecks,
+   280→        iconClass: "bg-stone-100 text-stone-600",
+   281→      });
+   282→    }
+   283→    for (const p of detail.progressHistory) {
+   284→      entries.push({
+   285→        id: p.id,
+   286→        kind: "progress",
+   287→        createdAt: p.createdAt,
+   288→        userName: p.userName,
+   289→        text: `updated progress ${p.previousProgress}% → ${p.newProgress}%`,
+   290→        detail: p.note,
+   291→        badge: p.source,
+   292→        icon: TrendingUp,
+   293→        iconClass: "bg-emerald-50 text-emerald-700",
+   294→      });
+   295→    }
+   296→    for (const i of detail.inspections) {
+   297→      entries.push({
+   298→        id: i.id,
+   299→        kind: "inspection",
+   300→        createdAt: i.createdAt,
+   301→        userName: i.inspectorName,
+   302→        text: `inspection decision — ${INSPECTION_DECISION_LABELS[i.decision as never] ?? i.decision}`,
+   303→        detail: i.comments,
+   304→        icon: ShieldCheck,
+   305→        iconClass:
+   306→          i.decision === "APPROVED"
+   307→            ? "bg-emerald-50 text-emerald-700"
+   308→            : i.decision === "CHANGES_REQUESTED"
+   309→              ? "bg-amber-50 text-amber-700"
+   310→              : "bg-stone-100 text-stone-600",
+   311→      });
+   312→    }
+   313→    for (const c of detail.comments) {
+   314→      entries.push({
+   315→        id: c.id,
+   316→        kind: "comment",
+   317→        createdAt: c.createdAt,
+   318→        userName: c.userName,
+   319→        text: c.isIssue ? "reported an issue" : "added a note",
+   320→        detail: c.message,
+   321→        icon: MessageSquare,
+   322→        iconClass: c.isIssue ? "bg-red-50 text-red-700" : "bg-stone-100 text-stone-600",
+   323→      });
+   324→    }
+   325→    return entries.sort(
+   326→      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+   327→    );
+   328→  }, [detail]);
+   329→
+   330→  const url = taskId ? `/api/atelier/tasks/${taskId}` : "";
+   331→
+   332→  /** Run a workflow mutation, refresh the detail and toast the outcome. */
+   333→  const runAction = useCallback(
+   334→    async (label: string, fn: () => Promise<unknown>) => {
+   335→      setBusy(true);
+   336→      try {
+   337→        await fn();
+   338→        await load(true);
+   339→        setDialog(null);
+   340→        toast({ title: label });
+   341→      } catch (e) {
+   342→        toast({
+   343→          title: "Action failed",
+   344→          description: e instanceof Error ? e.message : "Unexpected error.",
+   345→          variant: "destructive",
+   346→        });
+   347→      } finally {
+   348→        setBusy(false);
+   349→      }
+   350→    },
+   351→    [load, toast]
+   352→  );
+   353→
+   354→  function openDialog(kind: Exclude<DialogKind, null>) {
+   355→    if (!detail) return;
+   356→    // Never prefill the current assignee — the server rejects no-op assignments.
+   357→    setStaffId("");
+   358→    setNote("");
+   359→    setReason("");
+   360→    setComments("");
+   361→    if (kind === "edit") {
+   362→      setEditForm({
+   363→        garmentPiece: detail.task.garmentPiece,
+   364→        deadline: toDatetimeLocal(detail.task.deadline),
+   365→        priority: detail.task.priority,
+   366→        instructions: detail.task.instructions ?? "",
+   367→      });
+   368→    }
+   369→    setDialog(kind);
+   370→    if (kind === "assign" && isSupervisor(user) && staff.length === 0) {
+   371→      api
+   372→        .get<{ users: UserRecord[] }>("/api/atelier/users?role=STAFF")
+   373→        .then((res) => setStaff(res.users.filter((u) => u.isActive)))
+   374→        .catch(() => {
+   375→          // Options stay empty; assignment can be retried later.
+   376→        });
+   377→    }
+   378→  }
+   379→
+   380→  // ---- Guards ------------------------------------------------------------------
+   381→
+   382→  if (!taskId) {
+   383→    return (
+   384→      <EmptyState
+   385→        title="No task selected"
+   386→        description="Open a task from the production board to see its details."
+   387→        action={
+   388→          <Button variant="outline" size="sm" onClick={() => navigate("tasks")}>
+   389→            <ArrowLeft className="size-4" />
+   390→            Go to tasks
+   391→          </Button>
+   392→        }
+   393→      />
+   394→    );
+   395→  }
+   396→
+   397→  if (fatal) {
+   398→    return (
+   399→      <EmptyState
+   400→        icon={AlertTriangle}
+   401→        title="Task unavailable"
+   402→        description={fatal}
+   403→        action={
+   404→          <Button variant="outline" size="sm" onClick={() => navigate("tasks")}>
+   405→            <ArrowLeft className="size-4" />
+   406→            Back to tasks
+   407→          </Button>
+   408→        }
+   409→      />
+   410→    );
+   411→  }
+   412→
+   413→  if (loading && !detail) {
+   414→    return (
+   415→      <div className="space-y-4">
+   416→        <Skeleton className="h-8 w-36" />
+   417→        <Skeleton className="h-10 w-2/3" />
+   418→        <Skeleton className="h-6 w-1/2" />
+   419→        <div className="grid lg:grid-cols-3 gap-4">
+   420→          <div className="lg:col-span-2 space-y-4">
+   421→            <Skeleton className="h-80" />
+   422→            <Skeleton className="h-64" />
+   423→          </div>
+   424→          <div className="space-y-4">
+   425→            <Skeleton className="h-72" />
+   426→            <Skeleton className="h-56" />
+   427→          </div>
+   428→        </div>
+   429→      </div>
+   430→    );
+   431→  }
+   432→
+   433→  if (!detail) {
+   434→    return (
+   435→      <EmptyState
+   436→        icon={AlertTriangle}
+   437→        title="Could not load task"
+   438→        description={fetchError ?? "Unknown error."}
+   439→        action={
+   440→          <Button variant="outline" size="sm" onClick={() => load()}>
+   441→            Retry
+   442→          </Button>
+   443→        }
+   444→      />
+   445→    );
+   446→  }
+   447→
+   448→  // ---- Derived values ------------------------------------------------------------
+   449→
+   450→  const task = detail.task;
+   451→  const supervisor = isSupervisor(user);
+   452→  const isAssignee = !!user && task.assignedStaffId === user.id;
+   453→  const terminal = task.status === "DELIVERED" || task.status === "CANCELLED";
+   454→  const inWork = WORK_STATUSES.includes(task.status);
+   455→
+   456→  const mayUpdateProgress = (supervisor || isAssignee) && inWork;
+   457→  const mayEditChecklist =
+   458→    (supervisor && !terminal) || (isAssignee && inWork);
+   459→  const mayComment = (supervisor || isAssignee) && !terminal;
+   460→
+   461→  const canAssign = supervisor && !terminal;
+   462→  const canEdit = supervisor && !terminal;
+   463→  const canSubmit = (supervisor || isAssignee) && inWork;
+   464→  const staffSubmitBlocked = isAssignee && !supervisor && task.progress < 100;
+   465→  const canInspect = supervisor && task.status === "AWAITING_INSPECTION";
+   466→  const canReady = supervisor && task.status === "APPROVED";
+   467→  const canDeliver = supervisor && task.status === "READY_FOR_PICKUP";
+   468→  const canReopen = supervisor && (task.status === "APPROVED" || task.status === "READY_FOR_PICKUP");
+   469→  const canBlock = (supervisor || isAssignee) && inWork;
+   470→  const canUnblock = (supervisor || isAssignee) && task.status === "BLOCKED";
+   471→  const canCancel = supervisor && !terminal;
+   472→  const noActions =
+   473→    !canAssign &&
+   474→    !canEdit &&
+   475→    !canSubmit &&
+   476→    !canInspect &&
+   477→    !canReady &&
+   478→    !canDeliver &&
+   479→    !canReopen &&
+   480→    !canBlock &&
+   481→    !canUnblock &&
+   482→    !canCancel;
+   483→
+   484→  const hasWeights = stages.some((s) => s.weight > 1);
+   485→  const changesCount = Object.keys(stageChanges).length;
+   486→
+   487→  const progressValue = Number(progressInput);
+   488→  const progressValid =
+   489→    progressInput !== "" &&
+   490→    Number.isInteger(progressValue) &&
+   491→    progressValue >= 0 &&
+   492→    progressValue <= 100 &&
+   493→    progressValue !== task.progress;
+   494→
+   495→  // ---- History timeline filter ------------------------------------------------------------
+   496→
+   497→  const filteredHistory =
+   498→    historyTab === "all"
+   499→      ? history
+   500→      : history.filter((e) => {
+   501→          if (historyTab === "progress") return e.kind === "progress";
+   502→          if (historyTab === "checklist") return e.kind === "stage";
+   503→          if (historyTab === "status") return e.kind === "status";
+   504→          return e.kind === "inspection";
+   505→        });
+   506→
+   507→  // ---- Mutations ---------------------------------------------------------------------
+   508→
+   509→  function requireStaff() {
+   510→    if (!staffId) {
+   511→      toast({
+   512→        title: "Select a staff member",
+   513→        description: "Choose the account responsible for this garment piece.",
+   514→        variant: "destructive",
+   515→      });
+   516→      return false;
+   517→    }
+   518→    return true;
+   519→  }
+   520→
+   521→  function requireReason(field: string, min = 3) {
+   522→    if (reason.trim().length < min) {
+   523→      toast({
+   524→        title: "A reason is required",
+   525→        description: `Provide ${field} (at least ${min} characters).`,
+   526→        variant: "destructive",
+   527→      });
+   528→      return false;
+   529→    }
+   530→    return true;
+   531→  }
+   532→
+   533→  const doAssign = () => {
+   534→    if (!requireStaff()) return;
+   535→    const target = staff.find((s) => s.id === staffId);
+   536→    runAction(
+   537→      `${task.assignedStaffId ? "Reassigned" : "Assigned"} to ${target?.name ?? "staff member"}`,
+   538→      () =>
+   539→        api.patch(url, {
+   540→          action: "ASSIGN",
+   541→          staffId,
+   542→          note: note.trim() || undefined,
+   543→        })
+   544→    );
+   545→  };
+   546→
+   547→  const doEdit = () => {
+   548→    const piece = editForm.garmentPiece.trim();
+   549→    if (!piece) {
+   550→      toast({ title: "Garment piece name is required", variant: "destructive" });
+   551→      return;
+   552→    }
+   553→    const body: Record<string, unknown> = { action: "UPDATE" };
+   554→    const deadlineIso = editForm.deadline ? new Date(editForm.deadline).toISOString() : null;
+   555→    if (deadlineIso !== task.deadline) body.deadline = deadlineIso;
+   556→    if (editForm.priority !== task.priority) body.priority = editForm.priority;
+   557→    if (editForm.instructions.trim() !== (task.instructions ?? "")) {
+   558→      body.instructions = editForm.instructions.trim();
+   559→    }
+   560→    if (piece !== task.garmentPiece) body.garmentPiece = piece;
+   561→    if (Object.keys(body).length === 1) {
+   562→      toast({ title: "Nothing to update", description: "No field was changed." });
+   563→      return;
+   564→    }
+   565→    runAction("Task details updated", () => api.patch(url, body));
+   566→  };
+   567→
+   568→  const doSubmit = () => {
+   569→    runAction("Submitted for inspection", () =>
+   570→      api.patch(url, { action: "SUBMIT", note: note.trim() || undefined })
+   571→    );
+   572→  };
+   573→
+   574→  const doApprove = () => {
+   575→    runAction("Inspection approved", () =>
+   576→      api.patch(url, {
+   577→        action: "INSPECT",
+   578→        decision: "APPROVED",
+   579→        comments: comments.trim() || undefined,
+   580→      })
+   581→    );
+   582→  };
+   583→
+   584→  const doRequestChanges = () => {
+   585→    if (comments.trim().length < 3) {
+   586→      toast({
+   587→        title: "Correction instructions required",
+   588→        description: "Describe what needs to be corrected (at least 3 characters).",
+   589→        variant: "destructive",
+   590→      });
+   591→      return;
+   592→    }
+   593→    runAction("Corrections requested", () =>
+   594→      api.patch(url, {
+   595→        action: "INSPECT",
+   596→        decision: "CHANGES_REQUESTED",
+   597→        comments: comments.trim(),
+   598→      })
+   599→    );
+   600→  };
+   601→
+   602→  const doReady = () => {
+   603→    runAction("Marked ready for pickup", () => api.patch(url, { action: "READY" }));
+   604→  };
+   605→
+   606→  const doDeliver = () => {
+   607→    runAction("Marked as delivered/collected", () =>
+   608→      api.patch(url, { action: "DELIVER", note: note.trim() || undefined })
+   609→    );
+   610→  };
+   611→
+   612→  const doReopen = () => {
+   613→    if (comments.trim().length < 3) {
+   614→      toast({
+   615→        title: "Comments are required",
+   616→        description: "Explain why this task is being reopened (at least 3 characters).",
+   617→        variant: "destructive",
+   618→      });
+   619→      return;
+   620→    }
+   621→    runAction("Task reopened", () =>
+   622→      api.patch(url, { action: "INSPECT", decision: "REOPENED", comments: comments.trim() })
+   623→    );
+   624→  };
+   625→
+   626→  const doBlock = () => {
+   627→    if (!requireReason("the reason production is blocked")) return;
+   628→    runAction("Task blocked", () => api.patch(url, { action: "BLOCK", reason: reason.trim() }));
+   629→  };
+   630→
+   631→  const doUnblock = () => {
+   632→    runAction("Task unblocked", () =>
+   633→      api.patch(url, { action: "UNBLOCK", note: note.trim() || undefined })
+   634→    );
+   635→  };
+   636→
+   637→  const doCancel = () => {
+   638→    if (!requireReason("the cancellation reason")) return;
+   639→    runAction("Task cancelled", () => api.patch(url, { action: "CANCEL", reason: reason.trim() }));
+   640→  };
+   641→
+   642→  const doProgressUpdate = async () => {
+   643→    if (!progressValid) return;
+   644→    setBusy(true);
+   645→    try {
+   646→      await api.post(`${url}/progress`, {
+   647→        progress: progressValue,
+   648→        note: progressNote.trim() || null,
+   649→      });
+   650→      setProgressInput("");
+   651→      setProgressNote("");
+   652→      await load(true);
+   653→      toast({ title: `Progress updated to ${progressValue}%` });
+   654→    } catch (e) {
+   655→      toast({
+   656→        title: "Could not update progress",
+   657→        description: e instanceof Error ? e.message : "Unexpected error.",
+   658→        variant: "destructive",
+   659→      });
+   660→    } finally {
+   661→      setBusy(false);
+   662→    }
+   663→  };
+   664→
+   665→  const saveChecklist = async () => {
+   666→    const updates = Object.entries(stageChanges).map(([stageId, state]) => ({
+   667→      stageId,
+   668→      state,
+   669→      comment: stageComment.trim() || null,
+   670→    }));
+   671→    if (updates.length === 0) return;
+   672→    setBusy(true);
+   673→    try {
+   674→      await api.post(`${url}/stages`, { updates });
+   675→      setStageChanges({});
+   676→      setStageComment("");
+   677→      await load(true);
+   678→      toast({
+   679→        title: "Checklist updated",
+   680→        description: "Progress was recalculated from the completed stages.",
+   681→      });
+   682→    } catch (e) {
+   683→      toast({
+   684→        title: "Could not save checklist",
+   685→        description: e instanceof Error ? e.message : "Unexpected error.",
+   686→        variant: "destructive",
+   687→      });
+   688→    } finally {
+   689→      setBusy(false);
+   690→    }
+   691→  };
+   692→
+   693→  const postComment = async (isIssue: boolean) => {
+   694→    const message = commentText.trim();
+   695→    if (!message) {
+   696→      toast({
+   697→        title: "Write a message first",
+   698→        description: isIssue ? "Describe the problem you encountered." : "Type a note before sending.",
+   699→        variant: "destructive",
+   700→      });
+   701→      return;
+   702→    }
+   703→    setBusy(true);
+   704→    try {
+   705→      await api.post(`${url}/comments`, { message, isIssue });
+   706→      setCommentText("");
+   707→      await load(true);
+   708→      toast({
+   709→        title: isIssue ? "Issue reported" : "Note added",
+   710→        description: isIssue ? "Management has been notified." : undefined,
+   711→      });
+   712→    } catch (e) {
+   713→      toast({
+   714→        title: "Could not add comment",
+   715→        description: e instanceof Error ? e.message : "Unexpected error.",
+   716→        variant: "destructive",
+   717→      });
+   718→    } finally {
+   719→      setBusy(false);
+   720→    }
+   721→  };
+   722→
+   723→  const dialogOpen = (kind: Exclude<DialogKind, null>) => dialog === kind;
+   724→  const closeDialog = (open: boolean) => {
+   725→    if (!open && !busy) setDialog(null);
+   726→  };
+   727→
+   728→  // ---- Render ---------------------------------------------------------------------
+   729→
+   730→  return (
+   731→    <div>
+   732→      <Button variant="ghost" size="sm" className="-ml-2 mb-2" onClick={() => navigate("tasks")}>
+   733→        <ArrowLeft className="size-4" />
+   734→        Back to tasks
+   735→      </Button>
+   736→
+   737→      {/* ---- Header ---- */}
+   738→      <div className="mb-4">
+   739→        <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-3">
+   740→          <div className="min-w-0">
+   741→            <h1 className="font-display text-2xl font-bold tracking-tight truncate">
+   742→              {task.code} — {task.garmentPiece}
+   743→            </h1>
+   744→            <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 mt-1.5 text-sm text-muted-foreground">
+   745→              <span>
+   746→                {task.orderNumber} · {task.customerName}
+   747→              </span>
+   748→              <span>
+   749→                Assignee:{" "}
+   750→                <span className="text-foreground font-medium">
+   751→                  {task.assignedStaffName ?? "Unassigned"}
+   752→                </span>
+   753→              </span>
+   754→              <DueDate deadline={task.deadline} overdue={task.overdue} />
+   755→              <span>Created {formatDate(task.createdAt)}</span>
+   756→            </div>
+   757→          </div>
+   758→          <div className="flex flex-wrap gap-1.5 shrink-0">
+   759→            <StatusBadge status={task.status} />
+   760→            <PriorityBadge priority={task.priority} />
+   761→            <CategoryBadge category={task.category} />
+   762→          </div>
+   763→        </div>
+   764→
+   765→        {task.status === "BLOCKED" && task.blockedReason && (
+   766→          <Alert variant="destructive" className="mt-3">
+   767→            <AlertTriangle />
+   768→            <AlertTitle>Task blocked</AlertTitle>
+   769→            <AlertDescription className="text-destructive/90">
+   770→              {task.blockedReason}
+   771→            </AlertDescription>
+   772→          </Alert>
+   773→        )}
+   774→        {task.status === "CANCELLED" && (
+   775→          <Alert className="mt-3 border-stone-300 bg-stone-50 text-stone-700">
+   776→            <Ban />
+   777→            <AlertTitle>Task cancelled</AlertTitle>
+   778→            <AlertDescription className="text-stone-600">
+   779→              {task.cancelReason ?? "This task was cancelled."}
+   780→            </AlertDescription>
+   781→          </Alert>
+   782→        )}
+   783→        {task.status === "CHANGES_REQUESTED" && (
+   784→          <Alert className="mt-3 border-amber-300 bg-amber-50 text-amber-800">
+   785→            <AlertTriangle />
+   786→            <AlertTitle>Corrections requested</AlertTitle>
+   787→            <AlertDescription className="text-amber-700">
+   788→              Corrections were requested — see inspection history below for details.
+   789→            </AlertDescription>
+   790→          </Alert>
+   791→        )}
+   792→      </div>
+   793→
+   794→      <div className="grid lg:grid-cols-3 gap-4">
+   795→        {/* ---- Progress & checklist (left) ---- */}
+   796→        <SectionCard title="Progress & Checklist" className="lg:col-span-2">
+   797→          <div className="space-y-4">
+   798→            <ProgressCell value={task.progress} status={task.status} />
+   799→            <p className="text-xs text-muted-foreground -mt-2">
+   800→              Current progress: <span className="font-semibold">{task.progress}%</span>
+   801→            </p>
+   802→
+   803→            {mayUpdateProgress && (
+   804→              <div className="rounded-lg border bg-muted/30 p-3 space-y-2">
+   805→                <p className="text-sm font-medium">Update progress manually</p>
+   806→                <div className="flex flex-col sm:flex-row gap-2">
+   807→                  <Input
+   808→                    type="number"
+   809→                    min={0}
+   810→                    max={100}
+   811→                    step={1}
+   812→                    className="sm:w-28"
+   813→                    placeholder={`${task.progress}`}
+   814→                    value={progressInput}
+   815→                    onChange={(e) => setProgressInput(e.target.value)}
+   816→                    aria-label="New progress percentage"
+   817→                  />
+   818→                  <Input
+   819→                    className="flex-1"
+   820→                    placeholder="Optional note"
+   821→                    value={progressNote}
+   822→                    onChange={(e) => setProgressNote(e.target.value)}
+   823→                    aria-label="Progress note"
+   824→                  />
+   825→                  <Button disabled={!progressValid || busy} onClick={doProgressUpdate}>
+   826→                    Update
+   827→                  </Button>
+   828→                </div>
+   829→                {supervisor && (
+   830→                  <p className="text-xs text-muted-foreground">
+   831→                    Supervisor correction — manual values are recorded in the history with source
+   832→                    &quot;MANUAL&quot;.
+   833→                  </p>
+   834→                )}
+   835→              </div>
+   836→            )}
+   837→
+   838→            <Separator />
+   839→
+   840→            <div>
+   841→              <div className="flex items-center justify-between gap-2">
+   842→                <p className="text-sm font-medium">Production checklist</p>
+   843→                {changesCount > 0 && (
+   844→                  <Badge variant="outline" className="border-amber-300 bg-amber-50 text-amber-800">
+   845→                    {changesCount} pending change{changesCount === 1 ? "" : "s"}
+   846→                  </Badge>
+   847→                )}
+   848→              </div>
+   849→              <p className="text-xs text-muted-foreground mt-0.5">
+   850→                Progress is recalculated from completed stages (in-progress counts half
+   851→                {hasWeights ? "; heavier stages count proportionally more" : ""}).
+   852→              </p>
+   853→
+   854→              <div className="mt-2 divide-y rounded-lg border">
+   855→                {stages.length === 0 ? (
+   856→                  <EmptyState
+   857→                    icon={Inbox}
+   858→                    title="No checklist stages"
+   859→                    description="No production stages apply to this task category."
+   860→                  />
+   861→                ) : (
+   862→                  stages.map((s) => {
+   863→                    const pending = stageChanges[s.id];
+   864→                    const effective = pending ?? s.state;
+   865→                    return (
+   866→                      <div
+   867→                        key={s.id}
+   868→                        className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-4 py-3"
+   869→                      >
+   870→                        <div className="min-w-0">
+   871→                          <p className="text-sm font-medium flex items-center gap-2 flex-wrap">
+   872→                            {s.name}
+   873→                            {s.weight > 1 && (
+   874→                              <Badge variant="secondary" className="text-xs">
+   875→                                weight ×{s.weight}
+   876→                              </Badge>
+   877→                            )}
+   878→                          </p>
+   879→                          <div className="mt-1 flex items-center gap-2">
+   880→                            <StageStateChip state={effective} />
+   881→                            {pending && pending !== s.state && (
+   882→                              <span className="text-xs text-amber-700">was {stageLabel(s.state)}</span>
+   883→                            )}
+   884→                          </div>
+   885→                        </div>
+   886→                        {mayEditChecklist ? (
+   887→                          <div className="flex flex-wrap gap-1 shrink-0" role="group" aria-label={`State for ${s.name}`}>
+   888→                            {STAGE_STATE_OPTIONS.map((o) => {
+   889→                              const active = effective === o.value;
+   890→                              return (
+   891→                                <button
+   892→                                  key={o.value}
+   893→                                  type="button"
+   894→                                  aria-pressed={active}
+   895→                                  aria-label={`Set ${s.name} to ${o.label}`}
+   896→                                  onClick={() =>
+   897→                                    setStageChanges((prev) => {
+   898→                                      const next = { ...prev };
+   899→                                      if (o.value === s.state) {
+   900→                                        // Clicking the saved state reverts any pending change.
+   901→                                        delete next[s.id];
+   902→                                      } else {
+   903→                                        next[s.id] = o.value;
+   904→                                      }
+   905→                                      return next;
+   906→                                    })
+   907→                                  }
+   908→                                  className={cn(
+   909→                                    "h-8 px-2.5 rounded-md text-xs font-medium border transition-colors",
+   910→                                    active
+   911→                                      ? "bg-primary text-primary-foreground border-primary"
+   912→                                      : "bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground"
+   913→                                  )}
+   914→                                >
+   915→                                  {o.label}
+   916→                                </button>
+   917→                              );
+   918→                            })}
+   919→                          </div>
+   920→                        ) : null}
+   921→                      </div>
+   922→                    );
+   923→                  })
+   924→                )}
+   925→              </div>
+   926→
+   927→              {mayEditChecklist && stages.length > 0 && (
+   928→                <div className="mt-3 space-y-2">
+   929→                  <Input
+   930→                    placeholder="Optional comment attached to the next checklist save"
+   931→                    value={stageComment}
+   932→                    onChange={(e) => setStageComment(e.target.value)}
+   933→                    aria-label="Checklist save comment"
+   934→                  />
+   935→                  <div className="flex justify-end">
+   936→                    <Button
+   937→                      size="sm"
+   938→                      disabled={changesCount === 0 || busy}
+   939→                      onClick={saveChecklist}
+   940→                    >
+   941→                      {busy ? (
+   942→                        <Loader2 className="size-4 animate-spin" />
+   943→                      ) : (
+   944→                        <Save className="size-4" />
+   945→                      )}
+   946→                      Save Checklist{changesCount > 0 ? ` (${changesCount})` : ""}
+   947→                    </Button>
+   948→                  </div>
+   949→                </div>
+   950→              )}
+   951→            </div>
+   952→          </div>
+   953→        </SectionCard>
+   954→
+   955→        {/* ---- Actions (right) ---- */}
+   956→        <SectionCard title="Workflow Actions">
+   957→          <div className="space-y-2">
+   958→            {canSubmit && (
+   959→              <div>
+   960→                <Button
+   961→                  className="w-full"
+   962→                  disabled={busy || staffSubmitBlocked}
+   963→                  onClick={() => openDialog("submit")}
+   964→                >
+   965→                  <ClipboardCheck className="size-4" />
+   966→                  Submit for Inspection
+   967→                </Button>
+   968→                {staffSubmitBlocked && (
+   969→                  <p className="text-xs text-muted-foreground mt-1">
+   970→                    Reach 100% progress first.
+   971→                  </p>
+   972→                )}
+   973→              </div>
+   974→            )}
+   975→            {canInspect && (
+   976→              <Button className="w-full" disabled={busy} onClick={() => openDialog("inspect")}>
+   977→                <ShieldCheck className="size-4" />
+   978→                Inspect Result
+   979→              </Button>
+   980→            )}
+   981→            {canReady && (
+   982→              <Button className="w-full" disabled={busy} onClick={doReady}>
+   983→                <ShoppingBag className="size-4" />
+   984→                Mark Ready for Pickup
+   985→              </Button>
+   986→            )}
+   987→            {canDeliver && (
+   988→              <Button className="w-full" disabled={busy} onClick={() => openDialog("deliver")}>
+   989→                <Truck className="size-4" />
+   990→                Mark Delivered/Collected
+   991→              </Button>
+   992→            )}
+   993→
+   994→            {(canAssign || canEdit) && <Separator className="my-3" />}
+   995→
+   996→            {canAssign && (
+   997→              <Button
+   998→                variant="outline"
+   999→                className="w-full"
+  1000→                disabled={busy}
+  1001→                onClick={() => openDialog("assign")}
+  1002→              >
+  1003→                <UserPlus className="size-4" />
+  1004→                {task.assignedStaffId ? "Reassign Staff" : "Assign Staff"}
+  1005→              </Button>
+  1006→            )}
+  1007→            {canEdit && (
+  1008→              <Button
+  1009→                variant="outline"
+  1010→                className="w-full"
+  1011→                disabled={busy}
+  1012→                onClick={() => openDialog("edit")}
+  1013→              >
+  1014→                <Pencil className="size-4" />
+  1015→                Edit Details
+  1016→              </Button>
+  1017→            )}
+  1018→
+  1019→            {(canBlock || canUnblock || canReopen || canCancel) && <Separator className="my-3" />}
+  1020→
+  1021→            {canBlock && (
+  1022→              <Button
+  1023→                variant="outline"
+  1024→                className="w-full border-amber-300 text-amber-800 hover:bg-amber-50 hover:text-amber-900"
+  1025→                disabled={busy}
+  1026→                onClick={() => openDialog("block")}
+  1027→              >
+  1028→                <Ban className="size-4" />
+  1029→                Block Task
+  1030→              </Button>
+  1031→            )}
+  1032→            {canUnblock && (
+  1033→              <Button
+  1034→                variant="outline"
+  1035→                className="w-full"
+  1036→                disabled={busy}
+  1037→                onClick={() => openDialog("unblock")}
+  1038→              >
+  1039→                <RotateCcw className="size-4" />
+  1040→                Unblock Task
+  1041→              </Button>
+  1042→            )}
+  1043→            {canReopen && (
+  1044→              <Button
+  1045→                variant="outline"
+  1046→                className="w-full"
+  1047→                disabled={busy}
+  1048→                onClick={() => openDialog("reopen")}
+  1049→              >
+  1050→                <Undo2 className="size-4" />
+  1051→                Reopen Task
+  1052→              </Button>
+  1053→            )}
+  1054→            {canCancel && (
+  1055→              <Button
+  1056→                variant="outline"
+  1057→                className="w-full border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive"
+  1058→                disabled={busy}
+  1059→                onClick={() => openDialog("cancel")}
+  1060→              >
+  1061→                <XCircle className="size-4" />
+  1062→                Cancel Task
+  1063→              </Button>
+  1064→            )}
+  1065→
+  1066→            {noActions && (
+  1067→              <p className="text-sm text-muted-foreground">
+  1068→                No actions available for this task{terminal ? " — it is closed." : ""}
+  1069→              </p>
+  1070→            )}
+  1071→          </div>
+  1072→        </SectionCard>
+  1073→
+  1074→        {/* ---- Comments & issues (left) ---- */}
+  1075→        <SectionCard
+  1076→          title="Comments & Issues"
+  1077→          className="lg:col-span-2"
+  1078→          action={
+  1079→            <span className="text-xs text-muted-foreground">
+  1080→              {detail.comments.length} total
+  1081→            </span>
+  1082→          }
+  1083→        >
+  1084→          <div className="space-y-4">
+  1085→            {detail.comments.length === 0 ? (
+  1086→              <EmptyState
+  1087→                icon={MessageSquare}
+  1088→                title="No notes yet"
+  1089→                description="Production notes and reported issues will appear here."
+  1090→              />
+  1091→            ) : (
+  1092→              <ScrollArea className="max-h-96 -mx-1 px-1">
+  1093→                <div className="space-y-3">
+  1094→                  {detail.comments.map((c) => (
+  1095→                    <div
+  1096→                      key={c.id}
+  1097→                      className={cn(
+  1098→                        "rounded-lg border p-3",
+  1099→                        c.isIssue ? "border-l-4 border-l-red-400 bg-red-50/50" : "bg-card"
+  1100→                      )}
+  1101→                    >
+  1102→                      <div className="flex items-center justify-between gap-2">
+  1103→                        <p className="text-sm font-medium flex items-center gap-1.5 min-w-0">
+  1104→                          {c.isIssue && <AlertTriangle className="size-3.5 text-red-600 shrink-0" />}
+  1105→                          <span className="truncate">{c.userName}</span>
+  1106→                        </p>
+  1107→                        <span
+  1108→                          className="text-xs text-muted-foreground shrink-0"
+  1109→                          title={formatDateTime(c.createdAt)}
+  1110→                        >
+  1111→                          {timeAgo(c.createdAt)}
+  1112→                        </span>
+  1113→                      </div>
+  1114→                      <p className="text-sm text-muted-foreground mt-1 whitespace-pre-wrap break-words">
+  1115→                        {c.message}
+  1116→                      </p>
+  1117→                    </div>
+  1118→                  ))}
+  1119→                </div>
+  1120→              </ScrollArea>
+  1121→            )}
+  1122→
+  1123→            {mayComment && (
+  1124→              <div className="space-y-2">
+  1125→                <Textarea
+  1126→                  placeholder="Write a production note or describe a problem..."
+  1127→                  value={commentText}
+  1128→                  onChange={(e) => setCommentText(e.target.value)}
+  1129→                  aria-label="New comment"
+  1130→                />
+  1131→                <div className="flex flex-col sm:flex-row sm:justify-end gap-2">
+  1132→                  <Button variant="outline" size="sm" disabled={busy} onClick={() => postComment(false)}>
+  1133→                    <MessageSquare className="size-4" />
+  1134→                    Add Note
+  1135→                  </Button>
+  1136→                  <Button
+  1137→                    variant="outline"
+  1138→                    size="sm"
+  1139→                    className="border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive"
+  1140→                    disabled={busy}
+  1141→                    onClick={() => postComment(true)}
+  1142→                  >
+  1143→                    <AlertTriangle className="size-4" />
+  1144→                    Report Issue
+  1145→                  </Button>
+  1146→                </div>
+  1147→              </div>
+  1148→            )}
+  1149→          </div>
+  1150→        </SectionCard>
+  1151→
+  1152→        {/* ---- Details (right) ---- */}
+  1153→        <SectionCard title="Task Details">
+  1154→          <div className="divide-y">
+  1155→            <MetaRow label="Order">
+  1156→              <span className="font-medium">
+  1157→                {task.orderNumber} — {task.customerName}
+  1158→              </span>
+  1159→            </MetaRow>
+  1160→            <MetaRow label="Garment piece">
+  1161→              <span className="font-medium">{task.garmentPiece}</span>
+  1162→            </MetaRow>
+  1163→            <MetaRow label="Assignee">
+  1164→              {task.assignedStaffName ?? <span className="text-muted-foreground">Unassigned</span>}
+  1165→            </MetaRow>
+  1166→            <MetaRow label="Category">
+  1167→              <CategoryBadge category={task.category} />
+  1168→            </MetaRow>
+  1169→            <MetaRow label="Priority">
+  1170→              <PriorityBadge priority={task.priority} />
+  1171→            </MetaRow>
+  1172→            <MetaRow label="Deadline">
+  1173→              <DueDate deadline={task.deadline} overdue={task.overdue} />
+  1174→            </MetaRow>
+  1175→            <MetaRow label="Created">{formatDate(task.createdAt)}</MetaRow>
+  1176→            <MetaRow label="Completed">
+  1177→              {task.completedAt ? formatDate(task.completedAt) : "—"}
+  1178→            </MetaRow>
+  1179→            <MetaRow label="Delivered">
+  1180→              {task.deliveredAt ? formatDate(task.deliveredAt) : "—"}
+  1181→            </MetaRow>
+  1182→          </div>
+  1183→          {task.instructions && (
+  1184→            <div className="mt-3">
+  1185→              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+  1186→                Instructions
+  1187→              </p>
+  1188→              <p className="text-sm mt-1 rounded-lg border bg-muted/30 p-3 whitespace-pre-wrap">
+  1189→                {task.instructions}
+  1190→              </p>
+  1191→            </div>
+  1192→          )}
+  1193→        </SectionCard>
+  1194→
+  1195→        {/* ---- History (full width) ---- */}
+  1196→        <SectionCard
+  1197→          title="History"
+  1198→          className="lg:col-span-3"
+  1199→          action={
+  1200→            <span className="text-xs text-muted-foreground">{history.length} events</span>
+  1201→          }
+  1202→        >
+  1203→          <Tabs value={historyTab} onValueChange={(v) => setHistoryTab(v as HistoryTab)}>
+  1204→            <TabsList className="flex-wrap h-auto">
+  1205→              <TabsTrigger value="all" className="h-8">
+  1206→                All
+  1207→              </TabsTrigger>
+  1208→              <TabsTrigger value="progress" className="h-8">
+  1209→                Progress
+  1210→              </TabsTrigger>
+  1211→              <TabsTrigger value="checklist" className="h-8">
+  1212→                Checklist
+  1213→              </TabsTrigger>
+  1214→              <TabsTrigger value="status" className="h-8">
+  1215→                Status
+  1216→              </TabsTrigger>
+  1217→              <TabsTrigger value="inspections" className="h-8">
+  1218→                Inspections
+  1219→              </TabsTrigger>
+  1220→            </TabsList>
+  1221→            <TabsContent value={historyTab} className="mt-2">
+  1222→              {filteredHistory.length === 0 ? (
+  1223→                <EmptyState icon={Inbox} title="No events recorded" />
+  1224→              ) : (
+  1225→                <ScrollArea className="max-h-96 rounded-lg border">
+  1226→                  <div className="divide-y px-4 py-1">
+  1227→                    {filteredHistory.map((e) => (
+  1228→                      <div key={e.id} className="flex gap-3 py-2.5">
+  1229→                        <div
+  1230→                          className={cn(
+  1231→                            "rounded-full p-1.5 shrink-0 mt-0.5",
+  1232→                            e.iconClass
+  1233→                          )}
+  1234→                        >
+  1235→                          <e.icon className="size-3.5" />
+  1236→                        </div>
+  1237→                        <div className="min-w-0 flex-1">
+  1238→                          <p className="text-sm leading-snug">
+  1239→                            <span className="font-medium">{e.userName}</span>{" "}
+  1240→                            <span className="text-muted-foreground">{e.text}</span>
+  1241→                            {e.badge && (
+  1242→                              <Badge
+  1243→                                variant="outline"
+  1244→                                className="ml-1.5 text-[10px] px-1.5 py-0 align-middle"
+  1245→                              >
+  1246→                                {e.badge}
+  1247→                              </Badge>
+  1248→                            )}
+  1249→                          </p>
+  1250→                          {e.detail && (
+  1251→                            <p className="text-xs text-muted-foreground mt-0.5 whitespace-pre-wrap break-words">
+  1252→                              {e.detail}
+  1253→                            </p>
+  1254→                          )}
+  1255→                          <p
+  1256→                            className="text-xs text-muted-foreground/80 mt-0.5"
+  1257→                            title={formatDateTime(e.createdAt)}
+  1258→                          >
+  1259→                            {timeAgo(e.createdAt)}
+  1260→                          </p>
+  1261→                        </div>
+  1262→                      </div>
+  1263→                    ))}
+  1264→                  </div>
+  1265→                </ScrollArea>
+  1266→              )}
+  1267→            </TabsContent>
+  1268→          </Tabs>
+  1269→        </SectionCard>
+  1270→      </div>
+  1271→
+  1272→      {/* ---- Dialogs ---- */}
+  1273→
+  1274→      {/* Assign / Reassign */}
+  1275→      <Dialog open={dialogOpen("assign")} onOpenChange={closeDialog}>
+  1276→        <DialogContent>
+  1277→          <DialogHeader>
+  1278→            <DialogTitle>{task.assignedStaffId ? "Reassign Task" : "Assign Task"}</DialogTitle>
+  1279→            <DialogDescription>
+  1280→              Select the staff member responsible for {task.garmentPiece} ({task.code}).
+  1281→            </DialogDescription>
+  1282→          </DialogHeader>
+  1283→          <div className="space-y-3">
+  1284→            <div className="space-y-1.5">
+  1285→              <Label>Staff member</Label>
+  1286→              <Select value={staffId} onValueChange={setStaffId}>
+  1287→                <SelectTrigger className="w-full">
+  1288→                  <SelectValue placeholder="Select staff member" />
+  1289→                </SelectTrigger>
+  1290→                <SelectContent>
+  1291→                  {staff.length === 0 && (
+  1292→                    <SelectItem value="loading" disabled>
+  1293→                      No staff accounts available
+  1294→                    </SelectItem>
+  1295→                  )}
+  1296→                  {staff.map((u) => (
+  1297→                    <SelectItem key={u.id} value={u.id} disabled={u.id === task.assignedStaffId}>
+  1298→                      {u.name}
+  1299→                      {u.activeTaskCount != null ? ` (${u.activeTaskCount} active)` : ""}
+  1300→                      {u.id === task.assignedStaffId ? " — current" : ""}
+  1301→                    </SelectItem>
+  1302→                  ))}
+  1303→                </SelectContent>
+  1304→              </Select>
+  1305→            </div>
+  1306→            <div className="space-y-1.5">
+  1307→              <Label htmlFor="assign-note">Note (optional)</Label>
+  1308→              <Input
+  1309→                id="assign-note"
+  1310→                placeholder="Note sent with the assignment notification"
+  1311→                value={note}
+  1312→                onChange={(e) => setNote(e.target.value)}
+  1313→              />
+  1314→            </div>
+  1315→          </div>
+  1316→          <DialogFooter>
+  1317→            <Button variant="outline" disabled={busy} onClick={() => setDialog(null)}>
+  1318→              Cancel
+  1319→            </Button>
+  1320→            <Button disabled={busy || !staffId} onClick={doAssign}>
+  1321→              {busy && <Loader2 className="size-4 animate-spin" />}
+  1322→              {task.assignedStaffId ? "Reassign" : "Assign"}
+  1323→            </Button>
+  1324→          </DialogFooter>
+  1325→        </DialogContent>
+  1326→      </Dialog>
+  1327→
+  1328→      {/* Edit details */}
+  1329→      <Dialog open={dialogOpen("edit")} onOpenChange={closeDialog}>
+  1330→        <DialogContent className="sm:max-w-lg">
+  1331→          <DialogHeader>
+  1332→            <DialogTitle>Edit Task Details</DialogTitle>
+  1333→            <DialogDescription>
+  1334→              Only the fields you change are submitted.
+  1335→            </DialogDescription>
+  1336→          </DialogHeader>
+  1337→          <div className="space-y-3">
+  1338→            <div className="space-y-1.5">
+  1339→              <Label htmlFor="edit-piece">Garment piece</Label>
+  1340→              <Input
+  1341→                id="edit-piece"
+  1342→                value={editForm.garmentPiece}
+  1343→                onChange={(e) => setEditForm((f) => ({ ...f, garmentPiece: e.target.value }))}
+  1344→              />
+  1345→            </div>
+  1346→            <div className="grid gap-3 sm:grid-cols-2">
+  1347→              <div className="space-y-1.5">
+  1348→                <Label htmlFor="edit-deadline">Deadline</Label>
+  1349→                <Input
+  1350→                  id="edit-deadline"
+  1351→                  type="datetime-local"
+  1352→                  value={editForm.deadline}
+  1353→                  onChange={(e) => setEditForm((f) => ({ ...f, deadline: e.target.value }))}
+  1354→                />
+  1355→              </div>
+  1356→              <div className="space-y-1.5">
+  1357→                <Label>Priority</Label>
+  1358→                <Select
+  1359→                  value={editForm.priority}
+  1360→                  onValueChange={(v) => setEditForm((f) => ({ ...f, priority: v }))}
+  1361→                >
+  1362→                  <SelectTrigger className="w-full">
+  1363→                    <SelectValue />
+  1364→                  </SelectTrigger>
+  1365→                  <SelectContent>
+  1366→                    {PRIORITIES.map((p) => (
+  1367→                      <SelectItem key={p} value={p}>
+  1368→                        {PRIORITY_LABELS[p]}
+  1369→                      </SelectItem>
+  1370→                    ))}
+  1371→                  </SelectContent>
+  1372→                </Select>
+  1373→              </div>
+  1374→            </div>
+  1375→            <div className="space-y-1.5">
+  1376→              <Label htmlFor="edit-instructions">Instructions</Label>
+  1377→              <Textarea
+  1378→                id="edit-instructions"
+  1379→                placeholder="Production instructions for this piece"
+  1380→                value={editForm.instructions}
+  1381→                onChange={(e) => setEditForm((f) => ({ ...f, instructions: e.target.value }))}
+  1382→              />
+  1383→            </div>
+  1384→          </div>
+  1385→          <DialogFooter>
+  1386→            <Button variant="outline" disabled={busy} onClick={() => setDialog(null)}>
+  1387→              Cancel
+  1388→            </Button>
+  1389→            <Button disabled={busy} onClick={doEdit}>
+  1390→              {busy && <Loader2 className="size-4 animate-spin" />}
+  1391→              Save Changes
+  1392→            </Button>
+  1393→          </DialogFooter>
+  1394→        </DialogContent>
+  1395→      </Dialog>
+  1396→
+  1397→      {/* Submit for inspection */}
+  1398→      <Dialog open={dialogOpen("submit")} onOpenChange={closeDialog}>
+  1399→        <DialogContent>
+  1400→          <DialogHeader>
+  1401→            <DialogTitle>Submit for Inspection</DialogTitle>
+  1402→            <DialogDescription>
+  1403→              {supervisor
+  1404→                ? "The task moves to Awaiting Inspection for quality control."
+  1405→                : "Your work will be reviewed by quality control. Make sure the checklist is complete."}
+  1406→            </DialogDescription>
+  1407→          </DialogHeader>
+  1408→          <div className="space-y-1.5">
+  1409→            <Label htmlFor="submit-note">Note (optional)</Label>
+  1410→            <Textarea
+  1411→              id="submit-note"
+  1412→              placeholder="Anything the inspector should know"
+  1413→              value={note}
+  1414→              onChange={(e) => setNote(e.target.value)}
+  1415→            />
+  1416→          </div>
+  1417→          <DialogFooter>
+  1418→            <Button variant="outline" disabled={busy} onClick={() => setDialog(null)}>
+  1419→              Cancel
+  1420→            </Button>
+  1421→            <Button disabled={busy} onClick={doSubmit}>
+  1422→              {busy && <Loader2 className="size-4 animate-spin" />}
+  1423→              Submit
+  1424→            </Button>
+  1425→          </DialogFooter>
+  1426→        </DialogContent>
+  1427→      </Dialog>
+  1428→
+  1429→      {/* Inspect */}
+  1430→      <Dialog open={dialogOpen("inspect")} onOpenChange={closeDialog}>
+  1431→        <DialogContent>
+  1432→          <DialogHeader>
+  1433→            <DialogTitle>Quality Inspection</DialogTitle>
+  1434→            <DialogDescription>
+  1435→              Approve passes the garment to the pickup flow. Request changes returns it to the
+  1436→              worker with correction instructions.
+  1437→            </DialogDescription>
+  1438→          </DialogHeader>
+  1439→          <div className="space-y-1.5">
+  1440→            <Label htmlFor="inspect-comments">Inspection comments</Label>
+  1441→            <Textarea
+  1442→              id="inspect-comments"
+  1443→              placeholder={
+  1444→                "Required when requesting changes — describe the corrections needed"
+  1445→              }
+  1446→              value={comments}
+  1447→              onChange={(e) => setComments(e.target.value)}
+  1448→            />
+  1449→          </div>
+  1450→          <DialogFooter className="sm:justify-between">
+  1451→            <Button
+  1452→              variant="outline"
+  1453→              className="border-amber-300 text-amber-800 hover:bg-amber-50 hover:text-amber-900"
+  1454→              disabled={busy}
+  1455→              onClick={doRequestChanges}
+  1456→            >
+  1457→              Request Changes
+  1458→            </Button>
+  1459→            <Button disabled={busy} onClick={doApprove}>
+  1460→              {busy && <Loader2 className="size-4 animate-spin" />}
+  1461→              <ShieldCheck className="size-4" />
+  1462→              Approve
+  1463→            </Button>
+  1464→          </DialogFooter>
+  1465→        </DialogContent>
+  1466→      </Dialog>
+  1467→
+  1468→      {/* Deliver */}
+  1469→      <Dialog open={dialogOpen("deliver")} onOpenChange={closeDialog}>
+  1470→        <DialogContent>
+  1471→          <DialogHeader>
+  1472→            <DialogTitle>Mark Delivered/Collected</DialogTitle>
+  1473→            <DialogDescription>
+  1474→              Confirm that {task.customerName} collected {task.garmentPiece}.
+  1475→            </DialogDescription>
+  1476→          </DialogHeader>
+  1477→          <div className="space-y-1.5">
+  1478→            <Label htmlFor="deliver-note">Note (optional)</Label>
+  1479→            <Input
+  1480→              id="deliver-note"
+  1481→              placeholder="e.g. Collected by the customer in person"
+  1482→              value={note}
+  1483→              onChange={(e) => setNote(e.target.value)}
+  1484→            />
+  1485→          </div>
+  1486→          <DialogFooter>
+  1487→            <Button variant="outline" disabled={busy} onClick={() => setDialog(null)}>
+  1488→              Cancel
+  1489→            </Button>
+  1490→            <Button disabled={busy} onClick={doDeliver}>
+  1491→              {busy && <Loader2 className="size-4 animate-spin" />}
+  1492→              <Truck className="size-4" />
+  1493→              Mark Delivered
+  1494→            </Button>
+  1495→          </DialogFooter>
+  1496→        </DialogContent>
+  1497→      </Dialog>
+  1498→
+  1499→      {/* Reopen */}
+  1500→      <Dialog open={dialogOpen("reopen")} onOpenChange={closeDialog}>
+  1501→        <DialogContent>
+  1502→          <DialogHeader>
+  1503→            <DialogTitle>Reopen Task</DialogTitle>
+  1504→            <DialogDescription>
+  1505→              The task returns to Ongoing so production can resume. Comments are required.
+  1506→            </DialogDescription>
+  1507→          </DialogHeader>
+  1508→          <div className="space-y-1.5">
+  1509→            <Label htmlFor="reopen-comments">Comments</Label>
+  1510→            <Textarea
+  1511→              id="reopen-comments"
+  1512→              placeholder="Why is this task being reopened?"
+  1513→              value={comments}
+  1514→              onChange={(e) => setComments(e.target.value)}
+  1515→            />
+  1516→          </div>
+  1517→          <DialogFooter>
+  1518→            <Button variant="outline" disabled={busy} onClick={() => setDialog(null)}>
+  1519→              Cancel
+  1520→            </Button>
+  1521→            <Button disabled={busy} onClick={doReopen}>
+  1522→              {busy && <Loader2 className="size-4 animate-spin" />}
+  1523→              <Undo2 className="size-4" />
+  1524→              Reopen
+  1525→            </Button>
+  1526→          </DialogFooter>
+  1527→        </DialogContent>
+  1528→      </Dialog>
+  1529→
+  1530→      {/* Block */}
+  1531→      <Dialog open={dialogOpen("block")} onOpenChange={closeDialog}>
+  1532→        <DialogContent>
+  1533→          <DialogHeader>
+  1534→            <DialogTitle>Block Task</DialogTitle>
+  1535→            <DialogDescription>
+  1536→              Report what is blocking production. Management is notified immediately.
+  1537→            </DialogDescription>
+  1538→          </DialogHeader>
+  1539→          <div className="space-y-1.5">
+  1540→            <Label htmlFor="block-reason">Reason (required)</Label>
+  1541→            <Textarea
+  1542→              id="block-reason"
+  1543→              placeholder="e.g. Missing customer-provided fabric"
+  1544→              value={reason}
+  1545→              onChange={(e) => setReason(e.target.value)}
+  1546→            />
+  1547→          </div>
+  1548→          <DialogFooter>
+  1549→            <Button variant="outline" disabled={busy} onClick={() => setDialog(null)}>
+  1550→              Cancel
+  1551→            </Button>
+  1552→            <Button
+  1553→              className="bg-red-600 text-white hover:bg-red-700"
+  1554→              disabled={busy || reason.trim().length < 3}
+  1555→              onClick={doBlock}
+  1556→            >
+  1557→              {busy && <Loader2 className="size-4 animate-spin" />}
+  1558→              <Ban className="size-4" />
+  1559→              Block Task
+  1560→            </Button>
+  1561→          </DialogFooter>
+  1562→        </DialogContent>
+  1563→      </Dialog>
+  1564→
+  1565→      {/* Unblock */}
+  1566→      <Dialog open={dialogOpen("unblock")} onOpenChange={closeDialog}>
+  1567→        <DialogContent>
+  1568→          <DialogHeader>
+  1569→            <DialogTitle>Unblock Task</DialogTitle>
+  1570→            <DialogDescription>
+  1571→              The blocker is cleared and production can resume.
+  1572→            </DialogDescription>
+  1573→          </DialogHeader>
+  1574→          <div className="space-y-1.5">
+  1575→            <Label htmlFor="unblock-note">Note (optional)</Label>
+  1576→            <Input
+  1577→              id="unblock-note"
+  1578→              placeholder="How the blocker was resolved"
+  1579→              value={note}
+  1580→              onChange={(e) => setNote(e.target.value)}
+  1581→            />
+  1582→          </div>
+  1583→          <DialogFooter>
+  1584→            <Button variant="outline" disabled={busy} onClick={() => setDialog(null)}>
+  1585→              Cancel
+  1586→            </Button>
+  1587→            <Button disabled={busy} onClick={doUnblock}>
+  1588→              {busy && <Loader2 className="size-4 animate-spin" />}
+  1589→              <RotateCcw className="size-4" />
+  1590→              Unblock
+  1591→            </Button>
+  1592→          </DialogFooter>
+  1593→        </DialogContent>
+  1594→      </Dialog>
+  1595→
+  1596→      {/* Cancel (destructive confirmation) */}
+  1597→      <AlertDialog open={dialogOpen("cancel")} onOpenChange={closeDialog}>
+  1598→        <AlertDialogContent>
+  1599→          <AlertDialogHeader>
+  1600→            <AlertDialogTitle>Cancel this task?</AlertDialogTitle>
+  1601→            <AlertDialogDescription>
+  1602→              {task.code} — {task.garmentPiece} ({task.orderNumber}) will be permanently closed.
+  1603→              This cannot be undone.
+  1604→            </AlertDialogDescription>
+  1605→          </AlertDialogHeader>
+  1606→          <div className="space-y-1.5">
+  1607→            <Label htmlFor="cancel-reason">Reason (required)</Label>
+  1608→            <Textarea
+  1609→              id="cancel-reason"
+  1610→              placeholder="e.g. Cancelled by the customer"
+  1611→              value={reason}
+  1612→              onChange={(e) => setReason(e.target.value)}
+  1613→            />
+  1614→          </div>
+  1615→          <AlertDialogFooter>
+  1616→            <AlertDialogCancel disabled={busy}>Keep Task</AlertDialogCancel>
+  1617→            <AlertDialogAction
+  1618→              className="bg-destructive text-white hover:bg-destructive/90"
+  1619→              disabled={busy || reason.trim().length < 3}
+  1620→              onClick={(e) => {
+  1621→                e.preventDefault();
+  1622→                doCancel();
+  1623→              }}
+  1624→            >
+  1625→              {busy && <Loader2 className="size-4 animate-spin" />}
+  1626→              <XCircle className="size-4" />
+  1627→              Cancel Task
+  1628→            </AlertDialogAction>
+  1629→          </AlertDialogFooter>
+  1630→        </AlertDialogContent>
+  1631→      </AlertDialog>
+  1632→    </div>
+  1633→  );
+  1634→}
+  1635→

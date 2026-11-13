@@ -1,0 +1,823 @@
+     1→"use client";
+     2→
+     3→// OSSZ ATELIER — order registry: filter, register orders (with existing or
+     4→// inline new customers), inspect production progress per order and edit.
+     5→
+     6→import { useCallback, useEffect, useState } from "react";
+     7→import { api, ApiClientError, qs } from "../client";
+     8→import { can, useAppStore } from "../store";
+     9→import type { Customer, OrderSummary, TaskSummary } from "../types";
+    10→import { DueDate, EmptyState, PageHeader, PriorityBadge, ProgressCell, StatusBadge } from "../ui-bits";
+    11→import { useToast } from "@/hooks/use-toast";
+    12→import { Button } from "@/components/ui/button";
+    13→import { Input } from "@/components/ui/input";
+    14→import { Label as FormLabel } from "@/components/ui/label";
+    15→import { Textarea } from "@/components/ui/textarea";
+    16→import { Skeleton } from "@/components/ui/skeleton";
+    17→import { Separator } from "@/components/ui/separator";
+    18→import {
+    19→  Dialog,
+    20→  DialogContent,
+    21→  DialogDescription,
+    22→  DialogFooter,
+    23→  DialogHeader,
+    24→  DialogTitle,
+    25→} from "@/components/ui/dialog";
+    26→import {
+    27→  Select,
+    28→  SelectContent,
+    29→  SelectItem,
+    30→  SelectTrigger,
+    31→  SelectValue,
+    32→} from "@/components/ui/select";
+    33→import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+    34→import {
+    35→  Table,
+    36→  TableBody,
+    37→  TableCell,
+    38→  TableHead,
+    39→  TableHeader,
+    40→  TableRow,
+    41→} from "@/components/ui/table";
+    42→import { PRIORITIES, PRIORITY_LABELS } from "@/lib/atelier/constants";
+    43→import { formatDate } from "@/lib/format";
+    44→import { AlertTriangle, ClipboardList, Package, Pencil, Plus, Scissors, Search } from "lucide-react";
+    45→
+    46→type OrderForm = {
+    47→  orderNumber: string;
+    48→  customerMode: "existing" | "new";
+    49→  customerId: string;
+    50→  ncName: string;
+    51→  ncPhone: string;
+    52→  ncEmail: string;
+    53→  ncAddress: string;
+    54→  ncNotes: string;
+    55→  orderDate: string;
+    56→  expectedDeliveryDate: string;
+    57→  description: string;
+    58→  garmentCategory: string;
+    59→  numberOfPieces: string;
+    60→  priority: string;
+    61→  instructions: string;
+    62→  notes: string;
+    63→};
+    64→
+    65→type OrderDetail = { order: OrderSummary; tasks: TaskSummary[] };
+    66→
+    67→const EMPTY_FORM: OrderForm = {
+    68→  orderNumber: "",
+    69→  customerMode: "existing",
+    70→  customerId: "",
+    71→  ncName: "",
+    72→  ncPhone: "",
+    73→  ncEmail: "",
+    74→  ncAddress: "",
+    75→  ncNotes: "",
+    76→  orderDate: new Date().toISOString().slice(0, 10),
+    77→  expectedDeliveryDate: "",
+    78→  description: "",
+    79→  garmentCategory: "",
+    80→  numberOfPieces: "1",
+    81→  priority: "NORMAL",
+    82→  instructions: "",
+    83→  notes: "",
+    84→};
+    85→
+    86→function useDebounced<T>(value: T, ms = 300) {
+    87→  const [debounced, setDebounced] = useState(value);
+    88→  useEffect(() => {
+    89→    const t = setTimeout(() => setDebounced(value), ms);
+    90→    return () => clearTimeout(t);
+    91→  }, [value, ms]);
+    92→  return debounced;
+    93→}
+    94→
+    95→function toInputDate(iso: string | null): string {
+    96→  return iso ? iso.slice(0, 10) : "";
+    97→}
+    98→
+    99→function isPast(iso: string | null): boolean {
+   100→  return !!iso && new Date(iso).getTime() < Date.now();
+   101→}
+   102→
+   103→export function OrdersView() {
+   104→  const user = useAppStore((s) => s.user);
+   105→  const navigate = useAppStore((s) => s.navigate);
+   106→  const { toast } = useToast();
+   107→  const canManage = can(user, "orders.manage");
+   108→
+   109→  const [orders, setOrders] = useState<OrderSummary[] | null>(null);
+   110→  const [error, setError] = useState<string | null>(null);
+   111→  const [search, setSearch] = useState("");
+   112→  const [priority, setPriority] = useState("");
+   113→  const [from, setFrom] = useState("");
+   114→  const [to, setTo] = useState("");
+   115→  const debouncedSearch = useDebounced(search);
+   116→
+   117→  const [customers, setCustomers] = useState<Customer[]>([]);
+   118→  const [formOpen, setFormOpen] = useState(false);
+   119→  const [editing, setEditing] = useState<OrderSummary | null>(null);
+   120→  const [form, setForm] = useState<OrderForm>(EMPTY_FORM);
+   121→  const [formError, setFormError] = useState<string | null>(null);
+   122→  const [submitting, setSubmitting] = useState(false);
+   123→
+   124→  const [detail, setDetail] = useState<OrderDetail | null>(null);
+   125→  const [detailLoading, setDetailLoading] = useState(false);
+   126→  const [detailId, setDetailId] = useState<string | null>(null);
+   127→
+   128→  const load = useCallback(async () => {
+   129→    try {
+   130→      const res = await api.get<{ orders: OrderSummary[] }>(
+   131→        `/api/atelier/orders${qs({ search: debouncedSearch, priority, from, to })}`
+   132→      );
+   133→      setOrders(res.orders);
+   134→      setError(null);
+   135→    } catch (e) {
+   136→      setError(e instanceof Error ? e.message : "Failed to load orders");
+   137→    }
+   138→  }, [debouncedSearch, priority, from, to]);
+   139→
+   140→  const loadCustomers = useCallback(async () => {
+   141→    try {
+   142→      const res = await api.get<{ customers: Customer[] }>("/api/atelier/customers");
+   143→      setCustomers(res.customers);
+   144→    } catch {
+   145→      // Non-blocking: the new-customer mode remains available.
+   146→    }
+   147→  }, []);
+   148→
+   149→  useEffect(() => {
+   150→    load();
+   151→  }, [load]);
+   152→
+   153→  useEffect(() => {
+   154→    loadCustomers();
+   155→  }, [loadCustomers]);
+   156→
+   157→  const openDetail = useCallback(async (id: string) => {
+   158→    setDetailId(id);
+   159→    setDetail(null);
+   160→    setDetailLoading(true);
+   161→    try {
+   162→      const res = await api.get<OrderDetail>(`/api/atelier/orders/${id}`);
+   163→      setDetail(res);
+   164→    } catch (e) {
+   165→      toast({
+   166→        title: "Could not load order",
+   167→        description: e instanceof Error ? e.message : undefined,
+   168→        variant: "destructive",
+   169→      });
+   170→      setDetailId(null);
+   171→    } finally {
+   172→      setDetailLoading(false);
+   173→    }
+   174→  }, [toast]);
+   175→
+   176→  function openCreate() {
+   177→    setEditing(null);
+   178→    setForm({
+   179→      ...EMPTY_FORM,
+   180→      customerMode: customers.length > 0 ? "existing" : "new",
+   181→      customerId: "",
+   182→    });
+   183→    setFormError(null);
+   184→    setFormOpen(true);
+   185→  }
+   186→
+   187→  function openEdit(o: OrderSummary) {
+   188→    setEditing(o);
+   189→    setForm({
+   190→      orderNumber: o.orderNumber,
+   191→      customerMode: "existing",
+   192→      customerId: o.customerId,
+   193→      ncName: "",
+   194→      ncPhone: "",
+   195→      ncEmail: "",
+   196→      ncAddress: "",
+   197→      ncNotes: "",
+   198→      orderDate: toInputDate(o.orderDate),
+   199→      expectedDeliveryDate: toInputDate(o.expectedDeliveryDate),
+   200→      description: o.description,
+   201→      garmentCategory: o.garmentCategory,
+   202→      numberOfPieces: String(o.numberOfPieces),
+   203→      priority: o.priority,
+   204→      instructions: o.instructions ?? "",
+   205→      notes: o.notes ?? "",
+   206→    });
+   207→    setFormError(null);
+   208→    setDetail(null);
+   209→    setFormOpen(true);
+   210→  }
+   211→
+   212→  function buildPayload(): Record<string, unknown> | string {
+   213→    if (!form.orderNumber.trim()) return "Order number is required.";
+   214→    if (!form.orderDate) return "Order date is required.";
+   215→    if (!form.description.trim()) return "Description is required.";
+   216→    if (!form.garmentCategory.trim()) return "Garment category is required.";
+   217→    const pieces = Number.parseInt(form.numberOfPieces, 10);
+   218→    if (!Number.isFinite(pieces) || pieces < 1 || pieces > 200) {
+   219→      return "Number of pieces must be between 1 and 200.";
+   220→    }
+   221→    let customer: Record<string, unknown> | undefined;
+   222→    if (!editing) {
+   223→      if (form.customerMode === "existing") {
+   224→        if (!form.customerId) return "Select an existing customer or choose “New customer”.";
+   225→      } else {
+   226→        if (!form.ncName.trim() || !form.ncPhone.trim()) {
+   227→          return "New customer name and phone are required.";
+   228→        }
+   229→        customer = {
+   230→          name: form.ncName,
+   231→          phone: form.ncPhone,
+   232→          ...(form.ncEmail ? { email: form.ncEmail } : {}),
+   233→          ...(form.ncAddress ? { address: form.ncAddress } : {}),
+   234→          ...(form.ncNotes ? { notes: form.ncNotes } : {}),
+   235→        };
+   236→      }
+   237→    }
+   238→    return {
+   239→      orderNumber: form.orderNumber,
+   240→      ...(editing ? {} : form.customerMode === "existing" ? { customerId: form.customerId } : { newCustomer: customer }),
+   241→      orderDate: form.orderDate,
+   242→      expectedDeliveryDate: form.expectedDeliveryDate || null,
+   243→      description: form.description,
+   244→      garmentCategory: form.garmentCategory,
+   245→      numberOfPieces: pieces,
+   246→      priority: form.priority,
+   247→      ...(form.instructions ? { instructions: form.instructions } : {}),
+   248→      ...(form.notes ? { notes: form.notes } : {}),
+   249→    };
+   250→  }
+   251→
+   252→  async function submit() {
+   253→    const payload = buildPayload();
+   254→    if (typeof payload === "string") {
+   255→      setFormError(payload);
+   256→      return;
+   257→    }
+   258→    setSubmitting(true);
+   259→    setFormError(null);
+   260→    try {
+   261→      if (editing) {
+   262→        await api.patch(`/api/atelier/orders/${editing.id}`, payload);
+   263→        toast({ title: "Order updated", description: `${form.orderNumber} was saved.` });
+   264→      } else {
+   265→        await api.post("/api/atelier/orders", payload);
+   266→        toast({ title: "Order registered", description: `${form.orderNumber} was created.` });
+   267→      }
+   268→      setFormOpen(false);
+   269→      await load();
+   270→      if (detailId) await openDetail(detailId);
+   271→    } catch (e) {
+   272→      const message =
+   273→        e instanceof ApiClientError
+   274→          ? e.details?.issues?.[0]?.message ?? e.message
+   275→          : "Something went wrong. Please try again.";
+   276→      setFormError(message);
+   277→      toast({
+   278→        title: editing ? "Could not update order" : "Could not register order",
+   279→        description: message,
+   280→        variant: "destructive",
+   281→      });
+   282→    } finally {
+   283→      setSubmitting(false);
+   284→    }
+   285→  }
+   286→
+   287→  const hasFilters = !!search || !!priority || !!from || !!to;
+   288→
+   289→  return (
+   290→    <div>
+   291→      <PageHeader
+   292→        title="Orders"
+   293→        description="Manually registered production orders and their progress."
+   294→      >
+   295→        {canManage && (
+   296→          <Button onClick={openCreate}>
+   297→            <Plus className="size-4 mr-1.5" />
+   298→            Register Order
+   299→          </Button>
+   300→        )}
+   301→      </PageHeader>
+   302→
+   303→      <div className="mb-4 flex flex-col sm:flex-row gap-2 sm:items-center">
+   304→        <div className="relative flex-1 max-w-sm">
+   305→          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+   306→          <Input
+   307→            value={search}
+   308→            onChange={(e) => setSearch(e.target.value)}
+   309→            placeholder="Search order number, customer, description…"
+   310→            className="pl-8"
+   311→            aria-label="Search orders"
+   312→          />
+   313→        </div>
+   314→        <div className="flex flex-wrap gap-2 items-center">
+   315→          <Select value={priority || "all"} onValueChange={(v) => setPriority(v === "all" ? "" : v)}>
+   316→            <SelectTrigger className="w-[150px]" aria-label="Filter by priority">
+   317→              <SelectValue placeholder="Priority" />
+   318→            </SelectTrigger>
+   319→            <SelectContent>
+   320→              <SelectItem value="all">All priorities</SelectItem>
+   321→              {PRIORITIES.map((p) => (
+   322→                <SelectItem key={p} value={p}>
+   323→                  {PRIORITY_LABELS[p]}
+   324→                </SelectItem>
+   325→              ))}
+   326→            </SelectContent>
+   327→          </Select>
+   328→          <div className="flex items-center gap-1.5">
+   329→            <Input
+   330→              type="date"
+   331→              value={from}
+   332→              onChange={(e) => setFrom(e.target.value)}
+   333→              className="w-[145px]"
+   334→              aria-label="From date"
+   335→            />
+   336→            <span className="text-muted-foreground text-sm">to</span>
+   337→            <Input
+   338→              type="date"
+   339→              value={to}
+   340→              onChange={(e) => setTo(e.target.value)}
+   341→              className="w-[145px]"
+   342→              aria-label="To date"
+   343→            />
+   344→          </div>
+   345→          {hasFilters && (
+   346→            <Button
+   347→              variant="ghost"
+   348→              size="sm"
+   349→              onClick={() => {
+   350→                setSearch("");
+   351→                setPriority("");
+   352→                setFrom("");
+   353→                setTo("");
+   354→              }}
+   355→            >
+   356→              Clear
+   357→            </Button>
+   358→          )}
+   359→        </div>
+   360→      </div>
+   361→
+   362→      {error ? (
+   363→        <EmptyState
+   364→          icon={AlertTriangle}
+   365→          title="Could not load orders"
+   366→          description={error}
+   367→          action={
+   368→            <Button variant="outline" size="sm" onClick={load}>
+   369→              Try again
+   370→            </Button>
+   371→          }
+   372→        />
+   373→      ) : orders === null ? (
+   374→        <div className="space-y-3">
+   375→          <Skeleton className="h-10 w-full" />
+   376→          <Skeleton className="h-16 w-full" />
+   377→          <Skeleton className="h-16 w-full" />
+   378→          <Skeleton className="h-16 w-full" />
+   379→        </div>
+   380→      ) : orders.length === 0 ? (
+   381→        <div className="rounded-lg border">
+   382→          <EmptyState
+   383→            icon={Package}
+   384→            title={hasFilters ? "No orders match your filters" : "No orders registered yet"}
+   385→            description={
+   386→              hasFilters
+   387→                ? "Adjust the search or date filters to see more results."
+   388→                : "Register a customer order to start planning production."
+   389→            }
+   390→            action={
+   391→              canManage && !hasFilters ? (
+   392→                <Button size="sm" onClick={openCreate}>
+   393→                  <Plus className="size-4 mr-1.5" />
+   394→                  Register Order
+   395→                </Button>
+   396→              ) : undefined
+   397→            }
+   398→          />
+   399→        </div>
+   400→      ) : (
+   401→        <div className="rounded-lg border overflow-x-auto">
+   402→          <Table className="min-w-[980px]">
+   403→            <TableHeader>
+   404→              <TableRow>
+   405→                <TableHead>Order</TableHead>
+   406→                <TableHead>Customer</TableHead>
+   407→                <TableHead>Garment</TableHead>
+   408→                <TableHead className="text-center">Pieces</TableHead>
+   409→                <TableHead>Priority</TableHead>
+   410→                <TableHead>Expected Delivery</TableHead>
+   411→                <TableHead className="min-w-52">Production</TableHead>
+   412→                <TableHead>Registered</TableHead>
+   413→              </TableRow>
+   414→            </TableHeader>
+   415→            <TableBody>
+   416→              {orders.map((o) => (
+   417→                <TableRow
+   418→                  key={o.id}
+   419→                  className="cursor-pointer"
+   420→                  onClick={() => openDetail(o.id)}
+   421→                >
+   422→                  <TableCell className="font-medium whitespace-nowrap">{o.orderNumber}</TableCell>
+   423→                  <TableCell>
+   424→                    <p className="font-medium truncate">{o.customerName}</p>
+   425→                    <p className="text-xs text-muted-foreground truncate">{o.customerPhone}</p>
+   426→                  </TableCell>
+   427→                  <TableCell className="max-w-56">
+   428→                    <p className="truncate">{o.description}</p>
+   429→                    <p className="text-xs text-muted-foreground truncate">{o.garmentCategory}</p>
+   430→                  </TableCell>
+   431→                  <TableCell className="text-center tabular-nums">{o.numberOfPieces}</TableCell>
+   432→                  <TableCell>
+   433→                    <PriorityBadge priority={o.priority} />
+   434→                  </TableCell>
+   435→                  <TableCell>
+   436→                    <DueDate deadline={o.expectedDeliveryDate} overdue={isPast(o.expectedDeliveryDate)} />
+   437→                  </TableCell>
+   438→                  <TableCell>
+   439→                    <ProgressCell value={o.avgProgress} />
+   440→                    <p className="text-xs text-muted-foreground mt-1">
+   441→                      {o.taskCount === 0
+   442→                        ? "No tasks yet"
+   443→                        : `${o.completedTaskCount}/${o.taskCount} task${o.taskCount > 1 ? "s" : ""} done`}
+   444→                    </p>
+   445→                  </TableCell>
+   446→                  <TableCell className="text-muted-foreground whitespace-nowrap">
+   447→                    {formatDate(o.createdAt)}
+   448→                  </TableCell>
+   449→                </TableRow>
+   450→              ))}
+   451→            </TableBody>
+   452→          </Table>
+   453→        </div>
+   454→      )}
+   455→
+   456→      {/* ------------------------------------------------ order detail dialog */}
+   457→      <Dialog
+   458→        open={!!detailId}
+   459→        onOpenChange={(open) => {
+   460→          if (!open) setDetailId(null);
+   461→        }}
+   462→      >
+   463→        <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto">
+   464→          {detailLoading || !detail ? (
+   465→            <div className="space-y-3 py-2">
+   466→              <Skeleton className="h-7 w-56" />
+   467→              <Skeleton className="h-24 w-full" />
+   468→              <Skeleton className="h-32 w-full" />
+   469→            </div>
+   470→          ) : (
+   471→            <>
+   472→              <DialogHeader>
+   473→                <DialogTitle className="flex items-center gap-2 flex-wrap">
+   474→                  <span>{detail.order.orderNumber}</span>
+   475→                  <PriorityBadge priority={detail.order.priority} />
+   476→                </DialogTitle>
+   477→                <DialogDescription>
+   478→                  Registered {formatDate(detail.order.createdAt)} · {detail.order.customerName}
+   479→                </DialogDescription>
+   480→              </DialogHeader>
+   481→
+   482→              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
+   483→                <div>
+   484→                  <p className="text-xs text-muted-foreground uppercase tracking-wide">Order date</p>
+   485→                  <p className="font-medium mt-0.5">{formatDate(detail.order.orderDate)}</p>
+   486→                </div>
+   487→                <div>
+   488→                  <p className="text-xs text-muted-foreground uppercase tracking-wide">Expected delivery</p>
+   489→                  <div className="mt-0.5">
+   490→                    <DueDate
+   491→                      deadline={detail.order.expectedDeliveryDate}
+   492→                      overdue={isPast(detail.order.expectedDeliveryDate)}
+   493→                    />
+   494→                  </div>
+   495→                </div>
+   496→                <div>
+   497→                  <p className="text-xs text-muted-foreground uppercase tracking-wide">Pieces</p>
+   498→                  <p className="font-medium mt-0.5 tabular-nums">{detail.order.numberOfPieces}</p>
+   499→                </div>
+   500→                <div>
+   501→                  <p className="text-xs text-muted-foreground uppercase tracking-wide">Category</p>
+   502→                  <p className="font-medium mt-0.5">{detail.order.garmentCategory}</p>
+   503→                </div>
+   504→              </div>
+   505→
+   506→              <div>
+   507→                <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Description</p>
+   508→                <p className="text-sm">{detail.order.description}</p>
+   509→              </div>
+   510→              {detail.order.instructions && (
+   511→                <div>
+   512→                  <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Instructions</p>
+   513→                  <p className="text-sm whitespace-pre-line">{detail.order.instructions}</p>
+   514→                </div>
+   515→              )}
+   516→              {detail.order.notes && (
+   517→                <div>
+   518→                  <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Notes</p>
+   519→                  <p className="text-sm whitespace-pre-line text-muted-foreground">{detail.order.notes}</p>
+   520→                </div>
+   521→              )}
+   522→
+   523→              <Separator />
+   524→
+   525→              <div>
+   526→                <div className="flex items-center justify-between gap-2 mb-2">
+   527→                  <p className="text-sm font-semibold">Production tasks</p>
+   528→                  <span className="text-xs text-muted-foreground">
+   529→                    {detail.order.completedTaskCount}/{detail.order.taskCount} done · avg{" "}
+   530→                    {detail.order.avgProgress}%
+   531→                  </span>
+   532→                </div>
+   533→                {detail.tasks.length === 0 ? (
+   534→                  <EmptyState
+   535→                    icon={ClipboardList}
+   536→                    title="Not broken into tasks yet"
+   537→                    description="Split this order into garment pieces to start production."
+   538→                  />
+   539→                ) : (
+   540→                  <div className="rounded-lg border divide-y overflow-x-auto">
+   541→                    {detail.tasks.map((t) => (
+   542→                      <div
+   543→                        key={t.id}
+   544→                        className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 px-4 py-2.5 min-w-[520px]"
+   545→                      >
+   546→                        <div className="min-w-0 flex-1">
+   547→                          <p className="text-sm font-medium truncate">
+   548→                            {t.garmentPiece} <span className="text-muted-foreground font-normal">· {t.code}</span>
+   549→                          </p>
+   550→                          <p className="text-xs text-muted-foreground truncate">
+   551→                            {t.assignedStaffName ?? "Unassigned"}
+   552→                          </p>
+   553→                        </div>
+   554→                        <StatusBadge status={t.status} />
+   555→                        <ProgressCell value={t.progress} status={t.status} className="w-32" />
+   556→                      </div>
+   557→                    ))}
+   558→                  </div>
+   559→                )}
+   560→              </div>
+   561→
+   562→              {(canManage || can(user, "production.create.tasks")) && (
+   563→                <DialogFooter>
+   564→                  {can(user, "production.create.tasks") && (
+   565→                    <Button
+   566→                      onClick={() => navigate("task-create", { orderId: detail.order.id })}
+   567→                    >
+   568→                      <Scissors className="size-4 mr-1.5" />
+   569→                      Break into Tasks
+   570→                    </Button>
+   571→                  )}
+   572→                  {canManage && (
+   573→                    <Button variant="outline" onClick={() => openEdit(detail.order)}>
+   574→                      <Pencil className="size-4 mr-1.5" />
+   575→                      Edit
+   576→                    </Button>
+   577→                  )}
+   578→                </DialogFooter>
+   579→              )}
+   580→            </>
+   581→          )}
+   582→        </DialogContent>
+   583→      </Dialog>
+   584→
+   585→      {/* -------------------------------------------- register / edit dialog */}
+   586→      <Dialog open={formOpen} onOpenChange={setFormOpen}>
+   587→        <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto">
+   588→          <DialogHeader>
+   589→            <DialogTitle>{editing ? `Edit Order ${editing.orderNumber}` : "Register Order"}</DialogTitle>
+   590→            <DialogDescription>
+   591→              {editing
+   592→                ? "Update order details. The linked customer cannot be changed."
+   593→                : "Enter the business order reference and garment details."}
+   594→            </DialogDescription>
+   595→          </DialogHeader>
+   596→
+   597→          {!editing && (
+   598→            <>
+   599→              <div className="grid gap-1.5">
+   600→                <FormLabel>Customer</FormLabel>
+   601→                <RadioGroup
+   602→                  value={form.customerMode}
+   603→                  onValueChange={(v) => setForm({ ...form, customerMode: v as OrderForm["customerMode"] })}
+   604→                  className="flex flex-col sm:flex-row gap-2"
+   605→                >
+   606→                  <label
+   607→                    htmlFor="cust-existing"
+   608→                    className="flex flex-1 items-center gap-2 rounded-lg border p-3 cursor-pointer has-[button[data-state=checked]]:border-primary has-[button[data-state=checked]]:bg-primary/5"
+   609→                  >
+   610→                    <RadioGroupItem value="existing" id="cust-existing" />
+   611→                    <span className="text-sm font-medium">Existing customer</span>
+   612→                  </label>
+   613→                  <label
+   614→                    htmlFor="cust-new"
+   615→                    className="flex flex-1 items-center gap-2 rounded-lg border p-3 cursor-pointer has-[button[data-state=checked]]:border-primary has-[button[data-state=checked]]:bg-primary/5"
+   616→                  >
+   617→                    <RadioGroupItem value="new" id="cust-new" />
+   618→                    <span className="text-sm font-medium">New customer</span>
+   619→                  </label>
+   620→                </RadioGroup>
+   621→              </div>
+   622→              {form.customerMode === "existing" ? (
+   623→                <div className="grid gap-1.5">
+   624→                  <FormLabel htmlFor="order-customer">Select customer *</FormLabel>
+   625→                  <Select
+   626→                    value={form.customerId}
+   627→                    onValueChange={(v) => setForm({ ...form, customerId: v })}
+   628→                  >
+   629→                    <SelectTrigger id="order-customer">
+   630→                      <SelectValue placeholder={customers.length ? "Select a customer…" : "Loading customers…"} />
+   631→                    </SelectTrigger>
+   632→                    <SelectContent>
+   633→                      {customers.map((c) => (
+   634→                        <SelectItem key={c.id} value={c.id}>
+   635→                          {c.name} — {c.phone}
+   636→                        </SelectItem>
+   637→                      ))}
+   638→                    </SelectContent>
+   639→                  </Select>
+   640→                </div>
+   641→              ) : (
+   642→                <div className="grid gap-4 sm:grid-cols-2 rounded-lg border p-3">
+   643→                  <p className="sm:col-span-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">
+   644→                    New customer details
+   645→                  </p>
+   646→                  <div className="grid gap-1.5">
+   647→                    <FormLabel htmlFor="nc-name">Name *</FormLabel>
+   648→                    <Input
+   649→                      id="nc-name"
+   650→                      value={form.ncName}
+   651→                      onChange={(e) => setForm({ ...form, ncName: e.target.value })}
+   652→                      maxLength={120}
+   653→                    />
+   654→                  </div>
+   655→                  <div className="grid gap-1.5">
+   656→                    <FormLabel htmlFor="nc-phone">Phone *</FormLabel>
+   657→                    <Input
+   658→                      id="nc-phone"
+   659→                      value={form.ncPhone}
+   660→                      onChange={(e) => setForm({ ...form, ncPhone: e.target.value })}
+   661→                      maxLength={40}
+   662→                    />
+   663→                  </div>
+   664→                  <div className="grid gap-1.5 sm:col-span-2">
+   665→                    <FormLabel htmlFor="nc-email">Email</FormLabel>
+   666→                    <Input
+   667→                      id="nc-email"
+   668→                      type="email"
+   669→                      value={form.ncEmail}
+   670→                      onChange={(e) => setForm({ ...form, ncEmail: e.target.value })}
+   671→                    />
+   672→                  </div>
+   673→                  <div className="grid gap-1.5 sm:col-span-2">
+   674→                    <FormLabel htmlFor="nc-address">Address</FormLabel>
+   675→                    <Input
+   676→                      id="nc-address"
+   677→                      value={form.ncAddress}
+   678→                      onChange={(e) => setForm({ ...form, ncAddress: e.target.value })}
+   679→                      maxLength={300}
+   680→                    />
+   681→                  </div>
+   682→                  <div className="grid gap-1.5 sm:col-span-2">
+   683→                    <FormLabel htmlFor="nc-notes">Customer notes</FormLabel>
+   684→                    <Textarea
+   685→                      id="nc-notes"
+   686→                      rows={2}
+   687→                      value={form.ncNotes}
+   688→                      onChange={(e) => setForm({ ...form, ncNotes: e.target.value })}
+   689→                    />
+   690→                  </div>
+   691→                </div>
+   692→              )}
+   693→              <Separator />
+   694→            </>
+   695→          )}
+   696→
+   697→          {editing && (
+   698→            <div className="grid gap-1.5">
+   699→              <FormLabel>Customer</FormLabel>
+   700→              <p className="text-sm rounded-lg border p-3 bg-muted/40">
+   701→                <span className="font-medium">{editing.customerName}</span>
+   702→                <span className="text-muted-foreground"> · {editing.customerPhone}</span>
+   703→              </p>
+   704→            </div>
+   705→          )}
+   706→
+   707→          <div className="grid gap-4 sm:grid-cols-2">
+   708→            <div className="grid gap-1.5">
+   709→              <FormLabel htmlFor="order-number">Order number *</FormLabel>
+   710→              <Input
+   711→                id="order-number"
+   712→                value={form.orderNumber}
+   713→                onChange={(e) => setForm({ ...form, orderNumber: e.target.value })}
+   714→                placeholder="e.g. OSSZ-2026-042"
+   715→                maxLength={50}
+   716→              />
+   717→            </div>
+   718→            <div className="grid gap-1.5">
+   719→              <FormLabel htmlFor="order-priority">Priority</FormLabel>
+   720→              <Select value={form.priority} onValueChange={(v) => setForm({ ...form, priority: v })}>
+   721→                <SelectTrigger id="order-priority">
+   722→                  <SelectValue />
+   723→                </SelectTrigger>
+   724→                <SelectContent>
+   725→                  {PRIORITIES.map((p) => (
+   726→                    <SelectItem key={p} value={p}>
+   727→                      {PRIORITY_LABELS[p]}
+   728→                    </SelectItem>
+   729→                  ))}
+   730→                </SelectContent>
+   731→              </Select>
+   732→            </div>
+   733→            <div className="grid gap-1.5">
+   734→              <FormLabel htmlFor="order-date">Order date *</FormLabel>
+   735→              <Input
+   736→                id="order-date"
+   737→                type="date"
+   738→                value={form.orderDate}
+   739→                onChange={(e) => setForm({ ...form, orderDate: e.target.value })}
+   740→              />
+   741→            </div>
+   742→            <div className="grid gap-1.5">
+   743→              <FormLabel htmlFor="order-delivery">Expected delivery</FormLabel>
+   744→              <Input
+   745→                id="order-delivery"
+   746→                type="date"
+   747→                value={form.expectedDeliveryDate}
+   748→                onChange={(e) => setForm({ ...form, expectedDeliveryDate: e.target.value })}
+   749→              />
+   750→            </div>
+   751→            <div className="grid gap-1.5 sm:col-span-2">
+   752→              <FormLabel htmlFor="order-desc">Description *</FormLabel>
+   753→              <Input
+   754→                id="order-desc"
+   755→                value={form.description}
+   756→                onChange={(e) => setForm({ ...form, description: e.target.value })}
+   757→                placeholder="e.g. Bridal gown with hand embroidery"
+   758→                maxLength={500}
+   759→              />
+   760→            </div>
+   761→            <div className="grid gap-1.5">
+   762→              <FormLabel htmlFor="order-category">Garment category *</FormLabel>
+   763→              <Input
+   764→                id="order-category"
+   765→                value={form.garmentCategory}
+   766→                onChange={(e) => setForm({ ...form, garmentCategory: e.target.value })}
+   767→                placeholder="e.g. Suiting, Evening wear"
+   768→                maxLength={80}
+   769→              />
+   770→            </div>
+   771→            <div className="grid gap-1.5">
+   772→              <FormLabel htmlFor="order-pieces">Number of pieces *</FormLabel>
+   773→              <Input
+   774→                id="order-pieces"
+   775→                type="number"
+   776→                min={1}
+   777→                max={200}
+   778→                value={form.numberOfPieces}
+   779→                onChange={(e) => setForm({ ...form, numberOfPieces: e.target.value })}
+   780→              />
+   781→            </div>
+   782→            <div className="grid gap-1.5 sm:col-span-2">
+   783→              <FormLabel htmlFor="order-instructions">Production instructions</FormLabel>
+   784→              <Textarea
+   785→                id="order-instructions"
+   786→                rows={3}
+   787→                value={form.instructions}
+   788→                onChange={(e) => setForm({ ...form, instructions: e.target.value })}
+   789→                placeholder="Fabrics, colours, special handling…"
+   790→              />
+   791→            </div>
+   792→            <div className="grid gap-1.5 sm:col-span-2">
+   793→              <FormLabel htmlFor="order-notes">Notes</FormLabel>
+   794→              <Textarea
+   795→                id="order-notes"
+   796→                rows={2}
+   797→                value={form.notes}
+   798→                onChange={(e) => setForm({ ...form, notes: e.target.value })}
+   799→                placeholder="Payment terms, follow-ups…"
+   800→              />
+   801→            </div>
+   802→            {formError && (
+   803→              <p className="sm:col-span-2 text-sm font-medium text-red-700">{formError}</p>
+   804→            )}
+   805→          </div>
+   806→
+   807→          <DialogFooter>
+   808→            <Button variant="outline" onClick={() => setFormOpen(false)} disabled={submitting}>
+   809→              Cancel
+   810→            </Button>
+   811→            <Button onClick={submit} disabled={submitting}>
+   812→              {submitting && (
+   813→                <span className="size-4 mr-1.5 animate-spin rounded-full border-2 border-current border-t-transparent" />
+   814→              )}
+   815→              {editing ? "Save Changes" : "Register Order"}
+   816→            </Button>
+   817→          </DialogFooter>
+   818→        </DialogContent>
+   819→      </Dialog>
+   820→    </div>
+   821→  );
+   822→}
+   823→

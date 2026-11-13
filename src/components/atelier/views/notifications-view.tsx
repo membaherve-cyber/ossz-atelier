@@ -9,6 +9,8 @@ import { api, ApiClientError } from "../client";
 import { useAppStore } from "../store";
 import type { NotificationRecord } from "../types";
 import { EmptyState, PageHeader } from "../ui-bits";
+import { useI18n } from "../i18n/use-i18n";
+import { notifTitle } from "../i18n/core";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -23,6 +25,7 @@ type NotificationsResponse = {
 };
 
 export function NotificationsView() {
+  const { t, lang } = useI18n();
   const { toast } = useToast();
   const openTask = useAppStore((s) => s.openTask);
   const setUnreadCount = useAppStore((s) => s.setUnreadCount);
@@ -38,9 +41,9 @@ export function NotificationsView() {
       setUnreadCount(res.unreadCount);
       setError(null);
     } catch (err) {
-      setError(err instanceof ApiClientError ? err.message : "Unexpected error.");
+      setError(err instanceof ApiClientError ? err.message : t("notif.unexpectedError"));
     }
-  }, [setUnreadCount]);
+  }, [setUnreadCount, t]);
 
   useEffect(() => {
     load();
@@ -73,8 +76,8 @@ export function NotificationsView() {
         applyRead(n.id);
       } catch (err) {
         toast({
-          title: "Could not mark the notification as read",
-          description: err instanceof ApiClientError ? err.message : "Unexpected error.",
+          title: t("notif.markOneError"),
+          description: err instanceof ApiClientError ? err.message : t("notif.unexpectedError"),
           variant: "destructive",
         });
       }
@@ -94,11 +97,11 @@ export function NotificationsView() {
           : d
       );
       setUnreadCount(res.unreadCount);
-      toast({ title: "All notifications marked as read" });
+      toast({ title: t("notif.markAllSuccess") });
     } catch (err) {
       toast({
-        title: "Could not mark notifications as read",
-        description: err instanceof ApiClientError ? err.message : "Unexpected error.",
+        title: t("notif.markAllError"),
+        description: err instanceof ApiClientError ? err.message : t("notif.unexpectedError"),
         variant: "destructive",
       });
     } finally {
@@ -110,11 +113,11 @@ export function NotificationsView() {
     return (
       <EmptyState
         icon={AlertTriangle}
-        title="Could not load your notifications"
+        title={t("notif.loadError")}
         description={error}
         action={
           <Button variant="outline" size="sm" onClick={load}>
-            Try again
+            {t("common.tryAgain")}
           </Button>
         }
       />
@@ -123,18 +126,20 @@ export function NotificationsView() {
 
   return (
     <div>
-      <PageHeader title="Notifications" description="Production alerts for your account.">
+      <PageHeader title={t("notif.title")} description={t("notif.desc")}>
         <Button variant="outline" onClick={markAll} disabled={markingAll || unreadCount === 0}>
           <CheckCheck className="size-4 mr-1.5" />
-          {markingAll ? "Marking…" : "Mark all as read"}
+          {markingAll ? t("notif.marking") : t("notif.markAll")}
         </Button>
       </PageHeader>
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as "all" | "unread")} className="mb-4">
         <TabsList>
-          <TabsTrigger value="all">All ({notifications.length})</TabsTrigger>
+          <TabsTrigger value="all">{t("notif.tabAll", { count: notifications.length })}</TabsTrigger>
           <TabsTrigger value="unread">
-            Unread{unreadCount > 0 ? ` (${unreadCount})` : ""}
+            {unreadCount > 0
+              ? t("notif.tabUnreadCount", { count: unreadCount })
+              : t("notif.tabUnread")}
           </TabsTrigger>
         </TabsList>
       </Tabs>
@@ -148,11 +153,11 @@ export function NotificationsView() {
       ) : visible.length === 0 ? (
         <EmptyState
           icon={Bell}
-          title="You're all caught up."
+          title={t("notif.emptyTitle")}
           description={
             tab === "unread"
-              ? "No unread notifications — new alerts will appear here."
-              : "No notifications yet — production alerts will appear here."
+              ? t("notif.emptyUnreadDesc")
+              : t("notif.emptyDesc")
           }
         />
       ) : (
@@ -177,7 +182,7 @@ export function NotificationsView() {
                   <span
                     className={`text-sm truncate ${n.isRead ? "font-medium" : "font-semibold"}`}
                   >
-                    {n.title}
+                    {notifTitle(n.type, n.title, lang)}
                   </span>
                   <Badge
                     variant="outline"

@@ -7,6 +7,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { api, ApiClientError } from "../client";
 import type { StageConfig } from "../types";
+import { useI18n } from "../i18n/use-i18n";
+import { categoryLabel } from "../i18n/core";
 import { CategoryBadge, EmptyState, PageHeader } from "../ui-bits";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -33,7 +35,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
-import { APPLIES_TO_ALL, CATEGORY_LABELS, TASK_CATEGORIES } from "@/lib/atelier/constants";
+import { APPLIES_TO_ALL, TASK_CATEGORIES } from "@/lib/atelier/constants";
 import { AlertTriangle, Info, ListChecks, Pencil, Plus } from "lucide-react";
 
 type FormState = {
@@ -79,6 +81,7 @@ function StageDialog({
   onSaved: (stage: StageConfig) => void;
 }) {
   const { toast } = useToast();
+  const { t, lang } = useI18n();
   const [form, setForm] = useState<FormState>(emptyForm());
   const [saving, setSaving] = useState(false);
 
@@ -99,8 +102,8 @@ function StageDialog({
     const name = form.name.trim();
     if (name.length < 2 || name.length > 80) {
       toast({
-        title: "Invalid name",
-        description: "The stage name must be between 2 and 80 characters.",
+        title: t("stages.invalidNameTitle"),
+        description: t("stages.invalidNameDesc"),
         variant: "destructive",
       });
       return;
@@ -108,8 +111,8 @@ function StageDialog({
     const weight = form.weight.trim() === "" ? 1 : Number(form.weight);
     if (!Number.isFinite(weight) || weight < 0.1 || weight > 10) {
       toast({
-        title: "Invalid weight",
-        description: "Weight must be a number between 0.1 and 10.",
+        title: t("stages.invalidWeightTitle"),
+        description: t("stages.invalidWeightDesc"),
         variant: "destructive",
       });
       return;
@@ -117,8 +120,8 @@ function StageDialog({
     const sortOrder = form.sortOrder.trim() === "" ? 0 : Number(form.sortOrder);
     if (!Number.isInteger(sortOrder) || sortOrder < 0 || sortOrder > 999) {
       toast({
-        title: "Invalid sort order",
-        description: "Sort order must be a whole number between 0 and 999.",
+        title: t("stages.invalidSortTitle"),
+        description: t("stages.invalidSortDesc"),
         variant: "destructive",
       });
       return;
@@ -137,15 +140,15 @@ function StageDialog({
         ? await api.patch<{ stage: StageConfig }>(`/api/atelier/stages/${stage.id}`, payload)
         : await api.post<{ stage: StageConfig }>("/api/atelier/stages", payload);
       toast({
-        title: stage ? "Stage updated" : "Stage created",
-        description: `"${res.stage.name}" was saved successfully.`,
+        title: stage ? t("stages.updatedToastTitle") : t("stages.createdToastTitle"),
+        description: t("stages.savedToastDesc", { name: res.stage.name }),
       });
       onSaved(res.stage);
       onClose();
     } catch (err) {
       toast({
-        title: "Could not save the stage",
-        description: err instanceof ApiClientError ? err.message : "Unexpected error.",
+        title: t("stages.saveFailedToast"),
+        description: err instanceof ApiClientError ? err.message : t("stages.unexpectedError"),
         variant: "destructive",
       });
     } finally {
@@ -157,28 +160,26 @@ function StageDialog({
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>{stage ? "Edit Stage" : "Add Stage"}</DialogTitle>
+          <DialogTitle>{stage ? t("stages.editTitle") : t("stages.addStage")}</DialogTitle>
           <DialogDescription>
-            {stage
-              ? "Update the stage details. The stage code stays unchanged."
-              : "Define a new checklist stage and the task categories it applies to."}
+            {stage ? t("stages.editDescription") : t("stages.addDescription")}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
           <div className="space-y-1.5">
-            <Label htmlFor="stage-name">Name</Label>
+            <Label htmlFor="stage-name">{t("stages.nameLabel")}</Label>
             <Input
               id="stage-name"
               value={form.name}
               onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-              placeholder="e.g. Fabric cutting"
+              placeholder={t("stages.namePlaceholder")}
               maxLength={80}
             />
           </div>
 
           <div className="space-y-1.5">
-            <Label>Applies to</Label>
+            <Label>{t("stages.appliesToLabel")}</Label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 rounded-lg border p-3">
               {TASK_CATEGORIES.map((code) => (
                 <label
@@ -189,18 +190,18 @@ function StageDialog({
                     checked={form.appliesTo.has(code)}
                     onCheckedChange={(v) => toggleCategory(code, v === true)}
                   />
-                  {CATEGORY_LABELS[code]}
+                  {categoryLabel(code, lang)}
                 </label>
               ))}
             </div>
             <p className="text-xs text-muted-foreground">
-              Leave all unchecked or check all to apply to every category.
+              {t("stages.appliesToHint")}
             </p>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label htmlFor="stage-weight">Weight</Label>
+              <Label htmlFor="stage-weight">{t("stages.weightLabel")}</Label>
               <Input
                 id="stage-weight"
                 type="number"
@@ -212,7 +213,7 @@ function StageDialog({
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="stage-sort">Sort order</Label>
+              <Label htmlFor="stage-sort">{t("stages.sortOrderLabel")}</Label>
               <Input
                 id="stage-sort"
                 type="number"
@@ -228,10 +229,10 @@ function StageDialog({
 
         <DialogFooter>
           <Button variant="outline" onClick={onClose} disabled={saving}>
-            Cancel
+            {t("common.cancel")}
           </Button>
           <Button onClick={submit} disabled={saving}>
-            {saving ? "Saving…" : stage ? "Save changes" : "Create stage"}
+            {saving ? t("stages.saving") : stage ? t("common.saveChanges") : t("stages.createStage")}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -245,6 +246,7 @@ function StageDialog({
 
 export function StagesView() {
   const { toast } = useToast();
+  const { t } = useI18n();
   const [stages, setStages] = useState<StageConfig[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -257,7 +259,9 @@ export function StagesView() {
       setStages(res.stages);
       setError(null);
     } catch (err) {
-      setError(err instanceof ApiClientError ? err.message : "Unexpected error.");
+      // Empty string marks a generic failure; the translated message is
+      // rendered at display time so it follows the active language.
+      setError(err instanceof ApiClientError ? err.message : "");
     }
   }, []);
 
@@ -278,18 +282,18 @@ export function StagesView() {
       });
       setStages((list) => (list ?? []).map((s) => (s.id === res.stage.id ? res.stage : s)));
       toast({
-        title: res.stage.isActive ? "Stage activated" : "Stage deactivated",
+        title: res.stage.isActive ? t("stages.activatedToastTitle") : t("stages.deactivatedToastTitle"),
         description: res.stage.isActive
-          ? `"${res.stage.name}" is available to new tasks again.`
-          : `"${res.stage.name}" will no longer be added to new tasks.`,
+          ? t("stages.activatedToastDesc", { name: res.stage.name })
+          : t("stages.deactivatedToastDesc", { name: res.stage.name }),
       });
     } catch (err) {
       setStages((list) =>
         (list ?? []).map((s) => (s.id === stage.id ? { ...s, isActive: stage.isActive } : s))
       );
       toast({
-        title: "Could not update the stage",
-        description: err instanceof ApiClientError ? err.message : "Unexpected error.",
+        title: t("stages.updateFailedToast"),
+        description: err instanceof ApiClientError ? err.message : t("stages.unexpectedError"),
         variant: "destructive",
       });
     } finally {
@@ -318,15 +322,15 @@ export function StagesView() {
     });
   };
 
-  if (error) {
+  if (error !== null) {
     return (
       <EmptyState
         icon={AlertTriangle}
-        title="Could not load the stage configuration"
-        description={error}
+        title={t("stages.errorTitle")}
+        description={error || t("stages.unexpectedError")}
         action={
           <Button variant="outline" size="sm" onClick={load}>
-            Try again
+            {t("common.tryAgain")}
           </Button>
         }
       />
@@ -336,21 +340,20 @@ export function StagesView() {
   return (
     <div>
       <PageHeader
-        title="Production Stages"
-        description="Configure the checklist stages available to production tasks. Different task categories use different stage sets."
+        title={t("stages.title")}
+        description={t("stages.description")}
       >
         <Button onClick={openCreate}>
           <Plus className="size-4 mr-1.5" />
-          Add Stage
+          {t("stages.addStage")}
         </Button>
       </PageHeader>
 
       <Alert className="mb-4 border-amber-300 bg-amber-50/70 text-amber-900">
         <Info className="size-4" />
-        <AlertTitle>Stage changes never rewrite history</AlertTitle>
+        <AlertTitle>{t("stages.historyTitle")}</AlertTitle>
         <AlertDescription className="text-amber-800/90">
-          Existing task histories keep the stage names at the time of recording. Deactivating a
-          stage removes it from new tasks only.
+          {t("stages.historyDescription")}
         </AlertDescription>
       </Alert>
 
@@ -364,12 +367,12 @@ export function StagesView() {
       ) : stages.length === 0 ? (
         <EmptyState
           icon={ListChecks}
-          title="No stages configured"
-          description="Create the first checklist stage to start building the production workflow."
+          title={t("stages.emptyTitle")}
+          description={t("stages.emptyDescription")}
           action={
             <Button size="sm" onClick={openCreate}>
               <Plus className="size-4 mr-1.5" />
-              Add Stage
+              {t("stages.addStage")}
             </Button>
           }
         />
@@ -378,13 +381,13 @@ export function StagesView() {
           <Table className="min-w-[760px]">
             <TableHeader>
               <TableRow>
-                <TableHead className="w-20">Sort</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>Code</TableHead>
-                <TableHead>Applies To</TableHead>
-                <TableHead className="w-20 text-right">Weight</TableHead>
-                <TableHead className="w-24 text-center">Active</TableHead>
-                <TableHead className="w-20 text-right">Actions</TableHead>
+                <TableHead className="w-20">{t("stages.col.sort")}</TableHead>
+                <TableHead>{t("stages.col.name")}</TableHead>
+                <TableHead>{t("stages.col.code")}</TableHead>
+                <TableHead>{t("stages.col.appliesTo")}</TableHead>
+                <TableHead className="w-20 text-right">{t("stages.col.weight")}</TableHead>
+                <TableHead className="w-24 text-center">{t("stages.col.active")}</TableHead>
+                <TableHead className="w-20 text-right">{t("common.actions")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -403,7 +406,7 @@ export function StagesView() {
                         variant="outline"
                         className="border-amber-300 bg-amber-50 text-amber-900"
                       >
-                        All categories
+                        {t("stages.allCategories")}
                       </Badge>
                     ) : (
                       <div className="flex flex-wrap gap-1">
@@ -422,7 +425,11 @@ export function StagesView() {
                       checked={s.isActive}
                       onCheckedChange={() => toggleActive(s)}
                       disabled={togglingId === s.id}
-                      aria-label={`${s.isActive ? "Deactivate" : "Activate"} stage ${s.name}`}
+                      aria-label={
+                        s.isActive
+                          ? t("stages.deactivateStageAria", { name: s.name })
+                          : t("stages.activateStageAria", { name: s.name })
+                      }
                     />
                   </TableCell>
                   <TableCell className="text-right">
@@ -430,10 +437,10 @@ export function StagesView() {
                       variant="ghost"
                       size="sm"
                       onClick={() => openEdit(s)}
-                      aria-label={`Edit stage ${s.name}`}
+                      aria-label={t("stages.editStageAria", { name: s.name })}
                     >
                       <Pencil className="size-4" />
-                      <span className="sr-only">Edit</span>
+                      <span className="sr-only">{t("common.edit")}</span>
                     </Button>
                   </TableCell>
                 </TableRow>

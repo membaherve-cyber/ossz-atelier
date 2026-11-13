@@ -21,6 +21,7 @@ datasource db {
 
 model User {
   id           String   @id @default(cuid())
+  code         String?  @unique // USR-001 (system-assigned account identifier)
   name         String
   email        String   @unique
   phone        String?

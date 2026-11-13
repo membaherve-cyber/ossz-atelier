@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import { useAppStore } from "./store";
 import { LoginView } from "./login-view";
 import { AppShell } from "./app-shell";
+import { useI18n } from "./i18n/use-i18n";
 import { DashboardView } from "./views/dashboard-view";
 import { TasksView } from "./views/tasks-view";
 import { TaskCreateView } from "./views/task-create-view";
@@ -25,10 +26,13 @@ export default function AtelierApp() {
   const status = useAppStore((s) => s.status);
   const view = useAppStore((s) => s.view);
   const bootstrap = useAppStore((s) => s.bootstrap);
+  const applyStoredLang = useAppStore((s) => s.applyStoredLang);
+  const { t } = useI18n();
 
   useEffect(() => {
+    applyStoredLang();
     bootstrap();
-  }, [bootstrap]);
+  }, [applyStoredLang, bootstrap]);
 
   if (status === "loading") {
     return (
@@ -37,7 +41,7 @@ export default function AtelierApp() {
           <Scissors className="size-7 text-primary" />
         </div>
         <p className="font-display text-lg font-semibold">OSSZ Atelier</p>
-        <p className="text-sm text-muted-foreground">Loading…</p>
+        <p className="text-sm text-muted-foreground">{t("common.loading")}</p>
       </div>
     );
   }

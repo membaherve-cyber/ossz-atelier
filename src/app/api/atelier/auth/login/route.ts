@@ -37,7 +37,7 @@ export const POST = withApi(async (req: Request) => {
   await setSessionCookie(user.id);
   const token = createSessionToken(user.id);
   await logAudit(
-    { id: user.id, name: user.name, email: user.email, role: user.role as never, permissions: [] },
+    { id: user.id, code: user.code, name: user.name, email: user.email, role: user.role as never, permissions: [] },
     "LOGIN_SUCCESS",
     "USER",
     user.id
@@ -50,6 +50,7 @@ export const POST = withApi(async (req: Request) => {
     token,
     user: {
       id: user.id,
+      code: user.code,
       name: user.name,
       email: user.email,
       role: user.role,

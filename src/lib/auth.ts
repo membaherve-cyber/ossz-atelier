@@ -112,6 +112,7 @@ export async function getSessionUser(): Promise<SessionUser | null> {
   if (!user || !user.isActive) return null;
   return {
     id: user.id,
+    code: user.code,
     name: user.name,
     email: user.email,
     role: user.role as Role,

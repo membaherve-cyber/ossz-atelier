@@ -43,6 +43,7 @@ async function main() {
   // ---------------------------------------------------------------------
   const aminata = await db.user.create({
     data: {
+      code: "USR-001",
       name: "Aminata Sow",
       email: "management@atelier.com",
       phone: "+237 677 000 001",
@@ -53,6 +54,7 @@ async function main() {
   });
   const david = await db.user.create({
     data: {
+      code: "USR-002",
       name: "David Nkeng",
       email: "admin@atelier.com",
       phone: "+237 677 000 002",
@@ -63,6 +65,7 @@ async function main() {
   });
   const hamidou = await db.user.create({
     data: {
+      code: "USR-003",
       name: "Hamidou Abdoul",
       email: "hamidou@atelier.com",
       phone: "+237 677 000 003",
@@ -73,6 +76,7 @@ async function main() {
   });
   const lawal = await db.user.create({
     data: {
+      code: "USR-004",
       name: "Lawal Sani",
       email: "lawal@atelier.com",
       phone: "+237 677 000 004",
@@ -83,6 +87,7 @@ async function main() {
   });
   await db.user.create({
     data: {
+      code: "USR-005",
       name: "Ngozi Okafor",
       email: "ngozi@atelier.com",
       phone: "+237 677 000 005",

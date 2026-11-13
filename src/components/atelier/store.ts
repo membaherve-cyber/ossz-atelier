@@ -1,9 +1,11 @@
 "use client";
 
-// OSSZ ATELIER — global client state (session + view router + notification badge).
+// OSSZ ATELIER — global client state (session + view router + notification
+// badge + UI language).
 
 import { create } from "zustand";
 import { api, setStoredToken } from "./client";
+import { currentLang, persistLang, type Lang } from "./i18n/core";
 import type { SessionUser } from "./types";
 
 export type View =
@@ -29,12 +31,15 @@ type AppState = {
   view: View;
   viewParams: Record<string, string>;
   unreadCount: number;
+  lang: Lang;
   bootstrap: () => Promise<void>;
   login: (email: string, password: string) => Promise<SessionUser>;
   logout: () => Promise<void>;
   navigate: (view: View, params?: Record<string, string>) => void;
   openTask: (taskId: string) => void;
   setUnreadCount: (n: number) => void;
+  setLang: (lang: Lang) => void;
+  applyStoredLang: () => void;
 };
 
 export const useAppStore = create<AppState>((set) => ({
@@ -43,6 +48,9 @@ export const useAppStore = create<AppState>((set) => ({
   view: "dashboard",
   viewParams: {},
   unreadCount: 0,
+  // Starts as English so SSR output and first client render always match;
+  // applyStoredLang() restores the persisted choice right after mount.
+  lang: "en",
 
   bootstrap: async () => {
     try {
@@ -91,6 +99,16 @@ export const useAppStore = create<AppState>((set) => ({
   openTask: (taskId) => set({ view: "task-detail", viewParams: { taskId } }),
 
   setUnreadCount: (n) => set({ unreadCount: n }),
+
+  setLang: (lang) => {
+    set({ lang });
+    persistLang(lang);
+  },
+
+  applyStoredLang: () => {
+    const stored = currentLang();
+    set((state) => (state.lang === stored ? state : { lang: stored }));
+  },
 }));
 
 export function can(user: SessionUser | null, permission: string): boolean {

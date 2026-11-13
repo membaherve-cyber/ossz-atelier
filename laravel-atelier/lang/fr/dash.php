@@ -1,0 +1,46 @@
+<?php
+
+// OSSZ ATELIER — FR lines, ported from the "dash*" keys of the dict files (see dashboard.ts).
+// Accessed via __('dash.key').
+
+return [
+    'loadError' => 'Impossible de charger le tableau de bord',
+    'welcome' => 'Bon retour, {name}',
+    'staffDesc' => 'Voici votre aperçu personnel de la production. Seules les tâches qui vous sont affectées sont visibles.',
+    'stat' => [
+        'myActive' => 'Mes tâches actives',
+        'awaiting' => 'En attente d\'inspection',
+        'completedThisMonth' => 'Terminées ce mois-ci',
+        'overdue' => 'En retard',
+        'totalOrders' => 'Commandes enregistrées',
+        'activeTasks' => 'Tâches actives',
+        'unassigned' => 'Non affectées',
+        'ongoing' => 'En cours',
+        'approved' => 'Approuvées',
+        'readyForPickup' => 'Prêtes pour retrait',
+        'delivered' => 'Livrées',
+        'blocked' => 'Bloquées',
+    ],
+    'myTasks' => 'Mes tâches de production',
+    'viewAll' => 'Tout afficher',
+    'noTasksTitle' => 'Aucune tâche affectée pour le moment',
+    'noTasksDesc' => 'Lorsque la direction alloue des pièces à votre compte, elles apparaîtront ici.',
+    'managerTitle' => 'Tableau de bord — {role}',
+    'managerDesc' => 'Vue d\'ensemble complète de la production, pour toutes les commandes enregistrées et tout le personnel.',
+    'createTasks' => 'Créer des tâches',
+    'overdueTitle' => 'Tâches en retard',
+    'productionBoard' => 'Tableau de production',
+    'overdueEmptyTitle' => 'Aucun retard',
+    'overdueEmptyDesc' => 'Toutes les échéances sont maîtrisées.',
+    'unassigned' => 'Non affectée',
+    'dueSoonTitle' => 'Échéances dans les 7 prochains jours',
+    'dueSoonEmptyTitle' => 'Aucune échéance imminente',
+    'dueSoonEmptyDesc' => 'Aucune tâche n\'arrive à échéance dans les sept prochains jours.',
+    'workloadTitle' => 'Charge de travail du personnel (tâches actives)',
+    'workloadEmpty' => 'Aucun compte personnel actif',
+    'awaitingCount' => '{count} en attente d\'inspection',
+    'overdueCount' => '{count} en retard',
+    'activityTitle' => 'Activité récente',
+    'activityEmpty' => 'Aucune activité enregistrée pour le moment',
+    'system' => 'Système',
+];

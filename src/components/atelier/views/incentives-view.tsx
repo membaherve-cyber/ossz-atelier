@@ -7,6 +7,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { api } from "../client";
+import { incentivePeriodLabel, incentiveStatusLabel, paymentStatusLabel } from "../i18n/core";
+import { useI18n } from "../i18n/use-i18n";
 import { can, useAppStore } from "../store";
 import type { IncentiveRecordRow, IncentiveSchemeRecord } from "../types";
 import { EmptyState, PageHeader, SectionCard } from "../ui-bits";
@@ -30,7 +32,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import {
-  INCENTIVE_PERIOD_LABELS,
   INCENTIVE_PERIOD_TYPES,
   type IncentivePeriodType,
 } from "@/lib/atelier/constants";
@@ -52,29 +53,26 @@ import {
 // ---------------------------------------------------------------------------
 
 function StatusBadge({ status }: { status: string }) {
+  const { lang } = useI18n();
   const styles: Record<string, string> = {
     PENDING: "bg-amber-50 text-amber-800 border-amber-300",
     APPROVED: "bg-emerald-50 text-emerald-800 border-emerald-300",
     REJECTED: "bg-red-50 text-red-800 border-red-300",
   };
-  const labels: Record<string, string> = {
-    PENDING: "Pending",
-    APPROVED: "Approved",
-    REJECTED: "Rejected",
-  };
   return (
     <Badge variant="outline" className={cn("whitespace-nowrap", styles[status] ?? "")}>
-      {labels[status] ?? status}
+      {incentiveStatusLabel(status, lang)}
     </Badge>
   );
 }
 
 function PaymentBadge({ record }: { record: IncentiveRecordRow }) {
+  const { lang } = useI18n();
   if (record.paymentStatus === "PAID") {
     return (
       <div className="flex flex-col gap-0.5">
         <Badge variant="outline" className="bg-emerald-50 text-emerald-800 border-emerald-300 whitespace-nowrap">
-          Paid
+          {paymentStatusLabel(record.paymentStatus, lang)}
         </Badge>
         <span className="text-[11px] text-muted-foreground whitespace-nowrap">
           {record.paymentDate ? formatDate(record.paymentDate) : ""}
@@ -84,7 +82,7 @@ function PaymentBadge({ record }: { record: IncentiveRecordRow }) {
   }
   return (
     <Badge variant="outline" className="bg-stone-100 text-stone-600 border-stone-300 whitespace-nowrap">
-      Unpaid
+      {paymentStatusLabel(record.paymentStatus, lang)}
     </Badge>
   );
 }
@@ -109,10 +107,6 @@ const EMPTY_SCHEME: SchemeForm = {
   description: "",
 };
 
-function periodLabel(periodType: string): string {
-  return INCENTIVE_PERIOD_LABELS[periodType as IncentivePeriodType] ?? periodType;
-}
-
 // ---------------------------------------------------------------------------
 // Main view
 // ---------------------------------------------------------------------------
@@ -120,6 +114,7 @@ function periodLabel(periodType: string): string {
 export function IncentivesView() {
   const user = useAppStore((s) => s.user);
   const { toast } = useToast();
+  const { t, lang } = useI18n();
   const canManageSchemes = can(user, "incentives.manage.schemes");
   const canPrepare = can(user, "incentives.prepare");
   const canApprove = can(user, "incentives.approve");
@@ -182,10 +177,10 @@ export function IncentivesView() {
   const isAnnual = selectedScheme?.periodType === "ANNUAL";
   const periodPlaceholder = isQuarterly ? "2026-Q4" : isAnnual ? "2026" : "2026-11";
   const periodHint = isQuarterly
-    ? "Enter a quarter (YYYY-QN)"
+    ? t("inc.gen.hintQuarter")
     : isAnnual
-      ? "Enter a year (YYYY)"
-      : "Enter a month (YYYY-MM)";
+      ? t("inc.gen.hintYear")
+      : t("inc.gen.hintMonth");
 
   // ------------------------------------------------------------- schemes tab
 
@@ -211,8 +206,8 @@ export function IncentivesView() {
     const name = schemeForm.name.trim();
     if (name.length < 2 || name.length > 120) {
       toast({
-        title: "Invalid name",
-        description: "Scheme name must be between 2 and 120 characters.",
+        title: t("inc.toast.invalidNameTitle"),
+        description: t("inc.toast.invalidNameDesc"),
         variant: "destructive",
       });
       return;
@@ -220,8 +215,8 @@ export function IncentivesView() {
     const minScore = schemeForm.minScore.trim() === "" ? null : Number(schemeForm.minScore);
     if (minScore != null && (!Number.isFinite(minScore) || minScore < 0 || minScore > 100)) {
       toast({
-        title: "Invalid minimum score",
-        description: "Minimum score must be between 0 and 100.",
+        title: t("inc.toast.invalidScoreTitle"),
+        description: t("inc.toast.invalidScoreDesc"),
         variant: "destructive",
       });
       return;
@@ -229,8 +224,8 @@ export function IncentivesView() {
     const amount = schemeForm.amount.trim() === "" ? null : Number(schemeForm.amount);
     if (amount != null && (!Number.isFinite(amount) || amount < 0)) {
       toast({
-        title: "Invalid amount",
-        description: "Amount must be zero or more (FCFA).",
+        title: t("inc.toast.invalidAmountTitle"),
+        description: t("inc.toast.invalidAmountDesc"),
         variant: "destructive",
       });
       return;
@@ -247,7 +242,7 @@ export function IncentivesView() {
           amount,
           description: description || null,
         });
-        toast({ title: "Scheme updated", description: `${name} was saved.` });
+        toast({ title: t("inc.toast.schemeUpdated"), description: t("inc.toast.schemeSavedDesc", { name }) });
       } else {
         await api.post("/api/atelier/incentives/schemes", {
           name,
@@ -256,14 +251,14 @@ export function IncentivesView() {
           ...(amount != null ? { amount } : {}),
           ...(description ? { description } : {}),
         });
-        toast({ title: "Scheme created", description: `${name} was added.` });
+        toast({ title: t("inc.toast.schemeCreated"), description: t("inc.toast.schemeCreatedDesc", { name }) });
       }
       setSchemeDialogOpen(false);
       await loadSchemes();
     } catch (e) {
       toast({
-        title: "Could not save scheme",
-        description: e instanceof Error ? e.message : "Unexpected error.",
+        title: t("inc.toast.saveFailed"),
+        description: e instanceof Error ? e.message : t("inc.toast.unexpected"),
         variant: "destructive",
       });
     } finally {
@@ -279,13 +274,13 @@ export function IncentivesView() {
         prev ? prev.map((s) => (s.id === scheme.id ? { ...s, isActive: checked } : s)) : prev
       );
       toast({
-        title: checked ? "Scheme activated" : "Scheme deactivated",
+        title: checked ? t("inc.toast.schemeActivated") : t("inc.toast.schemeDeactivated"),
         description: scheme.name,
       });
     } catch (e) {
       toast({
-        title: "Could not update scheme",
-        description: e instanceof Error ? e.message : "Unexpected error.",
+        title: t("inc.toast.updateFailed"),
+        description: e instanceof Error ? e.message : t("inc.toast.unexpected"),
         variant: "destructive",
       });
     } finally {
@@ -298,8 +293,8 @@ export function IncentivesView() {
   async function generateRecommendations() {
     if (!selectedSchemeId) {
       toast({
-        title: "Select a scheme",
-        description: "Choose the incentive scheme to evaluate.",
+        title: t("inc.gen.selectScheme"),
+        description: t("inc.toast.selectSchemeDesc"),
         variant: "destructive",
       });
       return;
@@ -307,12 +302,12 @@ export function IncentivesView() {
     const period = periodInput.trim();
     if (!period) {
       toast({
-        title: "Enter a period",
+        title: t("inc.toast.enterPeriod"),
         description: isQuarterly
-          ? "Expected format: YYYY-QN (e.g. 2026-Q4)."
+          ? t("inc.toast.formatQuarter")
           : isAnnual
-            ? "Expected format: YYYY (e.g. 2026)."
-            : "Expected format: YYYY-MM (e.g. 2026-11).",
+            ? t("inc.toast.formatYear")
+            : t("inc.toast.formatMonth"),
         variant: "destructive",
       });
       return;
@@ -325,14 +320,14 @@ export function IncentivesView() {
       });
       const eligibleCount = res.records.filter((r) => r.eligible).length;
       toast({
-        title: "Recommendations generated",
-        description: `${res.records.length} evaluation(s) prepared — ${eligibleCount} eligible.`,
+        title: t("inc.toast.generatedTitle"),
+        description: t("inc.toast.generatedDesc", { total: res.records.length, eligible: eligibleCount }),
       });
       await loadRecords();
     } catch (e) {
       toast({
-        title: "Generation failed",
-        description: e instanceof Error ? e.message : "Unexpected error.",
+        title: t("inc.toast.generationFailed"),
+        description: e instanceof Error ? e.message : t("inc.toast.unexpected"),
         variant: "destructive",
       });
     } finally {
@@ -353,8 +348,8 @@ export function IncentivesView() {
       const n = Number(approveAmount);
       if (!Number.isFinite(n) || n < 0) {
         toast({
-          title: "Invalid amount",
-          description: "Approved amount must be zero or more (FCFA).",
+          title: t("inc.toast.invalidAmountTitle"),
+          description: t("inc.toast.invalidApprovedAmountDesc"),
           variant: "destructive",
         });
         return;
@@ -376,14 +371,18 @@ export function IncentivesView() {
         prev ? prev.map((r) => (r.id === res.record.id ? res.record : r)) : prev
       );
       toast({
-        title: status === "APPROVED" ? "Incentive approved" : "Incentive rejected",
-        description: `${res.record.staffName} — ${res.record.schemeName} (${res.record.period}).`,
+        title: status === "APPROVED" ? t("inc.toast.approvedTitle") : t("inc.toast.rejectedTitle"),
+        description: t("inc.toast.reviewedDesc", {
+          staff: res.record.staffName,
+          scheme: res.record.schemeName,
+          period: res.record.period,
+        }),
       });
       setReviewing(null);
     } catch (e) {
       toast({
-        title: "Review failed",
-        description: e instanceof Error ? e.message : "Unexpected error.",
+        title: t("inc.toast.reviewFailed"),
+        description: e instanceof Error ? e.message : t("inc.toast.unexpected"),
         variant: "destructive",
       });
     } finally {
@@ -402,13 +401,16 @@ export function IncentivesView() {
         prev ? prev.map((r) => (r.id === res.record.id ? res.record : r)) : prev
       );
       toast({
-        title: "Payment recorded",
-        description: `${record.staffName} — ${formatFCFA(res.record.approvedAmount)}.`,
+        title: t("inc.toast.paymentRecorded"),
+        description: t("inc.toast.paymentRecordedDesc", {
+          staff: record.staffName,
+          amount: formatFCFA(res.record.approvedAmount),
+        }),
       });
     } catch (e) {
       toast({
-        title: "Could not record payment",
-        description: e instanceof Error ? e.message : "Unexpected error.",
+        title: t("inc.toast.paymentFailed"),
+        description: e instanceof Error ? e.message : t("inc.toast.unexpected"),
         variant: "destructive",
       });
     } finally {
@@ -420,32 +422,29 @@ export function IncentivesView() {
 
   return (
     <div>
-      <PageHeader
-        title="Staff Incentives"
-        description="Define bonus schemes, generate evaluation recommendations from performance data, approve payments and record payouts."
-      />
+      <PageHeader title={t("inc.title")} description={t("inc.subtitle")} />
 
       <Tabs value={tab} onValueChange={setTab}>
         <TabsList className="mb-4">
           <TabsTrigger value="schemes">
             <Gift className="size-4 mr-1.5" />
-            Incentive Schemes
+            {t("inc.tab.schemes")}
           </TabsTrigger>
           <TabsTrigger value="evaluations">
             <Award className="size-4 mr-1.5" />
-            Evaluations & Approvals
+            {t("inc.tab.evaluations")}
           </TabsTrigger>
         </TabsList>
 
         {/* ------------------------------------------------------ schemes tab */}
         <TabsContent value="schemes">
           <SectionCard
-            title="Incentive Schemes"
+            title={t("inc.schemes.title")}
             action={
               canManageSchemes ? (
                 <Button size="sm" onClick={openCreateScheme}>
                   <Plus className="size-4 mr-1.5" />
-                  New Scheme
+                  {t("inc.schemes.new")}
                 </Button>
               ) : undefined
             }
@@ -460,17 +459,17 @@ export function IncentivesView() {
             ) : schemes.length === 0 ? (
               <EmptyState
                 icon={Gift}
-                title="No incentive schemes yet"
+                title={t("inc.schemes.emptyTitle")}
                 description={
                   canManageSchemes
-                    ? "Create your first scheme to start rewarding staff performance."
-                    : "Management has not defined any incentive scheme yet."
+                    ? t("inc.schemes.emptyDescManage")
+                    : t("inc.schemes.emptyDescView")
                 }
                 action={
                   canManageSchemes ? (
                     <Button size="sm" onClick={openCreateScheme}>
                       <Plus className="size-4 mr-1.5" />
-                      New Scheme
+                      {t("inc.schemes.new")}
                     </Button>
                   ) : undefined
                 }
@@ -480,13 +479,13 @@ export function IncentivesView() {
                 <Table className="min-w-[860px]">
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Period Type</TableHead>
-                      <TableHead className="text-center">Min Score</TableHead>
-                      <TableHead className="text-right">Amount</TableHead>
-                      <TableHead className="text-center">Active</TableHead>
-                      <TableHead>Created By</TableHead>
-                      {canManageSchemes && <TableHead className="text-right">Actions</TableHead>}
+                      <TableHead>{t("inc.schemes.col.name")}</TableHead>
+                      <TableHead>{t("inc.schemes.col.periodType")}</TableHead>
+                      <TableHead className="text-center">{t("inc.schemes.col.minScore")}</TableHead>
+                      <TableHead className="text-right">{t("inc.schemes.col.amount")}</TableHead>
+                      <TableHead className="text-center">{t("inc.schemes.col.active")}</TableHead>
+                      <TableHead>{t("inc.schemes.col.createdBy")}</TableHead>
+                      {canManageSchemes && <TableHead className="text-right">{t("common.actions")}</TableHead>}
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -502,11 +501,15 @@ export function IncentivesView() {
                         </TableCell>
                         <TableCell>
                           <Badge variant="secondary" className="whitespace-nowrap">
-                            {periodLabel(s.periodType)}
+                            {incentivePeriodLabel(s.periodType, lang)}
                           </Badge>
                         </TableCell>
                         <TableCell className="text-center tabular-nums">
-                          {s.minScore == null ? <span className="text-muted-foreground">Any</span> : `≥ ${s.minScore}`}
+                          {s.minScore == null ? (
+                            <span className="text-muted-foreground">{t("inc.schemes.anyScore")}</span>
+                          ) : (
+                            `≥ ${s.minScore}`
+                          )}
                         </TableCell>
                         <TableCell className="text-right tabular-nums font-medium">
                           {s.amount == null ? <span className="text-muted-foreground">—</span> : formatFCFA(s.amount)}
@@ -517,7 +520,7 @@ export function IncentivesView() {
                               checked={s.isActive}
                               disabled={togglingId === s.id}
                               onCheckedChange={(checked) => void toggleSchemeActive(s, checked)}
-                              aria-label={`Toggle ${s.name}`}
+                              aria-label={t("inc.schemes.toggleAria", { name: s.name })}
                             />
                           ) : (
                             <Badge
@@ -529,7 +532,7 @@ export function IncentivesView() {
                                   : "bg-stone-100 text-stone-500 border-stone-300"
                               )}
                             >
-                              {s.isActive ? "Active" : "Inactive"}
+                              {s.isActive ? t("inc.schemes.active") : t("inc.schemes.inactive")}
                             </Badge>
                           )}
                         </TableCell>
@@ -540,10 +543,10 @@ export function IncentivesView() {
                               variant="ghost"
                               size="sm"
                               onClick={() => openEditScheme(s)}
-                              aria-label={`Edit ${s.name}`}
+                              aria-label={t("inc.schemes.editAria", { name: s.name })}
                             >
                               <Pencil className="size-3.5 mr-1" />
-                              Edit
+                              {t("common.edit")}
                             </Button>
                           </TableCell>
                         )}
@@ -558,13 +561,13 @@ export function IncentivesView() {
 
         {/* -------------------------------------------------- evaluations tab */}
         <TabsContent value="evaluations">
-          <SectionCard title="Generate Recommendations" className="mb-4">
+          <SectionCard title={t("inc.gen.title")} className="mb-4">
             <div className="flex flex-col sm:flex-row sm:items-end gap-3">
               <div className="space-y-1.5 flex-1 min-w-[200px]">
-                <Label htmlFor="incentive-scheme">Scheme</Label>
+                <Label htmlFor="incentive-scheme">{t("inc.gen.schemeLabel")}</Label>
                 <Select value={selectedSchemeId} onValueChange={setSelectedSchemeId}>
                   <SelectTrigger id="incentive-scheme" className="w-full">
-                    <SelectValue placeholder="Select a scheme" />
+                    <SelectValue placeholder={t("inc.gen.selectScheme")} />
                   </SelectTrigger>
                   <SelectContent>
                     {(schemes ?? []).filter((s) => s.isActive).map((s) => (
@@ -576,7 +579,7 @@ export function IncentivesView() {
                 </Select>
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="incentive-period">Period</Label>
+                <Label htmlFor="incentive-period">{t("inc.gen.periodLabel")}</Label>
                 <Input
                   id="incentive-period"
                   className="sm:w-[170px]"
@@ -588,18 +591,18 @@ export function IncentivesView() {
               {canPrepare && (
                 <Button onClick={() => void generateRecommendations()} disabled={generating || !selectedSchemeId}>
                   <Sparkles className="size-4 mr-1.5" />
-                  {generating ? "Generating..." : "Generate Recommendations"}
+                  {generating ? t("inc.gen.generating") : t("inc.gen.title")}
                 </Button>
               )}
             </div>
             <p className="text-xs text-muted-foreground mt-3">
               {periodHint}
-              {selectedScheme ? ` — ${periodLabel(selectedScheme.periodType)}.` : "."} Scores are read
-              from the performance engine; approved or rejected records are never overwritten by regeneration.
+              {selectedScheme ? ` — ${incentivePeriodLabel(selectedScheme.periodType, lang)}.` : "."}{" "}
+              {t("inc.gen.hintScores")}
             </p>
           </SectionCard>
 
-          <SectionCard title="Evaluation Records" contentClassName="p-0">
+          <SectionCard title={t("inc.records.title")} contentClassName="p-0">
             {records === null ? (
               <div className="p-4 space-y-3">
                 {Array.from({ length: 3 }).map((_, i) => (
@@ -609,25 +612,25 @@ export function IncentivesView() {
             ) : records.length === 0 ? (
               <EmptyState
                 icon={Award}
-                title="No evaluations yet"
-                description="Generate recommendations for a scheme and period to create evaluation records."
+                title={t("inc.records.emptyTitle")}
+                description={t("inc.records.emptyDesc")}
               />
             ) : (
               <div className="overflow-x-auto max-h-[520px] overflow-y-auto">
                 <Table className="min-w-[1100px]">
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Staff</TableHead>
-                      <TableHead>Scheme</TableHead>
-                      <TableHead>Period</TableHead>
-                      <TableHead className="text-center">Score</TableHead>
-                      <TableHead className="text-center">Eligible</TableHead>
-                      <TableHead className="text-right">Proposed</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Approved</TableHead>
-                      <TableHead>Approved By</TableHead>
-                      <TableHead>Payment</TableHead>
-                      {(canApprove || canPay) && <TableHead className="text-right">Actions</TableHead>}
+                      <TableHead>{t("inc.records.col.staff")}</TableHead>
+                      <TableHead>{t("inc.records.col.scheme")}</TableHead>
+                      <TableHead>{t("inc.records.col.period")}</TableHead>
+                      <TableHead className="text-center">{t("inc.records.col.score")}</TableHead>
+                      <TableHead className="text-center">{t("inc.records.col.eligible")}</TableHead>
+                      <TableHead className="text-right">{t("inc.records.col.proposed")}</TableHead>
+                      <TableHead>{t("inc.records.col.status")}</TableHead>
+                      <TableHead className="text-right">{t("inc.records.col.approved")}</TableHead>
+                      <TableHead>{t("inc.records.col.approvedBy")}</TableHead>
+                      <TableHead>{t("inc.records.col.payment")}</TableHead>
+                      {(canApprove || canPay) && <TableHead className="text-right">{t("common.actions")}</TableHead>}
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -641,9 +644,9 @@ export function IncentivesView() {
                         </TableCell>
                         <TableCell className="text-center">
                           {r.eligible ? (
-                            <CheckCircle2 className="size-4 text-emerald-600 mx-auto" aria-label="Eligible" />
+                            <CheckCircle2 className="size-4 text-emerald-600 mx-auto" aria-label={t("inc.records.col.eligible")} />
                           ) : (
-                            <XCircle className="size-4 text-stone-400 mx-auto" aria-label="Not eligible" />
+                            <XCircle className="size-4 text-stone-400 mx-auto" aria-label={t("inc.records.notEligible")} />
                           )}
                         </TableCell>
                         <TableCell className="text-right tabular-nums">{formatFCFA(r.proposedAmount)}</TableCell>
@@ -666,7 +669,7 @@ export function IncentivesView() {
                             <div className="flex items-center justify-end gap-1.5">
                               {canApprove && r.status === "PENDING" && (
                                 <Button variant="outline" size="sm" onClick={() => openReview(r)}>
-                                  Review
+                                  {t("inc.records.review")}
                                 </Button>
                               )}
                               {canPay && r.status === "APPROVED" && r.paymentStatus === "UNPAID" && (
@@ -677,7 +680,7 @@ export function IncentivesView() {
                                   onClick={() => void markPaid(r)}
                                 >
                                   <CheckCircle2 className="size-3.5 mr-1" />
-                                  Mark as Paid
+                                  {t("inc.records.markPaid")}
                                 </Button>
                               )}
                               {!(canApprove && r.status === "PENDING") &&
@@ -701,27 +704,26 @@ export function IncentivesView() {
       <Dialog open={schemeDialogOpen} onOpenChange={setSchemeDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editingScheme ? "Edit Scheme" : "New Incentive Scheme"}</DialogTitle>
+            <DialogTitle>{editingScheme ? t("inc.schemeDialog.editTitle") : t("inc.schemeDialog.newTitle")}</DialogTitle>
             <DialogDescription>
-              Define the evaluation rule. Amounts are in FCFA; minimum score is compared against the
-              staff performance score for the period.
+              {t("inc.schemeDialog.description")}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-1.5">
               <Label htmlFor="scheme-name">
-                Name <span className="text-red-600">*</span>
+                {t("inc.schemeDialog.name")} <span className="text-red-600">*</span>
               </Label>
               <Input
                 id="scheme-name"
                 maxLength={120}
                 value={schemeForm.name}
                 onChange={(e) => setSchemeForm((f) => ({ ...f, name: e.target.value }))}
-                placeholder="e.g. Monthly Excellence Bonus"
+                placeholder={t("inc.schemeDialog.namePlaceholder")}
               />
             </div>
             <div className="space-y-1.5">
-              <Label>Period type</Label>
+              <Label>{t("inc.schemeDialog.periodType")}</Label>
               <Select
                 value={schemeForm.periodType}
                 onValueChange={(v) => setSchemeForm((f) => ({ ...f, periodType: v as IncentivePeriodType }))}
@@ -730,9 +732,9 @@ export function IncentivesView() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {INCENTIVE_PERIOD_TYPES.map((t) => (
-                    <SelectItem key={t} value={t}>
-                      {INCENTIVE_PERIOD_LABELS[t]}
+                  {INCENTIVE_PERIOD_TYPES.map((periodType) => (
+                    <SelectItem key={periodType} value={periodType}>
+                      {incentivePeriodLabel(periodType, lang)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -740,7 +742,7 @@ export function IncentivesView() {
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label htmlFor="scheme-min">Min score (0-100)</Label>
+                <Label htmlFor="scheme-min">{t("inc.schemeDialog.minScore")}</Label>
                 <Input
                   id="scheme-min"
                   type="number"
@@ -748,39 +750,39 @@ export function IncentivesView() {
                   max={100}
                   value={schemeForm.minScore}
                   onChange={(e) => setSchemeForm((f) => ({ ...f, minScore: e.target.value }))}
-                  placeholder="Optional"
+                  placeholder={t("common.optional")}
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="scheme-amount">Amount (FCFA)</Label>
+                <Label htmlFor="scheme-amount">{t("inc.schemeDialog.amount")}</Label>
                 <Input
                   id="scheme-amount"
                   type="number"
                   min={0}
                   value={schemeForm.amount}
                   onChange={(e) => setSchemeForm((f) => ({ ...f, amount: e.target.value }))}
-                  placeholder="Optional"
+                  placeholder={t("common.optional")}
                 />
               </div>
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="scheme-desc">Description</Label>
+              <Label htmlFor="scheme-desc">{t("inc.schemeDialog.descriptionLabel")}</Label>
               <Textarea
                 id="scheme-desc"
                 rows={3}
                 value={schemeForm.description}
                 onChange={(e) => setSchemeForm((f) => ({ ...f, description: e.target.value }))}
-                placeholder="What this scheme rewards."
+                placeholder={t("inc.schemeDialog.descPlaceholder")}
               />
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setSchemeDialogOpen(false)} disabled={savingScheme}>
-              Cancel
+              {t("common.cancel")}
             </Button>
             <Button onClick={() => void saveScheme()} disabled={savingScheme}>
               <Save className="size-4 mr-1.5" />
-              {savingScheme ? "Saving..." : editingScheme ? "Save Changes" : "Create Scheme"}
+              {savingScheme ? t("inc.schemeDialog.saving") : editingScheme ? t("common.saveChanges") : t("inc.schemeDialog.create")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -790,10 +792,9 @@ export function IncentivesView() {
       <Dialog open={reviewing !== null} onOpenChange={(o) => !o && setReviewing(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Review Incentive</DialogTitle>
+            <DialogTitle>{t("inc.review.title")}</DialogTitle>
             <DialogDescription>
-              Approve or reject this incentive recommendation. The decision is final — regeneration
-              will not alter reviewed records.
+              {t("inc.review.description")}
             </DialogDescription>
           </DialogHeader>
           {reviewing && (
@@ -803,16 +804,16 @@ export function IncentivesView() {
                   {reviewing.staffName} — {reviewing.schemeName}
                 </p>
                 <p className="text-muted-foreground">
-                  Period {reviewing.period} · Score {reviewing.performanceScore} ·{" "}
-                  {reviewing.eligible ? "eligible" : "not eligible"}
+                  {t("inc.review.periodScore", { period: reviewing.period, score: reviewing.performanceScore })}{" "}·{" "}
+                  {reviewing.eligible ? t("inc.review.eligible") : t("inc.review.notEligible")}
                 </p>
                 <p>
-                  Proposed amount:{" "}
+                  {t("inc.review.proposedAmount")}{" "}
                   <span className="font-semibold">{formatFCFA(reviewing.proposedAmount)}</span>
                 </p>
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="approve-amount">Approved amount (FCFA)</Label>
+                <Label htmlFor="approve-amount">{t("inc.review.approvedAmount")}</Label>
                 <Input
                   id="approve-amount"
                   type="number"
@@ -822,13 +823,13 @@ export function IncentivesView() {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="review-comments">Comments</Label>
+                <Label htmlFor="review-comments">{t("inc.review.comments")}</Label>
                 <Textarea
                   id="review-comments"
                   rows={3}
                   value={reviewComments}
                   onChange={(e) => setReviewComments(e.target.value)}
-                  placeholder="Optional note recorded with the decision."
+                  placeholder={t("inc.review.commentsPlaceholder")}
                 />
               </div>
             </div>
@@ -840,11 +841,11 @@ export function IncentivesView() {
               onClick={() => void submitReview("REJECTED")}
             >
               <XCircle className="size-4 mr-1.5" />
-              Reject
+              {t("inc.review.reject")}
             </Button>
             <Button disabled={submittingReview} onClick={() => void submitReview("APPROVED")}>
               <CheckCircle2 className="size-4 mr-1.5" />
-              Approve
+              {t("inc.review.approve")}
             </Button>
           </DialogFooter>
         </DialogContent>

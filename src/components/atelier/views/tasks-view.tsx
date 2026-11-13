@@ -5,15 +5,12 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { api, qs } from "../client";
+import { useI18n } from "../i18n/use-i18n";
+import { priorityLabel, statusLabel } from "../i18n/core";
 import { isSupervisor, useAppStore } from "../store";
 import type { TaskListResponse, TaskSummary, UserRecord } from "../types";
 import { DueDate, EmptyState, PageHeader, ProgressCell, StatusBadge } from "../ui-bits";
-import {
-  PRIORITIES,
-  PRIORITY_LABELS,
-  STATUS_LABELS,
-  TASK_STATUSES,
-} from "@/lib/atelier/constants";
+import { PRIORITIES, TASK_STATUSES } from "@/lib/atelier/constants";
 import { formatDateTime, timeAgo } from "@/lib/format";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -51,11 +48,11 @@ const PAGE_SIZE = 20;
 
 type SortKey = "updated" | "deadline" | "progress" | "created";
 
-const SORT_OPTIONS: Array<{ value: SortKey; label: string }> = [
-  { value: "updated", label: "Recently updated" },
-  { value: "deadline", label: "Deadline" },
-  { value: "progress", label: "Progress" },
-  { value: "created", label: "Newest" },
+const SORT_OPTIONS: Array<{ value: SortKey; labelKey: string }> = [
+  { value: "updated", labelKey: "tasks.sortUpdated" },
+  { value: "deadline", labelKey: "tasks.sortDeadline" },
+  { value: "progress", labelKey: "tasks.sortProgress" },
+  { value: "created", labelKey: "tasks.sortCreated" },
 ];
 
 export function TasksView() {
@@ -63,6 +60,7 @@ export function TasksView() {
   const openTask = useAppStore((s) => s.openTask);
   const navigate = useAppStore((s) => s.navigate);
   const { toast } = useToast();
+  const { t, lang } = useI18n();
   const supervisor = isSupervisor(user);
 
   // ---- Filters -------------------------------------------------------------
@@ -132,9 +130,9 @@ export function TasksView() {
       setTotal(res.total);
       setError(null);
     } catch (e) {
-      const message = e instanceof Error ? e.message : "Failed to load tasks.";
+      const message = e instanceof Error ? e.message : t("tasks.loadFailed");
       setError(message);
-      toast({ title: "Could not load tasks", description: message, variant: "destructive" });
+      toast({ title: t("tasks.loadFailedTitle"), description: message, variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -149,6 +147,7 @@ export function TasksView() {
     from,
     to,
     toast,
+    t,
   ]);
 
   useEffect(() => {
@@ -167,29 +166,27 @@ export function TasksView() {
 
   const emptyTitle = supervisor
     ? hasFilters
-      ? "No tasks match your filters"
-      : "No production tasks yet"
-    : "No tasks assigned to you";
+      ? t("tasks.emptyFilteredTitle")
+      : t("tasks.emptyTitle")
+    : t("tasks.emptyStaffTitle");
   const emptyDescription = supervisor
     ? hasFilters
-      ? "Try adjusting the search or filters above."
-      : "Create tasks from a customer order to start production."
-    : "Garment pieces allocated to your account will appear here.";
+      ? t("tasks.emptyFilteredDesc")
+      : t("tasks.emptyDesc")
+    : t("tasks.emptyStaffDesc");
 
   return (
     <div>
       <PageHeader
-        title={supervisor ? "Production" : "My Tasks"}
+        title={supervisor ? t("tasks.title") : t("tasks.myTitle")}
         description={
-          supervisor
-            ? "Monitor every garment production task across the atelier."
-            : "Your assigned garment pieces and their production status."
+          supervisor ? t("tasks.description") : t("tasks.myDescription")
         }
       >
         {supervisor && (
           <Button size="sm" onClick={() => navigate("task-create")}>
             <Plus className="size-4" />
-            Create Tasks
+            {t("tasks.createTasks")}
           </Button>
         )}
       </PageHeader>
@@ -199,13 +196,13 @@ export function TasksView() {
         <CardContent className="p-4">
           <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
             <div className="space-y-1.5 lg:col-span-2">
-              <Label htmlFor="tasks-search">Search</Label>
+              <Label htmlFor="tasks-search">{t("common.search")}</Label>
               <div className="relative">
                 <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
                 <Input
                   id="tasks-search"
                   className="pl-8"
-                  placeholder="Order number, customer, piece or task code"
+                  placeholder={t("tasks.searchPlaceholder")}
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
                 />
@@ -213,7 +210,7 @@ export function TasksView() {
             </div>
 
             <div className="space-y-1.5">
-              <Label>Status</Label>
+              <Label>{t("tasks.status")}</Label>
               <Select
                 value={statusFilter}
                 onValueChange={(v) => {
@@ -221,14 +218,14 @@ export function TasksView() {
                   setPage(1);
                 }}
               >
-                <SelectTrigger className="w-full" aria-label="Filter by status">
+                <SelectTrigger className="w-full" aria-label={t("tasks.filterByStatus")}>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All statuses</SelectItem>
+                  <SelectItem value="all">{t("tasks.allStatuses")}</SelectItem>
                   {TASK_STATUSES.map((s) => (
                     <SelectItem key={s} value={s}>
-                      {STATUS_LABELS[s]}
+                      {statusLabel(s, lang)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -236,7 +233,7 @@ export function TasksView() {
             </div>
 
             <div className="space-y-1.5">
-              <Label>Sort by</Label>
+              <Label>{t("tasks.sortBy")}</Label>
               <Select
                 value={sortBy}
                 onValueChange={(v) => {
@@ -244,13 +241,13 @@ export function TasksView() {
                   setPage(1);
                 }}
               >
-                <SelectTrigger className="w-full" aria-label="Sort tasks">
+                <SelectTrigger className="w-full" aria-label={t("tasks.sortAria")}>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   {SORT_OPTIONS.map((o) => (
                     <SelectItem key={o.value} value={o.value}>
-                      {o.label}
+                      {t(o.labelKey)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -259,7 +256,7 @@ export function TasksView() {
 
             {supervisor && (
               <div className="space-y-1.5">
-                <Label>Staff</Label>
+                <Label>{t("tasks.staff")}</Label>
                 <Select
                   value={staffFilter}
                   onValueChange={(v) => {
@@ -267,16 +264,18 @@ export function TasksView() {
                     setPage(1);
                   }}
                 >
-                  <SelectTrigger className="w-full" aria-label="Filter by staff">
+                  <SelectTrigger className="w-full" aria-label={t("tasks.filterByStaff")}>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All staff</SelectItem>
-                    <SelectItem value="unassigned">Unassigned</SelectItem>
+                    <SelectItem value="all">{t("tasks.allStaff")}</SelectItem>
+                    <SelectItem value="unassigned">{t("tasks.unassignedFilter")}</SelectItem>
                     {staff.map((u) => (
                       <SelectItem key={u.id} value={u.id}>
                         {u.name}
-                        {u.activeTaskCount != null ? ` (${u.activeTaskCount} active)` : ""}
+                        {u.activeTaskCount != null
+                          ? ` (${t("tasks.activeCount", { count: u.activeTaskCount })})`
+                          : ""}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -286,7 +285,7 @@ export function TasksView() {
 
             {supervisor && (
               <div className="space-y-1.5">
-                <Label>Priority</Label>
+                <Label>{t("tasks.priority")}</Label>
                 <Select
                   value={priorityFilter}
                   onValueChange={(v) => {
@@ -294,14 +293,14 @@ export function TasksView() {
                     setPage(1);
                   }}
                 >
-                  <SelectTrigger className="w-full" aria-label="Filter by priority">
+                  <SelectTrigger className="w-full" aria-label={t("tasks.filterByPriority")}>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All priorities</SelectItem>
+                    <SelectItem value="all">{t("tasks.allPriorities")}</SelectItem>
                     {PRIORITIES.map((p) => (
                       <SelectItem key={p} value={p}>
-                        {PRIORITY_LABELS[p]}
+                        {priorityLabel(p, lang)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -311,7 +310,7 @@ export function TasksView() {
 
             {supervisor && (
               <div className="space-y-1.5">
-                <Label htmlFor="tasks-from">Deadline from</Label>
+                <Label htmlFor="tasks-from">{t("tasks.deadlineFrom")}</Label>
                 <Input
                   id="tasks-from"
                   type="date"
@@ -326,7 +325,7 @@ export function TasksView() {
 
             {supervisor && (
               <div className="space-y-1.5">
-                <Label htmlFor="tasks-to">Deadline to</Label>
+                <Label htmlFor="tasks-to">{t("tasks.deadlineTo")}</Label>
                 <Input
                   id="tasks-to"
                   type="date"
@@ -348,7 +347,7 @@ export function TasksView() {
                   setPage(1);
                 }}
               />
-              <Label htmlFor="tasks-overdue">Overdue only</Label>
+              <Label htmlFor="tasks-overdue">{t("tasks.overdueOnly")}</Label>
             </div>
           </div>
         </CardContent>
@@ -358,7 +357,7 @@ export function TasksView() {
       {error && tasks.length > 0 && (
         <Alert variant="destructive" className="mb-4">
           <AlertTriangle />
-          <AlertTitle>Could not refresh tasks</AlertTitle>
+          <AlertTitle>{t("tasks.refreshFailed")}</AlertTitle>
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
@@ -369,11 +368,11 @@ export function TasksView() {
           <CardContent className="p-0">
             <EmptyState
               icon={AlertTriangle}
-              title="Could not load tasks"
+              title={t("tasks.loadFailedTitle")}
               description={error}
               action={
                 <Button variant="outline" size="sm" onClick={() => fetchTasks()}>
-                  Retry
+                  {t("common.tryAgain")}
                 </Button>
               }
             />
@@ -385,13 +384,13 @@ export function TasksView() {
             <Table className="min-w-[900px]">
               <TableHeader>
                 <TableRow>
-                  <TableHead className="pl-4 w-[220px]">Task</TableHead>
-                  <TableHead className="w-[200px]">Order</TableHead>
-                  <TableHead className="w-[150px]">Assignee</TableHead>
-                  <TableHead className="w-[160px]">Status</TableHead>
-                  <TableHead className="w-[170px]">Progress</TableHead>
-                  <TableHead className="w-[140px]">Deadline</TableHead>
-                  <TableHead className="pr-4 text-right">Last Update</TableHead>
+                  <TableHead className="pl-4 w-[220px]">{t("tasks.colTask")}</TableHead>
+                  <TableHead className="w-[200px]">{t("tasks.colOrder")}</TableHead>
+                  <TableHead className="w-[150px]">{t("tasks.colAssignee")}</TableHead>
+                  <TableHead className="w-[160px]">{t("tasks.colStatus")}</TableHead>
+                  <TableHead className="w-[170px]">{t("tasks.colProgress")}</TableHead>
+                  <TableHead className="w-[140px]">{t("tasks.colDeadline")}</TableHead>
+                  <TableHead className="pr-4 text-right">{t("tasks.colLastUpdate")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -428,7 +427,7 @@ export function TasksView() {
                                 setPage(1);
                               }}
                             >
-                              Clear filters
+                              {t("tasks.clearFilters")}
                             </Button>
                           ) : undefined
                         }
@@ -436,51 +435,56 @@ export function TasksView() {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  tasks.map((t) => (
+                  tasks.map((task) => (
                     <TableRow
-                      key={t.id}
+                      key={task.id}
                       tabIndex={0}
                       className="cursor-pointer focus-visible:bg-muted/60 outline-none"
-                      onClick={() => openTask(t.id)}
+                      onClick={() => openTask(task.id)}
                       onKeyDown={(e) => {
                         if (e.key === "Enter" || e.key === " ") {
                           e.preventDefault();
-                          openTask(t.id);
+                          openTask(task.id);
                         }
                       }}
-                      aria-label={`Open task ${t.code} — ${t.garmentPiece}`}
+                      aria-label={t("tasks.openTaskAria", {
+                        code: task.code,
+                        piece: task.garmentPiece,
+                      })}
                     >
                       <TableCell className="pl-4">
-                        <p className="font-medium text-sm leading-tight">{t.garmentPiece}</p>
-                        <p className="text-xs text-muted-foreground mt-0.5">{t.code}</p>
+                        <p className="font-medium text-sm leading-tight">{task.garmentPiece}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">{task.code}</p>
                       </TableCell>
                       <TableCell>
-                        <p className="text-sm leading-tight">{t.orderNumber}</p>
+                        <p className="text-sm leading-tight">{task.orderNumber}</p>
                         <p className="text-xs text-muted-foreground mt-0.5 truncate max-w-44">
-                          {t.customerName}
+                          {task.customerName}
                         </p>
                       </TableCell>
                       <TableCell>
-                        {t.assignedStaffName ? (
-                          <span className="text-sm">{t.assignedStaffName}</span>
+                        {task.assignedStaffName ? (
+                          <span className="text-sm">{task.assignedStaffName}</span>
                         ) : (
-                          <span className="text-sm text-muted-foreground italic">Unassigned</span>
+                          <span className="text-sm text-muted-foreground italic">
+                            {t("tasks.unassigned")}
+                          </span>
                         )}
                       </TableCell>
                       <TableCell>
-                        <StatusBadge status={t.status} />
+                        <StatusBadge status={task.status} />
                       </TableCell>
                       <TableCell>
-                        <ProgressCell value={t.progress} status={t.status} />
+                        <ProgressCell value={task.progress} status={task.status} />
                       </TableCell>
                       <TableCell>
-                        <DueDate deadline={t.deadline} overdue={t.overdue} />
+                        <DueDate deadline={task.deadline} overdue={task.overdue} />
                       </TableCell>
                       <TableCell
                         className="pr-4 text-right text-xs text-muted-foreground"
-                        title={formatDateTime(t.updatedAt)}
+                        title={formatDateTime(task.updatedAt)}
                       >
-                        {timeAgo(t.updatedAt)}
+                        {timeAgo(task.updatedAt)}
                       </TableCell>
                     </TableRow>
                   ))
@@ -491,7 +495,9 @@ export function TasksView() {
             {/* ---- Pagination ---- */}
             <div className="flex flex-col sm:flex-row items-center justify-between gap-2 border-t px-4 py-3">
               <p className="text-xs text-muted-foreground">
-                {total} task{total === 1 ? "" : "s"} total
+                {total === 1
+                  ? t("tasks.totalOne", { count: total })
+                  : t("tasks.totalMany", { count: total })}
               </p>
               <div className="flex items-center gap-2">
                 <Button
@@ -501,10 +507,10 @@ export function TasksView() {
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                 >
                   <ChevronLeft className="size-4" />
-                  Previous
+                  {t("tasks.previous")}
                 </Button>
                 <span className="text-xs text-muted-foreground tabular-nums whitespace-nowrap px-1">
-                  Page {page} of {totalPages}
+                  {t("tasks.pageOf", { page, totalPages })}
                 </span>
                 <Button
                   variant="outline"
@@ -512,7 +518,7 @@ export function TasksView() {
                   disabled={page >= totalPages || loading}
                   onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 >
-                  Next
+                  {t("tasks.next")}
                   <ChevronRight className="size-4" />
                 </Button>
               </div>

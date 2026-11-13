@@ -5,6 +5,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { api, ApiClientError } from "../client";
 import { can, useAppStore } from "../store";
+import { useI18n } from "../i18n/use-i18n";
 import type { Customer } from "../types";
 import { EmptyState, PageHeader } from "../ui-bits";
 import { useToast } from "@/hooks/use-toast";
@@ -54,6 +55,7 @@ function useDebounced<T>(value: T, ms = 300) {
 export function CustomersView() {
   const user = useAppStore((s) => s.user);
   const { toast } = useToast();
+  const { t } = useI18n();
   const canManage = can(user, "customers.manage");
 
   const [customers, setCustomers] = useState<Customer[] | null>(null);
@@ -75,9 +77,9 @@ export function CustomersView() {
       setCustomers(res.customers);
       setError(null);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to load customers");
+      setError(e instanceof Error ? e.message : t("cust.loadFail"));
     }
-  }, [debouncedSearch]);
+  }, [debouncedSearch, t]);
 
   useEffect(() => {
     load();
@@ -105,7 +107,7 @@ export function CustomersView() {
 
   async function submit() {
     if (!form.name.trim() || !form.phone.trim()) {
-      setFormError("Customer name and phone number are required.");
+      setFormError(t("cust.namePhoneRequired"));
       return;
     }
     setSubmitting(true);
@@ -119,7 +121,10 @@ export function CustomersView() {
           address: form.address,
           notes: form.notes,
         });
-        toast({ title: "Customer updated", description: `${form.name} was saved.` });
+        toast({
+          title: t("cust.updatedToast"),
+          description: t("cust.updatedToastDesc", { name: form.name }),
+        });
       } else {
         const res = await api.post<{ customer: Customer }>("/api/atelier/customers", {
           name: form.name,
@@ -129,8 +134,11 @@ export function CustomersView() {
           ...(form.notes ? { notes: form.notes } : {}),
         });
         toast({
-          title: "Customer registered",
-          description: `${res.customer.name} received code ${res.customer.code}.`,
+          title: t("cust.registeredToast"),
+          description: t("cust.registeredToastDesc", {
+            name: res.customer.name,
+            code: res.customer.code,
+          }),
         });
       }
       setDialogOpen(false);
@@ -139,10 +147,10 @@ export function CustomersView() {
       const message =
         e instanceof ApiClientError
           ? e.details?.issues?.[0]?.message ?? e.message
-          : "Something went wrong. Please try again.";
+          : t("common.somethingWrong");
       setFormError(message);
       toast({
-        title: editing ? "Could not update customer" : "Could not register customer",
+        title: editing ? t("cust.updateFailed") : t("cust.registerFailed"),
         description: message,
         variant: "destructive",
       });
@@ -154,13 +162,13 @@ export function CustomersView() {
   return (
     <div>
       <PageHeader
-        title="Customers"
-        description="Directory of registered customers with their order history."
+        title={t("cust.title")}
+        description={t("cust.subtitle")}
       >
         {canManage && (
           <Button onClick={openCreate}>
             <Plus className="size-4 mr-1.5" />
-            Register Customer
+            {t("cust.register")}
           </Button>
         )}
       </PageHeader>
@@ -171,9 +179,9 @@ export function CustomersView() {
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by name, phone, email or code…"
+            placeholder={t("cust.searchPlaceholder")}
             className="pl-8"
-            aria-label="Search customers"
+            aria-label={t("cust.searchLabel")}
           />
         </div>
       </div>
@@ -181,11 +189,11 @@ export function CustomersView() {
       {error ? (
         <EmptyState
           icon={AlertTriangle}
-          title="Could not load customers"
+          title={t("cust.loadFailedTitle")}
           description={error}
           action={
             <Button variant="outline" size="sm" onClick={load}>
-              Try again
+              {t("common.tryAgain")}
             </Button>
           }
         />
@@ -200,17 +208,17 @@ export function CustomersView() {
         <div className="rounded-lg border">
           <EmptyState
             icon={Users}
-            title={search ? "No customers match your search" : "No customers registered yet"}
+            title={search ? t("cust.emptySearchTitle") : t("cust.emptyTitle")}
             description={
               search
-                ? "Try a different name, phone number or customer code."
-                : "Register your first customer to start taking orders."
+                ? t("cust.emptySearchDesc")
+                : t("cust.emptyDesc")
             }
             action={
               canManage && !search ? (
                 <Button size="sm" onClick={openCreate}>
                   <Plus className="size-4 mr-1.5" />
-                  Register Customer
+                  {t("cust.register")}
                 </Button>
               ) : undefined
             }
@@ -221,14 +229,16 @@ export function CustomersView() {
           <Table className="min-w-[820px]">
             <TableHeader>
               <TableRow>
-                <TableHead>Code</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>Phone</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Address</TableHead>
-                <TableHead className="text-center">Orders</TableHead>
-                <TableHead>Registered</TableHead>
-                {canManage && <TableHead className="w-12 text-right sr-only">Actions</TableHead>}
+                <TableHead>{t("cust.colCode")}</TableHead>
+                <TableHead>{t("cust.colName")}</TableHead>
+                <TableHead>{t("cust.colPhone")}</TableHead>
+                <TableHead>{t("cust.colEmail")}</TableHead>
+                <TableHead>{t("cust.colAddress")}</TableHead>
+                <TableHead className="text-center">{t("cust.colOrders")}</TableHead>
+                <TableHead>{t("cust.colRegistered")}</TableHead>
+                {canManage && (
+                  <TableHead className="w-12 text-right sr-only">{t("common.actions")}</TableHead>
+                )}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -258,7 +268,7 @@ export function CustomersView() {
                         size="icon"
                         className="size-8"
                         onClick={() => openEdit(c)}
-                        aria-label={`Edit ${c.name}`}
+                        aria-label={t("cust.editAria", { name: c.name })}
                       >
                         <Pencil className="size-4" />
                       </Button>
@@ -274,26 +284,26 @@ export function CustomersView() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editing ? "Edit Customer" : "Register Customer"}</DialogTitle>
+            <DialogTitle>{editing ? t("cust.editTitle") : t("cust.register")}</DialogTitle>
             <DialogDescription>
               {editing
-                ? `Update the details of ${editing.name} (${editing.code}).`
-                : "A unique customer code (CUST-XXXX) is generated automatically."}
+                ? t("cust.editDesc", { name: editing.name, code: editing.code })
+                : t("cust.registerDesc")}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="grid gap-1.5">
-              <Label htmlFor="cust-name">Name *</Label>
+              <Label htmlFor="cust-name">{t("cust.fieldName")}</Label>
               <Input
                 id="cust-name"
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
-                placeholder="e.g. Amina Cissé"
+                placeholder={t("cust.namePlaceholder")}
                 maxLength={120}
               />
             </div>
             <div className="grid gap-1.5">
-              <Label htmlFor="cust-phone">Phone *</Label>
+              <Label htmlFor="cust-phone">{t("cust.fieldPhone")}</Label>
               <Input
                 id="cust-phone"
                 value={form.phone}
@@ -303,7 +313,7 @@ export function CustomersView() {
               />
             </div>
             <div className="grid gap-1.5 sm:col-span-2">
-              <Label htmlFor="cust-email">Email</Label>
+              <Label htmlFor="cust-email">{t("cust.fieldEmail")}</Label>
               <Input
                 id="cust-email"
                 type="email"
@@ -313,22 +323,22 @@ export function CustomersView() {
               />
             </div>
             <div className="grid gap-1.5 sm:col-span-2">
-              <Label htmlFor="cust-address">Address</Label>
+              <Label htmlFor="cust-address">{t("cust.fieldAddress")}</Label>
               <Input
                 id="cust-address"
                 value={form.address}
                 onChange={(e) => setForm({ ...form, address: e.target.value })}
-                placeholder="Neighbourhood, city"
+                placeholder={t("cust.addressPlaceholder")}
                 maxLength={300}
               />
             </div>
             <div className="grid gap-1.5 sm:col-span-2">
-              <Label htmlFor="cust-notes">Notes</Label>
+              <Label htmlFor="cust-notes">{t("cust.fieldNotes")}</Label>
               <Textarea
                 id="cust-notes"
                 value={form.notes}
                 onChange={(e) => setForm({ ...form, notes: e.target.value })}
-                placeholder="Preferences, measurements remarks, payment history…"
+                placeholder={t("cust.notesPlaceholder")}
                 rows={3}
               />
             </div>
@@ -338,11 +348,11 @@ export function CustomersView() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)} disabled={submitting}>
-              Cancel
+              {t("common.cancel")}
             </Button>
             <Button onClick={submit} disabled={submitting}>
               {submitting && <span className="size-4 mr-1.5 animate-spin rounded-full border-2 border-current border-t-transparent" />}
-              {editing ? "Save Changes" : "Register Customer"}
+              {editing ? t("common.saveChanges") : t("cust.register")}
             </Button>
           </DialogFooter>
         </DialogContent>

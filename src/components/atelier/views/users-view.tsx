@@ -8,6 +8,8 @@ import { useCallback, useEffect, useState } from "react";
 import { api, ApiClientError } from "../client";
 import { can, useAppStore } from "../store";
 import type { UserRecord } from "../types";
+import { useI18n, type TranslateFn } from "../i18n/use-i18n";
+import { roleLabel } from "../i18n/core";
 import { EmptyState, PageHeader, RoleBadge } from "../ui-bits";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -87,14 +89,23 @@ type EditForm = {
   role: string;
 };
 
-const ROLE_HINTS: Record<string, string> = {
-  MANAGEMENT: "Full access, final authority on incentives and critical decisions.",
-  ADMIN: "Operational management of customers, orders, production and staff accounts.",
-  STAFF: "Sees and updates only the tasks assigned to their own account.",
-};
+/** Per-role permission hint shown in the create dialog (bilingual). */
+function roleHint(role: string, t: TranslateFn): string {
+  switch (role) {
+    case "MANAGEMENT":
+      return t("users.roleHint.management");
+    case "ADMIN":
+      return t("users.roleHint.admin");
+    case "STAFF":
+      return t("users.roleHint.staff");
+    default:
+      return "";
+  }
+}
 
 export function UsersView() {
   const user = useAppStore((s) => s.user);
+  const { t, lang } = useI18n();
   const { toast } = useToast();
   const canManageStaff = can(user, "users.manage.staff") || can(user, "users.manage.all");
   const isManagement = user?.role === "MANAGEMENT";
@@ -130,7 +141,9 @@ export function UsersView() {
       setUsers(res.users);
       setError(null);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to load users");
+      // Empty string marks a generic failure; the translated message is
+      // rendered at display time so it follows the active language.
+      setError(e instanceof Error ? e.message : "");
     }
   }, []);
 
@@ -140,7 +153,7 @@ export function UsersView() {
 
   function errMessage(e: unknown): string {
     if (e instanceof ApiClientError) return e.details?.issues?.[0]?.message ?? e.message;
-    return "Something went wrong. Please try again.";
+    return t("common.somethingWrong");
   }
 
   function openCreate() {
@@ -152,11 +165,11 @@ export function UsersView() {
 
   async function submitCreate() {
     if (!createForm.name.trim() || !createForm.email.trim()) {
-      setFormError("Name and email are required.");
+      setFormError(t("users.nameEmailRequired"));
       return;
     }
     if (createForm.password.length < 8) {
-      setFormError("Password must be at least 8 characters.");
+      setFormError(t("users.passwordTooShort"));
       return;
     }
     setSubmitting(true);
@@ -171,15 +184,18 @@ export function UsersView() {
         ...(createForm.jobTitle ? { jobTitle: createForm.jobTitle } : {}),
       });
       toast({
-        title: "Account created",
-        description: `${res.user.name} (${res.user.role.toLowerCase()}) can now sign in.`,
+        title: t("users.createdToastTitle"),
+        description: t("users.createdToastDesc", {
+          name: res.user.name,
+          role: roleLabel(res.user.role, lang).toLowerCase(),
+        }),
       });
       setCreateOpen(false);
       await load();
     } catch (e) {
       const message = errMessage(e);
       setFormError(message);
-      toast({ title: "Could not create account", description: message, variant: "destructive" });
+      toast({ title: t("users.createFailedToast"), description: message, variant: "destructive" });
     } finally {
       setSubmitting(false);
     }
@@ -199,8 +215,8 @@ export function UsersView() {
     if (!editTarget) return;
     if (!editForm.name.trim() || editForm.name.trim().length < 2) {
       toast({
-        title: "Could not update account",
-        description: "Name must be at least 2 characters.",
+        title: t("users.updateFailedToast"),
+        description: t("users.nameTooShort"),
         variant: "destructive",
       });
       return;
@@ -213,11 +229,11 @@ export function UsersView() {
         jobTitle: editForm.jobTitle,
         ...(isManagement ? { role: editForm.role } : {}),
       });
-      toast({ title: "Account updated", description: `${editForm.name} was saved.` });
+      toast({ title: t("users.updatedToastTitle"), description: t("users.savedToast", { name: editForm.name }) });
       setEditTarget(null);
       await load();
     } catch (e) {
-      toast({ title: "Could not update account", description: errMessage(e), variant: "destructive" });
+      toast({ title: t("users.updateFailedToast"), description: errMessage(e), variant: "destructive" });
     } finally {
       setSubmitting(false);
     }
@@ -229,12 +245,12 @@ export function UsersView() {
     setSubmitting(true);
     try {
       await api.patch(`/api/atelier/users/${pwTarget.id}`, { password: newPassword });
-      toast({ title: "Password reset", description: `${pwTarget.name} can sign in with the new password.` });
+      toast({ title: t("users.resetToastTitle"), description: t("users.resetToastDesc", { name: pwTarget.name }) });
       setPwTarget(null);
       setNewPassword("");
       setShowNewPw(false);
     } catch (e) {
-      toast({ title: "Could not reset password", description: errMessage(e), variant: "destructive" });
+      toast({ title: t("users.resetFailedToast"), description: errMessage(e), variant: "destructive" });
     } finally {
       setSubmitting(false);
     }
@@ -247,15 +263,15 @@ export function UsersView() {
     try {
       await api.patch(`/api/atelier/users/${statusTarget.id}`, { isActive: next });
       toast({
-        title: next ? "Account reactivated" : "Account deactivated",
+        title: next ? t("users.reactivatedToastTitle") : t("users.deactivatedToastTitle"),
         description: next
-          ? `${statusTarget.name} can sign in again.`
-          : `${statusTarget.name} can no longer sign in.`,
+          ? t("users.reactivatedToastDesc", { name: statusTarget.name })
+          : t("users.deactivatedToastDesc", { name: statusTarget.name }),
       });
       setStatusTarget(null);
       await load();
     } catch (e) {
-      toast({ title: "Could not update account", description: errMessage(e), variant: "destructive" });
+      toast({ title: t("users.updateFailedToast"), description: errMessage(e), variant: "destructive" });
     } finally {
       setSubmitting(false);
     }
@@ -268,25 +284,25 @@ export function UsersView() {
   return (
     <div>
       <PageHeader
-        title="Users & Roles"
-        description="Accounts with access to the atelier management system."
+        title={t("users.title")}
+        description={t("users.description")}
       >
         {canManageStaff && (
           <Button onClick={openCreate}>
             <UserPlus className="size-4 mr-1.5" />
-            Create Account
+            {t("users.createAccount")}
           </Button>
         )}
       </PageHeader>
 
-      {error ? (
+      {error !== null ? (
         <EmptyState
           icon={AlertTriangle}
-          title="Could not load users"
-          description={error}
+          title={t("users.errorTitle")}
+          description={error || t("users.loadFailed")}
           action={
             <Button variant="outline" size="sm" onClick={load}>
-              Try again
+              {t("common.tryAgain")}
             </Button>
           }
         />
@@ -299,26 +315,32 @@ export function UsersView() {
         </div>
       ) : users.length === 0 ? (
         <div className="rounded-lg border">
-          <EmptyState icon={Users} title="No accounts found" />
+          <EmptyState icon={Users} title={t("users.emptyTitle")} />
         </div>
       ) : (
         <div className="rounded-lg border overflow-x-auto">
-          <Table className="min-w-[900px]">
+          <Table className="min-w-[980px]">
             <TableHeader>
               <TableRow>
-                <TableHead>User</TableHead>
-                <TableHead>Role</TableHead>
-                <TableHead>Job title</TableHead>
-                <TableHead>Phone</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-center">Active tasks</TableHead>
-                <TableHead>Created</TableHead>
-                {canManageStaff && <TableHead className="w-12 text-right sr-only">Actions</TableHead>}
+                <TableHead>{t("users.col.userId")}</TableHead>
+                <TableHead>{t("users.col.user")}</TableHead>
+                <TableHead>{t("users.col.role")}</TableHead>
+                <TableHead>{t("users.col.jobTitle")}</TableHead>
+                <TableHead>{t("users.col.phone")}</TableHead>
+                <TableHead>{t("users.col.status")}</TableHead>
+                <TableHead className="text-center">{t("users.col.activeTasks")}</TableHead>
+                <TableHead>{t("users.col.created")}</TableHead>
+                {canManageStaff && <TableHead className="w-12 text-right sr-only">{t("common.actions")}</TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
               {users.map((u) => (
                 <TableRow key={u.id}>
+                  <TableCell>
+                    <span className="inline-flex rounded-md border bg-muted/50 px-2 py-1 font-mono text-xs font-semibold tracking-wide text-foreground">
+                      {u.code ?? "—"}
+                    </span>
+                  </TableCell>
                   <TableCell>
                     <p className="font-medium">{u.name}</p>
                     <p className="text-xs text-muted-foreground truncate">{u.email}</p>
@@ -331,11 +353,11 @@ export function UsersView() {
                   <TableCell>
                     {u.isActive ? (
                       <Badge variant="outline" className="bg-emerald-50 text-emerald-800 border-emerald-300 whitespace-nowrap">
-                        Active
+                        {t("users.active")}
                       </Badge>
                     ) : (
                       <Badge variant="outline" className="bg-stone-100 text-stone-500 border-stone-300 whitespace-nowrap">
-                        Inactive
+                        {t("users.inactive")}
                       </Badge>
                     )}
                   </TableCell>
@@ -350,7 +372,7 @@ export function UsersView() {
                       {canActOn(u) ? (
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="size-8" aria-label={`Actions for ${u.name}`}>
+                            <Button variant="ghost" size="icon" className="size-8" aria-label={t("users.actionsFor", { name: u.name })}>
                               <MoreHorizontal className="size-4" />
                             </Button>
                           </DropdownMenuTrigger>
@@ -359,11 +381,11 @@ export function UsersView() {
                             <DropdownMenuSeparator />
                             <DropdownMenuItem onClick={() => openEdit(u)}>
                               <Pencil className="size-4 mr-2" />
-                              Edit details
+                              {t("users.editDetails")}
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => { setPwTarget(u); setNewPassword(""); setShowNewPw(false); }}>
                               <KeyRound className="size-4 mr-2" />
-                              Reset password
+                              {t("users.resetPassword")}
                             </DropdownMenuItem>
                             {u.id !== user?.id && (
                               <DropdownMenuItem
@@ -371,13 +393,13 @@ export function UsersView() {
                                 className={!u.isActive ? "" : "text-red-700 focus:text-red-700 focus:bg-red-50"}
                               >
                                 <Power className="size-4 mr-2" />
-                                {u.isActive ? "Deactivate" : "Reactivate"}
+                                {u.isActive ? t("users.deactivate") : t("users.reactivate")}
                               </DropdownMenuItem>
                             )}
                           </DropdownMenuContent>
                         </DropdownMenu>
                       ) : (
-                        <span className="text-xs text-muted-foreground">Admin access: staff only</span>
+                        <span className="text-xs text-muted-foreground">{t("users.adminAccessNote")}</span>
                       )}
                     </TableCell>
                   )}
@@ -392,24 +414,24 @@ export function UsersView() {
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
         <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Create Account</DialogTitle>
+            <DialogTitle>{t("users.createAccount")}</DialogTitle>
             <DialogDescription>
-              New accounts can sign in immediately with the password you set.
+              {t("users.createDescription")}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="grid gap-1.5">
-              <Label htmlFor="new-name">Full name *</Label>
+              <Label htmlFor="new-name">{t("users.fullName")}</Label>
               <Input
                 id="new-name"
                 value={createForm.name}
                 onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })}
-                placeholder="e.g. Marie Ngo"
+                placeholder={t("users.namePlaceholder")}
                 maxLength={120}
               />
             </div>
             <div className="grid gap-1.5">
-              <Label htmlFor="new-email">Email *</Label>
+              <Label htmlFor="new-email">{t("users.email")}</Label>
               <Input
                 id="new-email"
                 type="email"
@@ -419,14 +441,14 @@ export function UsersView() {
               />
             </div>
             <div className="grid gap-1.5">
-              <Label htmlFor="new-password">Password *</Label>
+              <Label htmlFor="new-password">{t("users.password")}</Label>
               <div className="relative">
                 <Input
                   id="new-password"
                   type={showCreatePw ? "text" : "password"}
                   value={createForm.password}
                   onChange={(e) => setCreateForm({ ...createForm, password: e.target.value })}
-                  placeholder="At least 8 characters"
+                  placeholder={t("users.passwordPlaceholder")}
                   className="pr-10"
                   autoComplete="new-password"
                 />
@@ -434,14 +456,14 @@ export function UsersView() {
                   type="button"
                   onClick={() => setShowCreatePw(!showCreatePw)}
                   className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                  aria-label={showCreatePw ? "Hide password" : "Show password"}
+                  aria-label={showCreatePw ? t("common.hidePassword") : t("common.showPassword")}
                 >
                   {showCreatePw ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                 </button>
               </div>
             </div>
             <div className="grid gap-1.5">
-              <Label htmlFor="new-role">Role *</Label>
+              <Label htmlFor="new-role">{t("users.roleRequired")}</Label>
               <Select
                 value={createForm.role}
                 onValueChange={(v) => setCreateForm({ ...createForm, role: v })}
@@ -452,14 +474,14 @@ export function UsersView() {
                 <SelectContent>
                   {(isManagement ? ROLES : (["STAFF"] as const)).map((r) => (
                     <SelectItem key={r} value={r}>
-                      {r === "MANAGEMENT" ? "Management" : r === "ADMIN" ? "Admin" : "Staff"}
+                      {roleLabel(r, lang)}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
             <div className="grid gap-1.5">
-              <Label htmlFor="new-phone">Phone</Label>
+              <Label htmlFor="new-phone">{t("users.phoneLabel")}</Label>
               <Input
                 id="new-phone"
                 value={createForm.phone}
@@ -468,20 +490,20 @@ export function UsersView() {
               />
             </div>
             <div className="grid gap-1.5">
-              <Label htmlFor="new-job">Job title</Label>
+              <Label htmlFor="new-job">{t("users.jobTitleLabel")}</Label>
               <Input
                 id="new-job"
                 value={createForm.jobTitle}
                 onChange={(e) => setCreateForm({ ...createForm, jobTitle: e.target.value })}
-                placeholder="e.g. Tailor, Cutter"
+                placeholder={t("users.jobTitlePlaceholder")}
                 maxLength={120}
               />
             </div>
             <div className="sm:col-span-2 rounded-lg border bg-muted/40 p-3 flex gap-2">
               <ShieldCheck className="size-4 shrink-0 mt-0.5 text-primary" />
               <p className="text-xs text-muted-foreground">
-                {ROLE_HINTS[createForm.role] ?? ""}
-                {createForm.role === "STAFF" && " Staff accounts can be assigned production tasks."}
+                {roleHint(createForm.role, t)}
+                {createForm.role === "STAFF" && ` ${t("users.roleHint.staffExtra")}`}
               </p>
             </div>
             {formError && (
@@ -490,13 +512,13 @@ export function UsersView() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setCreateOpen(false)} disabled={submitting}>
-              Cancel
+              {t("common.cancel")}
             </Button>
             <Button onClick={submitCreate} disabled={submitting}>
               {submitting && (
                 <span className="size-4 mr-1.5 animate-spin rounded-full border-2 border-current border-t-transparent" />
               )}
-              Create Account
+              {t("users.createAccount")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -506,12 +528,12 @@ export function UsersView() {
       <Dialog open={!!editTarget} onOpenChange={(open) => !open && setEditTarget(null)}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Edit Account</DialogTitle>
+            <DialogTitle>{t("users.editTitle")}</DialogTitle>
             <DialogDescription>{editTarget?.email}</DialogDescription>
           </DialogHeader>
           <div className="grid gap-4">
             <div className="grid gap-1.5">
-              <Label htmlFor="edit-name">Full name *</Label>
+              <Label htmlFor="edit-name">{t("users.fullName")}</Label>
               <Input
                 id="edit-name"
                 value={editForm.name}
@@ -520,7 +542,7 @@ export function UsersView() {
               />
             </div>
             <div className="grid gap-1.5">
-              <Label htmlFor="edit-phone">Phone</Label>
+              <Label htmlFor="edit-phone">{t("users.phoneLabel")}</Label>
               <Input
                 id="edit-phone"
                 value={editForm.phone}
@@ -529,7 +551,7 @@ export function UsersView() {
               />
             </div>
             <div className="grid gap-1.5">
-              <Label htmlFor="edit-job">Job title</Label>
+              <Label htmlFor="edit-job">{t("users.jobTitleLabel")}</Label>
               <Input
                 id="edit-job"
                 value={editForm.jobTitle}
@@ -539,7 +561,7 @@ export function UsersView() {
             </div>
             {isManagement && (
               <div className="grid gap-1.5">
-                <Label htmlFor="edit-role">Role</Label>
+                <Label htmlFor="edit-role">{t("users.roleLabel")}</Label>
                 <Select value={editForm.role} onValueChange={(v) => setEditForm({ ...editForm, role: v })}>
                   <SelectTrigger id="edit-role">
                     <SelectValue />
@@ -547,7 +569,7 @@ export function UsersView() {
                   <SelectContent>
                     {ROLES.map((r) => (
                       <SelectItem key={r} value={r}>
-                        {r === "MANAGEMENT" ? "Management" : r === "ADMIN" ? "Admin" : "Staff"}
+                        {roleLabel(r, lang)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -557,13 +579,13 @@ export function UsersView() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditTarget(null)} disabled={submitting}>
-              Cancel
+              {t("common.cancel")}
             </Button>
             <Button onClick={submitEdit} disabled={submitting}>
               {submitting && (
                 <span className="size-4 mr-1.5 animate-spin rounded-full border-2 border-current border-t-transparent" />
               )}
-              Save Changes
+              {t("common.saveChanges")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -573,21 +595,20 @@ export function UsersView() {
       <AlertDialog open={!!pwTarget} onOpenChange={(open) => !open && setPwTarget(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Reset password</AlertDialogTitle>
+            <AlertDialogTitle>{t("users.resetPassword")}</AlertDialogTitle>
             <AlertDialogDescription>
-              Set a new password for {pwTarget?.name} ({pwTarget?.email}). They will use it at the
-              next sign-in.
+              {t("users.resetPwDescription", { name: pwTarget?.name ?? "", email: pwTarget?.email ?? "" })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="grid gap-1.5">
-            <Label htmlFor="reset-password">New password *</Label>
+            <Label htmlFor="reset-password">{t("users.newPassword")}</Label>
             <div className="relative">
               <Input
                 id="reset-password"
                 type={showNewPw ? "text" : "password"}
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="At least 8 characters"
+                placeholder={t("users.passwordPlaceholder")}
                 className="pr-10"
                 autoComplete="new-password"
               />
@@ -595,17 +616,17 @@ export function UsersView() {
                 type="button"
                 onClick={() => setShowNewPw(!showNewPw)}
                 className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                aria-label={showNewPw ? "Hide password" : "Show password"}
+                aria-label={showNewPw ? t("common.hidePassword") : t("common.showPassword")}
               >
                 {showNewPw ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
               </button>
             </div>
             {newPassword.length > 0 && newPassword.length < 8 && (
-              <p className="text-xs text-red-700">Password must be at least 8 characters.</p>
+              <p className="text-xs text-red-700">{t("users.passwordTooShort")}</p>
             )}
           </div>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={submitting}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={submitting}>{t("common.cancel")}</AlertDialogCancel>
             <AlertDialogAction
               disabled={newPassword.length < 8 || submitting}
               onClick={(e) => {
@@ -614,7 +635,7 @@ export function UsersView() {
               }}
               className="bg-primary text-primary-foreground hover:bg-primary/90"
             >
-              Reset Password
+              {t("users.resetPasswordAction")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -625,16 +646,16 @@ export function UsersView() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {statusTarget?.isActive ? "Deactivate account" : "Reactivate account"}
+              {statusTarget?.isActive ? t("users.deactivateTitle") : t("users.reactivateTitle")}
             </AlertDialogTitle>
             <AlertDialogDescription>
               {statusTarget?.isActive
-                ? `${statusTarget?.name} will no longer be able to sign in. Task history and audit records are kept.`
-                : `${statusTarget?.name} will be able to sign in again with their existing password.`}
+                ? t("users.deactivateDesc", { name: statusTarget?.name ?? "" })
+                : t("users.reactivateDesc", { name: statusTarget?.name ?? "" })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={submitting}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={submitting}>{t("common.cancel")}</AlertDialogCancel>
             <AlertDialogAction
               disabled={submitting}
               onClick={(e) => {
@@ -647,7 +668,7 @@ export function UsersView() {
                   : "bg-primary text-primary-foreground hover:bg-primary/90"
               }
             >
-              {statusTarget?.isActive ? "Deactivate" : "Reactivate"}
+              {statusTarget?.isActive ? t("users.deactivate") : t("users.reactivate")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

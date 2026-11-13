@@ -7,14 +7,13 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import {
-  CATEGORY_LABELS,
-  PRIORITY_LABELS,
-  STATUS_LABELS,
-  STAGE_STATE_LABELS,
-  type TaskCategory,
-  type Priority,
-  type TaskStatus,
-} from "@/lib/atelier/constants";
+  categoryLabel,
+  priorityLabel,
+  roleLabel,
+  stageStateLabel,
+  statusLabel,
+} from "./i18n/core";
+import { useAppStore } from "./store";
 import { formatDate } from "@/lib/format";
 import { AlertTriangle, CalendarClock, Inbox } from "lucide-react";
 
@@ -34,9 +33,10 @@ const STATUS_STYLES: Record<string, string> = {
 };
 
 export function StatusBadge({ status, className }: { status: string; className?: string }) {
+  const lang = useAppStore((s) => s.lang);
   return (
     <Badge variant="outline" className={cn("font-medium whitespace-nowrap", STATUS_STYLES[status] ?? "", className)}>
-      {STATUS_LABELS[status as TaskStatus] ?? status}
+      {statusLabel(status, lang)}
     </Badge>
   );
 }
@@ -51,9 +51,10 @@ const PRIORITY_STYLES: Record<string, string> = {
 };
 
 export function PriorityBadge({ priority, className }: { priority: string; className?: string }) {
+  const lang = useAppStore((s) => s.lang);
   return (
     <Badge variant="outline" className={cn("whitespace-nowrap", PRIORITY_STYLES[priority] ?? "", className)}>
-      {PRIORITY_LABELS[priority as Priority] ?? priority}
+      {priorityLabel(priority, lang)}
     </Badge>
   );
 }
@@ -61,9 +62,10 @@ export function PriorityBadge({ priority, className }: { priority: string; class
 // --- Category ------------------------------------------------------------------
 
 export function CategoryBadge({ category, className }: { category: string; className?: string }) {
+  const lang = useAppStore((s) => s.lang);
   return (
     <Badge variant="secondary" className={cn("whitespace-nowrap", className)}>
-      {CATEGORY_LABELS[category as TaskCategory] ?? category}
+      {categoryLabel(category, lang)}
     </Badge>
   );
 }
@@ -71,15 +73,16 @@ export function CategoryBadge({ category, className }: { category: string; class
 // --- Roles -----------------------------------------------------------------------
 
 const ROLE_STYLES: Record<string, string> = {
-  MANAGEMENT: "bg-amber-100 text-amber-900 border-amber-400",
+  MANAGEMENT: "bg-primary/10 text-primary border-primary/40",
   ADMIN: "bg-teal-50 text-teal-800 border-teal-300",
   STAFF: "bg-stone-100 text-stone-700 border-stone-300",
 };
 
 export function RoleBadge({ role, className }: { role: string; className?: string }) {
+  const lang = useAppStore((s) => s.lang);
   return (
     <Badge variant="outline" className={cn(ROLE_STYLES[role] ?? "", className)}>
-      {role === "MANAGEMENT" ? "Management" : role === "ADMIN" ? "Admin" : "Staff"}
+      {roleLabel(role, lang)}
     </Badge>
   );
 }
@@ -246,9 +249,10 @@ const STAGE_STATE_STYLES: Record<string, string> = {
 };
 
 export function StageStateChip({ state }: { state: string }) {
+  const lang = useAppStore((s) => s.lang);
   return (
     <span className={cn("rounded-full px-2 py-0.5 text-xs font-medium", STAGE_STATE_STYLES[state] ?? "")}>
-      {STAGE_STATE_LABELS[state as never] ?? state}
+      {stageStateLabel(state, lang)}
     </span>
   );
 }

@@ -1,9 +1,17 @@
 import { format, formatDistanceToNow, isValid } from "date-fns";
+import { fr } from "date-fns/locale";
+import { currentLang } from "@/components/atelier/i18n/core";
+
+/** Locale matching the active UI language (English by default). */
+function dateLocale() {
+  return currentLang() === "fr" ? fr : undefined;
+}
 
 /** Format an amount in Central African CFA francs. */
 export function formatFCFA(amount: number | null | undefined): string {
   if (amount == null) return "—";
-  return `${new Intl.NumberFormat("en-US").format(amount)} FCFA`;
+  const locale = currentLang() === "fr" ? "fr-FR" : "en-US";
+  return `${new Intl.NumberFormat(locale).format(amount)} FCFA`;
 }
 
 function toDate(value: string | Date | null | undefined): Date | null {
@@ -14,17 +22,17 @@ function toDate(value: string | Date | null | undefined): Date | null {
 
 export function formatDate(value: string | Date | null | undefined): string {
   const d = toDate(value);
-  return d ? format(d, "dd MMM yyyy") : "—";
+  return d ? format(d, "dd MMM yyyy", { locale: dateLocale() }) : "—";
 }
 
 export function formatDateTime(value: string | Date | null | undefined): string {
   const d = toDate(value);
-  return d ? format(d, "dd MMM yyyy, HH:mm") : "—";
+  return d ? format(d, "dd MMM yyyy, HH:mm", { locale: dateLocale() }) : "—";
 }
 
 export function timeAgo(value: string | Date | null | undefined): string {
   const d = toDate(value);
-  return d ? formatDistanceToNow(d, { addSuffix: true }) : "—";
+  return d ? formatDistanceToNow(d, { addSuffix: true, locale: dateLocale() }) : "—";
 }
 
 export function initials(name: string | null | undefined): string {

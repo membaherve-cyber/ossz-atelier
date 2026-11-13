@@ -6,6 +6,7 @@
 import { useEffect, useState } from "react";
 import { api, ApiClientError, qs } from "../client";
 import type { AuditRecord } from "../types";
+import { useI18n, type TranslateFn } from "../i18n/use-i18n";
 import { EmptyState, PageHeader, SectionCard } from "../ui-bits";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -65,6 +66,17 @@ function actionLabel(action: string): string {
     .join("_");
 }
 
+/**
+ * Bilingual label for an audit action code (see "audit.action.*" entries).
+ * Unknown codes — e.g. actions introduced after this build — fall back to
+ * the prettified raw code.
+ */
+function actionDisplay(action: string, t: TranslateFn): string {
+  const key = `audit.action.${action}`;
+  const label = t(key);
+  return label === key ? actionLabel(action) : label;
+}
+
 /** Pretty-print the raw details JSON for display / tooltip. */
 function prettyDetails(raw: string | null): string {
   if (!raw) return "";
@@ -76,6 +88,7 @@ function prettyDetails(raw: string | null): string {
 }
 
 export function AuditView() {
+  const { t } = useI18n();
   const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
   const [page, setPage] = useState(1);
   const [reloadKey, setReloadKey] = useState(0);
@@ -102,7 +115,9 @@ export function AuditView() {
       })
       .catch((err) => {
         if (cancelled) return;
-        setError(err instanceof ApiClientError ? err.message : "Unexpected error.");
+        // Empty string marks a generic failure; the translated message is
+        // rendered at display time so it follows the active language.
+        setError(err instanceof ApiClientError ? err.message : "");
       });
     return () => {
       cancelled = true;
@@ -123,15 +138,15 @@ export function AuditView() {
 
   const totalPages = data ? Math.max(1, Math.ceil(data.total / data.pageSize)) : 1;
 
-  if (error) {
+  if (error !== null) {
     return (
       <EmptyState
         icon={AlertTriangle}
-        title="Could not load the audit trail"
-        description={error}
+        title={t("audit.errorTitle")}
+        description={error || t("audit.unexpectedError")}
         action={
           <Button variant="outline" size="sm" onClick={retry}>
-            Try again
+            {t("common.tryAgain")}
           </Button>
         }
       />
@@ -141,25 +156,25 @@ export function AuditView() {
   return (
     <div>
       <PageHeader
-        title="Audit History"
-        description="Permanent record of all system activity. Entries cannot be edited or deleted."
+        title={t("audit.title")}
+        description={t("audit.description")}
       />
 
-      <SectionCard title="Filters" className="mb-4">
+      <SectionCard title={t("audit.filters")} className="mb-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 items-end">
           <div className="space-y-1.5">
             <label className="text-xs font-medium text-muted-foreground" htmlFor="audit-action">
-              Action
+              {t("audit.actionFilter")}
             </label>
             <Select value={filters.action} onValueChange={(v) => setFilter({ action: v })}>
               <SelectTrigger id="audit-action" className="w-full">
-                <SelectValue placeholder="All actions" />
+                <SelectValue placeholder={t("audit.allActions")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All actions</SelectItem>
+                <SelectItem value="all">{t("audit.allActions")}</SelectItem>
                 {(data?.actions ?? []).map((a) => (
                   <SelectItem key={a} value={a}>
-                    {actionLabel(a)}
+                    {actionDisplay(a, t)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -168,17 +183,17 @@ export function AuditView() {
 
           <div className="space-y-1.5">
             <label className="text-xs font-medium text-muted-foreground" htmlFor="audit-entity">
-              Entity type
+              {t("audit.entityTypeFilter")}
             </label>
             <Select value={filters.entityType} onValueChange={(v) => setFilter({ entityType: v })}>
               <SelectTrigger id="audit-entity" className="w-full">
-                <SelectValue placeholder="All types" />
+                <SelectValue placeholder={t("audit.allTypes")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All types</SelectItem>
-                {ENTITY_TYPES.map((t) => (
-                  <SelectItem key={t} value={t}>
-                    {t}
+                <SelectItem value="all">{t("audit.allTypes")}</SelectItem>
+                {ENTITY_TYPES.map((type) => (
+                  <SelectItem key={type} value={type}>
+                    {type}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -187,7 +202,7 @@ export function AuditView() {
 
           <div className="space-y-1.5">
             <label className="text-xs font-medium text-muted-foreground" htmlFor="audit-from">
-              From
+              {t("audit.from")}
             </label>
             <Input
               id="audit-from"
@@ -199,7 +214,7 @@ export function AuditView() {
 
           <div className="space-y-1.5">
             <label className="text-xs font-medium text-muted-foreground" htmlFor="audit-to">
-              To
+              {t("audit.to")}
             </label>
             <Input
               id="audit-to"
@@ -211,7 +226,7 @@ export function AuditView() {
 
           <Button variant="outline" onClick={reset}>
             <RotateCcw className="size-4 mr-1.5" />
-            Reset
+            {t("audit.reset")}
           </Button>
         </div>
       </SectionCard>
@@ -224,11 +239,11 @@ export function AuditView() {
           <Skeleton className="h-12 w-full" />
         </div>
       ) : data.entries.length === 0 ? (
-        <SectionCard title="Entries">
+        <SectionCard title={t("audit.entries")}>
           <EmptyState
             icon={ScrollText}
-            title="No audit entries match these filters."
-            description="Try widening the date range or clearing the action and entity filters."
+            title={t("audit.emptyTitle")}
+            description={t("audit.emptyDescription")}
           />
         </SectionCard>
       ) : (
@@ -236,11 +251,11 @@ export function AuditView() {
           <Table className="min-w-[900px]">
             <TableHeader>
               <TableRow>
-                <TableHead className="w-44">Date &amp; Time</TableHead>
-                <TableHead className="w-40">User</TableHead>
-                <TableHead className="w-52">Action</TableHead>
-                <TableHead className="w-44">Entity</TableHead>
-                <TableHead>Details</TableHead>
+                <TableHead className="w-44">{t("audit.col.date")}</TableHead>
+                <TableHead className="w-40">{t("audit.col.user")}</TableHead>
+                <TableHead className="w-52">{t("audit.col.action")}</TableHead>
+                <TableHead className="w-44">{t("audit.col.entity")}</TableHead>
+                <TableHead>{t("audit.col.details")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -252,14 +267,14 @@ export function AuditView() {
                       {formatDateTime(e.createdAt)}
                     </TableCell>
                     <TableCell className="font-medium whitespace-nowrap">
-                      {e.userName ?? "System"}
+                      {e.userName ?? t("audit.system")}
                     </TableCell>
                     <TableCell>
                       <Badge
                         variant="outline"
                         className="font-mono text-xs border-stone-300 bg-stone-50 text-stone-700"
                       >
-                        {actionLabel(e.action)}
+                        {actionDisplay(e.action, t)}
                       </Badge>
                     </TableCell>
                     <TableCell className="whitespace-nowrap">
@@ -303,7 +318,9 @@ export function AuditView() {
       {data && data.entries.length > 0 && (
         <div className="flex flex-col sm:flex-row items-center justify-between gap-2 mt-4">
           <p className="text-sm text-muted-foreground">
-            {data.total} entr{data.total === 1 ? "y" : "ies"} · page {data.page} of {totalPages}
+            {data.total === 1
+              ? t("audit.paginationSingular", { total: data.total, page: data.page, totalPages })
+              : t("audit.paginationPlural", { total: data.total, page: data.page, totalPages })}
           </p>
           <div className="flex items-center gap-2">
             <Button
@@ -313,7 +330,7 @@ export function AuditView() {
               onClick={() => setPage((p) => Math.max(1, p - 1))}
             >
               <ChevronLeft className="size-4 mr-1" />
-              Previous
+              {t("audit.previous")}
             </Button>
             <Button
               variant="outline"
@@ -321,7 +338,7 @@ export function AuditView() {
               disabled={data.page >= totalPages}
               onClick={() => setPage((p) => p + 1)}
             >
-              Next
+              {t("audit.next")}
               <ChevronRight className="size-4 ml-1" />
             </Button>
           </div>

@@ -1,0 +1,914 @@
+     1→     1→/**
+     2→     2→ * OSSZ ATELIER — standalone database seed.
+     3→     3→ * Creates the three account roles, configurable production stages, performance
+     4→     4→ * configuration, incentive schemes and a realistic demo dataset matching the
+     5→     5→ * specification scenario (John Doe / OSSZ-2026-001 three-piece suit, allocated
+     6→     6→ * to Hamidou and Lawal) plus historical completed work for the performance and
+     7→     7→ * incentive modules.
+     8→     8→ *
+     9→     9→ * Run: bun prisma/seed.ts
+    10→    10→ */
+    11→    11→import { PrismaClient } from "@prisma/client";
+    12→    12→import { randomBytes, scryptSync } from "crypto";
+    13→    13→
+    14→    14→const db = new PrismaClient();
+    15→    15→
+    16→    16→function hashPassword(password: string): string {
+    17→    17→  const salt = randomBytes(16).toString("hex");
+    18→    18→  const hash = scryptSync(password, salt, 64).toString("hex");
+    19→    19→  return `${salt}:${hash}`;
+    20→    20→}
+    21→    21→
+    22→    22→const now = () => new Date();
+    23→    23→const daysAgo = (n: number, h = 10) => {
+    24→    24→  const d = new Date();
+    25→    25→  d.setDate(d.getDate() - n);
+    26→    26→  d.setHours(h, 0, 0, 0);
+    27→    27→  return d;
+    28→    28→};
+    29→    29→const daysFromNow = (n: number, h = 17) => {
+    30→    30→  const d = new Date();
+    31→    31→  d.setDate(d.getDate() + n);
+    32→    32→  d.setHours(h, 0, 0, 0);
+    33→    33→  return d;
+    34→    34→};
+    35→    35→
+    36→    36→const DEMO_PASSWORD = "Atelier@2026";
+    37→    37→
+    38→    38→async function main() {
+    39→    39→  console.log("Seeding OSSZ ATELIER standalone database...");
+    40→    40→
+    41→    41→  // ---------------------------------------------------------------------
+    42→    42→  // 1. Accounts (Management / Admin / Staff)
+    43→    43→  // ---------------------------------------------------------------------
+    44→    44→  const aminata = await db.user.create({
+    45→    45→    data: {
+    46→    46→      code: "USR-001",
+    47→    47→      name: "Aminata Sow",
+    48→    48→      email: "management@atelier.com",
+    49→    49→      phone: "+237 677 000 001",
+    50→    50→      jobTitle: "Atelier Director",
+    51→    51→      passwordHash: hashPassword(DEMO_PASSWORD),
+    52→    52→      role: "MANAGEMENT",
+    53→    53→    },
+    54→    54→  });
+    55→    55→  const david = await db.user.create({
+    56→    56→    data: {
+    57→    57→      code: "USR-002",
+    58→    58→      name: "David Nkeng",
+    59→    59→      email: "admin@atelier.com",
+    60→    60→      phone: "+237 677 000 002",
+    61→    61→      jobTitle: "Production Administrator",
+    62→    62→      passwordHash: hashPassword(DEMO_PASSWORD),
+    63→    63→      role: "ADMIN",
+    64→    64→    },
+    65→    65→  });
+    66→    66→  const hamidou = await db.user.create({
+    67→    67→    data: {
+    68→    68→      code: "USR-003",
+    69→    69→      name: "Hamidou Abdoul",
+    70→    70→      email: "hamidou@atelier.com",
+    71→    71→      phone: "+237 677 000 003",
+    72→    72→      jobTitle: "Master Tailor",
+    73→    73→      passwordHash: hashPassword(DEMO_PASSWORD),
+    74→    74→      role: "STAFF",
+    75→    75→    },
+    76→    76→  });
+    77→    77→  const lawal = await db.user.create({
+    78→    78→    data: {
+    79→    79→      code: "USR-004",
+    80→    80→      name: "Lawal Sani",
+    81→    81→      email: "lawal@atelier.com",
+    82→    82→      phone: "+237 677 000 004",
+    83→    83→      jobTitle: "Tailor",
+    84→    84→      passwordHash: hashPassword(DEMO_PASSWORD),
+    85→    85→      role: "STAFF",
+    86→    86→    },
+    87→    87→  });
+    88→    88→  await db.user.create({
+    89→    89→    data: {
+    90→    90→      code: "USR-005",
+    91→    91→      name: "Ngozi Okafor",
+    92→    92→      email: "ngozi@atelier.com",
+    93→    93→      phone: "+237 677 000 005",
+    94→    94→      jobTitle: "Finisher & Ironing",
+    95→    95→      passwordHash: hashPassword(DEMO_PASSWORD),
+    96→    96→      role: "STAFF",
+    97→    97→    },
+    98→    98→  });
+    99→    99→
+   100→   100→  // ---------------------------------------------------------------------
+   101→   101→  // 2. Configurable production stages (specification checklist)
+   102→   102→  // ---------------------------------------------------------------------
+   103→   103→  const stageDefs: Array<[string, string, number, string]> = [
+   104→   104→    ["assigned", "Assigned", 1, "ALL"],
+   105→   105→    ["ongoing", "Ongoing", 2, "ALL"],
+   106→   106→    ["cutting", "Cutting", 3, "FULL,CUTTING"],
+   107→   107→    ["sewing", "Sewing/Stitching", 4, "FULL,SEWING"],
+   108→   108→    ["fitting", "Fitting", 5, "FULL,SEWING"],
+   109→   109→    ["finishing", "Finishing", 6, "FULL,FINISHING"],
+   110→   110→    ["ironing", "Ironing", 7, "FULL,IRONING,FINISHING"],
+   111→   111→    ["quality-check", "Quality Check", 8, "ALL"],
+   112→   112→    ["ready-for-pickup", "Ready for Pickup", 9, "ALL"],
+   113→   113→    ["delivered", "Delivered/Collected", 10, "ALL"],
+   114→   114→    ["blocked", "Blocked", 11, "ALL"],
+   115→   115→    ["other", "Other", 12, "ALL"],
+   116→   116→  ];
+   117→   117→  const stages: Record<string, string> = {};
+   118→   118→  for (const [code, name, sortOrder, appliesTo] of stageDefs) {
+   119→   119→    const s = await db.productionStage.create({
+   120→   120→      data: { code, name, sortOrder, appliesTo, weight: 1 },
+   121→   121→    });
+   122→   122→    stages[code] = s.id;
+   123→   123→  }
+   124→   124→
+   125→   125→  // ---------------------------------------------------------------------
+   126→   126→  // 3. Performance configuration & incentive schemes
+   127→   127→  // ---------------------------------------------------------------------
+   128→   128→  await db.performanceConfig.create({
+   129→   129→    data: {
+   130→   130→      id: "main",
+   131→   131→      productivityWeight: 30,
+   132→   132→      timelyWeight: 25,
+   133→   133→      qualityWeight: 30,
+   134→   134→      reliabilityWeight: 10,
+   135→   135→      managementWeight: 5,
+   136→   136→      pieceTarget: 20,
+   137→   137→    },
+   138→   138→  });
+   139→   139→
+   140→   140→  const monthlyScheme = await db.incentiveScheme.create({
+   141→   141→    data: {
+   142→   142→      name: "Monthly Excellence Bonus",
+   143→   143→      periodType: "MONTHLY",
+   144→   144→      minScore: 75,
+   145→   145→      amount: 25000,
+   146→   146→      description:
+   147→   147→        "Awarded to staff whose overall monthly performance score reaches 75/100 or above.",
+   148→   148→      createdById: aminata.id,
+   149→   149→      createdByName: aminata.name,
+   150→   150→    },
+   151→   151→  });
+   152→   152→  await db.incentiveScheme.create({
+   153→   153→    data: {
+   154→   154→      name: "Annual Excellence Award",
+   155→   155→      periodType: "ANNUAL",
+   156→   156→      minScore: 80,
+   157→   157→      amount: 250000,
+   158→   158→      description: "Annual recognition of sustained excellence across the year.",
+   159→   159→      createdById: aminata.id,
+   160→   160→      createdByName: aminata.name,
+   161→   161→    },
+   162→   162→  });
+   163→   163→  await db.incentiveScheme.create({
+   164→   164→    data: {
+   165→   165→      name: "Quality Champion",
+   166→   166→      periodType: "QUALITY",
+   167→   167→      minScore: 90,
+   168→   168→      amount: 15000,
+   169→   169→      description: "For a monthly quality approval rate of 90% or above with at least 3 completions.",
+   170→   170→      createdById: aminata.id,
+   171→   171→      createdByName: aminata.name,
+   172→   172→    },
+   173→   173→  });
+   174→   174→
+   175→   175→  // ---------------------------------------------------------------------
+   176→   176→  // 4. Customers & manually registered orders
+   177→   177→  // ---------------------------------------------------------------------
+   178→   178→  const john = await db.customer.create({
+   179→   179→    data: {
+   180→   180→      code: "CUST-0001",
+   181→   181→      name: "John Doe",
+   182→   182→      phone: "+237 677 123 456",
+   183→   183→      email: "johndoe@example.com",
+   184→   184→      address: "Bonapriso, Douala",
+   185→   185→      notes: "Prefers slim-fit cuts. Returning customer.",
+   186→   186→      createdById: aminata.id,
+   187→   187→      createdAt: daysAgo(21),
+   188→   188→    },
+   189→   189→  });
+   190→   190→  const amina = await db.customer.create({
+   191→   191→    data: {
+   192→   192→      code: "CUST-0002",
+   193→   193→      name: "Amina Cissé",
+   194→   194→      phone: "+237 699 551 122",
+   195→   195→      email: "amina.cisse@example.com",
+   196→   196→      address: "Bastos, Yaoundé",
+   197→   197→      notes: "Measures on file from January fitting.",
+   198→   198→      createdById: david.id,
+   199→   199→      createdAt: daysAgo(46),
+   200→   200→    },
+   201→   201→  });
+   202→   202→
+   203→   203→  const orderSuit = await db.order.create({
+   204→   204→    data: {
+   205→   205→      orderNumber: "OSSZ-2026-001",
+   206→   206→      customerId: john.id,
+   207→   207→      orderDate: daysAgo(20),
+   208→   208→      expectedDeliveryDate: daysFromNow(10),
+   209→   209→      description: "Three-piece suit",
+   210→   210→      garmentCategory: "Suit",
+   211→   211→      numberOfPieces: 3,
+   212→   212→      instructions: "Slim fit, midnight blue fabric, gold buttons.",
+   213→   213→      priority: "HIGH",
+   214→   214→      notes: "Customer expects a fitting before finishing.",
+   215→   215→      createdById: aminata.id,
+   216→   216→      createdAt: daysAgo(20),
+   217→   217→    },
+   218→   218→  });
+   219→   219→  const orderAgbada = await db.order.create({
+   220→   220→    data: {
+   221→   221→      orderNumber: "OSSZ-2026-002",
+   222→   222→      customerId: amina.id,
+   223→   223→      orderDate: daysAgo(6),
+   224→   224→      expectedDeliveryDate: daysFromNow(24),
+   225→   225→      description: "Agbada two-piece set",
+   226→   226→      garmentCategory: "Agbada",
+   227→   227→      numberOfPieces: 2,
+   228→   228→      instructions: "Embroidered neckline, matching trousers.",
+   229→   229→      priority: "NORMAL",
+   230→   230→      createdById: david.id,
+   231→   231→      createdAt: daysAgo(6),
+   232→   232→    },
+   233→   233→  });
+   234→   234→  const orderSenegal = await db.order.create({
+   235→   235→    data: {
+   236→   236→      orderNumber: "OSSZ-2025-014",
+   237→   237→      customerId: amina.id,
+   238→   238→      orderDate: daysAgo(45),
+   239→   239→      expectedDeliveryDate: daysAgo(12),
+   240→   240→      description: "Senegal two-piece with headwrap",
+   241→   241→      garmentCategory: "Senegal",
+   242→   242→      numberOfPieces: 3,
+   243→   243→      priority: "NORMAL",
+   244→   244→      createdById: aminata.id,
+   245→   245→      createdAt: daysAgo(45),
+   246→   246→    },
+   247→   247→  });
+   248→   248→  const orderKaftan = await db.order.create({
+   249→   249→    data: {
+   250→   250→      orderNumber: "OSSZ-2025-009",
+   251→   251→      customerId: john.id,
+   252→   252→      orderDate: daysAgo(75),
+   253→   253→      expectedDeliveryDate: daysAgo(55),
+   254→   254→      description: "Grand kaftan",
+   255→   255→      garmentCategory: "Kaftan",
+   256→   256→      numberOfPieces: 1,
+   257→   257→      priority: "NORMAL",
+   258→   258→      createdById: aminata.id,
+   259→   259→      createdAt: daysAgo(75),
+   260→   260→    },
+   261→   261→  });
+   262→   262→
+   263→   263→  // ---------------------------------------------------------------------
+   264→   264→  // 5. Production tasks — current live production
+   265→   265→  // ---------------------------------------------------------------------
+   266→   266→  async function createTask(opts: {
+   267→   267→    code: string;
+   268→   268→    orderId: string;
+   269→   269→    garmentPiece: string;
+   270→   270→    category?: string;
+   271→   271→    instructions?: string;
+   272→   272→    deadline: Date;
+   273→   273→    priority?: string;
+   274→   274→    status: string;
+   275→   275→    progress: number;
+   276→   276→    assignedStaffId?: string;
+   277→   277→    createdAt: Date;
+   278→   278→    stageStates: Array<[string, string]>; // [stageCode, state]
+   279→   279→    stageUpdates?: Array<{ stageCode: string; from: string; to: string; by: string; at: Date }>;
+   280→   280→    statusChain?: Array<{ to: string; by: string; at: Date; reason?: string }>;
+   281→   281→    progressHistory?: Array<{ from: number; to: number; by: string; at: Date; note?: string }>;
+   282→   282→  }) {
+   283→   283→    const task = await db.productionTask.create({
+   284→   284→      data: {
+   285→   285→        code: opts.code,
+   286→   286→        orderId: opts.orderId,
+   287→   287→        garmentPiece: opts.garmentPiece,
+   288→   288→        category: opts.category ?? "FULL",
+   289→   289→        instructions: opts.instructions ?? null,
+   290→   290→        deadline: opts.deadline,
+   291→   291→        priority: opts.priority ?? "NORMAL",
+   292→   292→        status: opts.status,
+   293→   293→        progress: opts.progress,
+   294→   294→        assignedStaffId: opts.assignedStaffId ?? null,
+   295→   295→        createdById: aminata.id,
+   296→   296→        createdAt: opts.createdAt,
+   297→   297→        updatedAt: now(),
+   298→   298→      },
+   299→   299→    });
+   300→   300→
+   301→   301→    // Stage states
+   302→   302→    const category = opts.category ?? "FULL";
+   303→   303→    const applies = (code: string) => {
+   304→   304→      const def = stageDefs.find((s) => s[0] === code)!;
+   305→   305→      return def[3] === "ALL" || def[3].split(",").includes(category);
+   306→   306→    };
+   307→   307→    const names: Record<string, string> = {};
+   308→   308→    const users: Record<string, string> = {
+   309→   309→      hamidou: hamidou.name,
+   310→   310→      lawal: lawal.name,
+   311→   311→      aminata: aminata.name,
+   312→   312→      david: david.name,
+   313→   313→    };
+   314→   314→    for (const [code, name] of stageDefs) names[code] = name;
+   315→   315→    for (const [stageCode, state] of opts.stageStates) {
+   316→   316→      if (!applies(stageCode)) continue;
+   317→   317→      await db.taskStageState.create({
+   318→   318→        data: {
+   319→   319→          taskId: task.id,
+   320→   320→          stageId: stages[stageCode],
+   321→   321→          state,
+   322→   322→          updatedById: opts.assignedStaffId ?? null,
+   323→   323→          updatedByName: opts.assignedStaffId === hamidou.id ? hamidou.name : lawal.name,
+   324→   324→          updatedAt: opts.createdAt,
+   325→   325→        },
+   326→   326→      });
+   327→   327→    }
+   328→   328→    if (opts.stageUpdates) {
+   329→   329→      for (const u of opts.stageUpdates) {
+   330→   330→        if (!applies(u.stageCode)) continue;
+   331→   331→        await db.taskStageUpdate.create({
+   332→   332→          data: {
+   333→   333→            taskId: task.id,
+   334→   334→            stageId: stages[u.stageCode],
+   335→   335→            stageName: names[u.stageCode],
+   336→   336→            userId: u.by === "hamidou" ? hamidou.id : u.by === "lawal" ? lawal.id : aminata.id,
+   337→   337→            userName: users[u.by],
+   338→   338→            previousState: u.from,
+   339→   339→            newState: u.to,
+   340→   340→            createdAt: u.at,
+   341→   341→          },
+   342→   342→        });
+   343→   343→      }
+   344→   344→    }
+   345→   345→    if (opts.statusChain) {
+   346→   346→      let prev = "UNASSIGNED";
+   347→   347→      for (const c of opts.statusChain) {
+   348→   348→        await db.taskStatusChange.create({
+   349→   349→          data: {
+   350→   350→            taskId: task.id,
+   351→   351→            userId: c.by === "aminata" ? aminata.id : c.by === "david" ? david.id : c.by === "hamidou" ? hamidou.id : lawal.id,
+   352→   352→            userName: users[c.by] ?? aminata.name,
+   353→   353→            fromStatus: prev,
+   354→   354→            toStatus: c.to,
+   355→   355→            reason: c.reason ?? null,
+   356→   356→            createdAt: c.at,
+   357→   357→          },
+   358→   358→        });
+   359→   359→        prev = c.to;
+   360→   360→      }
+   361→   361→    }
+   362→   362→    if (opts.progressHistory) {
+   363→   363→      for (const p of opts.progressHistory) {
+   364→   364→        await db.taskProgressHistory.create({
+   365→   365→          data: {
+   366→   366→            taskId: task.id,
+   367→   367→            userId: p.by === "hamidou" ? hamidou.id : lawal.id,
+   368→   368→            userName: users[p.by],
+   369→   369→            previousProgress: p.from,
+   370→   370→            newProgress: p.to,
+   371→   371→            source: "MANUAL",
+   372→   372→            note: p.note ?? null,
+   373→   373→            createdAt: p.at,
+   374→   374→          },
+   375→   375→        });
+   376→   376→      }
+   377→   377→    }
+   378→   378→    if (opts.assignedStaffId) {
+   379→   379→      await db.taskAssignment.create({
+   380→   380→        data: {
+   381→   381→          taskId: task.id,
+   382→   382→          staffId: opts.assignedStaffId,
+   383→   383→          staffName:
+   384→   384→            opts.assignedStaffId === hamidou.id ? hamidou.name : opts.assignedStaffId === lawal.id ? lawal.name : "",
+   385→   385→          assignedById: aminata.id,
+   386→   386→          assignedByName: aminata.name,
+   387→   387→          type: "ASSIGN",
+   388→   388→          createdAt: opts.createdAt,
+   389→   389→        },
+   390→   390→      });
+   391→   391→    }
+   392→   392→    return task;
+   393→   393→  }
+   394→   394→
+   395→   395→  const t1 = await createTask({
+   396→   396→    code: "TASK-0001",
+   397→   397→    orderId: orderSuit.id,
+   398→   398→    garmentPiece: "Jacket",
+   399→   399→    instructions: "Attach the customer-provided gold buttons. Single-breasted, two vents.",
+   400→   400→    deadline: daysFromNow(12),
+   401→   401→    priority: "HIGH",
+   402→   402→    status: "ONGOING",
+   403→   403→    progress: 60,
+   404→   404→    assignedStaffId: hamidou.id,
+   405→   405→    createdAt: daysAgo(15),
+   406→   406→    stageStates: [
+   407→   407→      ["assigned", "COMPLETED"],
+   408→   408→      ["ongoing", "COMPLETED"],
+   409→   409→      ["cutting", "COMPLETED"],
+   410→   410→      ["sewing", "IN_PROGRESS"],
+   411→   411→      ["fitting", "NOT_STARTED"],
+   412→   412→      ["finishing", "NOT_STARTED"],
+   413→   413→      ["ironing", "NOT_STARTED"],
+   414→   414→      ["quality-check", "NOT_STARTED"],
+   415→   415→      ["ready-for-pickup", "NOT_STARTED"],
+   416→   416→      ["delivered", "NOT_STARTED"],
+   417→   417→      ["blocked", "NOT_APPLICABLE"],
+   418→   418→      ["other", "NOT_APPLICABLE"],
+   419→   419→    ],
+   420→   420→    stageUpdates: [
+   421→   421→      { stageCode: "assigned", from: "NOT_STARTED", to: "COMPLETED", by: "hamidou", at: daysAgo(15) },
+   422→   422→      { stageCode: "ongoing", from: "NOT_STARTED", to: "COMPLETED", by: "hamidou", at: daysAgo(14) },
+   423→   423→      { stageCode: "cutting", from: "NOT_STARTED", to: "IN_PROGRESS", by: "hamidou", at: daysAgo(12) },
+   424→   424→      { stageCode: "cutting", from: "IN_PROGRESS", to: "COMPLETED", by: "hamidou", at: daysAgo(10) },
+   425→   425→      { stageCode: "sewing", from: "NOT_STARTED", to: "IN_PROGRESS", by: "hamidou", at: daysAgo(8) },
+   426→   426→    ],
+   427→   427→    statusChain: [
+   428→   428→      { to: "ASSIGNED", by: "aminata", at: daysAgo(15) },
+   429→   429→      { to: "ONGOING", by: "hamidou", at: daysAgo(14) },
+   430→   430→    ],
+   431→   431→    progressHistory: [
+   432→   432→      { from: 0, to: 25, by: "hamidou", at: daysAgo(14), note: "Fabric cut, assembly started." },
+   433→   433→      { from: 25, to: 45, by: "hamidou", at: daysAgo(8) },
+   434→   434→      { from: 45, to: 60, by: "hamidou", at: daysAgo(2), note: "Body assembled, sleeves set." },
+   435→   435→    ],
+   436→   436→  });
+   437→   437→
+   438→   438→  const t2 = await createTask({
+   439→   439→    code: "TASK-0002",
+   440→   440→    orderId: orderSuit.id,
+   441→   441→    garmentPiece: "Trousers",
+   442→   442→    instructions: "Slim fit, side adjusters instead of belt loops.",
+   443→   443→    deadline: daysFromNow(12),
+   444→   444→    priority: "HIGH",
+   445→   445→    status: "ONGOING",
+   446→   446→    progress: 80,
+   447→   447→    assignedStaffId: hamidou.id,
+   448→   448→    createdAt: daysAgo(15),
+   449→   449→    stageStates: [
+   450→   450→      ["assigned", "COMPLETED"],
+   451→   451→      ["ongoing", "COMPLETED"],
+   452→   452→      ["cutting", "COMPLETED"],
+   453→   453→      ["sewing", "COMPLETED"],
+   454→   454→      ["fitting", "COMPLETED"],
+   455→   455→      ["finishing", "IN_PROGRESS"],
+   456→   456→      ["ironing", "NOT_STARTED"],
+   457→   457→      ["quality-check", "NOT_STARTED"],
+   458→   458→      ["ready-for-pickup", "NOT_STARTED"],
+   459→   459→      ["delivered", "NOT_STARTED"],
+   460→   460→      ["blocked", "NOT_APPLICABLE"],
+   461→   461→      ["other", "NOT_APPLICABLE"],
+   462→   462→    ],
+   463→   463→    stageUpdates: [
+   464→   464→      { stageCode: "assigned", from: "NOT_STARTED", to: "COMPLETED", by: "hamidou", at: daysAgo(15) },
+   465→   465→      { stageCode: "ongoing", from: "NOT_STARTED", to: "COMPLETED", by: "hamidou", at: daysAgo(15, 12) },
+   466→   466→      { stageCode: "cutting", from: "NOT_STARTED", to: "COMPLETED", by: "hamidou", at: daysAgo(11) },
+   467→   467→      { stageCode: "sewing", from: "NOT_STARTED", to: "COMPLETED", by: "hamidou", at: daysAgo(7) },
+   468→   468→      { stageCode: "fitting", from: "NOT_STARTED", to: "COMPLETED", by: "hamidou", at: daysAgo(4) },
+   469→   469→      { stageCode: "finishing", from: "NOT_STARTED", to: "IN_PROGRESS", by: "hamidou", at: daysAgo(2) },
+   470→   470→    ],
+   471→   471→    statusChain: [
+   472→   472→      { to: "ASSIGNED", by: "aminata", at: daysAgo(15) },
+   473→   473→      { to: "ONGOING", by: "hamidou", at: daysAgo(15, 12) },
+   474→   474→    ],
+   475→   475→    progressHistory: [
+   476→   476→      { from: 0, to: 30, by: "hamidou", at: daysAgo(14) },
+   477→   477→      { from: 30, to: 60, by: "hamidou", at: daysAgo(7) },
+   478→   478→      { from: 60, to: 80, by: "hamidou", at: daysAgo(3), note: "Fitting done, finishing hem." },
+   479→   479→    ],
+   480→   480→  });
+   481→   481→
+   482→   482→  const t3 = await createTask({
+   483→   483→    code: "TASK-0003",
+   484→   484→    orderId: orderSuit.id,
+   485→   485→    garmentPiece: "Vest",
+   486→   486→    deadline: daysAgo(2), // overdue
+   487→   487→    priority: "HIGH",
+   488→   488→    status: "ONGOING",
+   489→   489→    progress: 30,
+   490→   490→    assignedStaffId: lawal.id,
+   491→   491→    createdAt: daysAgo(14),
+   492→   492→    stageStates: [
+   493→   493→      ["assigned", "COMPLETED"],
+   494→   494→      ["ongoing", "COMPLETED"],
+   495→   495→      ["cutting", "IN_PROGRESS"],
+   496→   496→      ["sewing", "NOT_STARTED"],
+   497→   497→      ["fitting", "NOT_STARTED"],
+   498→   498→      ["finishing", "NOT_STARTED"],
+   499→   499→      ["ironing", "NOT_STARTED"],
+   500→   500→      ["quality-check", "NOT_STARTED"],
+   501→   501→      ["ready-for-pickup", "NOT_STARTED"],
+   502→   502→      ["delivered", "NOT_STARTED"],
+   503→   503→      ["blocked", "NOT_APPLICABLE"],
+   504→   504→      ["other", "NOT_APPLICABLE"],
+   505→   505→    ],
+   506→   506→    stageUpdates: [
+   507→   507→      { stageCode: "assigned", from: "NOT_STARTED", to: "COMPLETED", by: "lawal", at: daysAgo(14) },
+   508→   508→      { stageCode: "ongoing", from: "NOT_STARTED", to: "COMPLETED", by: "lawal", at: daysAgo(13) },
+   509→   509→      { stageCode: "cutting", from: "NOT_STARTED", to: "IN_PROGRESS", by: "lawal", at: daysAgo(9) },
+   510→   510→    ],
+   511→   511→    statusChain: [
+   512→   512→      { to: "ASSIGNED", by: "aminata", at: daysAgo(14) },
+   513→   513→      { to: "ONGOING", by: "lawal", at: daysAgo(13) },
+   514→   514→    ],
+   515→   515→    progressHistory: [
+   516→   516→      { from: 0, to: 15, by: "lawal", at: daysAgo(13) },
+   517→   517→      { from: 15, to: 30, by: "lawal", at: daysAgo(4) },
+   518→   518→    ],
+   519→   519→  });
+   520→   520→
+   521→   521→  await createTask({
+   522→   522→    code: "TASK-0004",
+   523→   523→    orderId: orderAgbada.id,
+   524→   524→    garmentPiece: "Agbada Gown",
+   525→   525→    instructions: "Embroidered neckline as per chosen pattern A2.",
+   526→   526→    deadline: daysFromNow(24),
+   527→   527→    status: "UNASSIGNED",
+   528→   528→    progress: 0,
+   529→   529→    createdAt: daysAgo(5),
+   530→   530→    stageStates: [],
+   531→   531→  });
+   532→   532→  await createTask({
+   533→   533→    code: "TASK-0005",
+   534→   534→    orderId: orderAgbada.id,
+   535→   535→    garmentPiece: "Matching Trousers",
+   536→   536→    deadline: daysFromNow(24),
+   537→   537→    status: "UNASSIGNED",
+   538→   538→    progress: 0,
+   539→   539→    createdAt: daysAgo(5),
+   540→   540→    stageStates: [],
+   541→   541→  });
+   542→   542→
+   543→   543→  // ---------------------------------------------------------------------
+   544→   544→  // 6. Historical completed work (performance & incentive data)
+   545→   545→  // ---------------------------------------------------------------------
+   546→   546→  const doneStates = (category: string): Array<[string, string]> => {
+   547→   547→    const list: Array<[string, string]> = [];
+   548→   548→    for (const [code] of stageDefs) {
+   549→   549→      const def = stageDefs.find((s) => s[0] === code)!;
+   550→   550→      const appliesToCat = def[3] === "ALL" || def[3].split(",").includes(category);
+   551→   551→      if (!appliesToCat) continue;
+   552→   552→      if (code === "blocked" || code === "other") list.push([code, "NOT_APPLICABLE"]);
+   553→   553→      else if (code === "ready-for-pickup" || code === "delivered") list.push([code, "COMPLETED"]);
+   554→   554→      else list.push([code, "COMPLETED"]);
+   555→   555→    }
+   556→   556→    return list;
+   557→   557→  };
+   558→   558→
+   559→   559→  // OSSZ-2025-014 — Senegal two-piece (delivered)
+   560→   560→  const t6 = await db.productionTask.create({
+   561→   561→    data: {
+   562→   562→      code: "TASK-0006",
+   563→   563→      orderId: orderSenegal.id,
+   564→   564→      garmentPiece: "Senegal Top",
+   565→   565→      category: "FULL",
+   566→   566→      deadline: daysAgo(13),
+   567→   567→      priority: "NORMAL",
+   568→   568→      status: "DELIVERED",
+   569→   569→      progress: 100,
+   570→   570→      assignedStaffId: hamidou.id,
+   571→   571→      createdById: aminata.id,
+   572→   572→      completedAt: daysAgo(14),
+   573→   573→      deliveredAt: daysAgo(12),
+   574→   574→      createdAt: daysAgo(30),
+   575→   575→      updatedAt: daysAgo(12),
+   576→   576→    },
+   577→   577→  });
+   578→   578→  await db.taskAssignment.create({
+   579→   579→    data: {
+   580→   580→      taskId: t6.id, staffId: hamidou.id, staffName: hamidou.name,
+   581→   581→      assignedById: aminata.id, assignedByName: aminata.name, type: "ASSIGN", createdAt: daysAgo(30),
+   582→   582→    },
+   583→   583→  });
+   584→   584→  for (const [code, state] of doneStates("FULL")) {
+   585→   585→    await db.taskStageState.create({
+   586→   586→      data: {
+   587→   587→        taskId: t6.id, stageId: stages[code], state,
+   588→   588→        updatedById: hamidou.id, updatedByName: hamidou.name, updatedAt: daysAgo(14),
+   589→   589→      },
+   590→   590→    });
+   591→   591→  }
+   592→   592→  for (const [from, to, at] of [
+   593→   593→    ["UNASSIGNED", "ASSIGNED", daysAgo(30)],
+   594→   594→    ["ASSIGNED", "ONGOING", daysAgo(29)],
+   595→   595→    ["ONGOING", "BLOCKED", daysAgo(20)],
+   596→   596→    ["BLOCKED", "ONGOING", daysAgo(18)],
+   597→   597→    ["ONGOING", "AWAITING_INSPECTION", daysAgo(15)],
+   598→   598→    ["AWAITING_INSPECTION", "APPROVED", daysAgo(14)],
+   599→   599→    ["APPROVED", "READY_FOR_PICKUP", daysAgo(13)],
+   600→   600→    ["READY_FOR_PICKUP", "DELIVERED", daysAgo(12)],
+   601→   601→  ] as const) {
+   602→   602→    await db.taskStatusChange.create({
+   603→   603→      data: {
+   604→   604→        taskId: t6.id, userId: aminata.id, userName: aminata.name,
+   605→   605→        fromStatus: from, toStatus: to,
+   606→   606→        reason: to === "BLOCKED" ? "Fabric shipment delayed at the market." : null,
+   607→   607→        createdAt: at,
+   608→   608→      },
+   609→   609→    });
+   610→   610→  }
+   611→   611→  await db.taskProgressHistory.createMany({
+   612→   612→    data: [
+   613→   613→      { taskId: t6.id, userId: hamidou.id, userName: hamidou.name, previousProgress: 0, newProgress: 40, source: "MANUAL", createdAt: daysAgo(25) },
+   614→   614→      { taskId: t6.id, userId: hamidou.id, userName: hamidou.name, previousProgress: 40, newProgress: 100, source: "MANUAL", note: "Top fully assembled.", createdAt: daysAgo(15) },
+   615→   615→    ],
+   616→   616→  });
+   617→   617→  await db.inspectionRecord.create({
+   618→   618→    data: {
+   619→   619→      taskId: t6.id, inspectorId: aminata.id, inspectorName: aminata.name,
+   620→   620→      decision: "APPROVED", comments: "Clean seams, excellent finish.", createdAt: daysAgo(14),
+   621→   621→    },
+   622→   622→  });
+   623→   623→
+   624→   624→  const t7 = await db.productionTask.create({
+   625→   625→    data: {
+   626→   626→      code: "TASK-0007",
+   627→   627→      orderId: orderSenegal.id,
+   628→   628→      garmentPiece: "Wrap Skirt",
+   629→   629→      category: "FULL",
+   630→   630→      deadline: daysAgo(6),
+   631→   631→      priority: "NORMAL",
+   632→   632→      status: "DELIVERED",
+   633→   633→      progress: 100,
+   634→   634→      assignedStaffId: hamidou.id,
+   635→   635→      createdById: david.id,
+   636→   636→      completedAt: daysAgo(8),
+   637→   637→      deliveredAt: daysAgo(7),
+   638→   638→      createdAt: daysAgo(20),
+   639→   639→      updatedAt: daysAgo(7),
+   640→   640→    },
+   641→   641→  });
+   642→   642→  await db.taskAssignment.create({
+   643→   643→    data: {
+   644→   644→      taskId: t7.id, staffId: hamidou.id, staffName: hamidou.name,
+   645→   645→      assignedById: david.id, assignedByName: david.name, type: "ASSIGN", createdAt: daysAgo(20),
+   646→   646→    },
+   647→   647→  });
+   648→   648→  for (const [code, state] of doneStates("FULL")) {
+   649→   649→    await db.taskStageState.create({
+   650→   650→      data: { taskId: t7.id, stageId: stages[code], state, updatedById: hamidou.id, updatedByName: hamidou.name, updatedAt: daysAgo(8) },
+   651→   651→    });
+   652→   652→  }
+   653→   653→  for (const [from, to, at] of [
+   654→   654→    ["UNASSIGNED", "ASSIGNED", daysAgo(20)],
+   655→   655→    ["ASSIGNED", "ONGOING", daysAgo(19)],
+   656→   656→    ["ONGOING", "AWAITING_INSPECTION", daysAgo(9)],
+   657→   657→    ["AWAITING_INSPECTION", "APPROVED", daysAgo(8)],
+   658→   658→    ["APPROVED", "READY_FOR_PICKUP", daysAgo(8, 14)],
+   659→   659→    ["READY_FOR_PICKUP", "DELIVERED", daysAgo(7)],
+   660→   660→  ] as const) {
+   661→   661→    await db.taskStatusChange.create({
+   662→   662→      data: { taskId: t7.id, userId: david.id, userName: david.name, fromStatus: from, toStatus: to, createdAt: at },
+   663→   663→    });
+   664→   664→  }
+   665→   665→  await db.inspectionRecord.create({
+   666→   666→    data: {
+   667→   667→      taskId: t7.id, inspectorId: david.id, inspectorName: david.name,
+   668→   668→      decision: "APPROVED", comments: "Good pleat alignment.", createdAt: daysAgo(8),
+   669→   669→    },
+   670→   670→  });
+   671→   671→
+   672→   672→  const t8 = await db.productionTask.create({
+   673→   673→    data: {
+   674→   674→      code: "TASK-0008",
+   675→   675→      orderId: orderSenegal.id,
+   676→   676→      garmentPiece: "Headwrap",
+   677→   677→      category: "IRONING",
+   678→   678→      deadline: daysAgo(10),
+   679→   679→      priority: "NORMAL",
+   680→   680→      status: "DELIVERED",
+   681→   681→      progress: 100,
+   682→   682→      assignedStaffId: lawal.id,
+   683→   683→      createdById: aminata.id,
+   684→   684→      completedAt: daysAgo(9),
+   685→   685→      deliveredAt: daysAgo(7),
+   686→   686→      createdAt: daysAgo(20),
+   687→   687→      updatedAt: daysAgo(7),
+   688→   688→    },
+   689→   689→  });
+   690→   690→  await db.taskAssignment.create({
+   691→   691→    data: {
+   692→   692→      taskId: t8.id, staffId: lawal.id, staffName: lawal.name,
+   693→   693→      assignedById: aminata.id, assignedByName: aminata.name, type: "ASSIGN", createdAt: daysAgo(20),
+   694→   694→    },
+   695→   695→  });
+   696→   696→  for (const [code, state] of doneStates("IRONING")) {
+   697→   697→    await db.taskStageState.create({
+   698→   698→      data: { taskId: t8.id, stageId: stages[code], state, updatedById: lawal.id, updatedByName: lawal.name, updatedAt: daysAgo(9) },
+   699→   699→    });
+   700→   700→  }
+   701→   701→  for (const [from, to, at, reason] of [
+   702→   702→    ["UNASSIGNED", "ASSIGNED", daysAgo(20), null],
+   703→   703→    ["ASSIGNED", "ONGOING", daysAgo(19), null],
+   704→   704→    ["ONGOING", "AWAITING_INSPECTION", daysAgo(16), null],
+   705→   705→    ["AWAITING_INSPECTION", "CHANGES_REQUESTED", daysAgo(16, 15), null],
+   706→   706→    ["CHANGES_REQUESTED", "ONGOING", daysAgo(15), null],
+   707→   707→    ["ONGOING", "AWAITING_INSPECTION", daysAgo(9, 9), null],
+   708→   708→    ["AWAITING_INSPECTION", "APPROVED", daysAgo(9), null],
+   709→   709→    ["APPROVED", "READY_FOR_PICKUP", daysAgo(8), null],
+   710→   710→    ["READY_FOR_PICKUP", "DELIVERED", daysAgo(7), null],
+   711→   711→  ] as const) {
+   712→   712→    await db.taskStatusChange.create({
+   713→   713→      data: {
+   714→   714→        taskId: t8.id, userId: aminata.id, userName: aminata.name,
+   715→   715→        fromStatus: from, toStatus: to, reason, createdAt: at,
+   716→   716→      },
+   717→   717→    });
+   718→   718→  }
+   719→   719→  await db.inspectionRecord.createMany({
+   720→   720→    data: [
+   721→   721→      {
+   722→   722→        taskId: t8.id, inspectorId: aminata.id, inspectorName: aminata.name,
+   723→   723→        decision: "CHANGES_REQUESTED",
+   724→   724→        comments: "Pressing marks still visible on the edges. Redo the ironing.",
+   725→   725→        createdAt: daysAgo(16, 15),
+   726→   726→      },
+   727→   727→      {
+   728→   728→        taskId: t8.id, inspectorId: aminata.id, inspectorName: aminata.name,
+   729→   729→        decision: "APPROVED", comments: "Corrected. Crisp finish.", createdAt: daysAgo(9),
+   730→   730→      },
+   731→   731→    ],
+   732→   732→  });
+   733→   733→
+   734→   734→  // OSSZ-2025-009 — Kaftan (delivered)
+   735→   735→  const t9 = await db.productionTask.create({
+   736→   736→    data: {
+   737→   737→      code: "TASK-0009",
+   738→   738→      orderId: orderKaftan.id,
+   739→   739→      garmentPiece: "Kaftan Gown",
+   740→   740→      category: "FULL",
+   741→   741→      deadline: daysAgo(56),
+   742→   742→      priority: "NORMAL",
+   743→   743→      status: "DELIVERED",
+   744→   744→      progress: 100,
+   745→   745→      assignedStaffId: hamidou.id,
+   746→   746→      createdById: aminata.id,
+   747→   747→      completedAt: daysAgo(58),
+   748→   748→      deliveredAt: daysAgo(55),
+   749→   749→      createdAt: daysAgo(70),
+   750→   750→      updatedAt: daysAgo(55),
+   751→   751→    },
+   752→   752→  });
+   753→   753→  await db.taskAssignment.create({
+   754→   754→    data: {
+   755→   755→      taskId: t9.id, staffId: hamidou.id, staffName: hamidou.name,
+   756→   756→      assignedById: aminata.id, assignedByName: aminata.name, type: "ASSIGN", createdAt: daysAgo(70),
+   757→   757→    },
+   758→   758→  });
+   759→   759→  for (const [code, state] of doneStates("FULL")) {
+   760→   760→    await db.taskStageState.create({
+   761→   761→      data: { taskId: t9.id, stageId: stages[code], state, updatedById: hamidou.id, updatedByName: hamidou.name, updatedAt: daysAgo(58) },
+   762→   762→    });
+   763→   763→  }
+   764→   764→  await db.inspectionRecord.create({
+   765→   765→    data: {
+   766→   766→      taskId: t9.id, inspectorId: aminata.id, inspectorName: aminata.name,
+   767→   767→      decision: "APPROVED", comments: "Beautiful mandarin collar work.", createdAt: daysAgo(58),
+   768→   768→    },
+   769→   769→  });
+   770→   770→
+   771→   771→  // ---------------------------------------------------------------------
+   772→   772→  // 7. Comments & reported issues
+   773→   773→  // ---------------------------------------------------------------------
+   774→   774→  await db.taskComment.createMany({
+   775→   775→    data: [
+   776→   776→      {
+   777→   777→        taskId: t1.id, userId: hamidou.id, userName: hamidou.name,
+   778→   778→        message: "Jacket body assembled. Will set the sleeves tomorrow.",
+   779→   779→        createdAt: daysAgo(5),
+   780→   780→      },
+   781→   781→      {
+   782→   782→        taskId: t3.id, userId: lawal.id, userName: lawal.name,
+   783→   783→        message: "Waiting for the vest lining fabric promised by the customer. Production is stalled.",
+   784→   784→        isIssue: true,
+   785→   785→        createdAt: daysAgo(3, 11),
+   786→   786→      },
+   787→   787→    ],
+   788→   788→  });
+   789→   789→
+   790→   790→  // ---------------------------------------------------------------------
+   791→   791→  // 8. Notifications (internal)
+   792→   792→  // ---------------------------------------------------------------------
+   793→   793→  await db.notification.createMany({
+   794→   794→    data: [
+   795→   795→      {
+   796→   796→        userId: hamidou.id, type: "TASK_ASSIGNED",
+   797→   797→        title: "New task assigned",
+   798→   798→        message: `You were assigned ${t1.code} — Jacket (OSSZ-2026-001).`,
+   799→   799→        taskId: t1.id, createdAt: daysAgo(15),
+   800→   800→      },
+   801→   801→      {
+   802→   802→        userId: hamidou.id, type: "TASK_ASSIGNED",
+   803→   803→        title: "New task assigned",
+   804→   804→        message: `You were assigned ${t2.code} — Trousers (OSSZ-2026-001).`,
+   805→   805→        taskId: t2.id, createdAt: daysAgo(15, 10, ),
+   806→   806→      },
+   807→   807→      {
+   808→   808→        userId: lawal.id, type: "TASK_ASSIGNED",
+   809→   809→        title: "New task assigned",
+   810→   810→        message: `You were assigned ${t3.code} — Vest (OSSZ-2026-001).`,
+   811→   811→        taskId: t3.id, createdAt: daysAgo(14),
+   812→   812→      },
+   813→   813→      {
+   814→   814→        userId: aminata.id, type: "ISSUE_REPORTED",
+   815→   815→        title: "Production issue reported",
+   816→   816→        message: `Lawal Sani reported an issue on ${t3.code} — Vest: missing lining fabric.`,
+   817→   817→        taskId: t3.id, createdAt: daysAgo(3, 11),
+   818→   818→      },
+   819→   819→      {
+   820→   820→        userId: david.id, type: "ISSUE_REPORTED",
+   821→   821→        title: "Production issue reported",
+   822→   822→        message: `Lawal Sani reported an issue on ${t3.code} — Vest: missing lining fabric.`,
+   823→   823→        taskId: t3.id, createdAt: daysAgo(3, 11),
+   824→   824→      },
+   825→   825→      {
+   826→   826→        userId: aminata.id, type: "TASK_OVERDUE",
+   827→   827→        title: "Task overdue",
+   828→   828→        message: `${t3.code} — Vest (OSSZ-2026-001) has passed its deadline.`,
+   829→   829→        taskId: t3.id, createdAt: daysAgo(1),
+   830→   830→      },
+   831→   831→      {
+   832→   832→        userId: david.id, type: "TASK_OVERDUE",
+   833→   833→        title: "Task overdue",
+   834→   834→        message: `${t3.code} — Vest (OSSZ-2026-001) has passed its deadline.`,
+   835→   835→        taskId: t3.id, createdAt: daysAgo(1),
+   836→   836→      },
+   837→   837→    ],
+   838→   838→  });
+   839→   839→
+   840→   840→  // ---------------------------------------------------------------------
+   841→   841→  // 9. Management assessments & incentive history
+   842→   842→  // ---------------------------------------------------------------------
+   843→   843→  const lastMonth = new Date(now().getFullYear(), now().getMonth() - 1, 1);
+   844→   844→  const lastMonthPeriod = `${lastMonth.getFullYear()}-${String(lastMonth.getMonth() + 1).padStart(2, "0")}`;
+   845→   845→  await db.staffAssessment.createMany({
+   846→   846→    data: [
+   847→   847→      {
+   848→   848→        staffId: hamidou.id, staffName: hamidou.name, period: lastMonthPeriod,
+   849→   849→        score: 88, comments: "Excellent craftsmanship and autonomy.", updatedAt: daysAgo(5),
+   850→   850→      },
+   851→   851→      {
+   852→   852→        staffId: lawal.id, staffName: lawal.name, period: lastMonthPeriod,
+   853→   853→        score: 65, comments: "Good effort; watch deadlines and pressing quality.", updatedAt: daysAgo(5),
+   854→   854→      },
+   855→   855→    ],
+   856→   856→  });
+   857→   857→
+   858→   858→  await db.incentiveRecord.createMany({
+   859→   859→    data: [
+   860→   860→      {
+   861→   861→        schemeId: monthlyScheme.id, schemeName: monthlyScheme.name,
+   862→   862→        staffId: hamidou.id, staffName: hamidou.name,
+   863→   863→        period: lastMonthPeriod, performanceScore: 82.4, eligible: true, proposedAmount: 25000,
+   864→   864→        status: "APPROVED", approvedById: aminata.id, approvedByName: aminata.name,
+   865→   865→        approvalComments: "Consistent excellence all month.",
+   866→   866→        paymentStatus: "PAID", paymentDate: daysAgo(4),
+   867→   867→        createdAt: daysAgo(5), updatedAt: daysAgo(4),
+   868→   868→      },
+   869→   869→      {
+   870→   870→        schemeId: monthlyScheme.id, schemeName: monthlyScheme.name,
+   871→   871→        staffId: lawal.id, staffName: lawal.name,
+   872→   872→        period: lastMonthPeriod, performanceScore: 48.6, eligible: false, proposedAmount: 0,
+   873→   873→        status: "REJECTED", approvedById: aminata.id, approvedByName: aminata.name,
+   874→   874→        approvalComments: "Below the 75/100 threshold for this month.",
+   875→   875→        paymentStatus: "UNPAID",
+   876→   876→        createdAt: daysAgo(5), updatedAt: daysAgo(5),
+   877→   877→      },
+   878→   878→    ],
+   879→   879→  });
+   880→   880→
+   881→   881→  // ---------------------------------------------------------------------
+   882→   882→  // 10. Audit trail
+   883→   883→  // ---------------------------------------------------------------------
+   884→   884→  await db.auditLog.createMany({
+   885→   885→    data: [
+   886→   886→      { userId: aminata.id, userName: aminata.name, action: "USER_CREATED", entityType: "USER", entityId: david.id, details: JSON.stringify({ role: "ADMIN" }), createdAt: daysAgo(60) },
+   887→   887→      { userId: aminata.id, userName: aminata.name, action: "CUSTOMER_CREATED", entityType: "CUSTOMER", entityId: john.id, details: JSON.stringify({ code: "CUST-0001" }), createdAt: daysAgo(21) },
+   888→   888→      { userId: aminata.id, userName: aminata.name, action: "ORDER_CREATED", entityType: "ORDER", entityId: orderSuit.id, details: JSON.stringify({ orderNumber: "OSSZ-2026-001" }), createdAt: daysAgo(20) },
+   889→   889→      { userId: aminata.id, userName: aminata.name, action: "TASKS_CREATED", entityType: "ORDER", entityId: orderSuit.id, details: JSON.stringify({ tasks: [t1.code, t2.code, t3.code] }), createdAt: daysAgo(15) },
+   890→   890→      { userId: aminata.id, userName: aminata.name, action: "TASK_ASSIGNED", entityType: "TASK", entityId: t1.id, details: JSON.stringify({ staff: hamidou.name }), createdAt: daysAgo(15) },
+   891→   891→      { userId: aminata.id, userName: aminata.name, action: "TASK_ASSIGNED", entityType: "TASK", entityId: t2.id, details: JSON.stringify({ staff: hamidou.name }), createdAt: daysAgo(15) },
+   892→   892→      { userId: aminata.id, userName: aminata.name, action: "TASK_ASSIGNED", entityType: "TASK", entityId: t3.id, details: JSON.stringify({ staff: lawal.name }), createdAt: daysAgo(14) },
+   893→   893→      { userId: hamidou.id, userName: hamidou.name, action: "PROGRESS_UPDATED", entityType: "TASK", entityId: t1.id, details: JSON.stringify({ from: 45, to: 60 }), createdAt: daysAgo(2) },
+   894→   894→      { userId: lawal.id, userName: lawal.name, action: "ISSUE_REPORTED", entityType: "TASK", entityId: t3.id, details: JSON.stringify({ issue: "Missing lining fabric" }), createdAt: daysAgo(3, 11) },
+   895→   895→      { userId: aminata.id, userName: aminata.name, action: "INCENTIVE_APPROVED", entityType: "INCENTIVE", entityId: hamidou.id, details: JSON.stringify({ period: lastMonthPeriod, amount: 25000 }), createdAt: daysAgo(4) },
+   896→   896→    ],
+   897→   897→  });
+   898→   898→
+   899→   899→  console.log("Seed complete.");
+   900→   900→  console.log("Demo accounts (password: Atelier@2026):");
+   901→   901→  console.log("  MANAGEMENT  management@atelier.com");
+   902→   902→  console.log("  ADMIN       admin@atelier.com");
+   903→   903→  console.log("  STAFF       hamidou@atelier.com");
+   904→   904→  console.log("  STAFF       lawal@atelier.com");
+   905→   905→  console.log("  STAFF       ngozi@atelier.com");
+   906→   906→}
+   907→   907→
+   908→   908→main()
+   909→   909→  .catch((e) => {
+   910→   910→    console.error(e);
+   911→   911→    process.exit(1);
+   912→   912→  })
+   913→   913→  .finally(() => db.$disconnect());
+   914→   914→

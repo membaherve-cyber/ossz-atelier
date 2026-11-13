@@ -152,6 +152,7 @@ export type OrderSummary = {
 
 export type UserRecord = {
   id: string;
+  code: string | null;
   name: string;
   email: string;
   phone: string | null;

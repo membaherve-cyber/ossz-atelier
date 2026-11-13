@@ -155,6 +155,7 @@ export type PaymentStatus = (typeof PAYMENT_STATUSES)[number];
 
 export type SessionUser = {
   id: string;
+  code: string | null;
   name: string;
   email: string;
   role: Role;
