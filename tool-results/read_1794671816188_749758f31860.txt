@@ -1,0 +1,1132 @@
+     1→<?php
+     2→
+     3→declare(strict_types=1);
+     4→
+     5→namespace App\Http\Controllers;
+     6→
+     7→use App\Models\InspectionRecord;
+     8→use App\Models\ProductionStage;
+     9→use App\Models\ProductionTask;
+    10→use App\Models\TaskAssignment;
+    11→use App\Models\TaskComment;
+    12→use App\Models\TaskProgressHistory;
+    13→use App\Models\TaskStageState;
+    14→use App\Models\TaskStageUpdate;
+    15→use App\Models\TaskStatusChange;
+    16→use App\Models\User;
+    17→use App\Services\Audit;
+    18→use App\Services\Notifier;
+    19→use App\Services\Permissions;
+    20→use App\Services\ProgressService;
+    21→use App\Support\Atelier;
+    22→use Illuminate\Http\RedirectResponse;
+    23→use Illuminate\Http\Request;
+    24→use Illuminate\Support\Carbon;
+    25→use Illuminate\Support\Facades\DB;
+    26→
+    27→/**
+    28→ * Production task workflow mutations (spec §3: /tasks/{id}/…).
+    29→ *
+    30→ * Ported from the PATCH/POST branches of
+    31→ * src/app/api/atelier/tasks/[id]/route.ts (+ progress, stages, comments
+    32→ * sub-routes). "Mixed" access: every action requires the acting user to be
+    33→ * the assignee or a supervisor (MANAGEMENT/ADMIN); actions gated by a
+    34→ * permission in the reference re-check it here because the routes only
+    35→ * carry `auth`.
+    36→ *
+    37→ * Status transitions (EXACT reference rules):
+    38→ * - start:    ASSIGNED → ONGOING (assignee or supervisor)
+    39→ * - submit:   ASSIGNED|ONGOING|CHANGES_REQUESTED → AWAITING_INSPECTION
+    40→ *             (non-supervisors must have reached 100% progress)
+    41→ * - inspect:  APPROVED|CHANGES_REQUESTED only from AWAITING_INSPECTION;
+    42→ *             REOPENED only from APPROVED|READY_FOR_PICKUP
+    43→ * - ready:    APPROVED → READY_FOR_PICKUP (supervisor only)
+    44→ * - deliver:  READY_FOR_PICKUP → DELIVERED (supervisor only)
+    45→ * - reopen:   APPROVED|READY_FOR_PICKUP → ONGOING (supervisor only)
+    46→ * - cancel:   any non-terminal status → CANCELLED (supervisor only, reason)
+    47→ * - block:    ASSIGNED|ONGOING|CHANGES_REQUESTED → BLOCKED (reason)
+    48→ * - unblock:  BLOCKED → ONGOING (progress > 0) or ASSIGNED
+    49→ */
+    50→class TaskActionController
+    51→{
+    52→    // ------------------------------------------------------------------
+    53→    // ASSIGN — /tasks/{id}/assign (perm:production.assign on the route)
+    54→    // ------------------------------------------------------------------
+    55→
+    56→    /**
+    57→     * POST /tasks/{id}/assign — assign or reassign the task.
+    58→     */
+    59→    public function assign(Request $request, string $id): RedirectResponse
+    60→    {
+    61→        $data = $request->validate([
+    62→            'staffId' => ['required', 'string'],
+    63→            'note' => ['nullable', 'string', 'max:1000'],
+    64→        ]);
+    65→
+    66→        /** @var User $user */
+    67→        $user = $request->user();
+    68→        $task = $this->taskOrFail($id);
+    69→
+    70→        if (! $this->canAccess($user, $task)) {
+    71→            abort(403);
+    72→        }
+    73→
+    74→        if ($task->isTerminal()) {
+    75→            return $this->closedTask($id);
+    76→        }
+    77→
+    78→        $staff = User::query()->find($data['staffId']);
+    79→
+    80→        if ($staff === null || ! $staff->is_active) {
+    81→            return $this->taskError($id, __('flash.invalidStaffAccount'));
+    82→        }
+    83→
+    84→        if ($staff->id === $task->assigned_staff_id) {
+    85→            return $this->taskError($id, __('flash.taskAlreadyAssigned'));
+    86→        }
+    87→
+    88→        $reassign = $task->assigned_staff_id !== null;
+    89→        $oldAssigneeId = $task->assigned_staff_id;
+    90→        $newStatus = $task->status === 'UNASSIGNED' ? 'ASSIGNED' : $task->status;
+    91→        $note = $this->text($data, 'note');
+    92→
+    93→        DB::transaction(function () use ($task, $staff, $user, $reassign, $newStatus, $note): void {
+    94→            $task->forceFill([
+    95→                'assigned_staff_id' => $staff->id,
+    96→                'status' => $newStatus,
+    97→            ])->save();
+    98→
+    99→            TaskAssignment::query()->create([
+   100→                'task_id' => $task->id,
+   101→                'staff_id' => $staff->id,
+   102→                'staff_name' => $staff->name,
+   103→                'assigned_by_id' => $user->id,
+   104→                'assigned_by_name' => $user->name,
+   105→                'type' => $reassign ? 'REASSIGN' : 'ASSIGN',
+   106→                'note' => $note,
+   107→            ]);
+   108→        });
+   109→
+   110→        if ($newStatus !== $task->status) {
+   111→            $this->recordStatusChange($task, $task->status, $newStatus, $note, $user);
+   112→        }
+   113→
+   114→        $label = $this->taskLabel($task);
+   115→
+   116→        Notifier::users(
+   117→            [$staff->id],
+   118→            $reassign ? 'TASK_REASSIGNED' : 'TASK_ASSIGNED',
+   119→            $label.' has been '.($reassign ? 'reassigned' : 'assigned').' to you.'
+   120→            .($note !== null ? ' Note: '.$note : ''),
+   121→            $task->id,
+   122→            $task->order_id
+   123→        );
+   124→
+   125→        // Spec §5: reassignment notifies BOTH the old and the new assignee.
+   126→        if ($reassign && $oldAssigneeId !== null) {
+   127→            Notifier::users(
+   128→                [$oldAssigneeId],
+   129→                'TASK_REASSIGNED',
+   130→                $label.' has been reassigned to '.$staff->name.'.',
+   131→                $task->id,
+   132→                $task->order_id
+   133→            );
+   134→        }
+   135→
+   136→        Audit::log($user, $reassign ? 'TASK_REASSIGNED' : 'TASK_ASSIGNED', 'TASK', $task->id, [
+   137→            'staff' => $staff->name,
+   138→            'note' => $note,
+   139→        ]);
+   140→
+   141→        return $this->taskSuccess(
+   142→            $id,
+   143→            __($reassign ? 'td.toast.reassignedTo' : 'td.toast.assignedTo', ['name' => $staff->name])
+   144→        );
+   145→    }
+   146→
+   147→    // ------------------------------------------------------------------
+   148→    // STATUS — /tasks/{id}/status (action: start|submit|ready|deliver|reopen|cancel)
+   149→    // ------------------------------------------------------------------
+   150→
+   151→    /**
+   152→     * POST /tasks/{id}/status — workflow status transitions.
+   153→     */
+   154→    public function status(Request $request, string $id): RedirectResponse
+   155→    {
+   156→        $data = $request->validate([
+   157→            'action' => ['required', 'string', 'in:start,submit,ready,deliver,reopen,cancel'],
+   158→            'reason' => ['nullable', 'string', 'max:2000'],
+   159→            'note' => ['nullable', 'string', 'max:1000'],
+   160→            'comments' => ['nullable', 'string', 'max:2000'],
+   161→        ]);
+   162→
+   163→        /** @var User $user */
+   164→        $user = $request->user();
+   165→        $task = $this->taskOrFail($id);
+   166→        $supervisor = $this->supervisor($user);
+   167→
+   168→        if (! $this->canAccess($user, $task)) {
+   169→            abort(403);
+   170→        }
+   171→
+   172→        if ($task->isTerminal()) {
+   173→            return $this->closedTask($id);
+   174→        }
+   175→
+   176→        return match ($data['action']) {
+   177→            'start' => $this->startTask($task, $user),
+   178→            'submit' => $this->submitTask($task, $user, $this->text($data, 'note')),
+   179→            'ready' => $this->readyTask($task, $user, $supervisor),
+   180→            'deliver' => $this->deliverTask($task, $user, $supervisor, $this->text($data, 'note')),
+   181→            'reopen' => $this->reopenTask($task, $user, $supervisor, $this->text($data, 'comments')),
+   182→            'cancel' => $this->cancelTask($task, $user, $supervisor, $this->text($data, 'reason')),
+   183→            default => $this->taskError($id, __('td.actionFailed')),
+   184→        };
+   185→    }
+   186→
+   187→    /**
+   188→     * action=start — ASSIGNED → ONGOING (assignee or supervisor).
+   189→     */
+   190→    private function startTask(ProductionTask $task, User $user): RedirectResponse
+   191→    {
+   192→        if ($task->status !== 'ASSIGNED') {
+   193→            return $this->taskError($task->id, __('flash.statusNoStart'));
+   194→        }
+   195→
+   196→        $task->forceFill(['status' => 'ONGOING'])->save();
+   197→        $this->recordStatusChange($task, 'ASSIGNED', 'ONGOING', 'Production started', $user);
+   198→
+   199→        return $this->taskSuccess($task->id, __('flash.taskStarted'));
+   200→    }
+   201→
+   202→    /**
+   203→     * action=submit — ASSIGNED|ONGOING|CHANGES_REQUESTED → AWAITING_INSPECTION.
+   204→     * Non-supervisors must have reached 100% progress.
+   205→     */
+   206→    private function submitTask(ProductionTask $task, User $user, ?string $note): RedirectResponse
+   207→    {
+   208→        $supervisor = $this->supervisor($user);
+   209→
+   210→        if (! in_array($task->status, ['ASSIGNED', 'ONGOING', 'CHANGES_REQUESTED'], true)) {
+   211→            return $this->taskError(
+   212→                $task->id,
+   213→                __('flash.statusNoSubmit', ['status' => __('labels.status.'.$task->status)])
+   214→            );
+   215→        }
+   216→
+   217→        if (! $supervisor && $task->progress < 100) {
+   218→            return $this->taskError($task->id, __('td.toast.reach100'));
+   219→        }
+   220→
+   221→        $task->forceFill(['status' => 'AWAITING_INSPECTION'])->save();
+   222→        $this->recordStatusChange($task, $task->status, 'AWAITING_INSPECTION', $note, $user);
+   223→
+   224→        if ($note !== null) {
+   225→            TaskComment::query()->create([
+   226→                'task_id' => $task->id,
+   227→                'user_id' => $user->id,
+   228→                'user_name' => $user->name,
+   229→                'message' => 'Submitted for inspection: '.$note,
+   230→            ]);
+   231→        }
+   232→
+   233→        Notifier::management(
+   234→            'SUBMITTED_FOR_INSPECTION',
+   235→            $user->name.' submitted '.$this->taskLabel($task).' for inspection.',
+   236→            $task->id,
+   237→            $task->order_id
+   238→        );
+   239→
+   240→        Audit::log($user, 'SUBMITTED_FOR_INSPECTION', 'TASK', $task->id, ['note' => $note]);
+   241→
+   242→        return $this->taskSuccess($task->id, __('td.toast.submitted'));
+   243→    }
+   244→
+   245→    /**
+   246→     * action=ready — APPROVED → READY_FOR_PICKUP (production.inspect).
+   247→     */
+   248→    private function readyTask(ProductionTask $task, User $user, bool $supervisor): RedirectResponse
+   249→    {
+   250→        if (! $supervisor && ! Permissions::allows($user, 'production.inspect')) {
+   251→            abort(403);
+   252→        }
+   253→
+   254→        if ($task->status !== 'APPROVED') {
+   255→            return $this->taskError($task->id, __('flash.statusNoReady'));
+   256→        }
+   257→
+   258→        $task->forceFill(['status' => 'READY_FOR_PICKUP'])->save();
+   259→        $this->recordStatusChange($task, 'APPROVED', 'READY_FOR_PICKUP', null, $user);
+   260→
+   261→        Notifier::management(
+   262→            'READY_FOR_PICKUP',
+   263→            $this->taskLabel($task).' is approved and ready for customer pickup.',
+   264→            $task->id,
+   265→            $task->order_id
+   266→        );
+   267→
+   268→        if ($task->assigned_staff_id !== null) {
+   269→            Notifier::users(
+   270→                [$task->assigned_staff_id],
+   271→                'READY_FOR_PICKUP',
+   272→                $this->taskLabel($task).' is ready for customer pickup.',
+   273→                $task->id,
+   274→                $task->order_id
+   275→            );
+   276→        }
+   277→
+   278→        Audit::log($user, 'TASK_READY_FOR_PICKUP', 'TASK', $task->id);
+   279→
+   280→        return $this->taskSuccess($task->id, __('td.toast.ready'));
+   281→    }
+   282→
+   283→    /**
+   284→     * action=deliver — READY_FOR_PICKUP → DELIVERED (production.inspect).
+   285→     */
+   286→    private function deliverTask(ProductionTask $task, User $user, bool $supervisor, ?string $note): RedirectResponse
+   287→    {
+   288→        if (! $supervisor && ! Permissions::allows($user, 'production.inspect')) {
+   289→            abort(403);
+   290→        }
+   291→
+   292→        if ($task->status !== 'READY_FOR_PICKUP') {
+   293→            return $this->taskError($task->id, __('flash.statusNoDeliver'));
+   294→        }
+   295→
+   296→        $task->forceFill([
+   297→            'status' => 'DELIVERED',
+   298→            'delivered_at' => Carbon::now(),
+   299→        ])->save();
+   300→
+   301→        $this->recordStatusChange($task, 'READY_FOR_PICKUP', 'DELIVERED', $note, $user);
+   302→
+   303→        Notifier::management(
+   304→            'TASK_DELIVERED',
+   305→            $this->taskLabel($task).' has been delivered/collected by the customer.',
+   306→            $task->id,
+   307→            $task->order_id
+   308→        );
+   309→
+   310→        if ($task->assigned_staff_id !== null) {
+   311→            Notifier::users(
+   312→                [$task->assigned_staff_id],
+   313→                'TASK_DELIVERED',
+   314→                $this->taskLabel($task).' has been delivered/collected by the customer.',
+   315→                $task->id,
+   316→                $task->order_id
+   317→            );
+   318→        }
+   319→
+   320→        Audit::log($user, 'TASK_DELIVERED', 'TASK', $task->id, ['note' => $note]);
+   321→
+   322→        return $this->taskSuccess($task->id, __('td.toast.delivered'));
+   323→    }
+   324→
+   325→    /**
+   326→     * action=reopen — APPROVED|READY_FOR_PICKUP → ONGOING (production.inspect,
+   327→     * comments required). Shared with the INSPECT "REOPENED" decision.
+   328→     */
+   329→    private function reopenTask(ProductionTask $task, User $user, bool $supervisor, ?string $comments): RedirectResponse
+   330→    {
+   331→        if (! $supervisor && ! Permissions::allows($user, 'production.inspect')) {
+   332→            abort(403);
+   333→        }
+   334→
+   335→        if (! in_array($task->status, ['APPROVED', 'READY_FOR_PICKUP'], true)) {
+   336→            return $this->taskError($task->id, __('flash.statusNoReopen'));
+   337→        }
+   338→
+   339→        if ($comments === null || mb_strlen($comments) < 3) {
+   340→            return $this->taskError($task->id, __('td.toast.reopenCommentsRequired'));
+   341→        }
+   342→
+   343→        $fromStatus = $task->status;
+   344→
+   345→        $task->forceFill([
+   346→            'status' => 'ONGOING',
+   347→            'completed_at' => null,
+   348→        ])->save();
+   349→
+   350→        $this->recordStatusChange($task, $fromStatus, 'ONGOING', $comments, $user);
+   351→
+   352→        if ($task->assigned_staff_id !== null) {
+   353→            Notifier::users(
+   354→                [$task->assigned_staff_id],
+   355→                'TASK_REOPENED',
+   356→                $this->taskLabel($task).' has been reopened for production.',
+   357→                $task->id,
+   358→                $task->order_id
+   359→            );
+   360→        }
+   361→
+   362→        InspectionRecord::query()->create([
+   363→            'task_id' => $task->id,
+   364→            'inspector_id' => $user->id,
+   365→            'inspector_name' => $user->name,
+   366→            'decision' => 'REOPENED',
+   367→            'comments' => $comments,
+   368→        ]);
+   369→
+   370→        Audit::log($user, 'INSPECTION_COMPLETED', 'TASK', $task->id, [
+   371→            'decision' => 'REOPENED',
+   372→            'comments' => $comments,
+   373→        ]);
+   374→
+   375→        return $this->taskSuccess($task->id, __('td.toast.reopened'));
+   376→    }
+   377→
+   378→    /**
+   379→     * action=cancel — any non-terminal status → CANCELLED
+   380→     * (production.cancel, reason required).
+   381→     */
+   382→    private function cancelTask(ProductionTask $task, User $user, bool $supervisor, ?string $reason): RedirectResponse
+   383→    {
+   384→        if (! $supervisor && ! Permissions::allows($user, 'production.cancel')) {
+   385→            abort(403);
+   386→        }
+   387→
+   388→        if ($reason === null || mb_strlen($reason) < 3) {
+   389→            return $this->taskError($task->id, __('td.toast.reasonRequired'));
+   390→        }
+   391→
+   392→        $fromStatus = $task->status;
+   393→
+   394→        $task->forceFill([
+   395→            'status' => 'CANCELLED',
+   396→            'cancel_reason' => $reason,
+   397→        ])->save();
+   398→
+   399→        $this->recordStatusChange($task, $fromStatus, 'CANCELLED', $reason, $user);
+   400→
+   401→        if ($task->assigned_staff_id !== null) {
+   402→            Notifier::users(
+   403→                [$task->assigned_staff_id],
+   404→                'TASK_CANCELLED',
+   405→                $this->taskLabel($task).' has been cancelled. Reason: '.$reason,
+   406→                $task->id,
+   407→                $task->order_id
+   408→            );
+   409→        }
+   410→
+   411→        Audit::log($user, 'TASK_CANCELLED', 'TASK', $task->id, ['reason' => $reason]);
+   412→
+   413→        return $this->taskSuccess($task->id, __('td.toast.cancelled'));
+   414→    }
+   415→
+   416→    // ------------------------------------------------------------------
+   417→    // PROGRESS — /tasks/{id}/progress
+   418→    // ------------------------------------------------------------------
+   419→
+   420→    /**
+   421→     * POST /tasks/{id}/progress — numerical progress update (append-only
+   422→     * history; 100% never auto-approves — inspection is explicit).
+   423→     */
+   424→    public function progress(Request $request, string $id): RedirectResponse
+   425→    {
+   426→        $data = $request->validate([
+   427→            'progress' => ['required', 'integer', 'min:0', 'max:100'],
+   428→            'note' => ['nullable', 'string', 'max:500'],
+   429→        ]);
+   430→
+   431→        /** @var User $user */
+   432→        $user = $request->user();
+   433→        $task = $this->taskOrFail($id);
+   434→        $supervisor = $this->supervisor($user);
+   435→
+   436→        if (! $this->canAccess($user, $task)) {
+   437→            abort(403);
+   438→        }
+   439→
+   440→        if ($task->isTerminal()) {
+   441→            return $this->closedTask($id);
+   442→        }
+   443→
+   444→        if (! $supervisor && $task->status === 'BLOCKED') {
+   445→            return $this->taskError($id, __('flash.resolveBlockerFirst'));
+   446→        }
+   447→
+   448→        if (! $supervisor && ! in_array($task->status, ['ASSIGNED', 'ONGOING', 'CHANGES_REQUESTED'], true)) {
+   449→            return $this->taskError(
+   450→                $id,
+   451→                __('flash.progressLocked', ['status' => __('labels.status.'.$task->status)])
+   452→            );
+   453→        }
+   454→
+   455→        $progress = (int) $data['progress'];
+   456→
+   457→        if ($progress === $task->progress) {
+   458→            return $this->taskError($id, __('flash.progressUnchanged', ['value' => $task->progress]));
+   459→        }
+   460→
+   461→        $note = $this->text($data, 'note');
+   462→        $newStatus = $task->status === 'ASSIGNED' && $progress > 0 ? 'ONGOING' : $task->status;
+   463→
+   464→        DB::transaction(function () use ($task, $user, $progress, $note, $newStatus): void {
+   465→            $task->forceFill([
+   466→                'progress' => $progress,
+   467→                'status' => $newStatus,
+   468→            ])->save();
+   469→
+   470→            TaskProgressHistory::query()->create([
+   471→                'task_id' => $task->id,
+   472→                'user_id' => $user->id,
+   473→                'user_name' => $user->name,
+   474→                'previous_progress' => $task->getOriginal('progress'),
+   475→                'new_progress' => $progress,
+   476→                'source' => 'MANUAL',
+   477→                'note' => $note,
+   478→            ]);
+   479→        });
+   480→
+   481→        if ($newStatus !== $task->getOriginal('status')) {
+   482→            $this->recordStatusChange($task, 'ASSIGNED', 'ONGOING', 'Production started', $user);
+   483→        }
+   484→
+   485→        Audit::log($user, 'PROGRESS_UPDATED', 'TASK', $task->id, [
+   486→            'from' => $task->getOriginal('progress'),
+   487→            'to' => $progress,
+   488→            'note' => $note,
+   489→            'correction' => $supervisor,
+   490→        ]);
+   491→
+   492→        return $this->taskSuccess($id, __('td.toast.progressUpdated', ['value' => $progress]));
+   493→    }
+   494→
+   495→    // ------------------------------------------------------------------
+   496→    // STAGES — /tasks/{id}/stages
+   497→    // ------------------------------------------------------------------
+   498→
+   499→    /**
+   500→     * POST /tasks/{id}/stages — update production checklist stages. Every
+   501→     * change is recorded immutably; progress is recalculated from the
+   502→     * applicable stages via ProgressService.
+   503→     */
+   504→    public function stages(Request $request, string $id): RedirectResponse
+   505→    {
+   506→        $data = $request->validate([
+   507→            'updates' => ['required', 'array', 'min:1', 'max:30'],
+   508→            'updates.*.stageId' => ['required', 'string'],
+   509→            'updates.*.state' => ['required', 'string', 'in:'.implode(',', Atelier::STAGE_STATES)],
+   510→            'updates.*.comment' => ['nullable', 'string', 'max:500'],
+   511→        ]);
+   512→
+   513→        /** @var User $user */
+   514→        $user = $request->user();
+   515→        $task = $this->taskOrFail($id);
+   516→        $supervisor = $this->supervisor($user);
+   517→
+   518→        if (! $this->canAccess($user, $task)) {
+   519→            abort(403);
+   520→        }
+   521→
+   522→        if ($task->isTerminal()) {
+   523→            return $this->closedTask($id);
+   524→        }
+   525→
+   526→        if (! $supervisor && ! in_array($task->status, ['ASSIGNED', 'ONGOING', 'CHANGES_REQUESTED'], true)) {
+   527→            return $this->taskError(
+   528→                $id,
+   529→                __('flash.checklistLocked', ['status' => __('labels.status.'.$task->status)])
+   530→            );
+   531→        }
+   532→
+   533→        // Validate the stages against this task's category workflow.
+   534→        $applicable = ProductionStage::query()
+   535→            ->where('is_active', true)
+   536→            ->orderBy('sort_order')
+   537→            ->get()
+   538→            ->filter(fn (ProductionStage $stage): bool => Atelier::stageAppliesTo(
+   539→                (string) $stage->applies_to,
+   540→                (string) $task->category
+   541→            ));
+   542→
+   543→        $stageById = $applicable->keyBy('id');
+   544→
+   545→        foreach ($data['updates'] as $update) {
+   546→            if (! $stageById->has($update['stageId'])) {
+   547→                return $this->taskError($id, __('flash.stageNotApplicable'));
+   548→            }
+   549→        }
+   550→
+   551→        $existingStates = TaskStageState::query()
+   552→            ->where('task_id', $task->id)
+   553→            ->get()
+   554→            ->keyBy('stage_id');
+   555→
+   556→        $applied = [];
+   557→
+   558→        DB::transaction(function () use ($data, $task, $user, $stageById, $existingStates, &$applied): void {
+   559→            foreach ($data['updates'] as $update) {
+   560→                $stage = $stageById->get($update['stageId']);
+   561→                $previous = (string) ($existingStates->get($stage->id)->state ?? 'NOT_STARTED');
+   562→                $state = (string) $update['state'];
+   563→
+   564→                if ($previous === $state) {
+   565→                    continue;
+   566→                }
+   567→
+   568→                $comment = isset($update['comment']) && $update['comment'] !== ''
+   569→                    ? (string) $update['comment'] : null;
+   570→
+   571→                TaskStageUpdate::query()->create([
+   572→                    'task_id' => $task->id,
+   573→                    'stage_id' => $stage->id,
+   574→                    'stage_name' => $stage->name,
+   575→                    'user_id' => $user->id,
+   576→                    'user_name' => $user->name,
+   577→                    'previous_state' => $previous,
+   578→                    'new_state' => $state,
+   579→                    'comment' => $comment,
+   580→                ]);
+   581→
+   582→                TaskStageState::query()->updateOrCreate(
+   583→                    ['task_id' => $task->id, 'stage_id' => $stage->id],
+   584→                    [
+   585→                        'state' => $state,
+   586→                        'updated_by_id' => $user->id,
+   587→                        'updated_by_name' => $user->name,
+   588→                    ]
+   589→                );
+   590→
+   591→                $applied[] = [
+   592→                    'stageName' => $stage->name,
+   593→                    'previousState' => $previous,
+   594→                    'newState' => $state,
+   595→                ];
+   596→            }
+   597→        });
+   598→
+   599→        if ($applied === []) {
+   600→            return $this->taskError($id, __('flash.noStageChanges'));
+   601→        }
+   602→
+   603→        // Recalculate numerical progress from the checklist (never decreases).
+   604→        $task->refresh();
+   605→        ProgressService::recompute($task);
+   606→
+   607→        // First update moves an assigned task into Ongoing.
+   608→        if ($task->status === 'ASSIGNED') {
+   609→            $task->forceFill(['status' => 'ONGOING'])->save();
+   610→            $this->recordStatusChange($task, 'ASSIGNED', 'ONGOING', 'Production started', $user);
+   611→        }
+   612→
+   613→        Audit::log($user, 'STAGES_UPDATED', 'TASK', $task->id, ['changes' => $applied]);
+   614→
+   615→        return $this->taskSuccess($id, __('td.toast.checklistUpdated'));
+   616→    }
+   617→
+   618→    // ------------------------------------------------------------------
+   619→    // INSPECT — /tasks/{id}/inspect (perm:production.inspect on the route)
+   620→    // ------------------------------------------------------------------
+   621→
+   622→    /**
+   623→     * POST /tasks/{id}/inspect — quality inspection decision
+   624→     * (APPROVED | CHANGES_REQUESTED | REOPENED).
+   625→     */
+   626→    public function inspect(Request $request, string $id): RedirectResponse
+   627→    {
+   628→        $data = $request->validate([
+   629→            'decision' => ['required', 'string', 'in:'.implode(',', Atelier::INSPECTION_DECISIONS)],
+   630→            'comments' => ['nullable', 'string', 'max:2000'],
+   631→        ]);
+   632→
+   633→        /** @var User $user */
+   634→        $user = $request->user();
+   635→        $task = $this->taskOrFail($id);
+   636→
+   637→        if (! $this->canAccess($user, $task)) {
+   638→            abort(403);
+   639→        }
+   640→
+   641→        if ($task->isTerminal()) {
+   642→            return $this->closedTask($id);
+   643→        }
+   644→
+   645→        $decision = (string) $data['decision'];
+   646→        $comments = $this->text($data, 'comments');
+   647→
+   648→        if ($decision === 'REOPENED') {
+   649→            return $this->reopenTask($task, $user, $this->supervisor($user), $comments);
+   650→        }
+   651→
+   652→        if ($task->status !== 'AWAITING_INSPECTION') {
+   653→            return $this->taskError($id, __('flash.statusNoInspect'));
+   654→        }
+   655→
+   656→        if ($decision === 'APPROVED') {
+   657→            $this->approveTask($task, $user, $comments);
+   658→
+   659→            return $this->taskSuccess($id, __('td.toast.inspectionApproved'));
+   660→        }
+   661→
+   662→        return $this->requestChanges($task, $user, $comments);
+   663→    }
+   664→
+   665→    /**
+   666→     * Inspection decision APPROVED — status APPROVED, progress 100,
+   667→     * completedAt set (kept when already present).
+   668→     */
+   669→    private function approveTask(ProductionTask $task, User $user, ?string $comments): void
+   670→    {
+   671→        $previousProgress = (int) $task->progress;
+   672→
+   673→        DB::transaction(function () use ($task, $user, $previousProgress, $comments): void {
+   674→            $task->forceFill([
+   675→                'status' => 'APPROVED',
+   676→                'completed_at' => $task->completed_at ?? Carbon::now(),
+   677→                'progress' => 100,
+   678→            ])->save();
+   679→
+   680→            if ($previousProgress < 100) {
+   681→                TaskProgressHistory::query()->create([
+   682→                    'task_id' => $task->id,
+   683→                    'user_id' => $user->id,
+   684→                    'user_name' => $user->name,
+   685→                    'previous_progress' => $previousProgress,
+   686→                    'new_progress' => 100,
+   687→                    'source' => 'INSPECTION',
+   688→                    'note' => 'Set to 100% on approval',
+   689→                ]);
+   690→            }
+   691→        });
+   692→
+   693→        $this->recordStatusChange($task, 'AWAITING_INSPECTION', 'APPROVED', $comments, $user);
+   694→
+   695→        if ($task->assigned_staff_id !== null) {
+   696→            Notifier::users(
+   697→                [$task->assigned_staff_id],
+   698→                'TASK_APPROVED',
+   699→                $this->taskLabel($task).' passed quality inspection. Well done!',
+   700→                $task->id,
+   701→                $task->order_id
+   702→            );
+   703→        }
+   704→
+   705→        InspectionRecord::query()->create([
+   706→            'task_id' => $task->id,
+   707→            'inspector_id' => $user->id,
+   708→            'inspector_name' => $user->name,
+   709→            'decision' => 'APPROVED',
+   710→            'comments' => $comments,
+   711→        ]);
+   712→
+   713→        Audit::log($user, 'INSPECTION_COMPLETED', 'TASK', $task->id, [
+   714→            'decision' => 'APPROVED',
+   715→            'comments' => $comments,
+   716→        ]);
+   717→    }
+   718→
+   719→    /**
+   720→     * Inspection decision CHANGES_REQUESTED — correction instructions required.
+   721→     */
+   722→    private function requestChanges(ProductionTask $task, User $user, ?string $comments): RedirectResponse
+   723→    {
+   724→        if ($comments === null || mb_strlen($comments) < 3) {
+   725→            return $this->taskError($task->id, __('td.toast.correctionsRequired'));
+   726→        }
+   727→
+   728→        $task->forceFill(['status' => 'CHANGES_REQUESTED'])->save();
+   729→        $this->recordStatusChange($task, 'AWAITING_INSPECTION', 'CHANGES_REQUESTED', $comments, $user);
+   730→
+   731→        if ($task->assigned_staff_id !== null) {
+   732→            Notifier::users(
+   733→                [$task->assigned_staff_id],
+   734→                'CORRECTIONS_REQUESTED',
+   735→                'Corrections were requested on '.$this->taskLabel($task).': '.$comments,
+   736→                $task->id,
+   737→                $task->order_id
+   738→            );
+   739→        }
+   740→
+   741→        InspectionRecord::query()->create([
+   742→            'task_id' => $task->id,
+   743→            'inspector_id' => $user->id,
+   744→            'inspector_name' => $user->name,
+   745→            'decision' => 'CHANGES_REQUESTED',
+   746→            'comments' => $comments,
+   747→        ]);
+   748→
+   749→        Audit::log($user, 'INSPECTION_COMPLETED', 'TASK', $task->id, [
+   750→            'decision' => 'CHANGES_REQUESTED',
+   751→            'comments' => $comments,
+   752→        ]);
+   753→
+   754→        return $this->taskSuccess($task->id, __('td.toast.correctionsRequested'));
+   755→    }
+   756→
+   757→    // ------------------------------------------------------------------
+   758→    // COMMENT — /tasks/{id}/comment
+   759→    // ------------------------------------------------------------------
+   760→
+   761→    /**
+   762→     * POST /tasks/{id}/comment — add a production note or report an issue
+   763→     * (staff only on their own task).
+   764→     */
+   765→    public function comment(Request $request, string $id): RedirectResponse
+   766→    {
+   767→        $data = $request->validate([
+   768→            'message' => ['required', 'string', 'max:1000'],
+   769→            'isIssue' => ['nullable', 'boolean'],
+   770→        ]);
+   771→
+   772→        /** @var User $user */
+   773→        $user = $request->user();
+   774→        $task = $this->taskOrFail($id);
+   775→
+   776→        if (! $this->canAccess($user, $task)) {
+   777→            abort(403);
+   778→        }
+   779→
+   780→        if ($task->isTerminal()) {
+   781→            return $this->closedTask($id);
+   782→        }
+   783→
+   784→        $isIssue = $request->boolean('isIssue');
+   785→
+   786→        TaskComment::query()->create([
+   787→            'task_id' => $task->id,
+   788→            'user_id' => $user->id,
+   789→            'user_name' => $user->name,
+   790→            'message' => $data['message'],
+   791→            'is_issue' => $isIssue,
+   792→        ]);
+   793→
+   794→        if ($isIssue) {
+   795→            Notifier::management(
+   796→                'ISSUE_REPORTED',
+   797→                $user->name.' reported an issue on '.$task->code.' — '.$task->garment_piece
+   798→                .' ('.$task->order->order_number.'): '.$data['message'],
+   799→                $task->id,
+   800→                $task->order_id
+   801→            );
+   802→
+   803→            Audit::log($user, 'ISSUE_REPORTED', 'TASK', $task->id, ['message' => $data['message']]);
+   804→
+   805→            return $this->taskSuccess($id, __('td.toast.issueReported'));
+   806→        }
+   807→
+   808→        Audit::log($user, 'COMMENT_ADDED', 'TASK', $task->id);
+   809→
+   810→        return $this->taskSuccess($id, __('td.toast.noteAdded'));
+   811→    }
+   812→
+   813→    // ------------------------------------------------------------------
+   814→    // BLOCK / UNBLOCK — /tasks/{id}/block, /tasks/{id}/unblock
+   815→    // ------------------------------------------------------------------
+   816→
+   817→    /**
+   818→     * POST /tasks/{id}/block — ASSIGNED|ONGOING|CHANGES_REQUESTED → BLOCKED
+   819→     * (reason required, Management notified immediately).
+   820→     */
+   821→    public function block(Request $request, string $id): RedirectResponse
+   822→    {
+   823→        $data = $request->validate([
+   824→            'reason' => ['required', 'string', 'min:3', 'max:1000'],
+   825→        ]);
+   826→
+   827→        /** @var User $user */
+   828→        $user = $request->user();
+   829→        $task = $this->taskOrFail($id);
+   830→
+   831→        if (! $this->canAccess($user, $task)) {
+   832→            abort(403);
+   833→        }
+   834→
+   835→        if ($task->isTerminal()) {
+   836→            return $this->closedTask($id);
+   837→        }
+   838→
+   839→        if (! in_array($task->status, ['ASSIGNED', 'ONGOING', 'CHANGES_REQUESTED'], true)) {
+   840→            return $this->taskError(
+   841→                $id,
+   842→                __('flash.statusNoBlock', ['status' => __('labels.status.'.$task->status)])
+   843→            );
+   844→        }
+   845→
+   846→        $reason = (string) $data['reason'];
+   847→        $fromStatus = $task->status;
+   848→
+   849→        $task->forceFill([
+   850→            'status' => 'BLOCKED',
+   851→            'blocked_reason' => $reason,
+   852→        ])->save();
+   853→
+   854→        $this->recordStatusChange($task, $fromStatus, 'BLOCKED', $reason, $user);
+   855→
+   856→        Notifier::management(
+   857→            'TASK_BLOCKED',
+   858→            $user->name.' blocked '.$this->taskLabel($task).'. Reason: '.$reason,
+   859→            $task->id,
+   860→            $task->order_id
+   861→        );
+   862→
+   863→        Audit::log($user, 'TASK_BLOCKED', 'TASK', $task->id, ['reason' => $reason]);
+   864→
+   865→        return $this->taskSuccess($id, __('td.toast.blocked'));
+   866→    }
+   867→
+   868→    /**
+   869→     * POST /tasks/{id}/unblock — BLOCKED → ONGOING (progress > 0) or ASSIGNED.
+   870→     */
+   871→    public function unblock(Request $request, string $id): RedirectResponse
+   872→    {
+   873→        $data = $request->validate([
+   874→            'note' => ['nullable', 'string', 'max:1000'],
+   875→        ]);
+   876→
+   877→        /** @var User $user */
+   878→        $user = $request->user();
+   879→        $task = $this->taskOrFail($id);
+   880→
+   881→        if (! $this->canAccess($user, $task)) {
+   882→            abort(403);
+   883→        }
+   884→
+   885→        if ($task->status !== 'BLOCKED') {
+   886→            return $this->taskError($id, __('flash.taskNotBlocked'));
+   887→        }
+   888→
+   889→        $note = $this->text($data, 'note');
+   890→        $newStatus = $task->progress > 0 ? 'ONGOING' : 'ASSIGNED';
+   891→
+   892→        $task->forceFill([
+   893→            'status' => $newStatus,
+   894→            'blocked_reason' => null,
+   895→        ])->save();
+   896→
+   897→        $this->recordStatusChange($task, 'BLOCKED', $newStatus, $note, $user);
+   898→
+   899→        if ($task->assigned_staff_id !== null) {
+   900→            Notifier::users(
+   901→                [$task->assigned_staff_id],
+   902→                'BLOCK_RESOLVED',
+   903→                $this->taskLabel($task).' is no longer blocked. You can resume production.',
+   904→                $task->id,
+   905→                $task->order_id
+   906→            );
+   907→        }
+   908→
+   909→        Audit::log($user, 'BLOCK_RESOLVED', 'TASK', $task->id, ['note' => $note]);
+   910→
+   911→        return $this->taskSuccess($id, __('td.toast.unblocked'));
+   912→    }
+   913→
+   914→    // ------------------------------------------------------------------
+   915→    // UPDATE — /tasks/{id}/update (perm:production.manage.details on the route)
+   916→    // ------------------------------------------------------------------
+   917→
+   918→    /**
+   919→     * POST /tasks/{id}/update — edit task details (deadline, priority,
+   920→     * instructions, garment piece). The assignee is notified when the
+   921→     * deadline or the instructions change.
+   922→     */
+   923→    public function update(Request $request, string $id): RedirectResponse
+   924→    {
+   925→        $data = $request->validate([
+   926→            'deadline' => ['nullable', 'date'],
+   927→            'priority' => ['nullable', 'string', 'in:'.implode(',', Atelier::PRIORITIES)],
+   928→            'instructions' => ['nullable', 'string', 'max:2000'],
+   929→            'garmentPiece' => ['nullable', 'string', 'max:100'],
+   930→        ]);
+   931→
+   932→        /** @var User $user */
+   933→        $user = $request->user();
+   934→        $task = $this->taskOrFail($id);
+   935→
+   936→        if (! $this->canAccess($user, $task)) {
+   937→            abort(403);
+   938→        }
+   939→
+   940→        if ($task->isTerminal()) {
+   941→            return $this->closedTask($id);
+   942→        }
+   943→
+   944→        $changes = [];
+   945→        $force = [];
+   946→
+   947→        if ($request->has('deadline')) {
+   948→            $deadline = $this->text($data, 'deadline') !== null ? Carbon::parse((string) $data['deadline']) : null;
+   949→
+   950→            $force['deadline'] = $deadline;
+   951→            $changes['deadline'] = ['from' => $task->deadline?->toIso8601String(), 'to' => $deadline?->toIso8601String()];
+   952→        }
+   953→
+   954→        if ($request->has('priority') && $this->text($data, 'priority') !== null) {
+   955→            $force['priority'] = (string) $data['priority'];
+   956→            $changes['priority'] = ['from' => $task->priority, 'to' => (string) $data['priority']];
+   957→        }
+   958→
+   959→        if ($request->has('instructions')) {
+   960→            $instructions = $this->text($data, 'instructions');
+   961→            $force['instructions'] = $instructions;
+   962→            $changes['instructions'] = 'updated';
+   963→        }
+   964→
+   965→        if ($request->has('garmentPiece') && $this->text($data, 'garmentPiece') !== null) {
+   966→            $piece = trim((string) $data['garmentPiece']);
+   967→
+   968→            if ($piece === '') {
+   969→                return $this->taskError($id, __('td.toast.pieceRequired'));
+   970→            }
+   971→
+   972→            $clash = ProductionTask::query()
+   973→                ->where('order_id', $task->order_id)
+   974→                ->where('garment_piece', $piece)
+   975→                ->where('status', '!=', 'CANCELLED')
+   976→                ->where('id', '!=', $task->id)
+   977→                ->exists();
+   978→
+   979→            if ($clash) {
+   980→                return $this->taskError($id, __('flash.pieceExistsOnOrder', [
+   981→                    'name' => $piece,
+   982→                    'order' => $task->order->order_number,
+   983→                ]));
+   984→            }
+   985→
+   986→            $force['garment_piece'] = $piece;
+   987→        }
+   988→
+   989→        if ($force === []) {
+   990→            return $this->taskError($id, __('td.toast.nothingToUpdate'));
+   991→        }
+   992→
+   993→        $deadlineChanged = array_key_exists('deadline', $force);
+   994→        $instructionsChanged = array_key_exists('instructions', $force);
+   995→        $label = $this->taskLabel($task);
+   996→
+   997→        $task->forceFill($force)->save();
+   998→
+   999→        if ($deadlineChanged && $task->assigned_staff_id !== null) {
+  1000→            Notifier::users(
+  1001→                [$task->assigned_staff_id],
+  1002→                'DEADLINE_CHANGED',
+  1003→                'The deadline of '.$label.' has been changed.',
+  1004→                $task->id,
+  1005→                $task->order_id
+  1006→            );
+  1007→        }
+  1008→
+  1009→        if ($instructionsChanged && $task->assigned_staff_id !== null) {
+  1010→            Notifier::users(
+  1011→                [$task->assigned_staff_id],
+  1012→                'NEW_INSTRUCTIONS',
+  1013→                'New production instructions were added to '.$label.'.',
+  1014→                $task->id,
+  1015→                $task->order_id
+  1016→            );
+  1017→        }
+  1018→
+  1019→        Audit::log($user, 'TASK_UPDATED', 'TASK', $task->id, $changes);
+  1020→
+  1021→        return $this->taskSuccess($id, __('td.toast.detailsUpdated'));
+  1022→    }
+  1023→
+  1024→    // ------------------------------------------------------------------
+  1025→    // Shared helpers
+  1026→    // ------------------------------------------------------------------
+  1027→
+  1028→    /**
+  1029→     * Load the task (with order + customer + assignee) or abort with 404.
+  1030→     */
+  1031→    private function taskOrFail(string $id): ProductionTask
+  1032→    {
+  1033→        /** @var ProductionTask $task */
+  1034→        $task = ProductionTask::query()
+  1035→            ->with(['order.customer', 'assignedStaff'])
+  1036→            ->findOrFail($id);
+  1037→
+  1038→        return $task;
+  1039→    }
+  1040→
+  1041→    /**
+  1042→     * MANAGEMENT/ADMIN are supervisors and may touch any task.
+  1043→     */
+  1044→    private function supervisor(User $user): bool
+  1045→    {
+  1046→        return $user->role === 'MANAGEMENT' || $user->role === 'ADMIN';
+  1047→    }
+  1048→
+  1049→    /**
+  1050→     * Staff can only touch their own tasks (= canAccessTask() in tasks.ts).
+  1051→     */
+  1052→    private function canAccess(User $user, ProductionTask $task): bool
+  1053→    {
+  1054→        return $this->supervisor($user) || $task->assigned_staff_id === $user->id;
+  1055→    }
+  1056→
+  1057→    /**
+  1058→     * "TASK-0001 — Jacket (OSSZ-2026-042)" label used in notifications.
+  1059→     */
+  1060→    private function taskLabel(ProductionTask $task): string
+  1061→    {
+  1062→        return $task->code.' — '.$task->garment_piece.' ('.$task->order->order_number.')';
+  1063→    }
+  1064→
+  1065→    /**
+  1066→     * Record an immutable status change + its TASK_STATUS_CHANGED audit
+  1067→     * entry (= changeTaskStatus() in tasks.ts).
+  1068→     */
+  1069→    private function recordStatusChange(
+  1070→        ProductionTask $task,
+  1071→        string $fromStatus,
+  1072→        string $toStatus,
+  1073→        ?string $reason,
+  1074→        User $user
+  1075→    ): void {
+  1076→        TaskStatusChange::query()->create([
+  1077→            'task_id' => $task->id,
+  1078→            'user_id' => $user->id,
+  1079→            'user_name' => $user->name,
+  1080→            'from_status' => $fromStatus,
+  1081→            'to_status' => $toStatus,
+  1082→            'reason' => $reason,
+  1083→        ]);
+  1084→
+  1085→        Audit::log($user, 'TASK_STATUS_CHANGED', 'TASK', $task->id, [
+  1086→            'fromStatus' => $fromStatus,
+  1087→            'toStatus' => $toStatus,
+  1088→            'reason' => $reason,
+  1089→        ]);
+  1090→    }
+  1091→
+  1092→    /**
+  1093→     * Nullable trimmed string from a validated payload ('' → null).
+  1094→     */
+  1095→    private function text(array $data, string $key): ?string
+  1096→    {
+  1097→        $value = $data[$key] ?? null;
+  1098→
+  1099→        if (! is_string($value)) {
+  1100→            return null;
+  1101→        }
+  1102→
+  1103→        $trimmed = trim($value);
+  1104→
+  1105→        return $trimmed === '' ? null : $trimmed;
+  1106→    }
+  1107→
+  1108→    /**
+  1109→     * Redirect back to the task page with a success flash.
+  1110→     */
+  1111→    private function taskSuccess(string $id, string $message): RedirectResponse
+  1112→    {
+  1113→        return redirect()->route('tasks.show', ['id' => $id])->with('success', $message);
+  1114→    }
+  1115→
+  1116→    /**
+  1117→     * Redirect back to the task page with an error flash.
+  1118→     */
+  1119→    private function taskError(string $id, string $message): RedirectResponse
+  1120→    {
+  1121→        return redirect()->route('tasks.show', ['id' => $id])->with('error', $message);
+  1122→    }
+  1123→
+  1124→    /**
+  1125→     * Standard error for mutations on DELIVERED/CANCELLED tasks.
+  1126→     */
+  1127→    private function closedTask(string $id): RedirectResponse
+  1128→    {
+  1129→        return $this->taskError($id, __('flash.taskClosed'));
+  1130→    }
+  1131→}
+  1132→
