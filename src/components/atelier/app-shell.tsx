@@ -236,15 +236,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <div className="flex flex-1 min-h-0">
         {/* Desktop sidebar */}
         <aside className="hidden lg:flex w-60 shrink-0 flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border sticky top-0 h-screen">
-          <div className="flex items-center gap-3 px-5 h-16 border-b border-sidebar-border">
-            <img
-              src="/ossz-logo.png"
-              alt={t("login.logoAlt")}
-              className="h-9 w-auto rounded-md ring-1 ring-white/15"
-            />
-            <div className="min-w-0">
+          <div className="flex items-center justify-center px-5 h-16 border-b border-sidebar-border">
+            <div className="text-center min-w-0">
               <p className="font-display font-bold leading-none">OSSZ ATELIER</p>
-              <p className="text-[9px] tracking-[0.2em] text-stone-400 mt-1">{t("shell.brandTag")}</p>
+              <p className="text-[9px] tracking-[0.2em] text-stone-400 mt-1.5">{t("shell.brandTag")}</p>
             </div>
           </div>
           <div className="flex-1 overflow-y-auto">
@@ -257,7 +252,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
         {/* Main column */}
         <div className="flex-1 flex flex-col min-w-0">
-          <header className="sticky top-0 z-30 flex items-center gap-2 sm:gap-3 h-16 px-4 sm:px-6 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+          <header className="sticky top-0 z-30 relative flex items-center gap-2 sm:gap-3 h-16 px-3 sm:px-6 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
             {/* Mobile nav */}
             <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
               <SheetTrigger asChild>
@@ -270,13 +265,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 className="w-72 p-0 bg-sidebar text-sidebar-foreground border-sidebar-border"
               >
                 <SheetTitle className="sr-only">{t("shell.navigation")}</SheetTitle>
-                <div className="flex items-center gap-3 px-5 h-16 border-b border-sidebar-border">
-                  <img
-                    src="/ossz-logo.png"
-                    alt={t("login.logoAlt")}
-                    className="h-9 w-auto rounded-md ring-1 ring-white/15"
-                  />
-                  <p className="font-display font-bold">OSSZ ATELIER</p>
+                <div className="flex items-center justify-center px-5 h-16 border-b border-sidebar-border">
+                  <div className="text-center min-w-0">
+                    <p className="font-display font-bold leading-none">OSSZ ATELIER</p>
+                    <p className="text-[9px] tracking-[0.2em] text-stone-400 mt-1.5">
+                      {t("shell.brandTag")}
+                    </p>
+                  </div>
                 </div>
                 <NavList
                   sections={sections}
@@ -287,19 +282,44 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               </SheetContent>
             </Sheet>
 
-            <h1 className="font-display text-lg font-semibold truncate">
+            {/* Brand logo — centered at the top of the dashboard. Clicking it
+                returns to the dashboard view. Absolutely centered on >=360px
+                viewports; on very narrow screens it flows between the menu and
+                the header actions so it can never overlap them. */}
+            <button
+              type="button"
+              onClick={() => navigate("dashboard")}
+              aria-label={t("shell.logoAria")}
+              className={cn(
+                "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 shrink-0 rounded-md",
+                "max-[359px]:static max-[359px]:translate-x-0 max-[359px]:translate-y-0 max-[359px]:mx-auto"
+              )}
+            >
+              <img
+                src="/ossz-logo.png"
+                alt=""
+                className="h-7 sm:h-9 w-auto rounded-md ring-1 ring-black/10"
+              />
+            </button>
+
+            <h1 className="hidden sm:block font-display text-lg font-semibold truncate min-w-0 max-w-[calc(50%-6.5rem)]">
               {t(viewTitleKey(view, user.role))}
             </h1>
 
-            <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
+            <div className="ml-auto max-[359px]:ml-0 flex items-center gap-1 sm:gap-1.5">
               {/* Language switch */}
               <LanguageToggle />
 
               {/* Notifications bell */}
               <Popover open={bellOpen} onOpenChange={setBellOpen}>
                 <PopoverTrigger asChild>
-                  <Button variant="ghost" size="icon" className="relative" aria-label={t("shell.bellAria")}>
-                    <Bell className="size-5" />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="relative h-8 w-8 sm:h-9 sm:w-9"
+                    aria-label={t("shell.bellAria")}
+                  >
+                    <Bell className="size-4 sm:size-5" />
                     {unreadCount > 0 && (
                       <span className="absolute -top-0.5 -right-0.5 min-w-4.5 h-4.5 px-1 rounded-full bg-red-600 text-white text-[10px] font-bold flex items-center justify-center">
                         {unreadCount > 99 ? "99+" : unreadCount}
@@ -379,7 +399,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button
-                    className="flex items-center gap-2 rounded-full hover:bg-muted p-1 pr-2 transition-colors"
+                    className="flex items-center gap-2 rounded-full hover:bg-muted p-0 sm:p-1 sm:pr-2 transition-colors"
                     aria-label={t("shell.accountMenu")}
                   >
                     <Avatar className="size-8">

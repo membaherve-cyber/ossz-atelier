@@ -50,6 +50,10 @@ const entries: DictEntries = {
   "shell.view.notifications": { en: "Notifications", fr: "Notifications" },
 
   // --- Header controls --------------------------------------------------------------------
+  "shell.logoAria": {
+    en: "OSSZ Atelier logo — go to dashboard",
+    fr: "Logo OSSZ Atelier — aller au tableau de bord",
+  },
   "shell.openMenu": { en: "Open menu", fr: "Ouvrir le menu" },
   "shell.navigation": { en: "Navigation", fr: "Navigation" },
   "shell.bellAria": { en: "Notifications", fr: "Notifications" },
