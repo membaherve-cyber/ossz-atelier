@@ -51,4 +51,7 @@ return [
     'activatedToastDesc' => '« {name} » est de nouveau disponible pour les nouvelles tâches.',
     'deactivatedToastDesc' => '« {name} » ne sera plus ajoutée aux nouvelles tâches.',
     'updateFailedToast' => 'Impossible de mettre à jour l\'étape',
+
+    // Ajouts spécifiques à Laravel (case « Actif » du formulaire).
+    'activeLabel' => 'Actif',
 ];

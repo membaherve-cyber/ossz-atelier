@@ -47,6 +47,7 @@ return [
         'stages' => 'Étapes de production',
         'notifications' => 'Notifications',
     ],
+    'logoAria' => 'Logo OSSZ Atelier — aller au tableau de bord',
     'openMenu' => 'Ouvrir le menu',
     'navigation' => 'Navigation',
     'bellAria' => 'Notifications',

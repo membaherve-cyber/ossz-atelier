@@ -7,6 +7,7 @@ return [
     'title' => 'Notifications',
     'desc' => 'Alertes de production pour votre compte.',
     'markAll' => 'Tout marquer comme lu',
+    'markOne' => 'Marquer comme lu',
     'marking' => 'Marquage…',
     'tabAll' => 'Toutes ({count})',
     'tabUnread' => 'Non lues',

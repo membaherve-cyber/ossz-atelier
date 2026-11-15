@@ -41,4 +41,11 @@ return [
     'registeredToastDesc' => '{name} received code {code}.',
     'updateFailed' => 'Could not update customer',
     'registerFailed' => 'Could not register customer',
+
+    // Laravel-only additions (delete flow + row actions).
+    'hasOrdersError' => 'This customer already has orders and cannot be deleted.',
+    'deletedToast' => 'Customer deleted',
+    'deleteTitle' => 'Delete customer',
+    'deleteDesc' => '{name} will be permanently removed. This action cannot be undone.',
+    'deleteAria' => 'Delete customer {name}',
 ];

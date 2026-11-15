@@ -47,6 +47,7 @@ return [
         'stages' => 'Production Stages',
         'notifications' => 'Notifications',
     ],
+    'logoAria' => 'OSSZ Atelier logo — go to dashboard',
     'openMenu' => 'Open menu',
     'navigation' => 'Navigation',
     'bellAria' => 'Notifications',

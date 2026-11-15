@@ -69,4 +69,14 @@ return [
     'deactivatedToastTitle' => 'Compte désactivé',
     'reactivatedToastDesc' => '{name} peut de nouveau se connecter.',
     'deactivatedToastDesc' => '{name} ne peut plus se connecter.',
+
+    // Ajouts spécifiques à Laravel (garde-fous serveur + confirmation du mot de passe + champs de formulaire).
+    'lastManagementError' => 'Le dernier compte Management actif ne peut pas être désactivé ni rétrogradé.',
+    'selfDeactivateError' => 'Vous ne pouvez pas désactiver votre propre compte.',
+    'confirmPassword' => 'Confirmer le mot de passe *',
+    'confirmNewPassword' => 'Confirmer le nouveau mot de passe',
+    'newPasswordOptional' => 'Nouveau mot de passe',
+    'passwordOptionalHint' => 'Laissez vide pour conserver le mot de passe actuel.',
+    'isActiveLabel' => 'Compte actif',
+    'editAria' => 'Modifier le compte de {name}',
 ];

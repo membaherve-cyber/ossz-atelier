@@ -69,4 +69,14 @@ return [
     'deactivatedToastTitle' => 'Account deactivated',
     'reactivatedToastDesc' => '{name} can sign in again.',
     'deactivatedToastDesc' => '{name} can no longer sign in.',
+
+    // Laravel-only additions (server safeguards + password confirmation + form extras).
+    'lastManagementError' => 'The last active Management account cannot be deactivated or demoted.',
+    'selfDeactivateError' => 'You cannot deactivate your own account.',
+    'confirmPassword' => 'Confirm password *',
+    'confirmNewPassword' => 'Confirm new password',
+    'newPasswordOptional' => 'New password',
+    'passwordOptionalHint' => 'Leave blank to keep the current password.',
+    'isActiveLabel' => 'Account active',
+    'editAria' => 'Edit account {name}',
 ];

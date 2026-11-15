@@ -2,7 +2,12 @@
     "name": "ossz/atelier",
     "type": "project",
     "description": "OSSZ ATELIER - independent garment production management system (Laravel 11).",
-    "keywords": ["laravel", "atelier", "production", "management"],
+    "keywords": [
+        "laravel",
+        "atelier",
+        "production",
+        "management"
+    ],
     "license": "proprietary",
     "require": {
         "php": "^8.2",
@@ -13,7 +18,10 @@
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
-        }
+        },
+        "files": [
+            "app/Support/mb_polyfills.php"
+        ]
     },
     "scripts": {
         "post-autoload-dump": [
@@ -43,6 +51,9 @@
             "composer/package-discovery": true,
             "pestphp/pest-plugin": true,
             "php-http/discovery": true
+        },
+        "platform": {
+            "php": "8.2.35"
         }
     },
     "minimum-stability": "stable",

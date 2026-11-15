@@ -41,4 +41,11 @@ return [
     'registeredToastDesc' => '{name} a reçu le code {code}.',
     'updateFailed' => 'Impossible de modifier le client',
     'registerFailed' => 'Impossible d\'enregistrer le client',
+
+    // Ajouts spécifiques à Laravel (suppression + actions par ligne).
+    'hasOrdersError' => 'Ce client a déjà des commandes et ne peut pas être supprimé.',
+    'deletedToast' => 'Client supprimé',
+    'deleteTitle' => 'Supprimer le client',
+    'deleteDesc' => '{name} sera définitivement supprimé. Cette action est irréversible.',
+    'deleteAria' => 'Supprimer le client {name}',
 ];

@@ -91,4 +91,16 @@ return [
     'errPieces' => 'Number of pieces must be between 1 and 200.',
     'errCustomerSelect' => 'Select an existing customer or choose “New customer”.',
     'errNewCustomer' => 'New customer name and phone are required.',
+
+    // Laravel-only additions (delete flow + pagination + row actions).
+    'hasTasksError' => 'This order already has production tasks and cannot be deleted.',
+    'deletedToast' => 'Order deleted',
+    'deleteTitle' => 'Delete order',
+    'deleteDesc' => '{number} will be permanently removed. This action cannot be undone.',
+    'viewAria' => 'View order {number}',
+    'editAria' => 'Edit order {number}',
+    'deleteAria' => 'Delete order {number}',
+    'previous' => 'Previous',
+    'next' => 'Next',
+    'pagination' => '{total} orders · page {page} of {totalPages}',
 ];

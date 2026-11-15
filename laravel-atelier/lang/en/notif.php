@@ -7,6 +7,7 @@ return [
     'title' => 'Notifications',
     'desc' => 'Production alerts for your account.',
     'markAll' => 'Mark all as read',
+    'markOne' => 'Mark as read',
     'marking' => 'Marking…',
     'tabAll' => 'All ({count})',
     'tabUnread' => 'Unread',

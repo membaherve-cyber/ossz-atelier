@@ -91,4 +91,16 @@ return [
     'errPieces' => 'Le nombre de pièces doit être compris entre 1 et 200.',
     'errCustomerSelect' => 'Sélectionnez un client existant ou choisissez « Nouveau client ».',
     'errNewCustomer' => 'Le nom et le téléphone du nouveau client sont obligatoires.',
+
+    // Ajouts spécifiques à Laravel (suppression + pagination + actions par ligne).
+    'hasTasksError' => 'Cette commande a déjà des tâches de production et ne peut pas être supprimée.',
+    'deletedToast' => 'Commande supprimée',
+    'deleteTitle' => 'Supprimer la commande',
+    'deleteDesc' => '{number} sera définitivement supprimée. Cette action est irréversible.',
+    'viewAria' => 'Voir la commande {number}',
+    'editAria' => 'Modifier la commande {number}',
+    'deleteAria' => 'Supprimer la commande {number}',
+    'previous' => 'Précédent',
+    'next' => 'Suivant',
+    'pagination' => '{total} commandes · page {page} sur {totalPages}',
 ];

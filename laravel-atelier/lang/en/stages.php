@@ -51,4 +51,7 @@ return [
     'activatedToastDesc' => '"{name}" is available to new tasks again.',
     'deactivatedToastDesc' => '"{name}" will no longer be added to new tasks.',
     'updateFailedToast' => 'Could not update the stage',
+
+    // Laravel-only additions (active checkbox in the create/edit form).
+    'activeLabel' => 'Active',
 ];

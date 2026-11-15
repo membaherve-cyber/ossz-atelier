@@ -1,0 +1,917 @@
+   765→
+   766→  return (
+   767→    <div>
+   768→      <Button variant="ghost" size="sm" className="-ml-2 mb-2" onClick={() => navigate("tasks")}>
+   769→        <ArrowLeft className="size-4" />
+   770→        {t("td.backToTasks")}
+   771→      </Button>
+   772→
+   773→      {/* ---- Header ---- */}
+   774→      <div className="mb-4">
+   775→        <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-3">
+   776→          <div className="min-w-0">
+   777→            <h1 className="font-display text-2xl font-bold tracking-tight truncate">
+   778→              {task.code} — {task.garmentPiece}
+   779→            </h1>
+   780→            <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 mt-1.5 text-sm text-muted-foreground">
+   781→              <span>
+   782→                {task.orderNumber} · {task.customerName}
+   783→              </span>
+   784→              <span>
+   785→                {t("td.assigneeColon")}{" "}
+   786→                <span className="text-foreground font-medium">
+   787→                  {task.assignedStaffName ?? t("td.unassigned")}
+   788→                </span>
+   789→              </span>
+   790→              <DueDate deadline={task.deadline} overdue={task.overdue} />
+   791→              <span>{t("td.createdOn", { date: formatDate(task.createdAt) })}</span>
+   792→            </div>
+   793→          </div>
+   794→          <div className="flex flex-wrap gap-1.5 shrink-0">
+   795→            <StatusBadge status={task.status} />
+   796→            <PriorityBadge priority={task.priority} />
+   797→            <CategoryBadge category={task.category} />
+   798→          </div>
+   799→        </div>
+   800→
+   801→        {task.status === "BLOCKED" && task.blockedReason && (
+   802→          <Alert variant="destructive" className="mt-3">
+   803→            <AlertTriangle />
+   804→            <AlertTitle>{t("td.blockedAlert")}</AlertTitle>
+   805→            <AlertDescription className="text-destructive/90">
+   806→              {task.blockedReason}
+   807→            </AlertDescription>
+   808→          </Alert>
+   809→        )}
+   810→        {task.status === "CANCELLED" && (
+   811→          <Alert className="mt-3 border-stone-300 bg-stone-50 text-stone-700">
+   812→            <Ban />
+   813→            <AlertTitle>{t("td.cancelledAlert")}</AlertTitle>
+   814→            <AlertDescription className="text-stone-600">
+   815→              {task.cancelReason ?? t("td.cancelledFallback")}
+   816→            </AlertDescription>
+   817→          </Alert>
+   818→        )}
+   819→        {task.status === "CHANGES_REQUESTED" && (
+   820→          <Alert className="mt-3 border-amber-300 bg-amber-50 text-amber-800">
+   821→            <AlertTriangle />
+   822→            <AlertTitle>{t("td.correctionsAlert")}</AlertTitle>
+   823→            <AlertDescription className="text-amber-700">
+   824→              {t("td.correctionsAlertDesc")}
+   825→            </AlertDescription>
+   826→          </Alert>
+   827→        )}
+   828→      </div>
+   829→
+   830→      <div className="grid lg:grid-cols-3 gap-4">
+   831→        {/* ---- Progress & checklist (left) ---- */}
+   832→        <SectionCard title={t("td.progressChecklist")} className="lg:col-span-2">
+   833→          <div className="space-y-4">
+   834→            <ProgressCell value={task.progress} status={task.status} />
+   835→            <p className="text-xs text-muted-foreground -mt-2">
+   836→              {t("td.currentProgress")} <span className="font-semibold">{task.progress}%</span>
+   837→            </p>
+   838→
+   839→            {mayUpdateProgress && (
+   840→              <div className="rounded-lg border bg-muted/30 p-3 space-y-2">
+   841→                <p className="text-sm font-medium">{t("td.updateProgressManually")}</p>
+   842→                <div className="flex flex-col sm:flex-row gap-2">
+   843→                  <Input
+   844→                    type="number"
+   845→                    min={0}
+   846→                    max={100}
+   847→                    step={1}
+   848→                    className="sm:w-28"
+   849→                    placeholder={`${task.progress}`}
+   850→                    value={progressInput}
+   851→                    onChange={(e) => setProgressInput(e.target.value)}
+   852→                    aria-label={t("td.aria.newProgress")}
+   853→                  />
+   854→                  <Input
+   855→                    className="flex-1"
+   856→                    placeholder={t("td.optionalNote")}
+   857→                    value={progressNote}
+   858→                    onChange={(e) => setProgressNote(e.target.value)}
+   859→                    aria-label={t("td.aria.progressNote")}
+   860→                  />
+   861→                  <Button disabled={!progressValid || busy} onClick={doProgressUpdate}>
+   862→                    {t("td.update")}
+   863→                  </Button>
+   864→                </div>
+   865→                {supervisor && (
+   866→                  <p className="text-xs text-muted-foreground">
+   867→                    {t("td.manualProgressNote", { source: t("td.source.MANUAL") })}
+   868→                  </p>
+   869→                )}
+   870→              </div>
+   871→            )}
+   872→
+   873→            <Separator />
+   874→
+   875→            <div>
+   876→              <div className="flex items-center justify-between gap-2">
+   877→                <p className="text-sm font-medium">{t("td.checklistTitle")}</p>
+   878→                {changesCount > 0 && (
+   879→                  <Badge variant="outline" className="border-amber-300 bg-amber-50 text-amber-800">
+   880→                    {changesCount === 1
+   881→                      ? t("td.pendingChange")
+   882→                      : t("td.pendingChanges", { count: changesCount })}
+   883→                  </Badge>
+   884→                )}
+   885→              </div>
+   886→              <p className="text-xs text-muted-foreground mt-0.5">
+   887→                {t("td.checklistHelp", {
+   888→                  weights: hasWeights ? t("td.checklistHelpWeights") : "",
+   889→                })}
+   890→              </p>
+   891→
+   892→              <div className="mt-2 divide-y rounded-lg border">
+   893→                {stages.length === 0 ? (
+   894→                  <EmptyState
+   895→                    icon={Inbox}
+   896→                    title={t("td.noStages.title")}
+   897→                    description={t("td.noStages.desc")}
+   898→                  />
+   899→                ) : (
+   900→                  stages.map((s) => {
+   901→                    const pending = stageChanges[s.id];
+   902→                    const effective = pending ?? s.state;
+   903→                    return (
+   904→                      <div
+   905→                        key={s.id}
+   906→                        className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-4 py-3"
+   907→                      >
+   908→                        <div className="min-w-0">
+   909→                          <p className="text-sm font-medium flex items-center gap-2 flex-wrap">
+   910→                            {s.name}
+   911→                            {s.weight > 1 && (
+   912→                              <Badge variant="secondary" className="text-xs">
+   913→                                {t("td.stageWeight", { weight: s.weight })}
+   914→                              </Badge>
+   915→                            )}
+   916→                          </p>
+   917→                          <div className="mt-1 flex items-center gap-2">
+   918→                            <StageStateChip state={effective} />
+   919→                            {pending && pending !== s.state && (
+   920→                              <span className="text-xs text-amber-700">
+   921→                                {t("td.wasState", { state: stageStateLabel(s.state, lang) })}
+   922→                              </span>
+   923→                            )}
+   924→                          </div>
+   925→                        </div>
+   926→                        {mayEditChecklist ? (
+   927→                          <div
+   928→                            className="flex flex-wrap gap-1 shrink-0"
+   929→                            role="group"
+   930→                            aria-label={t("td.aria.stateFor", { stage: s.name })}
+   931→                          >
+   932→                            {stageStateOptions(lang).map((o) => {
+   933→                              const active = effective === o.value;
+   934→                              return (
+   935→                                <button
+   936→                                  key={o.value}
+   937→                                  type="button"
+   938→                                  aria-pressed={active}
+   939→                                  aria-label={t("td.aria.setState", {
+   940→                                    stage: s.name,
+   941→                                    state: o.label,
+   942→                                  })}
+   943→                                  onClick={() =>
+   944→                                    setStageChanges((prev) => {
+   945→                                      const next = { ...prev };
+   946→                                      if (o.value === s.state) {
+   947→                                        // Clicking the saved state reverts any pending change.
+   948→                                        delete next[s.id];
+   949→                                      } else {
+   950→                                        next[s.id] = o.value;
+   951→                                      }
+   952→                                      return next;
+   953→                                    })
+   954→                                  }
+   955→                                  className={cn(
+   956→                                    "h-8 px-2.5 rounded-md text-xs font-medium border transition-colors",
+   957→                                    active
+   958→                                      ? "bg-primary text-primary-foreground border-primary"
+   959→                                      : "bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground"
+   960→                                  )}
+   961→                                >
+   962→                                  {o.label}
+   963→                                </button>
+   964→                              );
+   965→                            })}
+   966→                          </div>
+   967→                        ) : null}
+   968→                      </div>
+   969→                    );
+   970→                  })
+   971→                )}
+   972→              </div>
+   973→
+   974→              {mayEditChecklist && stages.length > 0 && (
+   975→                <div className="mt-3 space-y-2">
+   976→                  <Input
+   977→                    placeholder={t("td.stageCommentPlaceholder")}
+   978→                    value={stageComment}
+   979→                    onChange={(e) => setStageComment(e.target.value)}
+   980→                    aria-label={t("td.aria.stageComment")}
+   981→                  />
+   982→                  <div className="flex justify-end">
+   983→                    <Button
+   984→                      size="sm"
+   985→                      disabled={changesCount === 0 || busy}
+   986→                      onClick={saveChecklist}
+   987→                    >
+   988→                      {busy ? (
+   989→                        <Loader2 className="size-4 animate-spin" />
+   990→                      ) : (
+   991→                        <Save className="size-4" />
+   992→                      )}
+   993→                      {t("td.saveChecklist")}
+   994→                      {changesCount > 0 ? ` (${changesCount})` : ""}
+   995→                    </Button>
+   996→                  </div>
+   997→                </div>
+   998→              )}
+   999→            </div>
+  1000→          </div>
+  1001→        </SectionCard>
+  1002→
+  1003→        {/* ---- Actions (right) ---- */}
+  1004→        <SectionCard title={t("td.workflowActions")}>
+  1005→          <div className="space-y-2">
+  1006→            {canSubmit && (
+  1007→              <div>
+  1008→                <Button
+  1009→                  className="w-full"
+  1010→                  disabled={busy || staffSubmitBlocked}
+  1011→                  onClick={() => openDialog("submit")}
+  1012→                >
+  1013→                  <ClipboardCheck className="size-4" />
+  1014→                  {t("td.submitForInspection")}
+  1015→                </Button>
+  1016→                {staffSubmitBlocked && (
+  1017→                  <p className="text-xs text-muted-foreground mt-1">{t("td.reach100")}</p>
+  1018→                )}
+  1019→              </div>
+  1020→            )}
+  1021→            {canInspect && (
+  1022→              <Button className="w-full" disabled={busy} onClick={() => openDialog("inspect")}>
+  1023→                <ShieldCheck className="size-4" />
+  1024→                {t("td.inspectResult")}
+  1025→              </Button>
+  1026→            )}
+  1027→            {canReady && (
+  1028→              <Button className="w-full" disabled={busy} onClick={doReady}>
+  1029→                <ShoppingBag className="size-4" />
+  1030→                {t("td.markReady")}
+  1031→              </Button>
+  1032→            )}
+  1033→            {canDeliver && (
+  1034→              <Button className="w-full" disabled={busy} onClick={() => openDialog("deliver")}>
+  1035→                <Truck className="size-4" />
+  1036→                {t("td.markDelivered")}
+  1037→              </Button>
+  1038→            )}
+  1039→
+  1040→            {(canAssign || canEdit) && <Separator className="my-3" />}
+  1041→
+  1042→            {canAssign && (
+  1043→              <Button
+  1044→                variant="outline"
+  1045→                className="w-full"
+  1046→                disabled={busy}
+  1047→                onClick={() => openDialog("assign")}
+  1048→              >
+  1049→                <UserPlus className="size-4" />
+  1050→                {task.assignedStaffId ? t("td.reassignStaff") : t("td.assignStaff")}
+  1051→              </Button>
+  1052→            )}
+  1053→            {canEdit && (
+  1054→              <Button
+  1055→                variant="outline"
+  1056→                className="w-full"
+  1057→                disabled={busy}
+  1058→                onClick={() => openDialog("edit")}
+  1059→              >
+  1060→                <Pencil className="size-4" />
+  1061→                {t("td.editDetails")}
+  1062→              </Button>
+  1063→            )}
+  1064→
+  1065→            {(canBlock || canUnblock || canReopen || canCancel) && <Separator className="my-3" />}
+  1066→
+  1067→            {canBlock && (
+  1068→              <Button
+  1069→                variant="outline"
+  1070→                className="w-full border-amber-300 text-amber-800 hover:bg-amber-50 hover:text-amber-900"
+  1071→                disabled={busy}
+  1072→                onClick={() => openDialog("block")}
+  1073→              >
+  1074→                <Ban className="size-4" />
+  1075→                {t("td.blockTask")}
+  1076→              </Button>
+  1077→            )}
+  1078→            {canUnblock && (
+  1079→              <Button
+  1080→                variant="outline"
+  1081→                className="w-full"
+  1082→                disabled={busy}
+  1083→                onClick={() => openDialog("unblock")}
+  1084→              >
+  1085→                <RotateCcw className="size-4" />
+  1086→                {t("td.unblockTask")}
+  1087→              </Button>
+  1088→            )}
+  1089→            {canReopen && (
+  1090→              <Button
+  1091→                variant="outline"
+  1092→                className="w-full"
+  1093→                disabled={busy}
+  1094→                onClick={() => openDialog("reopen")}
+  1095→              >
+  1096→                <Undo2 className="size-4" />
+  1097→                {t("td.reopenTask")}
+  1098→              </Button>
+  1099→            )}
+  1100→            {canCancel && (
+  1101→              <Button
+  1102→                variant="outline"
+  1103→                className="w-full border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive"
+  1104→                disabled={busy}
+  1105→                onClick={() => openDialog("cancel")}
+  1106→              >
+  1107→                <XCircle className="size-4" />
+  1108→                {t("td.cancelTask")}
+  1109→              </Button>
+  1110→            )}
+  1111→
+  1112→            {noActions && (
+  1113→              <p className="text-sm text-muted-foreground">
+  1114→                {t("td.noActions")}
+  1115→                {terminal ? t("td.noActionsClosed") : ""}
+  1116→              </p>
+  1117→            )}
+  1118→          </div>
+  1119→        </SectionCard>
+  1120→
+  1121→        {/* ---- Comments & issues (left) ---- */}
+  1122→        <SectionCard
+  1123→          title={t("td.commentsIssues")}
+  1124→          className="lg:col-span-2"
+  1125→          action={
+  1126→            <span className="text-xs text-muted-foreground">
+  1127→              {t("td.commentsTotal", { count: detail.comments.length })}
+  1128→            </span>
+  1129→          }
+  1130→        >
+  1131→          <div className="space-y-4">
+  1132→            {detail.comments.length === 0 ? (
+  1133→              <EmptyState
+  1134→                icon={MessageSquare}
+  1135→                title={t("td.noComments.title")}
+  1136→                description={t("td.noComments.desc")}
+  1137→              />
+  1138→            ) : (
+  1139→              <ScrollArea className="max-h-96 -mx-1 px-1">
+  1140→                <div className="space-y-3">
+  1141→                  {detail.comments.map((c) => (
+  1142→                    <div
+  1143→                      key={c.id}
+  1144→                      className={cn(
+  1145→                        "rounded-lg border p-3",
+  1146→                        c.isIssue ? "border-l-4 border-l-red-400 bg-red-50/50" : "bg-card"
+  1147→                      )}
+  1148→                    >
+  1149→                      <div className="flex items-center justify-between gap-2">
+  1150→                        <p className="text-sm font-medium flex items-center gap-1.5 min-w-0">
+  1151→                          {c.isIssue && <AlertTriangle className="size-3.5 text-red-600 shrink-0" />}
+  1152→                          <span className="truncate">{c.userName}</span>
+  1153→                        </p>
+  1154→                        <span
+  1155→                          className="text-xs text-muted-foreground shrink-0"
+  1156→                          title={formatDateTime(c.createdAt)}
+  1157→                        >
+  1158→                          {timeAgo(c.createdAt)}
+  1159→                        </span>
+  1160→                      </div>
+  1161→                      <p className="text-sm text-muted-foreground mt-1 whitespace-pre-wrap break-words">
+  1162→                        {c.message}
+  1163→                      </p>
+  1164→                    </div>
+  1165→                  ))}
+  1166→                </div>
+  1167→              </ScrollArea>
+  1168→            )}
+  1169→
+  1170→            {mayComment && (
+  1171→              <div className="space-y-2">
+  1172→                <Textarea
+  1173→                  placeholder={t("td.commentPlaceholder")}
+  1174→                  value={commentText}
+  1175→                  onChange={(e) => setCommentText(e.target.value)}
+  1176→                  aria-label={t("td.aria.newComment")}
+  1177→                />
+  1178→                <div className="flex flex-col sm:flex-row sm:justify-end gap-2">
+  1179→                  <Button variant="outline" size="sm" disabled={busy} onClick={() => postComment(false)}>
+  1180→                    <MessageSquare className="size-4" />
+  1181→                    {t("td.addNote")}
+  1182→                  </Button>
+  1183→                  <Button
+  1184→                    variant="outline"
+  1185→                    size="sm"
+  1186→                    className="border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive"
+  1187→                    disabled={busy}
+  1188→                    onClick={() => postComment(true)}
+  1189→                  >
+  1190→                    <AlertTriangle className="size-4" />
+  1191→                    {t("td.reportIssue")}
+  1192→                  </Button>
+  1193→                </div>
+  1194→              </div>
+  1195→            )}
+  1196→          </div>
+  1197→        </SectionCard>
+  1198→
+  1199→        {/* ---- Details (right) ---- */}
+  1200→        <SectionCard title={t("td.taskDetails")}>
+  1201→          <div className="divide-y">
+  1202→            <MetaRow label={t("td.meta.order")}>
+  1203→              <span className="font-medium">
+  1204→                {task.orderNumber} — {task.customerName}
+  1205→              </span>
+  1206→            </MetaRow>
+  1207→            <MetaRow label={t("td.meta.piece")}>
+  1208→              <span className="font-medium">{task.garmentPiece}</span>
+  1209→            </MetaRow>
+  1210→            <MetaRow label={t("td.meta.assignee")}>
+  1211→              {task.assignedStaffName ?? (
+  1212→                <span className="text-muted-foreground">{t("td.unassigned")}</span>
+  1213→              )}
+  1214→            </MetaRow>
+  1215→            <MetaRow label={t("td.meta.category")}>
+  1216→              <CategoryBadge category={task.category} />
+  1217→            </MetaRow>
+  1218→            <MetaRow label={t("td.meta.priority")}>
+  1219→              <PriorityBadge priority={task.priority} />
+  1220→            </MetaRow>
+  1221→            <MetaRow label={t("td.meta.deadline")}>
+  1222→              <DueDate deadline={task.deadline} overdue={task.overdue} />
+  1223→            </MetaRow>
+  1224→            <MetaRow label={t("td.meta.created")}>{formatDate(task.createdAt)}</MetaRow>
+  1225→            <MetaRow label={t("td.meta.completed")}>
+  1226→              {task.completedAt ? formatDate(task.completedAt) : "—"}
+  1227→            </MetaRow>
+  1228→            <MetaRow label={t("td.meta.delivered")}>
+  1229→              {task.deliveredAt ? formatDate(task.deliveredAt) : "—"}
+  1230→            </MetaRow>
+  1231→          </div>
+  1232→          {task.instructions && (
+  1233→            <div className="mt-3">
+  1234→              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+  1235→                {t("td.instructions")}
+  1236→              </p>
+  1237→              <p className="text-sm mt-1 rounded-lg border bg-muted/30 p-3 whitespace-pre-wrap">
+  1238→                {task.instructions}
+  1239→              </p>
+  1240→            </div>
+  1241→          )}
+  1242→        </SectionCard>
+  1243→
+  1244→        {/* ---- History (full width) ---- */}
+  1245→        <SectionCard
+  1246→          title={t("td.history")}
+  1247→          className="lg:col-span-3"
+  1248→          action={
+  1249→            <span className="text-xs text-muted-foreground">
+  1250→              {t("td.eventsCount", { count: history.length })}
+  1251→            </span>
+  1252→          }
+  1253→        >
+  1254→          <Tabs value={historyTab} onValueChange={(v) => setHistoryTab(v as HistoryTab)}>
+  1255→            <TabsList className="flex-wrap h-auto">
+  1256→              <TabsTrigger value="all" className="h-8">
+  1257→                {t("common.all")}
+  1258→              </TabsTrigger>
+  1259→              <TabsTrigger value="progress" className="h-8">
+  1260→                {t("td.tab.progress")}
+  1261→              </TabsTrigger>
+  1262→              <TabsTrigger value="checklist" className="h-8">
+  1263→                {t("td.tab.checklist")}
+  1264→              </TabsTrigger>
+  1265→              <TabsTrigger value="status" className="h-8">
+  1266→                {t("td.tab.status")}
+  1267→              </TabsTrigger>
+  1268→              <TabsTrigger value="inspections" className="h-8">
+  1269→                {t("td.tab.inspections")}
+  1270→              </TabsTrigger>
+  1271→            </TabsList>
+  1272→            <TabsContent value={historyTab} className="mt-2">
+  1273→              {filteredHistory.length === 0 ? (
+  1274→                <EmptyState icon={Inbox} title={t("td.noEvents")} />
+  1275→              ) : (
+  1276→                <ScrollArea className="max-h-96 rounded-lg border">
+  1277→                  <div className="divide-y px-4 py-1">
+  1278→                    {filteredHistory.map((e) => (
+  1279→                      <div key={e.id} className="flex gap-3 py-2.5">
+  1280→                        <div
+  1281→                          className={cn(
+  1282→                            "rounded-full p-1.5 shrink-0 mt-0.5",
+  1283→                            e.iconClass
+  1284→                          )}
+  1285→                        >
+  1286→                          <e.icon className="size-3.5" />
+  1287→                        </div>
+  1288→                        <div className="min-w-0 flex-1">
+  1289→                          <p className="text-sm leading-snug">
+  1290→                            <span className="font-medium">{e.userName}</span>{" "}
+  1291→                            <span className="text-muted-foreground">{e.text}</span>
+  1292→                            {e.badge && (
+  1293→                              <Badge
+  1294→                                variant="outline"
+  1295→                                className="ml-1.5 text-[10px] px-1.5 py-0 align-middle"
+  1296→                              >
+  1297→                                {e.badge}
+  1298→                              </Badge>
+  1299→                            )}
+  1300→                          </p>
+  1301→                          {e.detail && (
+  1302→                            <p className="text-xs text-muted-foreground mt-0.5 whitespace-pre-wrap break-words">
+  1303→                              {e.detail}
+  1304→                            </p>
+  1305→                          )}
+  1306→                          <p
+  1307→                            className="text-xs text-muted-foreground/80 mt-0.5"
+  1308→                            title={formatDateTime(e.createdAt)}
+  1309→                          >
+  1310→                            {timeAgo(e.createdAt)}
+  1311→                          </p>
+  1312→                        </div>
+  1313→                      </div>
+  1314→                    ))}
+  1315→                  </div>
+  1316→                </ScrollArea>
+  1317→              )}
+  1318→            </TabsContent>
+  1319→          </Tabs>
+  1320→        </SectionCard>
+  1321→      </div>
+  1322→
+  1323→      {/* ---- Dialogs ---- */}
+  1324→
+  1325→      {/* Assign / Reassign */}
+  1326→      <Dialog open={dialogOpen("assign")} onOpenChange={closeDialog}>
+  1327→        <DialogContent>
+  1328→          <DialogHeader>
+  1329→            <DialogTitle>
+  1330→              {task.assignedStaffId ? t("td.dialog.reassignTitle") : t("td.dialog.assignTitle")}
+  1331→            </DialogTitle>
+  1332→            <DialogDescription>
+  1333→              {t("td.dialog.assignDesc", { piece: task.garmentPiece, code: task.code })}
+  1334→            </DialogDescription>
+  1335→          </DialogHeader>
+  1336→          <div className="space-y-3">
+  1337→            <div className="space-y-1.5">
+  1338→              <Label>{t("td.dialog.staffMember")}</Label>
+  1339→              <Select value={staffId} onValueChange={setStaffId}>
+  1340→                <SelectTrigger className="w-full">
+  1341→                  <SelectValue placeholder={t("td.dialog.selectStaff")} />
+  1342→                </SelectTrigger>
+  1343→                <SelectContent>
+  1344→                  {staff.length === 0 && (
+  1345→                    <SelectItem value="loading" disabled>
+  1346→                      {t("td.dialog.noStaff")}
+  1347→                    </SelectItem>
+  1348→                  )}
+  1349→                  {staff.map((u) => (
+  1350→                    <SelectItem key={u.id} value={u.id} disabled={u.id === task.assignedStaffId}>
+  1351→                      {u.name}
+  1352→                      {u.activeTaskCount != null
+  1353→                        ? ` ${t("td.dialog.activeTasks", { count: u.activeTaskCount })}`
+  1354→                        : ""}
+  1355→                      {u.id === task.assignedStaffId ? t("td.dialog.currentAssignee") : ""}
+  1356→                    </SelectItem>
+  1357→                  ))}
+  1358→                </SelectContent>
+  1359→              </Select>
+  1360→            </div>
+  1361→            <div className="space-y-1.5">
+  1362→              <Label htmlFor="assign-note">{t("td.dialog.noteOptional")}</Label>
+  1363→              <Input
+  1364→                id="assign-note"
+  1365→                placeholder={t("td.dialog.assignNotePlaceholder")}
+  1366→                value={note}
+  1367→                onChange={(e) => setNote(e.target.value)}
+  1368→              />
+  1369→            </div>
+  1370→          </div>
+  1371→          <DialogFooter>
+  1372→            <Button variant="outline" disabled={busy} onClick={() => setDialog(null)}>
+  1373→              {t("common.cancel")}
+  1374→            </Button>
+  1375→            <Button disabled={busy || !staffId} onClick={doAssign}>
+  1376→              {busy && <Loader2 className="size-4 animate-spin" />}
+  1377→              {task.assignedStaffId ? t("td.dialog.reassignAction") : t("td.dialog.assignAction")}
+  1378→            </Button>
+  1379→          </DialogFooter>
+  1380→        </DialogContent>
+  1381→      </Dialog>
+  1382→
+  1383→      {/* Edit details */}
+  1384→      <Dialog open={dialogOpen("edit")} onOpenChange={closeDialog}>
+  1385→        <DialogContent className="sm:max-w-lg">
+  1386→          <DialogHeader>
+  1387→            <DialogTitle>{t("td.dialog.editTitle")}</DialogTitle>
+  1388→            <DialogDescription>{t("td.dialog.editDesc")}</DialogDescription>
+  1389→          </DialogHeader>
+  1390→          <div className="space-y-3">
+  1391→            <div className="space-y-1.5">
+  1392→              <Label htmlFor="edit-piece">{t("td.meta.piece")}</Label>
+  1393→              <Input
+  1394→                id="edit-piece"
+  1395→                value={editForm.garmentPiece}
+  1396→                onChange={(e) => setEditForm((f) => ({ ...f, garmentPiece: e.target.value }))}
+  1397→              />
+  1398→            </div>
+  1399→            <div className="grid gap-3 sm:grid-cols-2">
+  1400→              <div className="space-y-1.5">
+  1401→                <Label htmlFor="edit-deadline">{t("td.meta.deadline")}</Label>
+  1402→                <Input
+  1403→                  id="edit-deadline"
+  1404→                  type="datetime-local"
+  1405→                  value={editForm.deadline}
+  1406→                  onChange={(e) => setEditForm((f) => ({ ...f, deadline: e.target.value }))}
+  1407→                />
+  1408→              </div>
+  1409→              <div className="space-y-1.5">
+  1410→                <Label>{t("td.meta.priority")}</Label>
+  1411→                <Select
+  1412→                  value={editForm.priority}
+  1413→                  onValueChange={(v) => setEditForm((f) => ({ ...f, priority: v }))}
+  1414→                >
+  1415→                  <SelectTrigger className="w-full">
+  1416→                    <SelectValue />
+  1417→                  </SelectTrigger>
+  1418→                  <SelectContent>
+  1419→                    {PRIORITIES.map((p) => (
+  1420→                      <SelectItem key={p} value={p}>
+  1421→                        {priorityLabel(p, lang)}
+  1422→                      </SelectItem>
+  1423→                    ))}
+  1424→                  </SelectContent>
+  1425→                </Select>
+  1426→              </div>
+  1427→            </div>
+  1428→            <div className="space-y-1.5">
+  1429→              <Label htmlFor="edit-instructions">{t("td.instructions")}</Label>
+  1430→              <Textarea
+  1431→                id="edit-instructions"
+  1432→                placeholder={t("td.dialog.instructionsPlaceholder")}
+  1433→                value={editForm.instructions}
+  1434→                onChange={(e) => setEditForm((f) => ({ ...f, instructions: e.target.value }))}
+  1435→              />
+  1436→            </div>
+  1437→          </div>
+  1438→          <DialogFooter>
+  1439→            <Button variant="outline" disabled={busy} onClick={() => setDialog(null)}>
+  1440→              {t("common.cancel")}
+  1441→            </Button>
+  1442→            <Button disabled={busy} onClick={doEdit}>
+  1443→              {busy && <Loader2 className="size-4 animate-spin" />}
+  1444→              {t("common.saveChanges")}
+  1445→            </Button>
+  1446→          </DialogFooter>
+  1447→        </DialogContent>
+  1448→      </Dialog>
+  1449→
+  1450→      {/* Submit for inspection */}
+  1451→      <Dialog open={dialogOpen("submit")} onOpenChange={closeDialog}>
+  1452→        <DialogContent>
+  1453→          <DialogHeader>
+  1454→            <DialogTitle>{t("td.submitForInspection")}</DialogTitle>
+  1455→            <DialogDescription>
+  1456→              {supervisor ? t("td.dialog.submitDescSupervisor") : t("td.dialog.submitDescStaff")}
+  1457→            </DialogDescription>
+  1458→          </DialogHeader>
+  1459→          <div className="space-y-1.5">
+  1460→            <Label htmlFor="submit-note">{t("td.dialog.noteOptional")}</Label>
+  1461→            <Textarea
+  1462→              id="submit-note"
+  1463→              placeholder={t("td.dialog.submitNotePlaceholder")}
+  1464→              value={note}
+  1465→              onChange={(e) => setNote(e.target.value)}
+  1466→            />
+  1467→          </div>
+  1468→          <DialogFooter>
+  1469→            <Button variant="outline" disabled={busy} onClick={() => setDialog(null)}>
+  1470→              {t("common.cancel")}
+  1471→            </Button>
+  1472→            <Button disabled={busy} onClick={doSubmit}>
+  1473→              {busy && <Loader2 className="size-4 animate-spin" />}
+  1474→              {t("td.dialog.submitAction")}
+  1475→            </Button>
+  1476→          </DialogFooter>
+  1477→        </DialogContent>
+  1478→      </Dialog>
+  1479→
+  1480→      {/* Inspect */}
+  1481→      <Dialog open={dialogOpen("inspect")} onOpenChange={closeDialog}>
+  1482→        <DialogContent>
+  1483→          <DialogHeader>
+  1484→            <DialogTitle>{t("td.dialog.inspectTitle")}</DialogTitle>
+  1485→            <DialogDescription>{t("td.dialog.inspectDesc")}</DialogDescription>
+  1486→          </DialogHeader>
+  1487→          <div className="space-y-1.5">
+  1488→            <Label htmlFor="inspect-comments">{t("td.dialog.inspectionComments")}</Label>
+  1489→            <Textarea
+  1490→              id="inspect-comments"
+  1491→              placeholder={t("td.dialog.inspectPlaceholder")}
+  1492→              value={comments}
+  1493→              onChange={(e) => setComments(e.target.value)}
+  1494→            />
+  1495→          </div>
+  1496→          <DialogFooter className="sm:justify-between">
+  1497→            <Button
+  1498→              variant="outline"
+  1499→              className="border-amber-300 text-amber-800 hover:bg-amber-50 hover:text-amber-900"
+  1500→              disabled={busy}
+  1501→              onClick={doRequestChanges}
+  1502→            >
+  1503→              {t("td.dialog.requestChanges")}
+  1504→            </Button>
+  1505→            <Button disabled={busy} onClick={doApprove}>
+  1506→              {busy && <Loader2 className="size-4 animate-spin" />}
+  1507→              <ShieldCheck className="size-4" />
+  1508→              {t("td.dialog.approve")}
+  1509→            </Button>
+  1510→          </DialogFooter>
+  1511→        </DialogContent>
+  1512→      </Dialog>
+  1513→
+  1514→      {/* Deliver */}
+  1515→      <Dialog open={dialogOpen("deliver")} onOpenChange={closeDialog}>
+  1516→        <DialogContent>
+  1517→          <DialogHeader>
+  1518→            <DialogTitle>{t("td.markDelivered")}</DialogTitle>
+  1519→            <DialogDescription>
+  1520→              {t("td.dialog.deliverDesc", {
+  1521→                customer: task.customerName,
+  1522→                piece: task.garmentPiece,
+  1523→              })}
+  1524→            </DialogDescription>
+  1525→          </DialogHeader>
+  1526→          <div className="space-y-1.5">
+  1527→            <Label htmlFor="deliver-note">{t("td.dialog.noteOptional")}</Label>
+  1528→            <Input
+  1529→              id="deliver-note"
+  1530→              placeholder={t("td.dialog.deliverNotePlaceholder")}
+  1531→              value={note}
+  1532→              onChange={(e) => setNote(e.target.value)}
+  1533→            />
+  1534→          </div>
+  1535→          <DialogFooter>
+  1536→            <Button variant="outline" disabled={busy} onClick={() => setDialog(null)}>
+  1537→              {t("common.cancel")}
+  1538→            </Button>
+  1539→            <Button disabled={busy} onClick={doDeliver}>
+  1540→              {busy && <Loader2 className="size-4 animate-spin" />}
+  1541→              <Truck className="size-4" />
+  1542→              {t("td.dialog.markDeliveredAction")}
+  1543→            </Button>
+  1544→          </DialogFooter>
+  1545→        </DialogContent>
+  1546→      </Dialog>
+  1547→
+  1548→      {/* Reopen */}
+  1549→      <Dialog open={dialogOpen("reopen")} onOpenChange={closeDialog}>
+  1550→        <DialogContent>
+  1551→          <DialogHeader>
+  1552→            <DialogTitle>{t("td.reopenTask")}</DialogTitle>
+  1553→            <DialogDescription>{t("td.dialog.reopenDesc")}</DialogDescription>
+  1554→          </DialogHeader>
+  1555→          <div className="space-y-1.5">
+  1556→            <Label htmlFor="reopen-comments">{t("td.dialog.comments")}</Label>
+  1557→            <Textarea
+  1558→              id="reopen-comments"
+  1559→              placeholder={t("td.dialog.reopenPlaceholder")}
+  1560→              value={comments}
+  1561→              onChange={(e) => setComments(e.target.value)}
+  1562→            />
+  1563→          </div>
+  1564→          <DialogFooter>
+  1565→            <Button variant="outline" disabled={busy} onClick={() => setDialog(null)}>
+  1566→              {t("common.cancel")}
+  1567→            </Button>
+  1568→            <Button disabled={busy} onClick={doReopen}>
+  1569→              {busy && <Loader2 className="size-4 animate-spin" />}
+  1570→              <Undo2 className="size-4" />
+  1571→              {t("td.dialog.reopenAction")}
+  1572→            </Button>
+  1573→          </DialogFooter>
+  1574→        </DialogContent>
+  1575→      </Dialog>
+  1576→
+  1577→      {/* Block */}
+  1578→      <Dialog open={dialogOpen("block")} onOpenChange={closeDialog}>
+  1579→        <DialogContent>
+  1580→          <DialogHeader>
+  1581→            <DialogTitle>{t("td.blockTask")}</DialogTitle>
+  1582→            <DialogDescription>{t("td.dialog.blockDesc")}</DialogDescription>
+  1583→          </DialogHeader>
+  1584→          <div className="space-y-1.5">
+  1585→            <Label htmlFor="block-reason">{t("td.dialog.reasonRequired")}</Label>
+  1586→            <Textarea
+  1587→              id="block-reason"
+  1588→              placeholder={t("td.dialog.blockPlaceholder")}
+  1589→              value={reason}
+  1590→              onChange={(e) => setReason(e.target.value)}
+  1591→            />
+  1592→          </div>
+  1593→          <DialogFooter>
+  1594→            <Button variant="outline" disabled={busy} onClick={() => setDialog(null)}>
+  1595→              {t("common.cancel")}
+  1596→            </Button>
+  1597→            <Button
+  1598→              className="bg-red-600 text-white hover:bg-red-700"
+  1599→              disabled={busy || reason.trim().length < 3}
+  1600→              onClick={doBlock}
+  1601→            >
+  1602→              {busy && <Loader2 className="size-4 animate-spin" />}
+  1603→              <Ban className="size-4" />
+  1604→              {t("td.blockTask")}
+  1605→            </Button>
+  1606→          </DialogFooter>
+  1607→        </DialogContent>
+  1608→      </Dialog>
+  1609→
+  1610→      {/* Unblock */}
+  1611→      <Dialog open={dialogOpen("unblock")} onOpenChange={closeDialog}>
+  1612→        <DialogContent>
+  1613→          <DialogHeader>
+  1614→            <DialogTitle>{t("td.unblockTask")}</DialogTitle>
+  1615→            <DialogDescription>{t("td.dialog.unblockDesc")}</DialogDescription>
+  1616→          </DialogHeader>
+  1617→          <div className="space-y-1.5">
+  1618→            <Label htmlFor="unblock-note">{t("td.dialog.noteOptional")}</Label>
+  1619→            <Input
+  1620→              id="unblock-note"
+  1621→              placeholder={t("td.dialog.unblockPlaceholder")}
+  1622→              value={note}
+  1623→              onChange={(e) => setNote(e.target.value)}
+  1624→            />
+  1625→          </div>
+  1626→          <DialogFooter>
+  1627→            <Button variant="outline" disabled={busy} onClick={() => setDialog(null)}>
+  1628→              {t("common.cancel")}
+  1629→            </Button>
+  1630→            <Button disabled={busy} onClick={doUnblock}>
+  1631→              {busy && <Loader2 className="size-4 animate-spin" />}
+  1632→              <RotateCcw className="size-4" />
+  1633→              {t("td.dialog.unblockAction")}
+  1634→            </Button>
+  1635→          </DialogFooter>
+  1636→        </DialogContent>
+  1637→      </Dialog>
+  1638→
+  1639→      {/* Cancel (destructive confirmation) */}
+  1640→      <AlertDialog open={dialogOpen("cancel")} onOpenChange={closeDialog}>
+  1641→        <AlertDialogContent>
+  1642→          <AlertDialogHeader>
+  1643→            <AlertDialogTitle>{t("td.dialog.cancelTitle")}</AlertDialogTitle>
+  1644→            <AlertDialogDescription>
+  1645→              {t("td.dialog.cancelDesc", {
+  1646→                code: task.code,
+  1647→                piece: task.garmentPiece,
+  1648→                order: task.orderNumber,
+  1649→              })}
+  1650→            </AlertDialogDescription>
+  1651→          </AlertDialogHeader>
+  1652→          <div className="space-y-1.5">
+  1653→            <Label htmlFor="cancel-reason">{t("td.dialog.reasonRequired")}</Label>
+  1654→            <Textarea
+  1655→              id="cancel-reason"
+  1656→              placeholder={t("td.dialog.cancelPlaceholder")}
+  1657→              value={reason}
+  1658→              onChange={(e) => setReason(e.target.value)}
+  1659→            />
+  1660→          </div>
+  1661→          <AlertDialogFooter>
+  1662→            <AlertDialogCancel disabled={busy}>{t("td.dialog.keepTask")}</AlertDialogCancel>
+  1663→            <AlertDialogAction
+  1664→              className="bg-destructive text-white hover:bg-destructive/90"
+  1665→              disabled={busy || reason.trim().length < 3}
+  1666→              onClick={(e) => {
+  1667→                e.preventDefault();
+  1668→                doCancel();
+  1669→              }}
+  1670→            >
+  1671→              {busy && <Loader2 className="size-4 animate-spin" />}
+  1672→              <XCircle className="size-4" />
+  1673→              {t("td.cancelTask")}
+  1674→            </AlertDialogAction>
+  1675→          </AlertDialogFooter>
+  1676→        </AlertDialogContent>
+  1677→      </AlertDialog>
+  1678→    </div>
+  1679→  );
+  1680→}
+  1681→

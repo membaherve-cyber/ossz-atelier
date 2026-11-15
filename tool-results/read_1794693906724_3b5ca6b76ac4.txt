@@ -1,0 +1,1329 @@
+     1→<?php
+     2→
+     3→declare(strict_types=1);
+     4→
+     5→namespace Database\Seeders;
+     6→
+     7→use App\Models\AuditLog;
+     8→use App\Models\Customer;
+     9→use App\Models\IncentiveRecord;
+    10→use App\Models\IncentiveScheme;
+    11→use App\Models\InspectionRecord;
+    12→use App\Models\Notification;
+    13→use App\Models\Order;
+    14→use App\Models\PerformanceConfig;
+    15→use App\Models\ProductionStage;
+    16→use App\Models\ProductionTask;
+    17→use App\Models\StaffAssessment;
+    18→use App\Models\TaskAssignment;
+    19→use App\Models\TaskComment;
+    20→use App\Models\TaskProgressHistory;
+    21→use App\Models\TaskStageState;
+    22→use App\Models\TaskStageUpdate;
+    23→use App\Models\TaskStatusChange;
+    24→use App\Models\User;
+    25→use Carbon\Carbon;
+    26→use Illuminate\Database\Seeder;
+    27→use Illuminate\Support\Facades\Hash;
+    28→
+    29→/**
+    30→ * OSSZ ATELIER — standalone database seed.
+    31→ *
+    32→ * 1:1 Laravel port of prisma/seed.ts: creates the three account roles,
+    33→ * the 12 configurable production stages, the performance configuration,
+    34→ * incentive schemes and a realistic demo dataset matching the
+    35→ * specification scenario (John Doe / OSSZ-2026-001 three-piece suit,
+    36→ * allocated to Hamidou and Lawal) plus historical completed work for
+    37→ * the performance and incentive modules.
+    38→ *
+    39→ * Codes (USR-001, CUST-0001, TASK-0001 …) are the EXACT codes from the
+    40→ * reference seed — the Codes service is deliberately NOT used here so
+    41→ * the demo data matches the Next.js reference application.
+    42→ *
+    43→ * Idempotent: re-running against a database that already contains
+    44→ * users is a no-op, so `php artisan db:seed` never duplicates rows.
+    45→ */
+    46→class DatabaseSeeder extends Seeder
+    47→{
+    48→    /** Shared password for every seeded demo account. */
+    49→    private const DEMO_PASSWORD = 'Atelier@2026';
+    50→
+    51→    /**
+    52→     * Configurable production stages (specification checklist):
+    53→     * [code, name, sortOrder, appliesTo] — every stage weighs 1.
+    54→     */
+    55→    private const STAGE_DEFS = [
+    56→        ['assigned', 'Assigned', 1, 'ALL'],
+    57→        ['ongoing', 'Ongoing', 2, 'ALL'],
+    58→        ['cutting', 'Cutting', 3, 'FULL,CUTTING'],
+    59→        ['sewing', 'Sewing/Stitching', 4, 'FULL,SEWING'],
+    60→        ['fitting', 'Fitting', 5, 'FULL,SEWING'],
+    61→        ['finishing', 'Finishing', 6, 'FULL,FINISHING'],
+    62→        ['ironing', 'Ironing', 7, 'FULL,IRONING,FINISHING'],
+    63→        ['quality-check', 'Quality Check', 8, 'ALL'],
+    64→        ['ready-for-pickup', 'Ready for Pickup', 9, 'ALL'],
+    65→        ['delivered', 'Delivered/Collected', 10, 'ALL'],
+    66→        ['blocked', 'Blocked', 11, 'ALL'],
+    67→        ['other', 'Other', 12, 'ALL'],
+    68→    ];
+    69→
+    70→    /** @var array<string, User> demo accounts, keyed by first name (aminata, david, hamidou, lawal, ngozi). */
+    71→    private array $users = [];
+    72→
+    73→    /** @var array<string, Customer> demo customers, keyed by first name (john, amina). */
+    74→    private array $customers = [];
+    75→
+    76→    /** @var array<string, string> stage code => production stage id. */
+    77→    private array $stages = [];
+    78→
+    79→    /** @var array<string, Order> demo orders, keyed by short name (suit, agbada, senegal, kaftan). */
+    80→    private array $orders = [];
+    81→
+    82→    /** @var array<string, ProductionTask> demo tasks, keyed t1…t9. */
+    83→    private array $tasks = [];
+    84→
+    85→    /** The monthly incentive scheme (referenced by the demo incentive records). */
+    86→    private ?IncentiveScheme $monthlyScheme = null;
+    87→
+    88→    public function run(): void
+    89→    {
+    90→        // Idempotency guard — never duplicate an already-seeded database.
+    91→        if (User::count() > 0) {
+    92→            echo "Already seeded — users exist, nothing to do.\n";
+    93→
+    94→            return;
+    95→        }
+    96→
+    97→        echo "Seeding OSSZ ATELIER standalone database...\n";
+    98→
+    99→        $this->seedUsers();              // §1 accounts (Management / Admin / Staff)
+   100→        $this->seedStages();             // §2 configurable production stages
+   101→        $this->seedPerformanceConfig();  // §3 performance config + incentive schemes
+   102→        $this->seedCustomersAndOrders(); // §4 customers & manually registered orders
+   103→        $this->seedTasks();              // §5 live production + §6 historical work
+   104→        $this->seedHistoryAndExtras();   // §7 comments, §8 notifications, §9 assessments/incentives, §10 audit
+   105→
+   106→        echo "Seed complete.\n";
+   107→        echo 'Demo accounts (password: '.self::DEMO_PASSWORD."):\n";
+   108→        echo "  MANAGEMENT  management@atelier.com\n";
+   109→        echo "  ADMIN       admin@atelier.com\n";
+   110→        echo "  STAFF       hamidou@atelier.com\n";
+   111→        echo "  STAFF       lawal@atelier.com\n";
+   112→        echo "  STAFF       ngozi@atelier.com\n";
+   113→    }
+   114→
+   115→    /*
+   116→    |--------------------------------------------------------------------------
+   117→    | §1 Accounts
+   118→    |--------------------------------------------------------------------------
+   119→    */
+   120→
+   121→    /**
+   122→     * Create the five demo accounts: one MANAGEMENT, one ADMIN and
+   123→     * three STAFF users (USR-001…USR-005), all sharing the demo
+   124→     * password hashed with bcrypt (Hash::make).
+   125→     */
+   126→    private function seedUsers(): void
+   127→    {
+   128→        $this->users['aminata'] = User::create([
+   129→            'code' => 'USR-001',
+   130→            'name' => 'Aminata Sow',
+   131→            'email' => 'management@atelier.com',
+   132→            'phone' => '+237 677 000 001',
+   133→            'job_title' => 'Atelier Director',
+   134→            'password_hash' => Hash::make(self::DEMO_PASSWORD),
+   135→            'role' => 'MANAGEMENT',
+   136→        ]);
+   137→
+   138→        $this->users['david'] = User::create([
+   139→            'code' => 'USR-002',
+   140→            'name' => 'David Nkeng',
+   141→            'email' => 'admin@atelier.com',
+   142→            'phone' => '+237 677 000 002',
+   143→            'job_title' => 'Production Administrator',
+   144→            'password_hash' => Hash::make(self::DEMO_PASSWORD),
+   145→            'role' => 'ADMIN',
+   146→        ]);
+   147→
+   148→        $this->users['hamidou'] = User::create([
+   149→            'code' => 'USR-003',
+   150→            'name' => 'Hamidou Abdoul',
+   151→            'email' => 'hamidou@atelier.com',
+   152→            'phone' => '+237 677 000 003',
+   153→            'job_title' => 'Master Tailor',
+   154→            'password_hash' => Hash::make(self::DEMO_PASSWORD),
+   155→            'role' => 'STAFF',
+   156→        ]);
+   157→
+   158→        $this->users['lawal'] = User::create([
+   159→            'code' => 'USR-004',
+   160→            'name' => 'Lawal Sani',
+   161→            'email' => 'lawal@atelier.com',
+   162→            'phone' => '+237 677 000 004',
+   163→            'job_title' => 'Tailor',
+   164→            'password_hash' => Hash::make(self::DEMO_PASSWORD),
+   165→            'role' => 'STAFF',
+   166→        ]);
+   167→
+   168→        $this->users['ngozi'] = User::create([
+   169→            'code' => 'USR-005',
+   170→            'name' => 'Ngozi Okafor',
+   171→            'email' => 'ngozi@atelier.com',
+   172→            'phone' => '+237 677 000 005',
+   173→            'job_title' => 'Finisher & Ironing',
+   174→            'password_hash' => Hash::make(self::DEMO_PASSWORD),
+   175→            'role' => 'STAFF',
+   176→        ]);
+   177→    }
+   178→
+   179→    /*
+   180→    |--------------------------------------------------------------------------
+   181→    | §2 Production stages
+   182→    |--------------------------------------------------------------------------
+   183→    */
+   184→
+   185→    /**
+   186→     * Create the 12 configurable checklist stages (weight 1 each) and
+   187→     * keep a code => id map for the task stage states created later.
+   188→     */
+   189→    private function seedStages(): void
+   190→    {
+   191→        foreach (self::STAGE_DEFS as [$code, $name, $sortOrder, $appliesTo]) {
+   192→            $stage = ProductionStage::create([
+   193→                'code' => $code,
+   194→                'name' => $name,
+   195→                'sort_order' => $sortOrder,
+   196→                'applies_to' => $appliesTo,
+   197→                'weight' => 1,
+   198→            ]);
+   199→
+   200→            $this->stages[$code] = $stage->id;
+   201→        }
+   202→    }
+   203→
+   204→    /*
+   205→    |--------------------------------------------------------------------------
+   206→    | §3 Performance configuration & incentive schemes
+   207→    |--------------------------------------------------------------------------
+   208→    */
+   209→
+   210→    /**
+   211→     * Create the single 'main' performance configuration (weights
+   212→     * 30/25/30/10/5 totalling 100, pieceTarget 20/month) and the three
+   213→     * demo incentive schemes authored by Management.
+   214→     */
+   215→    private function seedPerformanceConfig(): void
+   216→    {
+   217→        PerformanceConfig::create([
+   218→            'id' => 'main',
+   219→            'productivity_weight' => 30,
+   220→            'timely_weight' => 25,
+   221→            'quality_weight' => 30,
+   222→            'reliability_weight' => 10,
+   223→            'management_weight' => 5,
+   224→            'piece_target' => 20,
+   225→        ]);
+   226→
+   227→        $this->monthlyScheme = IncentiveScheme::create([
+   228→            'name' => 'Monthly Excellence Bonus',
+   229→            'period_type' => 'MONTHLY',
+   230→            'min_score' => 75,
+   231→            'amount' => 25000,
+   232→            'description' => 'Awarded to staff whose overall monthly performance score reaches 75/100 or above.',
+   233→            'created_by_id' => $this->users['aminata']->id,
+   234→            'created_by_name' => $this->users['aminata']->name,
+   235→        ]);
+   236→
+   237→        IncentiveScheme::create([
+   238→            'name' => 'Annual Excellence Award',
+   239→            'period_type' => 'ANNUAL',
+   240→            'min_score' => 80,
+   241→            'amount' => 250000,
+   242→            'description' => 'Annual recognition of sustained excellence across the year.',
+   243→            'created_by_id' => $this->users['aminata']->id,
+   244→            'created_by_name' => $this->users['aminata']->name,
+   245→        ]);
+   246→
+   247→        IncentiveScheme::create([
+   248→            'name' => 'Quality Champion',
+   249→            'period_type' => 'QUALITY',
+   250→            'min_score' => 90,
+   251→            'amount' => 15000,
+   252→            'description' => 'For a monthly quality approval rate of 90% or above with at least 3 completions.',
+   253→            'created_by_id' => $this->users['aminata']->id,
+   254→            'created_by_name' => $this->users['aminata']->name,
+   255→        ]);
+   256→    }
+   257→
+   258→    /*
+   259→    |--------------------------------------------------------------------------
+   260→    | §4 Customers & orders
+   261→    |--------------------------------------------------------------------------
+   262→    */
+   263→
+   264→    /**
+   265→     * Create the two demo customers and their four manually registered
+   266→     * orders (OSSZ-2026-001, OSSZ-2026-002, OSSZ-2025-014, OSSZ-2025-009).
+   267→     */
+   268→    private function seedCustomersAndOrders(): void
+   269→    {
+   270→        $aminata = $this->users['aminata'];
+   271→        $david = $this->users['david'];
+   272→
+   273→        $this->customers['john'] = Customer::create([
+   274→            'code' => 'CUST-0001',
+   275→            'name' => 'John Doe',
+   276→            'phone' => '+237 677 123 456',
+   277→            'email' => 'johndoe@example.com',
+   278→            'address' => 'Bonapriso, Douala',
+   279→            'notes' => 'Prefers slim-fit cuts. Returning customer.',
+   280→            'created_by_id' => $aminata->id,
+   281→            'created_at' => $this->daysAgo(21),
+   282→        ]);
+   283→
+   284→        $this->customers['amina'] = Customer::create([
+   285→            'code' => 'CUST-0002',
+   286→            'name' => 'Amina Cissé',
+   287→            'phone' => '+237 699 551 122',
+   288→            'email' => 'amina.cisse@example.com',
+   289→            'address' => 'Bastos, Yaoundé',
+   290→            'notes' => 'Measures on file from January fitting.',
+   291→            'created_by_id' => $david->id,
+   292→            'created_at' => $this->daysAgo(46),
+   293→        ]);
+   294→
+   295→        $this->orders['suit'] = Order::create([
+   296→            'order_number' => 'OSSZ-2026-001',
+   297→            'customer_id' => $this->customers['john']->id,
+   298→            'order_date' => $this->daysAgo(20),
+   299→            'expected_delivery_date' => $this->daysFromNow(10),
+   300→            'description' => 'Three-piece suit',
+   301→            'garment_category' => 'Suit',
+   302→            'number_of_pieces' => 3,
+   303→            'instructions' => 'Slim fit, midnight blue fabric, gold buttons.',
+   304→            'priority' => 'HIGH',
+   305→            'notes' => 'Customer expects a fitting before finishing.',
+   306→            'created_by_id' => $aminata->id,
+   307→            'created_at' => $this->daysAgo(20),
+   308→        ]);
+   309→
+   310→        $this->orders['agbada'] = Order::create([
+   311→            'order_number' => 'OSSZ-2026-002',
+   312→            'customer_id' => $this->customers['amina']->id,
+   313→            'order_date' => $this->daysAgo(6),
+   314→            'expected_delivery_date' => $this->daysFromNow(24),
+   315→            'description' => 'Agbada two-piece set',
+   316→            'garment_category' => 'Agbada',
+   317→            'number_of_pieces' => 2,
+   318→            'instructions' => 'Embroidered neckline, matching trousers.',
+   319→            'priority' => 'NORMAL',
+   320→            'created_by_id' => $david->id,
+   321→            'created_at' => $this->daysAgo(6),
+   322→        ]);
+   323→
+   324→        $this->orders['senegal'] = Order::create([
+   325→            'order_number' => 'OSSZ-2025-014',
+   326→            'customer_id' => $this->customers['amina']->id,
+   327→            'order_date' => $this->daysAgo(45),
+   328→            'expected_delivery_date' => $this->daysAgo(12),
+   329→            'description' => 'Senegal two-piece with headwrap',
+   330→            'garment_category' => 'Senegal',
+   331→            'number_of_pieces' => 3,
+   332→            'priority' => 'NORMAL',
+   333→            'created_by_id' => $aminata->id,
+   334→            'created_at' => $this->daysAgo(45),
+   335→        ]);
+   336→
+   337→        $this->orders['kaftan'] = Order::create([
+   338→            'order_number' => 'OSSZ-2025-009',
+   339→            'customer_id' => $this->customers['john']->id,
+   340→            'order_date' => $this->daysAgo(75),
+   341→            'expected_delivery_date' => $this->daysAgo(55),
+   342→            'description' => 'Grand kaftan',
+   343→            'garment_category' => 'Kaftan',
+   344→            'number_of_pieces' => 1,
+   345→            'priority' => 'NORMAL',
+   346→            'created_by_id' => $aminata->id,
+   347→            'created_at' => $this->daysAgo(75),
+   348→        ]);
+   349→    }
+   350→
+   351→    /*
+   352→    |--------------------------------------------------------------------------
+   353→    | §5 Live production + §6 Historical work
+   354→    |--------------------------------------------------------------------------
+   355→    */
+   356→
+   357→    /**
+   358→     * Create the production tasks: the current live production
+   359→     * (TASK-0001…TASK-0005 for the suit and agbada orders) and the
+   360→     * historical completed/delivered work TASK-0006…TASK-0009 that
+   361→     * feeds the performance and incentive modules.
+   362→     */
+   363→    private function seedTasks(): void
+   364→    {
+   365→        $suit = $this->orders['suit'];
+   366→        $agbada = $this->orders['agbada'];
+   367→        $senegal = $this->orders['senegal'];
+   368→        $kaftan = $this->orders['kaftan'];
+   369→        $aminata = $this->users['aminata'];
+   370→        $david = $this->users['david'];
+   371→        $hamidou = $this->users['hamidou'];
+   372→        $lawal = $this->users['lawal'];
+   373→
+   374→        // ------------------------------------------------------------------
+   375→        // 5. Current live production (John Doe three-piece suit).
+   376→        // ------------------------------------------------------------------
+   377→
+   378→        $this->tasks['t1'] = $this->createTask([
+   379→            'code' => 'TASK-0001',
+   380→            'order_id' => $suit->id,
+   381→            'garment_piece' => 'Jacket',
+   382→            'instructions' => 'Attach the customer-provided gold buttons. Single-breasted, two vents.',
+   383→            'deadline' => $this->daysFromNow(12),
+   384→            'priority' => 'HIGH',
+   385→            'status' => 'ONGOING',
+   386→            'progress' => 60,
+   387→            'assigned_staff_id' => $hamidou->id,
+   388→            'created_at' => $this->daysAgo(15),
+   389→            'stage_states' => [
+   390→                ['assigned', 'COMPLETED'],
+   391→                ['ongoing', 'COMPLETED'],
+   392→                ['cutting', 'COMPLETED'],
+   393→                ['sewing', 'IN_PROGRESS'],
+   394→                ['fitting', 'NOT_STARTED'],
+   395→                ['finishing', 'NOT_STARTED'],
+   396→                ['ironing', 'NOT_STARTED'],
+   397→                ['quality-check', 'NOT_STARTED'],
+   398→                ['ready-for-pickup', 'NOT_STARTED'],
+   399→                ['delivered', 'NOT_STARTED'],
+   400→                ['blocked', 'NOT_APPLICABLE'],
+   401→                ['other', 'NOT_APPLICABLE'],
+   402→            ],
+   403→            'stage_updates' => [
+   404→                ['stage_code' => 'assigned', 'from' => 'NOT_STARTED', 'to' => 'COMPLETED', 'by' => 'hamidou', 'at' => $this->daysAgo(15)],
+   405→                ['stage_code' => 'ongoing', 'from' => 'NOT_STARTED', 'to' => 'COMPLETED', 'by' => 'hamidou', 'at' => $this->daysAgo(14)],
+   406→                ['stage_code' => 'cutting', 'from' => 'NOT_STARTED', 'to' => 'IN_PROGRESS', 'by' => 'hamidou', 'at' => $this->daysAgo(12)],
+   407→                ['stage_code' => 'cutting', 'from' => 'IN_PROGRESS', 'to' => 'COMPLETED', 'by' => 'hamidou', 'at' => $this->daysAgo(10)],
+   408→                ['stage_code' => 'sewing', 'from' => 'NOT_STARTED', 'to' => 'IN_PROGRESS', 'by' => 'hamidou', 'at' => $this->daysAgo(8)],
+   409→            ],
+   410→            'status_chain' => [
+   411→                ['to' => 'ASSIGNED', 'by' => 'aminata', 'at' => $this->daysAgo(15)],
+   412→                ['to' => 'ONGOING', 'by' => 'hamidou', 'at' => $this->daysAgo(14)],
+   413→            ],
+   414→            'progress_history' => [
+   415→                ['from' => 0, 'to' => 25, 'by' => 'hamidou', 'at' => $this->daysAgo(14), 'note' => 'Fabric cut, assembly started.'],
+   416→                ['from' => 25, 'to' => 45, 'by' => 'hamidou', 'at' => $this->daysAgo(8)],
+   417→                ['from' => 45, 'to' => 60, 'by' => 'hamidou', 'at' => $this->daysAgo(2), 'note' => 'Body assembled, sleeves set.'],
+   418→            ],
+   419→        ]);
+   420→
+   421→        $this->tasks['t2'] = $this->createTask([
+   422→            'code' => 'TASK-0002',
+   423→            'order_id' => $suit->id,
+   424→            'garment_piece' => 'Trousers',
+   425→            'instructions' => 'Slim fit, side adjusters instead of belt loops.',
+   426→            'deadline' => $this->daysFromNow(12),
+   427→            'priority' => 'HIGH',
+   428→            'status' => 'ONGOING',
+   429→            'progress' => 80,
+   430→            'assigned_staff_id' => $hamidou->id,
+   431→            'created_at' => $this->daysAgo(15),
+   432→            'stage_states' => [
+   433→                ['assigned', 'COMPLETED'],
+   434→                ['ongoing', 'COMPLETED'],
+   435→                ['cutting', 'COMPLETED'],
+   436→                ['sewing', 'COMPLETED'],
+   437→                ['fitting', 'COMPLETED'],
+   438→                ['finishing', 'IN_PROGRESS'],
+   439→                ['ironing', 'NOT_STARTED'],
+   440→                ['quality-check', 'NOT_STARTED'],
+   441→                ['ready-for-pickup', 'NOT_STARTED'],
+   442→                ['delivered', 'NOT_STARTED'],
+   443→                ['blocked', 'NOT_APPLICABLE'],
+   444→                ['other', 'NOT_APPLICABLE'],
+   445→            ],
+   446→            'stage_updates' => [
+   447→                ['stage_code' => 'assigned', 'from' => 'NOT_STARTED', 'to' => 'COMPLETED', 'by' => 'hamidou', 'at' => $this->daysAgo(15)],
+   448→                ['stage_code' => 'ongoing', 'from' => 'NOT_STARTED', 'to' => 'COMPLETED', 'by' => 'hamidou', 'at' => $this->daysAgo(15, 12)],
+   449→                ['stage_code' => 'cutting', 'from' => 'NOT_STARTED', 'to' => 'COMPLETED', 'by' => 'hamidou', 'at' => $this->daysAgo(11)],
+   450→                ['stage_code' => 'sewing', 'from' => 'NOT_STARTED', 'to' => 'COMPLETED', 'by' => 'hamidou', 'at' => $this->daysAgo(7)],
+   451→                ['stage_code' => 'fitting', 'from' => 'NOT_STARTED', 'to' => 'COMPLETED', 'by' => 'hamidou', 'at' => $this->daysAgo(4)],
+   452→                ['stage_code' => 'finishing', 'from' => 'NOT_STARTED', 'to' => 'IN_PROGRESS', 'by' => 'hamidou', 'at' => $this->daysAgo(2)],
+   453→            ],
+   454→            'status_chain' => [
+   455→                ['to' => 'ASSIGNED', 'by' => 'aminata', 'at' => $this->daysAgo(15)],
+   456→                ['to' => 'ONGOING', 'by' => 'hamidou', 'at' => $this->daysAgo(15, 12)],
+   457→            ],
+   458→            'progress_history' => [
+   459→                ['from' => 0, 'to' => 30, 'by' => 'hamidou', 'at' => $this->daysAgo(14)],
+   460→                ['from' => 30, 'to' => 60, 'by' => 'hamidou', 'at' => $this->daysAgo(7)],
+   461→                ['from' => 60, 'to' => 80, 'by' => 'hamidou', 'at' => $this->daysAgo(3), 'note' => 'Fitting done, finishing hem.'],
+   462→            ],
+   463→        ]);
+   464→
+   465→        $this->tasks['t3'] = $this->createTask([
+   466→            'code' => 'TASK-0003',
+   467→            'order_id' => $suit->id,
+   468→            'garment_piece' => 'Vest',
+   469→            'deadline' => $this->daysAgo(2), // overdue
+   470→            'priority' => 'HIGH',
+   471→            'status' => 'ONGOING',
+   472→            'progress' => 30,
+   473→            'assigned_staff_id' => $lawal->id,
+   474→            'created_at' => $this->daysAgo(14),
+   475→            'stage_states' => [
+   476→                ['assigned', 'COMPLETED'],
+   477→                ['ongoing', 'COMPLETED'],
+   478→                ['cutting', 'IN_PROGRESS'],
+   479→                ['sewing', 'NOT_STARTED'],
+   480→                ['fitting', 'NOT_STARTED'],
+   481→                ['finishing', 'NOT_STARTED'],
+   482→                ['ironing', 'NOT_STARTED'],
+   483→                ['quality-check', 'NOT_STARTED'],
+   484→                ['ready-for-pickup', 'NOT_STARTED'],
+   485→                ['delivered', 'NOT_STARTED'],
+   486→                ['blocked', 'NOT_APPLICABLE'],
+   487→                ['other', 'NOT_APPLICABLE'],
+   488→            ],
+   489→            'stage_updates' => [
+   490→                ['stage_code' => 'assigned', 'from' => 'NOT_STARTED', 'to' => 'COMPLETED', 'by' => 'lawal', 'at' => $this->daysAgo(14)],
+   491→                ['stage_code' => 'ongoing', 'from' => 'NOT_STARTED', 'to' => 'COMPLETED', 'by' => 'lawal', 'at' => $this->daysAgo(13)],
+   492→                ['stage_code' => 'cutting', 'from' => 'NOT_STARTED', 'to' => 'IN_PROGRESS', 'by' => 'lawal', 'at' => $this->daysAgo(9)],
+   493→            ],
+   494→            'status_chain' => [
+   495→                ['to' => 'ASSIGNED', 'by' => 'aminata', 'at' => $this->daysAgo(14)],
+   496→                ['to' => 'ONGOING', 'by' => 'lawal', 'at' => $this->daysAgo(13)],
+   497→            ],
+   498→            'progress_history' => [
+   499→                ['from' => 0, 'to' => 15, 'by' => 'lawal', 'at' => $this->daysAgo(13)],
+   500→                ['from' => 15, 'to' => 30, 'by' => 'lawal', 'at' => $this->daysAgo(4)],
+   501→            ],
+   502→        ]);
+   503→
+   504→        $this->tasks['t4'] = $this->createTask([
+   505→            'code' => 'TASK-0004',
+   506→            'order_id' => $agbada->id,
+   507→            'garment_piece' => 'Agbada Gown',
+   508→            'instructions' => 'Embroidered neckline as per chosen pattern A2.',
+   509→            'deadline' => $this->daysFromNow(24),
+   510→            'status' => 'UNASSIGNED',
+   511→            'progress' => 0,
+   512→            'created_at' => $this->daysAgo(5),
+   513→            'stage_states' => [],
+   514→        ]);
+   515→
+   516→        $this->tasks['t5'] = $this->createTask([
+   517→            'code' => 'TASK-0005',
+   518→            'order_id' => $agbada->id,
+   519→            'garment_piece' => 'Matching Trousers',
+   520→            'deadline' => $this->daysFromNow(24),
+   521→            'status' => 'UNASSIGNED',
+   522→            'progress' => 0,
+   523→            'created_at' => $this->daysAgo(5),
+   524→            'stage_states' => [],
+   525→        ]);
+   526→
+   527→        // ------------------------------------------------------------------
+   528→        // 6. Historical completed work (performance & incentive data).
+   529→        // ------------------------------------------------------------------
+   530→
+   531→        // OSSZ-2025-014 — Senegal two-piece (delivered).
+   532→        $t6 = ProductionTask::create([
+   533→            'code' => 'TASK-0006',
+   534→            'order_id' => $senegal->id,
+   535→            'garment_piece' => 'Senegal Top',
+   536→            'category' => 'FULL',
+   537→            'deadline' => $this->daysAgo(13),
+   538→            'priority' => 'NORMAL',
+   539→            'status' => 'DELIVERED',
+   540→            'progress' => 100,
+   541→            'assigned_staff_id' => $hamidou->id,
+   542→            'created_by_id' => $aminata->id,
+   543→            'completed_at' => $this->daysAgo(14),
+   544→            'delivered_at' => $this->daysAgo(12),
+   545→            'created_at' => $this->daysAgo(30),
+   546→            'updated_at' => $this->daysAgo(12),
+   547→        ]);
+   548→        $this->tasks['t6'] = $t6;
+   549→
+   550→        TaskAssignment::create([
+   551→            'task_id' => $t6->id,
+   552→            'staff_id' => $hamidou->id,
+   553→            'staff_name' => $hamidou->name,
+   554→            'assigned_by_id' => $aminata->id,
+   555→            'assigned_by_name' => $aminata->name,
+   556→            'type' => 'ASSIGN',
+   557→            'created_at' => $this->daysAgo(30),
+   558→        ]);
+   559→
+   560→        foreach ($this->doneStates('FULL') as $code => $state) {
+   561→            TaskStageState::create([
+   562→                'task_id' => $t6->id,
+   563→                'stage_id' => $this->stages[$code],
+   564→                'state' => $state,
+   565→                'updated_by_id' => $hamidou->id,
+   566→                'updated_by_name' => $hamidou->name,
+   567→                'updated_at' => $this->daysAgo(14),
+   568→            ]);
+   569→        }
+   570→
+   571→        foreach ([
+   572→            ['UNASSIGNED', 'ASSIGNED', $this->daysAgo(30)],
+   573→            ['ASSIGNED', 'ONGOING', $this->daysAgo(29)],
+   574→            ['ONGOING', 'BLOCKED', $this->daysAgo(20)],
+   575→            ['BLOCKED', 'ONGOING', $this->daysAgo(18)],
+   576→            ['ONGOING', 'AWAITING_INSPECTION', $this->daysAgo(15)],
+   577→            ['AWAITING_INSPECTION', 'APPROVED', $this->daysAgo(14)],
+   578→            ['APPROVED', 'READY_FOR_PICKUP', $this->daysAgo(13)],
+   579→            ['READY_FOR_PICKUP', 'DELIVERED', $this->daysAgo(12)],
+   580→        ] as [$from, $to, $at]) {
+   581→            TaskStatusChange::create([
+   582→                'task_id' => $t6->id,
+   583→                'user_id' => $aminata->id,
+   584→                'user_name' => $aminata->name,
+   585→                'from_status' => $from,
+   586→                'to_status' => $to,
+   587→                'reason' => $to === 'BLOCKED' ? 'Fabric shipment delayed at the market.' : null,
+   588→                'created_at' => $at,
+   589→            ]);
+   590→        }
+   591→
+   592→        TaskProgressHistory::create([
+   593→            'task_id' => $t6->id,
+   594→            'user_id' => $hamidou->id,
+   595→            'user_name' => $hamidou->name,
+   596→            'previous_progress' => 0,
+   597→            'new_progress' => 40,
+   598→            'source' => 'MANUAL',
+   599→            'created_at' => $this->daysAgo(25),
+   600→        ]);
+   601→
+   602→        TaskProgressHistory::create([
+   603→            'task_id' => $t6->id,
+   604→            'user_id' => $hamidou->id,
+   605→            'user_name' => $hamidou->name,
+   606→            'previous_progress' => 40,
+   607→            'new_progress' => 100,
+   608→            'source' => 'MANUAL',
+   609→            'note' => 'Top fully assembled.',
+   610→            'created_at' => $this->daysAgo(15),
+   611→        ]);
+   612→
+   613→        InspectionRecord::create([
+   614→            'task_id' => $t6->id,
+   615→            'inspector_id' => $aminata->id,
+   616→            'inspector_name' => $aminata->name,
+   617→            'decision' => 'APPROVED',
+   618→            'comments' => 'Clean seams, excellent finish.',
+   619→            'created_at' => $this->daysAgo(14),
+   620→        ]);
+   621→
+   622→        $t7 = ProductionTask::create([
+   623→            'code' => 'TASK-0007',
+   624→            'order_id' => $senegal->id,
+   625→            'garment_piece' => 'Wrap Skirt',
+   626→            'category' => 'FULL',
+   627→            'deadline' => $this->daysAgo(6),
+   628→            'priority' => 'NORMAL',
+   629→            'status' => 'DELIVERED',
+   630→            'progress' => 100,
+   631→            'assigned_staff_id' => $hamidou->id,
+   632→            'created_by_id' => $david->id,
+   633→            'completed_at' => $this->daysAgo(8),
+   634→            'delivered_at' => $this->daysAgo(7),
+   635→            'created_at' => $this->daysAgo(20),
+   636→            'updated_at' => $this->daysAgo(7),
+   637→        ]);
+   638→        $this->tasks['t7'] = $t7;
+   639→
+   640→        TaskAssignment::create([
+   641→            'task_id' => $t7->id,
+   642→            'staff_id' => $hamidou->id,
+   643→            'staff_name' => $hamidou->name,
+   644→            'assigned_by_id' => $david->id,
+   645→            'assigned_by_name' => $david->name,
+   646→            'type' => 'ASSIGN',
+   647→            'created_at' => $this->daysAgo(20),
+   648→        ]);
+   649→
+   650→        foreach ($this->doneStates('FULL') as $code => $state) {
+   651→            TaskStageState::create([
+   652→                'task_id' => $t7->id,
+   653→                'stage_id' => $this->stages[$code],
+   654→                'state' => $state,
+   655→                'updated_by_id' => $hamidou->id,
+   656→                'updated_by_name' => $hamidou->name,
+   657→                'updated_at' => $this->daysAgo(8),
+   658→            ]);
+   659→        }
+   660→
+   661→        foreach ([
+   662→            ['UNASSIGNED', 'ASSIGNED', $this->daysAgo(20)],
+   663→            ['ASSIGNED', 'ONGOING', $this->daysAgo(19)],
+   664→            ['ONGOING', 'AWAITING_INSPECTION', $this->daysAgo(9)],
+   665→            ['AWAITING_INSPECTION', 'APPROVED', $this->daysAgo(8)],
+   666→            ['APPROVED', 'READY_FOR_PICKUP', $this->daysAgo(8, 14)],
+   667→            ['READY_FOR_PICKUP', 'DELIVERED', $this->daysAgo(7)],
+   668→        ] as [$from, $to, $at]) {
+   669→            TaskStatusChange::create([
+   670→                'task_id' => $t7->id,
+   671→                'user_id' => $david->id,
+   672→                'user_name' => $david->name,
+   673→                'from_status' => $from,
+   674→                'to_status' => $to,
+   675→                'reason' => null,
+   676→                'created_at' => $at,
+   677→            ]);
+   678→        }
+   679→
+   680→        InspectionRecord::create([
+   681→            'task_id' => $t7->id,
+   682→            'inspector_id' => $david->id,
+   683→            'inspector_name' => $david->name,
+   684→            'decision' => 'APPROVED',
+   685→            'comments' => 'Good pleat alignment.',
+   686→            'created_at' => $this->daysAgo(8),
+   687→        ]);
+   688→
+   689→        $t8 = ProductionTask::create([
+   690→            'code' => 'TASK-0008',
+   691→            'order_id' => $senegal->id,
+   692→            'garment_piece' => 'Headwrap',
+   693→            'category' => 'IRONING',
+   694→            'deadline' => $this->daysAgo(10),
+   695→            'priority' => 'NORMAL',
+   696→            'status' => 'DELIVERED',
+   697→            'progress' => 100,
+   698→            'assigned_staff_id' => $lawal->id,
+   699→            'created_by_id' => $aminata->id,
+   700→            'completed_at' => $this->daysAgo(9),
+   701→            'delivered_at' => $this->daysAgo(7),
+   702→            'created_at' => $this->daysAgo(20),
+   703→            'updated_at' => $this->daysAgo(7),
+   704→        ]);
+   705→        $this->tasks['t8'] = $t8;
+   706→
+   707→        TaskAssignment::create([
+   708→            'task_id' => $t8->id,
+   709→            'staff_id' => $lawal->id,
+   710→            'staff_name' => $lawal->name,
+   711→            'assigned_by_id' => $aminata->id,
+   712→            'assigned_by_name' => $aminata->name,
+   713→            'type' => 'ASSIGN',
+   714→            'created_at' => $this->daysAgo(20),
+   715→        ]);
+   716→
+   717→        foreach ($this->doneStates('IRONING') as $code => $state) {
+   718→            TaskStageState::create([
+   719→                'task_id' => $t8->id,
+   720→                'stage_id' => $this->stages[$code],
+   721→                'state' => $state,
+   722→                'updated_by_id' => $lawal->id,
+   723→                'updated_by_name' => $lawal->name,
+   724→                'updated_at' => $this->daysAgo(9),
+   725→            ]);
+   726→        }
+   727→
+   728→        foreach ([
+   729→            ['UNASSIGNED', 'ASSIGNED', $this->daysAgo(20)],
+   730→            ['ASSIGNED', 'ONGOING', $this->daysAgo(19)],
+   731→            ['ONGOING', 'AWAITING_INSPECTION', $this->daysAgo(16)],
+   732→            ['AWAITING_INSPECTION', 'CHANGES_REQUESTED', $this->daysAgo(16, 15)],
+   733→            ['CHANGES_REQUESTED', 'ONGOING', $this->daysAgo(15)],
+   734→            ['ONGOING', 'AWAITING_INSPECTION', $this->daysAgo(9, 9)],
+   735→            ['AWAITING_INSPECTION', 'APPROVED', $this->daysAgo(9)],
+   736→            ['APPROVED', 'READY_FOR_PICKUP', $this->daysAgo(8)],
+   737→            ['READY_FOR_PICKUP', 'DELIVERED', $this->daysAgo(7)],
+   738→        ] as [$from, $to, $at]) {
+   739→            TaskStatusChange::create([
+   740→                'task_id' => $t8->id,
+   741→                'user_id' => $aminata->id,
+   742→                'user_name' => $aminata->name,
+   743→                'from_status' => $from,
+   744→                'to_status' => $to,
+   745→                'reason' => null,
+   746→                'created_at' => $at,
+   747→            ]);
+   748→        }
+   749→
+   750→        InspectionRecord::create([
+   751→            'task_id' => $t8->id,
+   752→            'inspector_id' => $aminata->id,
+   753→            'inspector_name' => $aminata->name,
+   754→            'decision' => 'CHANGES_REQUESTED',
+   755→            'comments' => 'Pressing marks still visible on the edges. Redo the ironing.',
+   756→            'created_at' => $this->daysAgo(16, 15),
+   757→        ]);
+   758→
+   759→        InspectionRecord::create([
+   760→            'task_id' => $t8->id,
+   761→            'inspector_id' => $aminata->id,
+   762→            'inspector_name' => $aminata->name,
+   763→            'decision' => 'APPROVED',
+   764→            'comments' => 'Corrected. Crisp finish.',
+   765→            'created_at' => $this->daysAgo(9),
+   766→        ]);
+   767→
+   768→        // OSSZ-2025-009 — Kaftan (delivered).
+   769→        $t9 = ProductionTask::create([
+   770→            'code' => 'TASK-0009',
+   771→            'order_id' => $kaftan->id,
+   772→            'garment_piece' => 'Kaftan Gown',
+   773→            'category' => 'FULL',
+   774→            'deadline' => $this->daysAgo(56),
+   775→            'priority' => 'NORMAL',
+   776→            'status' => 'DELIVERED',
+   777→            'progress' => 100,
+   778→            'assigned_staff_id' => $hamidou->id,
+   779→            'created_by_id' => $aminata->id,
+   780→            'completed_at' => $this->daysAgo(58),
+   781→            'delivered_at' => $this->daysAgo(55),
+   782→            'created_at' => $this->daysAgo(70),
+   783→            'updated_at' => $this->daysAgo(55),
+   784→        ]);
+   785→        $this->tasks['t9'] = $t9;
+   786→
+   787→        TaskAssignment::create([
+   788→            'task_id' => $t9->id,
+   789→            'staff_id' => $hamidou->id,
+   790→            'staff_name' => $hamidou->name,
+   791→            'assigned_by_id' => $aminata->id,
+   792→            'assigned_by_name' => $aminata->name,
+   793→            'type' => 'ASSIGN',
+   794→            'created_at' => $this->daysAgo(70),
+   795→        ]);
+   796→
+   797→        foreach ($this->doneStates('FULL') as $code => $state) {
+   798→            TaskStageState::create([
+   799→                'task_id' => $t9->id,
+   800→                'stage_id' => $this->stages[$code],
+   801→                'state' => $state,
+   802→                'updated_by_id' => $hamidou->id,
+   803→                'updated_by_name' => $hamidou->name,
+   804→                'updated_at' => $this->daysAgo(58),
+   805→            ]);
+   806→        }
+   807→
+   808→        InspectionRecord::create([
+   809→            'task_id' => $t9->id,
+   810→            'inspector_id' => $aminata->id,
+   811→            'inspector_name' => $aminata->name,
+   812→            'decision' => 'APPROVED',
+   813→            'comments' => 'Beautiful mandarin collar work.',
+   814→            'created_at' => $this->daysAgo(58),
+   815→        ]);
+   816→    }
+   817→
+   818→    /*
+   819→    |--------------------------------------------------------------------------
+   820→    | §7–§10 History & extras
+   821→    |--------------------------------------------------------------------------
+   822→    */
+   823→
+   824→    /**
+   825→     * Create the demo comments & reported issues (§7), internal
+   826→     * notifications (§8), Management assessments and incentive history
+   827→     * (§9) and the audit trail rows (§10).
+   828→     */
+   829→    private function seedHistoryAndExtras(): void
+   830→    {
+   831→        $aminata = $this->users['aminata'];
+   832→        $david = $this->users['david'];
+   833→        $hamidou = $this->users['hamidou'];
+   834→        $lawal = $this->users['lawal'];
+   835→        $john = $this->customers['john'];
+   836→        $suit = $this->orders['suit'];
+   837→        $t1 = $this->tasks['t1'];
+   838→        $t2 = $this->tasks['t2'];
+   839→        $t3 = $this->tasks['t3'];
+   840→
+   841→        // ------------------------------------------------------------------
+   842→        // 7. Comments & reported issues.
+   843→        // ------------------------------------------------------------------
+   844→
+   845→        TaskComment::create([
+   846→            'task_id' => $t1->id,
+   847→            'user_id' => $hamidou->id,
+   848→            'user_name' => $hamidou->name,
+   849→            'message' => 'Jacket body assembled. Will set the sleeves tomorrow.',
+   850→            'created_at' => $this->daysAgo(5),
+   851→        ]);
+   852→
+   853→        TaskComment::create([
+   854→            'task_id' => $t3->id,
+   855→            'user_id' => $lawal->id,
+   856→            'user_name' => $lawal->name,
+   857→            'message' => 'Waiting for the vest lining fabric promised by the customer. Production is stalled.',
+   858→            'is_issue' => true,
+   859→            'created_at' => $this->daysAgo(3, 11),
+   860→        ]);
+   861→
+   862→        // ------------------------------------------------------------------
+   863→        // 8. Notifications (internal).
+   864→        // ------------------------------------------------------------------
+   865→
+   866→        Notification::create([
+   867→            'user_id' => $hamidou->id,
+   868→            'type' => 'TASK_ASSIGNED',
+   869→            'title' => 'New task assigned',
+   870→            'message' => "You were assigned {$t1->code} — Jacket (OSSZ-2026-001).",
+   871→            'task_id' => $t1->id,
+   872→            'created_at' => $this->daysAgo(15),
+   873→        ]);
+   874→
+   875→        Notification::create([
+   876→            'user_id' => $hamidou->id,
+   877→            'type' => 'TASK_ASSIGNED',
+   878→            'title' => 'New task assigned',
+   879→            'message' => "You were assigned {$t2->code} — Trousers (OSSZ-2026-001).",
+   880→            'task_id' => $t2->id,
+   881→            'created_at' => $this->daysAgo(15),
+   882→        ]);
+   883→
+   884→        Notification::create([
+   885→            'user_id' => $lawal->id,
+   886→            'type' => 'TASK_ASSIGNED',
+   887→            'title' => 'New task assigned',
+   888→            'message' => "You were assigned {$t3->code} — Vest (OSSZ-2026-001).",
+   889→            'task_id' => $t3->id,
+   890→            'created_at' => $this->daysAgo(14),
+   891→        ]);
+   892→
+   893→        Notification::create([
+   894→            'user_id' => $aminata->id,
+   895→            'type' => 'ISSUE_REPORTED',
+   896→            'title' => 'Production issue reported',
+   897→            'message' => "{$lawal->name} reported an issue on {$t3->code} — Vest: missing lining fabric.",
+   898→            'task_id' => $t3->id,
+   899→            'created_at' => $this->daysAgo(3, 11),
+   900→        ]);
+   901→
+   902→        Notification::create([
+   903→            'user_id' => $david->id,
+   904→            'type' => 'ISSUE_REPORTED',
+   905→            'title' => 'Production issue reported',
+   906→            'message' => "{$lawal->name} reported an issue on {$t3->code} — Vest: missing lining fabric.",
+   907→            'task_id' => $t3->id,
+   908→            'created_at' => $this->daysAgo(3, 11),
+   909→        ]);
+   910→
+   911→        Notification::create([
+   912→            'user_id' => $aminata->id,
+   913→            'type' => 'TASK_OVERDUE',
+   914→            'title' => 'Task overdue',
+   915→            'message' => "{$t3->code} — Vest (OSSZ-2026-001) has passed its deadline.",
+   916→            'task_id' => $t3->id,
+   917→            'created_at' => $this->daysAgo(1),
+   918→        ]);
+   919→
+   920→        Notification::create([
+   921→            'user_id' => $david->id,
+   922→            'type' => 'TASK_OVERDUE',
+   923→            'title' => 'Task overdue',
+   924→            'message' => "{$t3->code} — Vest (OSSZ-2026-001) has passed its deadline.",
+   925→            'task_id' => $t3->id,
+   926→            'created_at' => $this->daysAgo(1),
+   927→        ]);
+   928→
+   929→        // ------------------------------------------------------------------
+   930→        // 9. Management assessments & incentive history.
+   931→        // ------------------------------------------------------------------
+   932→
+   933→        // First day of the previous month => period label "YYYY-MM"
+   934→        // (prisma/seed.ts: new Date(year, month - 1, 1)).
+   935→        $lastMonthPeriod = Carbon::now()
+   936→            ->subMonthsNoOverflow(1)
+   937→            ->startOfMonth()
+   938→            ->format('Y-m');
+   939→
+   940→        StaffAssessment::create([
+   941→            'staff_id' => $hamidou->id,
+   942→            'staff_name' => $hamidou->name,
+   943→            'period' => $lastMonthPeriod,
+   944→            'score' => 88,
+   945→            'comments' => 'Excellent craftsmanship and autonomy.',
+   946→            'updated_at' => $this->daysAgo(5),
+   947→        ]);
+   948→
+   949→        StaffAssessment::create([
+   950→            'staff_id' => $lawal->id,
+   951→            'staff_name' => $lawal->name,
+   952→            'period' => $lastMonthPeriod,
+   953→            'score' => 65,
+   954→            'comments' => 'Good effort; watch deadlines and pressing quality.',
+   955→            'updated_at' => $this->daysAgo(5),
+   956→        ]);
+   957→
+   958→        IncentiveRecord::create([
+   959→            'scheme_id' => $this->monthlyScheme->id,
+   960→            'scheme_name' => $this->monthlyScheme->name,
+   961→            'staff_id' => $hamidou->id,
+   962→            'staff_name' => $hamidou->name,
+   963→            'period' => $lastMonthPeriod,
+   964→            'performance_score' => 82.4,
+   965→            'eligible' => true,
+   966→            'proposed_amount' => 25000,
+   967→            'status' => 'APPROVED',
+   968→            'approved_by_id' => $aminata->id,
+   969→            'approved_by_name' => $aminata->name,
+   970→            'approval_comments' => 'Consistent excellence all month.',
+   971→            'payment_status' => 'PAID',
+   972→            'payment_date' => $this->daysAgo(4),
+   973→            'created_at' => $this->daysAgo(5),
+   974→            'updated_at' => $this->daysAgo(4),
+   975→        ]);
+   976→
+   977→        IncentiveRecord::create([
+   978→            'scheme_id' => $this->monthlyScheme->id,
+   979→            'scheme_name' => $this->monthlyScheme->name,
+   980→            'staff_id' => $lawal->id,
+   981→            'staff_name' => $lawal->name,
+   982→            'period' => $lastMonthPeriod,
+   983→            'performance_score' => 48.6,
+   984→            'eligible' => false,
+   985→            'proposed_amount' => 0,
+   986→            'status' => 'REJECTED',
+   987→            'approved_by_id' => $aminata->id,
+   988→            'approved_by_name' => $aminata->name,
+   989→            'approval_comments' => 'Below the 75/100 threshold for this month.',
+   990→            'payment_status' => 'UNPAID',
+   991→            'created_at' => $this->daysAgo(5),
+   992→            'updated_at' => $this->daysAgo(5),
+   993→        ]);
+   994→
+   995→        // ------------------------------------------------------------------
+   996→        // 10. Audit trail.
+   997→        // ------------------------------------------------------------------
+   998→
+   999→        AuditLog::create([
+  1000→            'user_id' => $aminata->id,
+  1001→            'user_name' => $aminata->name,
+  1002→            'action' => 'USER_CREATED',
+  1003→            'entity_type' => 'USER',
+  1004→            'entity_id' => $david->id,
+  1005→            'details' => $this->encodeDetails(['role' => 'ADMIN']),
+  1006→            'created_at' => $this->daysAgo(60),
+  1007→        ]);
+  1008→
+  1009→        AuditLog::create([
+  1010→            'user_id' => $aminata->id,
+  1011→            'user_name' => $aminata->name,
+  1012→            'action' => 'CUSTOMER_CREATED',
+  1013→            'entity_type' => 'CUSTOMER',
+  1014→            'entity_id' => $john->id,
+  1015→            'details' => $this->encodeDetails(['code' => 'CUST-0001']),
+  1016→            'created_at' => $this->daysAgo(21),
+  1017→        ]);
+  1018→
+  1019→        AuditLog::create([
+  1020→            'user_id' => $aminata->id,
+  1021→            'user_name' => $aminata->name,
+  1022→            'action' => 'ORDER_CREATED',
+  1023→            'entity_type' => 'ORDER',
+  1024→            'entity_id' => $suit->id,
+  1025→            'details' => $this->encodeDetails(['orderNumber' => 'OSSZ-2026-001']),
+  1026→            'created_at' => $this->daysAgo(20),
+  1027→        ]);
+  1028→
+  1029→        AuditLog::create([
+  1030→            'user_id' => $aminata->id,
+  1031→            'user_name' => $aminata->name,
+  1032→            'action' => 'TASKS_CREATED',
+  1033→            'entity_type' => 'ORDER',
+  1034→            'entity_id' => $suit->id,
+  1035→            'details' => $this->encodeDetails(['tasks' => [$t1->code, $t2->code, $t3->code]]),
+  1036→            'created_at' => $this->daysAgo(15),
+  1037→        ]);
+  1038→
+  1039→        AuditLog::create([
+  1040→            'user_id' => $aminata->id,
+  1041→            'user_name' => $aminata->name,
+  1042→            'action' => 'TASK_ASSIGNED',
+  1043→            'entity_type' => 'TASK',
+  1044→            'entity_id' => $t1->id,
+  1045→            'details' => $this->encodeDetails(['staff' => $hamidou->name]),
+  1046→            'created_at' => $this->daysAgo(15),
+  1047→        ]);
+  1048→
+  1049→        AuditLog::create([
+  1050→            'user_id' => $aminata->id,
+  1051→            'user_name' => $aminata->name,
+  1052→            'action' => 'TASK_ASSIGNED',
+  1053→            'entity_type' => 'TASK',
+  1054→            'entity_id' => $t2->id,
+  1055→            'details' => $this->encodeDetails(['staff' => $hamidou->name]),
+  1056→            'created_at' => $this->daysAgo(15),
+  1057→        ]);
+  1058→
+  1059→        AuditLog::create([
+  1060→            'user_id' => $aminata->id,
+  1061→            'user_name' => $aminata->name,
+  1062→            'action' => 'TASK_ASSIGNED',
+  1063→            'entity_type' => 'TASK',
+  1064→            'entity_id' => $t3->id,
+  1065→            'details' => $this->encodeDetails(['staff' => $lawal->name]),
+  1066→            'created_at' => $this->daysAgo(14),
+  1067→        ]);
+  1068→
+  1069→        AuditLog::create([
+  1070→            'user_id' => $hamidou->id,
+  1071→            'user_name' => $hamidou->name,
+  1072→            'action' => 'PROGRESS_UPDATED',
+  1073→            'entity_type' => 'TASK',
+  1074→            'entity_id' => $t1->id,
+  1075→            'details' => $this->encodeDetails(['from' => 45, 'to' => 60]),
+  1076→            'created_at' => $this->daysAgo(2),
+  1077→        ]);
+  1078→
+  1079→        AuditLog::create([
+  1080→            'user_id' => $lawal->id,
+  1081→            'user_name' => $lawal->name,
+  1082→            'action' => 'ISSUE_REPORTED',
+  1083→            'entity_type' => 'TASK',
+  1084→            'entity_id' => $t3->id,
+  1085→            'details' => $this->encodeDetails(['issue' => 'Missing lining fabric']),
+  1086→            'created_at' => $this->daysAgo(3, 11),
+  1087→        ]);
+  1088→
+  1089→        AuditLog::create([
+  1090→            'user_id' => $aminata->id,
+  1091→            'user_name' => $aminata->name,
+  1092→            'action' => 'INCENTIVE_APPROVED',
+  1093→            'entity_type' => 'INCENTIVE',
+  1094→            'entity_id' => $hamidou->id,
+  1095→            'details' => $this->encodeDetails(['period' => $lastMonthPeriod, 'amount' => 25000]),
+  1096→            'created_at' => $this->daysAgo(4),
+  1097→        ]);
+  1098→    }
+  1099→
+  1100→    /*
+  1101→    |--------------------------------------------------------------------------
+  1102→    | Task factory helper (createTask from prisma/seed.ts)
+  1103→    |--------------------------------------------------------------------------
+  1104→    */
+  1105→
+  1106→    /**
+  1107→     * Create one production task plus its checklist stage states, stage
+  1108→     * update log, status workflow chain, manual progress history and
+  1109→     * creation-time assignment row — 1:1 port of the `createTask()`
+  1110→     * helper in prisma/seed.ts.
+  1111→     *
+  1112→     * Option keys:
+  1113→     *  - code, order_id, garment_piece, status, progress, created_at  (required)
+  1114→     *  - category (default FULL), instructions, priority (default NORMAL),
+  1115→     *    assigned_staff_id, deadline                                  (optional)
+  1116→     *  - stage_states:      list of [stageCode, state] pairs (appliesTo filtered)
+  1117→     *  - stage_updates:     list of ['stage_code', 'from', 'to', 'by', 'at']
+  1118→     *  - status_chain:      list of ['to', 'by', 'at', 'reason'?] (from = previous)
+  1119→     *  - progress_history:  list of ['from', 'to', 'by', 'at', 'note'?]
+  1120→     *
+  1121→     * @param array<string, mixed> $opts
+  1122→     */
+  1123→    private function createTask(array $opts): ProductionTask
+  1124→    {
+  1125→        $aminata = $this->users['aminata'];
+  1126→        $hamidou = $this->users['hamidou'];
+  1127→        $lawal = $this->users['lawal'];
+  1128→
+  1129→        $task = ProductionTask::create([
+  1130→            'code' => $opts['code'],
+  1131→            'order_id' => $opts['order_id'],
+  1132→            'garment_piece' => $opts['garment_piece'],
+  1133→            'category' => $opts['category'] ?? 'FULL',
+  1134→            'instructions' => $opts['instructions'] ?? null,
+  1135→            'deadline' => $opts['deadline'],
+  1136→            'priority' => $opts['priority'] ?? 'NORMAL',
+  1137→            'status' => $opts['status'],
+  1138→            'progress' => $opts['progress'],
+  1139→            'assigned_staff_id' => $opts['assigned_staff_id'] ?? null,
+  1140→            'created_by_id' => $aminata->id,
+  1141→            'created_at' => $opts['created_at'],
+  1142→            'updated_at' => Carbon::now(),
+  1143→        ]);
+  1144→
+  1145→        $category = $opts['category'] ?? 'FULL';
+  1146→
+  1147→        // Current checklist stage states (filtered by appliesTo vs category).
+  1148→        foreach ($opts['stage_states'] as [$stageCode, $state]) {
+  1149→            if (! $this->stageAppliesTo($stageCode, $category)) {
+  1150→                continue;
+  1151→            }
+  1152→
+  1153→            TaskStageState::create([
+  1154→                'task_id' => $task->id,
+  1155→                'stage_id' => $this->stages[$stageCode],
+  1156→                'state' => $state,
+  1157→                'updated_by_id' => $opts['assigned_staff_id'] ?? null,
+  1158→                'updated_by_name' => ($opts['assigned_staff_id'] ?? null) === $hamidou->id
+  1159→                    ? $hamidou->name
+  1160→                    : $lawal->name,
+  1161→                'updated_at' => $opts['created_at'],
+  1162→            ]);
+  1163→        }
+  1164→
+  1165→        // Immutable stage state change log.
+  1166→        foreach ($opts['stage_updates'] ?? [] as $update) {
+  1167→            if (! $this->stageAppliesTo($update['stage_code'], $category)) {
+  1168→                continue;
+  1169→            }
+  1170→
+  1171→            TaskStageUpdate::create([
+  1172→                'task_id' => $task->id,
+  1173→                'stage_id' => $this->stages[$update['stage_code']],
+  1174→                'stage_name' => $this->stageName($update['stage_code']),
+  1175→                'user_id' => $update['by'] === 'hamidou'
+  1176→                    ? $hamidou->id
+  1177→                    : ($update['by'] === 'lawal' ? $lawal->id : $aminata->id),
+  1178→                'user_name' => $this->users[$update['by']]->name,
+  1179→                'previous_state' => $update['from'],
+  1180→                'new_state' => $update['to'],
+  1181→                'created_at' => $update['at'],
+  1182→            ]);
+  1183→        }
+  1184→
+  1185→        // Status workflow history (each entry chains from the previous status).
+  1186→        $previous = 'UNASSIGNED';
+  1187→
+  1188→        foreach ($opts['status_chain'] ?? [] as $change) {
+  1189→            TaskStatusChange::create([
+  1190→                'task_id' => $task->id,
+  1191→                'user_id' => $this->statusActorId($change['by']),
+  1192→                'user_name' => ($this->users[$change['by']] ?? $aminata)->name,
+  1193→                'from_status' => $previous,
+  1194→                'to_status' => $change['to'],
+  1195→                'reason' => $change['reason'] ?? null,
+  1196→                'created_at' => $change['at'],
+  1197→            ]);
+  1198→
+  1199→            $previous = $change['to'];
+  1200→        }
+  1201→
+  1202→        // Manual progress history.
+  1203→        foreach ($opts['progress_history'] ?? [] as $entry) {
+  1204→            TaskProgressHistory::create([
+  1205→                'task_id' => $task->id,
+  1206→                'user_id' => $entry['by'] === 'hamidou' ? $hamidou->id : $lawal->id,
+  1207→                'user_name' => $this->users[$entry['by']]->name,
+  1208→                'previous_progress' => $entry['from'],
+  1209→                'new_progress' => $entry['to'],
+  1210→                'source' => 'MANUAL',
+  1211→                'note' => $entry['note'] ?? null,
+  1212→                'created_at' => $entry['at'],
+  1213→            ]);
+  1214→        }
+  1215→
+  1216→        // Creation-time assignment row (assigned by Management).
+  1217→        if (! empty($opts['assigned_staff_id'])) {
+  1218→            TaskAssignment::create([
+  1219→                'task_id' => $task->id,
+  1220→                'staff_id' => $opts['assigned_staff_id'],
+  1221→                'staff_name' => $opts['assigned_staff_id'] === $hamidou->id
+  1222→                    ? $hamidou->name
+  1223→                    : ($opts['assigned_staff_id'] === $lawal->id ? $lawal->name : ''),
+  1224→                'assigned_by_id' => $aminata->id,
+  1225→                'assigned_by_name' => $aminata->name,
+  1226→                'type' => 'ASSIGN',
+  1227→                'created_at' => $opts['created_at'],
+  1228→            ]);
+  1229→        }
+  1230→
+  1231→        return $task;
+  1232→    }
+  1233→
+  1234→    /*
+  1235→    |--------------------------------------------------------------------------
+  1236→    | Utilities
+  1237→    |--------------------------------------------------------------------------
+  1238→    */
+  1239→
+  1240→    /**
+  1241→     * Stage states for a fully completed & delivered task of the given
+  1242→     * category (doneStates from prisma/seed.ts): every applicable stage
+  1243→     * COMPLETED except "blocked" / "other" which are NOT_APPLICABLE.
+  1244→     *
+  1245→     * @return array<string, string> stage code => state
+  1246→     */
+  1247→    private function doneStates(string $category): array
+  1248→    {
+  1249→        $states = [];
+  1250→
+  1251→        foreach (self::STAGE_DEFS as [$code, , , $appliesTo]) {
+  1252→            if (! ($appliesTo === 'ALL' || in_array($category, explode(',', $appliesTo), true))) {
+  1253→                continue;
+  1254→            }
+  1255→
+  1256→            $states[$code] = ($code === 'blocked' || $code === 'other') ? 'NOT_APPLICABLE' : 'COMPLETED';
+  1257→        }
+  1258→
+  1259→        return $states;
+  1260→    }
+  1261→
+  1262→    /** True when the stage (by code) applies to the given task category. */
+  1263→    private function stageAppliesTo(string $stageCode, string $category): bool
+  1264→    {
+  1265→        foreach (self::STAGE_DEFS as [$code, , , $appliesTo]) {
+  1266→            if ($code === $stageCode) {
+  1267→                return $appliesTo === 'ALL'
+  1268→                    || in_array($category, explode(',', $appliesTo), true);
+  1269→            }
+  1270→        }
+  1271→
+  1272→        return false;
+  1273→    }
+  1274→
+  1275→    /** Stage display name for a stage code (snapshot for history rows). */
+  1276→    private function stageName(string $stageCode): string
+  1277→    {
+  1278→        foreach (self::STAGE_DEFS as [$code, $name]) {
+  1279→            if ($code === $stageCode) {
+  1280→                return $name;
+  1281→            }
+  1282→        }
+  1283→
+  1284→        return $stageCode;
+  1285→    }
+  1286→
+  1287→    /**
+  1288→     * User id for a status-chain actor key ('aminata', 'david',
+  1289→     * 'hamidou'; anything else resolves to Lawal — faithful port of
+  1290→     * prisma/seed.ts).
+  1291→     */
+  1292→    private function statusActorId(string $by): string
+  1293→    {
+  1294→        return match ($by) {
+  1295→            'aminata' => $this->users['aminata']->id,
+  1296→            'david' => $this->users['david']->id,
+  1297→            'hamidou' => $this->users['hamidou']->id,
+  1298→            default => $this->users['lawal']->id,
+  1299→        };
+  1300→    }
+  1301→
+  1302→    /**
+  1303→     * daysAgo from prisma/seed.ts — now minus N days with the clock
+  1304→     * set to hour:00:00 (defaults to 10:00 like the reference).
+  1305→     */
+  1306→    private function daysAgo(int $days, int $hour = 10): Carbon
+  1307→    {
+  1308→        return Carbon::now()->subDays($days)->setTime($hour, 0, 0);
+  1309→    }
+  1310→
+  1311→    /**
+  1312→     * daysFromNow from prisma/seed.ts — now plus N days with the clock
+  1313→     * set to hour:00:00 (defaults to 17:00 like the reference).
+  1314→     */
+  1315→    private function daysFromNow(int $days, int $hour = 17): Carbon
+  1316→    {
+  1317→        return Carbon::now()->addDays($days)->setTime($hour, 0, 0);
+  1318→    }
+  1319→
+  1320→    /**
+  1321→     * JSON-encode an audit `details` payload byte-identically to
+  1322→     * JSON.stringify() in prisma/seed.ts (no slash/unicode escaping).
+  1323→     */
+  1324→    private function encodeDetails(array $details): string
+  1325→    {
+  1326→        return (string) json_encode($details, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+  1327→    }
+  1328→}
+  1329→
