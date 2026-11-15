@@ -1,0 +1,525 @@
+<!-- TITLE: Audit History — OSSZ ATELIER | source: audit-en.html | content-only (layout stripped) -->
+                    
+    <div>
+
+        
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+            <div>
+                <h1 class="font-display text-2xl font-bold tracking-tight">Audit History</h1>
+                <p class="text-sm text-muted-foreground mt-0.5">Permanent record of all system activity. Entries cannot be edited or deleted.</p>
+            </div>
+        </div>
+
+        
+        <section class="rounded-lg border bg-card shadow-sm mb-4">
+            <div class="p-4">
+                <form method="GET" action="https://atelier.osszcollection.com/audit" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 items-end">
+                    <div class="space-y-1.5">
+                        <label for="audit-action" class="block text-xs font-medium text-muted-foreground">Action</label>
+                        <select id="audit-action" name="action" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus:outline-none focus:ring-1 focus:ring-ring">
+                            <option value="">All actions</option>
+                                                                                            <option value="LOGIN_SUCCESS" >Login successful</option>
+                                                                                            <option value="LOGIN_FAILED" >Login failed</option>
+                                                                                            <option value="LOGIN_BLOCKED_INACTIVE" >Login blocked (inactive account)</option>
+                                                                                            <option value="LOGOUT" >Logout</option>
+                                                                                            <option value="USER_CREATED" >User created</option>
+                                                                                            <option value="USER_UPDATED" >User updated</option>
+                                                                                            <option value="USER_PASSWORD_RESET" >User password reset</option>
+                                                                                            <option value="STAFF_ASSESSED" >Staff assessed</option>
+                                                                                            <option value="CUSTOMER_CREATED" >Customer created</option>
+                                                                                            <option value="CUSTOMER_UPDATED" >Customer updated</option>
+                                                                                            <option value="ORDER_CREATED" >Order created</option>
+                                                                                            <option value="ORDER_UPDATED" >Order updated</option>
+                                                                                            <option value="TASKS_CREATED" >Tasks created</option>
+                                                                                            <option value="TASK_ASSIGNED" >Task assigned</option>
+                                                                                            <option value="TASK_REASSIGNED" >Task reassigned</option>
+                                                                                            <option value="TASK_UPDATED" >Task updated</option>
+                                                                                            <option value="TASK_CANCELLED" >Task cancelled</option>
+                                                                                            <option value="TASK_BLOCKED" >Task blocked</option>
+                                                                                            <option value="BLOCK_RESOLVED" >Block resolved</option>
+                                                                                            <option value="SUBMITTED_FOR_INSPECTION" >Submitted for inspection</option>
+                                                                                            <option value="INSPECTION_COMPLETED" >Inspection completed</option>
+                                                                                            <option value="TASK_READY_FOR_PICKUP" >Task ready for pickup</option>
+                                                                                            <option value="TASK_DELIVERED" >Task delivered</option>
+                                                                                            <option value="TASK_STATUS_CHANGED" >Task status changed</option>
+                                                                                            <option value="STAGES_UPDATED" >Stages updated</option>
+                                                                                            <option value="PROGRESS_UPDATED" >Progress updated</option>
+                                                                                            <option value="COMMENT_ADDED" >Comment added</option>
+                                                                                            <option value="ISSUE_REPORTED" >Issue reported</option>
+                                                                                            <option value="STAGE_CREATED" >Stage created</option>
+                                                                                            <option value="STAGE_UPDATED" >Stage updated</option>
+                                                                                            <option value="PERFORMANCE_CONFIG_UPDATED" >Performance config updated</option>
+                                                                                            <option value="INCENTIVE_SCHEME_CREATED" >Incentive scheme created</option>
+                                                                                            <option value="INCENTIVE_SCHEME_UPDATED" >Incentive scheme updated</option>
+                                                                                            <option value="INCENTIVE_RECOMMENDATIONS_GENERATED" >Incentive recommendations generated</option>
+                                                                                            <option value="INCENTIVE_APPROVED" >Incentive approved</option>
+                                                                                            <option value="INCENTIVE_REJECTED" >Incentive rejected</option>
+                                                                                            <option value="INCENTIVE_PAYMENT_RECORDED" >Incentive payment recorded</option>
+                                                    </select>
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label for="audit-user" class="block text-xs font-medium text-muted-foreground">User</label>
+                        <select id="audit-user" name="user" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus:outline-none focus:ring-1 focus:ring-ring">
+                            <option value="">All</option>
+                                                            <option value="847d3e8b-80de-453d-9cb2-fbfef8a32cde" >Aminata Sow</option>
+                                                            <option value="db60aa6e-5deb-4297-bacf-c2c337b75ebe" >David Nkeng</option>
+                                                            <option value="9d021fb4-9b45-4888-8a52-efe93ae1876c" >Hamidou Abdoul</option>
+                                                            <option value="a4ee2330-0adc-4b6c-a982-f3172fff059d" >Lawal Sani</option>
+                                                            <option value="5a7833ca-1d5e-4a7d-975c-85c1dbc489a5" >Ngozi Okafor</option>
+                                                    </select>
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label for="audit-from" class="block text-xs font-medium text-muted-foreground">From</label>
+                        <input type="date" id="audit-from" name="from" value="" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus:outline-none focus:ring-1 focus:ring-ring">
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label for="audit-to" class="block text-xs font-medium text-muted-foreground">To</label>
+                        <input type="date" id="audit-to" name="to" value="" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus:outline-none focus:ring-1 focus:ring-ring">
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <button type="submit" class="inline-flex items-center gap-1.5 h-9 px-4 rounded-md bg-primary text-primary-foreground text-sm font-medium shadow-sm hover:bg-primary/90 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                            Filter
+                        </button>
+                        <a href="https://atelier.osszcollection.com/audit" class="inline-flex items-center gap-1.5 h-9 px-4 rounded-md border bg-background text-sm font-medium shadow-sm hover:bg-muted transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                            Reset
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+                    
+            <div class="rounded-lg border overflow-x-auto bg-card shadow-sm">
+                <table class="w-full caption-bottom text-sm min-w-[900px]">
+                    <thead>
+                        <tr class="border-b bg-muted/50">
+                            <th scope="col" class="h-10 px-3 text-left align-middle font-medium text-muted-foreground whitespace-nowrap w-44">Date &amp; Time</th>
+                            <th scope="col" class="h-10 px-3 text-left align-middle font-medium text-muted-foreground whitespace-nowrap w-40">User</th>
+                            <th scope="col" class="h-10 px-3 text-left align-middle font-medium text-muted-foreground whitespace-nowrap w-52">Action</th>
+                            <th scope="col" class="h-10 px-3 text-left align-middle font-medium text-muted-foreground whitespace-nowrap w-44">Entity</th>
+                            <th scope="col" class="h-10 px-3 text-left align-middle font-medium text-muted-foreground">Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                                                                                <tr class="border-t transition-colors hover:bg-muted/50">
+                                <td class="px-3 py-2.5 align-middle text-muted-foreground whitespace-nowrap">
+                                    Nov 15, 2026, 15:43
+                                </td>
+                                <td class="px-3 py-2.5 align-middle font-medium whitespace-nowrap">
+                                    David Nkeng
+                                </td>
+                                <td class="px-3 py-2.5 align-middle">
+                                    <span class="inline-flex items-center rounded-full border border-stone-300 bg-stone-50 text-stone-700 font-mono text-xs px-2 py-0.5 whitespace-nowrap">Customer created</span>
+                                </td>
+                                <td class="px-3 py-2.5 align-middle whitespace-nowrap">
+                                                                            <span class="text-sm">
+                                            <span class="font-medium">CUSTOMER</span>
+                                                                                            <span class="font-mono text-xs text-muted-foreground"> · 4e68c997</span>
+                                                                                    </span>
+                                                                    </td>
+                                <td class="px-3 py-2.5 align-middle max-w-72">
+                                                                            <span title="{
+    &quot;code&quot;: &quot;CUST-0003&quot;,
+    &quot;name&quot;: &quot;Mme Choukem&quot;
+}" class="block max-w-72 truncate font-mono text-xs text-muted-foreground">{ &quot;code&quot;: &quot;CUST-0003&quot;, &quot;name&quot;: &quot;Mme Choukem&quot; }</span>
+                                                                    </td>
+                            </tr>
+                                                                                <tr class="border-t transition-colors hover:bg-muted/50">
+                                <td class="px-3 py-2.5 align-middle text-muted-foreground whitespace-nowrap">
+                                    Nov 15, 2026, 15:32
+                                </td>
+                                <td class="px-3 py-2.5 align-middle font-medium whitespace-nowrap">
+                                    David Nkeng
+                                </td>
+                                <td class="px-3 py-2.5 align-middle">
+                                    <span class="inline-flex items-center rounded-full border border-stone-300 bg-stone-50 text-stone-700 font-mono text-xs px-2 py-0.5 whitespace-nowrap">Login successful</span>
+                                </td>
+                                <td class="px-3 py-2.5 align-middle whitespace-nowrap">
+                                                                            <span class="text-sm">
+                                            <span class="font-medium">USER</span>
+                                                                                            <span class="font-mono text-xs text-muted-foreground"> · db60aa6e</span>
+                                                                                    </span>
+                                                                    </td>
+                                <td class="px-3 py-2.5 align-middle max-w-72">
+                                                                            <span class="text-muted-foreground">—</span>
+                                                                    </td>
+                            </tr>
+                                                                                <tr class="border-t transition-colors hover:bg-muted/50">
+                                <td class="px-3 py-2.5 align-middle text-muted-foreground whitespace-nowrap">
+                                    Nov 15, 2026, 15:32
+                                </td>
+                                <td class="px-3 py-2.5 align-middle font-medium whitespace-nowrap">
+                                    Aminata Sow
+                                </td>
+                                <td class="px-3 py-2.5 align-middle">
+                                    <span class="inline-flex items-center rounded-full border border-stone-300 bg-stone-50 text-stone-700 font-mono text-xs px-2 py-0.5 whitespace-nowrap">Login successful</span>
+                                </td>
+                                <td class="px-3 py-2.5 align-middle whitespace-nowrap">
+                                                                            <span class="text-sm">
+                                            <span class="font-medium">USER</span>
+                                                                                            <span class="font-mono text-xs text-muted-foreground"> · 847d3e8b</span>
+                                                                                    </span>
+                                                                    </td>
+                                <td class="px-3 py-2.5 align-middle max-w-72">
+                                                                            <span class="text-muted-foreground">—</span>
+                                                                    </td>
+                            </tr>
+                                                                                <tr class="border-t transition-colors hover:bg-muted/50">
+                                <td class="px-3 py-2.5 align-middle text-muted-foreground whitespace-nowrap">
+                                    Nov 15, 2026, 15:27
+                                </td>
+                                <td class="px-3 py-2.5 align-middle font-medium whitespace-nowrap">
+                                    Aminata Sow
+                                </td>
+                                <td class="px-3 py-2.5 align-middle">
+                                    <span class="inline-flex items-center rounded-full border border-stone-300 bg-stone-50 text-stone-700 font-mono text-xs px-2 py-0.5 whitespace-nowrap">Logout</span>
+                                </td>
+                                <td class="px-3 py-2.5 align-middle whitespace-nowrap">
+                                                                            <span class="text-sm">
+                                            <span class="font-medium">USER</span>
+                                                                                            <span class="font-mono text-xs text-muted-foreground"> · 847d3e8b</span>
+                                                                                    </span>
+                                                                    </td>
+                                <td class="px-3 py-2.5 align-middle max-w-72">
+                                                                            <span class="text-muted-foreground">—</span>
+                                                                    </td>
+                            </tr>
+                                                                                <tr class="border-t transition-colors hover:bg-muted/50">
+                                <td class="px-3 py-2.5 align-middle text-muted-foreground whitespace-nowrap">
+                                    Nov 15, 2026, 15:26
+                                </td>
+                                <td class="px-3 py-2.5 align-middle font-medium whitespace-nowrap">
+                                    Aminata Sow
+                                </td>
+                                <td class="px-3 py-2.5 align-middle">
+                                    <span class="inline-flex items-center rounded-full border border-stone-300 bg-stone-50 text-stone-700 font-mono text-xs px-2 py-0.5 whitespace-nowrap">Login successful</span>
+                                </td>
+                                <td class="px-3 py-2.5 align-middle whitespace-nowrap">
+                                                                            <span class="text-sm">
+                                            <span class="font-medium">USER</span>
+                                                                                            <span class="font-mono text-xs text-muted-foreground"> · 847d3e8b</span>
+                                                                                    </span>
+                                                                    </td>
+                                <td class="px-3 py-2.5 align-middle max-w-72">
+                                                                            <span class="text-muted-foreground">—</span>
+                                                                    </td>
+                            </tr>
+                                                                                <tr class="border-t transition-colors hover:bg-muted/50">
+                                <td class="px-3 py-2.5 align-middle text-muted-foreground whitespace-nowrap">
+                                    Nov 15, 2026, 15:25
+                                </td>
+                                <td class="px-3 py-2.5 align-middle font-medium whitespace-nowrap">
+                                    Aminata Sow
+                                </td>
+                                <td class="px-3 py-2.5 align-middle">
+                                    <span class="inline-flex items-center rounded-full border border-stone-300 bg-stone-50 text-stone-700 font-mono text-xs px-2 py-0.5 whitespace-nowrap">Login successful</span>
+                                </td>
+                                <td class="px-3 py-2.5 align-middle whitespace-nowrap">
+                                                                            <span class="text-sm">
+                                            <span class="font-medium">USER</span>
+                                                                                            <span class="font-mono text-xs text-muted-foreground"> · 847d3e8b</span>
+                                                                                    </span>
+                                                                    </td>
+                                <td class="px-3 py-2.5 align-middle max-w-72">
+                                                                            <span class="text-muted-foreground">—</span>
+                                                                    </td>
+                            </tr>
+                                                                                <tr class="border-t transition-colors hover:bg-muted/50">
+                                <td class="px-3 py-2.5 align-middle text-muted-foreground whitespace-nowrap">
+                                    Nov 14, 2026, 19:41
+                                </td>
+                                <td class="px-3 py-2.5 align-middle font-medium whitespace-nowrap">
+                                    Aminata Sow
+                                </td>
+                                <td class="px-3 py-2.5 align-middle">
+                                    <span class="inline-flex items-center rounded-full border border-stone-300 bg-stone-50 text-stone-700 font-mono text-xs px-2 py-0.5 whitespace-nowrap">Progress updated</span>
+                                </td>
+                                <td class="px-3 py-2.5 align-middle whitespace-nowrap">
+                                                                            <span class="text-sm">
+                                            <span class="font-medium">TASK</span>
+                                                                                            <span class="font-mono text-xs text-muted-foreground"> · d479101f</span>
+                                                                                    </span>
+                                                                    </td>
+                                <td class="px-3 py-2.5 align-middle max-w-72">
+                                                                            <span title="{
+    &quot;from&quot;: 80,
+    &quot;to&quot;: 30,
+    &quot;note&quot;: null,
+    &quot;correction&quot;: true
+}" class="block max-w-72 truncate font-mono text-xs text-muted-foreground">{ &quot;from&quot;: 80, &quot;to&quot;: 30, &quot;note&quot;: null, &quot;correction&quot;: true }</span>
+                                                                    </td>
+                            </tr>
+                                                                                <tr class="border-t transition-colors hover:bg-muted/50">
+                                <td class="px-3 py-2.5 align-middle text-muted-foreground whitespace-nowrap">
+                                    Nov 14, 2026, 19:39
+                                </td>
+                                <td class="px-3 py-2.5 align-middle font-medium whitespace-nowrap">
+                                    Aminata Sow
+                                </td>
+                                <td class="px-3 py-2.5 align-middle">
+                                    <span class="inline-flex items-center rounded-full border border-stone-300 bg-stone-50 text-stone-700 font-mono text-xs px-2 py-0.5 whitespace-nowrap">Login successful</span>
+                                </td>
+                                <td class="px-3 py-2.5 align-middle whitespace-nowrap">
+                                                                            <span class="text-sm">
+                                            <span class="font-medium">USER</span>
+                                                                                            <span class="font-mono text-xs text-muted-foreground"> · 847d3e8b</span>
+                                                                                    </span>
+                                                                    </td>
+                                <td class="px-3 py-2.5 align-middle max-w-72">
+                                                                            <span class="text-muted-foreground">—</span>
+                                                                    </td>
+                            </tr>
+                                                                                <tr class="border-t transition-colors hover:bg-muted/50">
+                                <td class="px-3 py-2.5 align-middle text-muted-foreground whitespace-nowrap">
+                                    Nov 13, 2026, 10:00
+                                </td>
+                                <td class="px-3 py-2.5 align-middle font-medium whitespace-nowrap">
+                                    Hamidou Abdoul
+                                </td>
+                                <td class="px-3 py-2.5 align-middle">
+                                    <span class="inline-flex items-center rounded-full border border-stone-300 bg-stone-50 text-stone-700 font-mono text-xs px-2 py-0.5 whitespace-nowrap">Progress updated</span>
+                                </td>
+                                <td class="px-3 py-2.5 align-middle whitespace-nowrap">
+                                                                            <span class="text-sm">
+                                            <span class="font-medium">TASK</span>
+                                                                                            <span class="font-mono text-xs text-muted-foreground"> · 249a0587</span>
+                                                                                    </span>
+                                                                    </td>
+                                <td class="px-3 py-2.5 align-middle max-w-72">
+                                                                            <span title="{
+    &quot;from&quot;: 45,
+    &quot;to&quot;: 60
+}" class="block max-w-72 truncate font-mono text-xs text-muted-foreground">{ &quot;from&quot;: 45, &quot;to&quot;: 60 }</span>
+                                                                    </td>
+                            </tr>
+                                                                                <tr class="border-t transition-colors hover:bg-muted/50">
+                                <td class="px-3 py-2.5 align-middle text-muted-foreground whitespace-nowrap">
+                                    Nov 12, 2026, 11:00
+                                </td>
+                                <td class="px-3 py-2.5 align-middle font-medium whitespace-nowrap">
+                                    Lawal Sani
+                                </td>
+                                <td class="px-3 py-2.5 align-middle">
+                                    <span class="inline-flex items-center rounded-full border border-stone-300 bg-stone-50 text-stone-700 font-mono text-xs px-2 py-0.5 whitespace-nowrap">Issue reported</span>
+                                </td>
+                                <td class="px-3 py-2.5 align-middle whitespace-nowrap">
+                                                                            <span class="text-sm">
+                                            <span class="font-medium">TASK</span>
+                                                                                            <span class="font-mono text-xs text-muted-foreground"> · 39f03973</span>
+                                                                                    </span>
+                                                                    </td>
+                                <td class="px-3 py-2.5 align-middle max-w-72">
+                                                                            <span title="{
+    &quot;issue&quot;: &quot;Missing lining fabric&quot;
+}" class="block max-w-72 truncate font-mono text-xs text-muted-foreground">{ &quot;issue&quot;: &quot;Missing lining fabric&quot; }</span>
+                                                                    </td>
+                            </tr>
+                                                                                <tr class="border-t transition-colors hover:bg-muted/50">
+                                <td class="px-3 py-2.5 align-middle text-muted-foreground whitespace-nowrap">
+                                    Nov 11, 2026, 10:00
+                                </td>
+                                <td class="px-3 py-2.5 align-middle font-medium whitespace-nowrap">
+                                    Aminata Sow
+                                </td>
+                                <td class="px-3 py-2.5 align-middle">
+                                    <span class="inline-flex items-center rounded-full border border-stone-300 bg-stone-50 text-stone-700 font-mono text-xs px-2 py-0.5 whitespace-nowrap">Incentive approved</span>
+                                </td>
+                                <td class="px-3 py-2.5 align-middle whitespace-nowrap">
+                                                                            <span class="text-sm">
+                                            <span class="font-medium">INCENTIVE</span>
+                                                                                            <span class="font-mono text-xs text-muted-foreground"> · 9d021fb4</span>
+                                                                                    </span>
+                                                                    </td>
+                                <td class="px-3 py-2.5 align-middle max-w-72">
+                                                                            <span title="{
+    &quot;period&quot;: &quot;2026-10&quot;,
+    &quot;amount&quot;: 25000
+}" class="block max-w-72 truncate font-mono text-xs text-muted-foreground">{ &quot;period&quot;: &quot;2026-10&quot;, &quot;amount&quot;: 25000 }</span>
+                                                                    </td>
+                            </tr>
+                                                                                <tr class="border-t transition-colors hover:bg-muted/50">
+                                <td class="px-3 py-2.5 align-middle text-muted-foreground whitespace-nowrap">
+                                    Nov 1, 2026, 10:00
+                                </td>
+                                <td class="px-3 py-2.5 align-middle font-medium whitespace-nowrap">
+                                    Aminata Sow
+                                </td>
+                                <td class="px-3 py-2.5 align-middle">
+                                    <span class="inline-flex items-center rounded-full border border-stone-300 bg-stone-50 text-stone-700 font-mono text-xs px-2 py-0.5 whitespace-nowrap">Task assigned</span>
+                                </td>
+                                <td class="px-3 py-2.5 align-middle whitespace-nowrap">
+                                                                            <span class="text-sm">
+                                            <span class="font-medium">TASK</span>
+                                                                                            <span class="font-mono text-xs text-muted-foreground"> · 39f03973</span>
+                                                                                    </span>
+                                                                    </td>
+                                <td class="px-3 py-2.5 align-middle max-w-72">
+                                                                            <span title="{
+    &quot;staff&quot;: &quot;Lawal Sani&quot;
+}" class="block max-w-72 truncate font-mono text-xs text-muted-foreground">{ &quot;staff&quot;: &quot;Lawal Sani&quot; }</span>
+                                                                    </td>
+                            </tr>
+                                                                                <tr class="border-t transition-colors hover:bg-muted/50">
+                                <td class="px-3 py-2.5 align-middle text-muted-foreground whitespace-nowrap">
+                                    Oct 31, 2026, 10:00
+                                </td>
+                                <td class="px-3 py-2.5 align-middle font-medium whitespace-nowrap">
+                                    Aminata Sow
+                                </td>
+                                <td class="px-3 py-2.5 align-middle">
+                                    <span class="inline-flex items-center rounded-full border border-stone-300 bg-stone-50 text-stone-700 font-mono text-xs px-2 py-0.5 whitespace-nowrap">Tasks created</span>
+                                </td>
+                                <td class="px-3 py-2.5 align-middle whitespace-nowrap">
+                                                                            <span class="text-sm">
+                                            <span class="font-medium">ORDER</span>
+                                                                                            <span class="font-mono text-xs text-muted-foreground"> · af28fab7</span>
+                                                                                    </span>
+                                                                    </td>
+                                <td class="px-3 py-2.5 align-middle max-w-72">
+                                                                            <span title="{
+    &quot;tasks&quot;: [
+        &quot;TASK-0001&quot;,
+        &quot;TASK-0002&quot;,
+        &quot;TASK-0003&quot;
+    ]
+}" class="block max-w-72 truncate font-mono text-xs text-muted-foreground">{ &quot;tasks&quot;: [ &quot;TASK-0001&quot;, &quot;TASK-0002&quot;, &quot;TASK-0003&quot; ] }</span>
+                                                                    </td>
+                            </tr>
+                                                                                <tr class="border-t transition-colors hover:bg-muted/50">
+                                <td class="px-3 py-2.5 align-middle text-muted-foreground whitespace-nowrap">
+                                    Oct 31, 2026, 10:00
+                                </td>
+                                <td class="px-3 py-2.5 align-middle font-medium whitespace-nowrap">
+                                    Aminata Sow
+                                </td>
+                                <td class="px-3 py-2.5 align-middle">
+                                    <span class="inline-flex items-center rounded-full border border-stone-300 bg-stone-50 text-stone-700 font-mono text-xs px-2 py-0.5 whitespace-nowrap">Task assigned</span>
+                                </td>
+                                <td class="px-3 py-2.5 align-middle whitespace-nowrap">
+                                                                            <span class="text-sm">
+                                            <span class="font-medium">TASK</span>
+                                                                                            <span class="font-mono text-xs text-muted-foreground"> · 249a0587</span>
+                                                                                    </span>
+                                                                    </td>
+                                <td class="px-3 py-2.5 align-middle max-w-72">
+                                                                            <span title="{
+    &quot;staff&quot;: &quot;Hamidou Abdoul&quot;
+}" class="block max-w-72 truncate font-mono text-xs text-muted-foreground">{ &quot;staff&quot;: &quot;Hamidou Abdoul&quot; }</span>
+                                                                    </td>
+                            </tr>
+                                                                                <tr class="border-t transition-colors hover:bg-muted/50">
+                                <td class="px-3 py-2.5 align-middle text-muted-foreground whitespace-nowrap">
+                                    Oct 31, 2026, 10:00
+                                </td>
+                                <td class="px-3 py-2.5 align-middle font-medium whitespace-nowrap">
+                                    Aminata Sow
+                                </td>
+                                <td class="px-3 py-2.5 align-middle">
+                                    <span class="inline-flex items-center rounded-full border border-stone-300 bg-stone-50 text-stone-700 font-mono text-xs px-2 py-0.5 whitespace-nowrap">Task assigned</span>
+                                </td>
+                                <td class="px-3 py-2.5 align-middle whitespace-nowrap">
+                                                                            <span class="text-sm">
+                                            <span class="font-medium">TASK</span>
+                                                                                            <span class="font-mono text-xs text-muted-foreground"> · d479101f</span>
+                                                                                    </span>
+                                                                    </td>
+                                <td class="px-3 py-2.5 align-middle max-w-72">
+                                                                            <span title="{
+    &quot;staff&quot;: &quot;Hamidou Abdoul&quot;
+}" class="block max-w-72 truncate font-mono text-xs text-muted-foreground">{ &quot;staff&quot;: &quot;Hamidou Abdoul&quot; }</span>
+                                                                    </td>
+                            </tr>
+                                                                                <tr class="border-t transition-colors hover:bg-muted/50">
+                                <td class="px-3 py-2.5 align-middle text-muted-foreground whitespace-nowrap">
+                                    Oct 26, 2026, 10:00
+                                </td>
+                                <td class="px-3 py-2.5 align-middle font-medium whitespace-nowrap">
+                                    Aminata Sow
+                                </td>
+                                <td class="px-3 py-2.5 align-middle">
+                                    <span class="inline-flex items-center rounded-full border border-stone-300 bg-stone-50 text-stone-700 font-mono text-xs px-2 py-0.5 whitespace-nowrap">Order created</span>
+                                </td>
+                                <td class="px-3 py-2.5 align-middle whitespace-nowrap">
+                                                                            <span class="text-sm">
+                                            <span class="font-medium">ORDER</span>
+                                                                                            <span class="font-mono text-xs text-muted-foreground"> · af28fab7</span>
+                                                                                    </span>
+                                                                    </td>
+                                <td class="px-3 py-2.5 align-middle max-w-72">
+                                                                            <span title="{
+    &quot;orderNumber&quot;: &quot;OSSZ-2026-001&quot;
+}" class="block max-w-72 truncate font-mono text-xs text-muted-foreground">{ &quot;orderNumber&quot;: &quot;OSSZ-2026-001&quot; }</span>
+                                                                    </td>
+                            </tr>
+                                                                                <tr class="border-t transition-colors hover:bg-muted/50">
+                                <td class="px-3 py-2.5 align-middle text-muted-foreground whitespace-nowrap">
+                                    Oct 25, 2026, 10:00
+                                </td>
+                                <td class="px-3 py-2.5 align-middle font-medium whitespace-nowrap">
+                                    Aminata Sow
+                                </td>
+                                <td class="px-3 py-2.5 align-middle">
+                                    <span class="inline-flex items-center rounded-full border border-stone-300 bg-stone-50 text-stone-700 font-mono text-xs px-2 py-0.5 whitespace-nowrap">Customer created</span>
+                                </td>
+                                <td class="px-3 py-2.5 align-middle whitespace-nowrap">
+                                                                            <span class="text-sm">
+                                            <span class="font-medium">CUSTOMER</span>
+                                                                                            <span class="font-mono text-xs text-muted-foreground"> · e5face95</span>
+                                                                                    </span>
+                                                                    </td>
+                                <td class="px-3 py-2.5 align-middle max-w-72">
+                                                                            <span title="{
+    &quot;code&quot;: &quot;CUST-0001&quot;
+}" class="block max-w-72 truncate font-mono text-xs text-muted-foreground">{ &quot;code&quot;: &quot;CUST-0001&quot; }</span>
+                                                                    </td>
+                            </tr>
+                                                                                <tr class="border-t transition-colors hover:bg-muted/50">
+                                <td class="px-3 py-2.5 align-middle text-muted-foreground whitespace-nowrap">
+                                    Sep 16, 2026, 10:00
+                                </td>
+                                <td class="px-3 py-2.5 align-middle font-medium whitespace-nowrap">
+                                    Aminata Sow
+                                </td>
+                                <td class="px-3 py-2.5 align-middle">
+                                    <span class="inline-flex items-center rounded-full border border-stone-300 bg-stone-50 text-stone-700 font-mono text-xs px-2 py-0.5 whitespace-nowrap">User created</span>
+                                </td>
+                                <td class="px-3 py-2.5 align-middle whitespace-nowrap">
+                                                                            <span class="text-sm">
+                                            <span class="font-medium">USER</span>
+                                                                                            <span class="font-mono text-xs text-muted-foreground"> · db60aa6e</span>
+                                                                                    </span>
+                                                                    </td>
+                                <td class="px-3 py-2.5 align-middle max-w-72">
+                                                                            <span title="{
+    &quot;role&quot;: &quot;ADMIN&quot;
+}" class="block max-w-72 truncate font-mono text-xs text-muted-foreground">{ &quot;role&quot;: &quot;ADMIN&quot; }</span>
+                                                                    </td>
+                            </tr>
+                                            </tbody>
+                </table>
+            </div>
+
+            
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-2 mt-4">
+                <p class="text-sm text-muted-foreground">
+                    18 entries · page 1 of 1
+                </p>
+                <div class="flex items-center gap-2">
+                                            <span class="inline-flex items-center gap-1 h-8 px-3 rounded-md border text-sm font-medium opacity-50 cursor-not-allowed" aria-disabled="true">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+                            Previous
+                        </span>
+                                                                <span class="inline-flex items-center gap-1 h-8 px-3 rounded-md border text-sm font-medium opacity-50 cursor-not-allowed" aria-disabled="true">
+                            Next
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+                        </span>
+                                    </div>
+            </div>
+            </div>
+            

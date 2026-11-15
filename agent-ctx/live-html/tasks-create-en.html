@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="dNzunr1u0Or0RPmvjYSF1yNP9NPtnIvIjrU6DnoG">
+    <title>Create Production Tasks — OSSZ ATELIER</title>
+    <link rel="stylesheet" href="/css/app.css">
+    <script src="/js/alpine.min.js" defer></script>
+    <style>[x-cloak]{display:none !important;}</style>
+</head>
+<body class="bg-background text-foreground antialiased">
+
+<div class="min-h-screen flex flex-col bg-background" x-data="{ nav: false }" @keydown.escape.window="nav = false">
+    <div class="flex flex-1 min-h-0">
+
+        
+        
+        
+        <aside class="hidden lg:flex w-60 shrink-0 flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border sticky top-0 h-screen">
+            <div class="flex items-center justify-center px-5 h-16 border-b border-sidebar-border">
+                <div class="text-center min-w-0">
+                    <p class="font-display font-bold leading-none">OSSZ ATELIER</p>
+                    <p class="text-[9px] tracking-[0.2em] text-stone-400 mt-1.5">PRODUCTION MGMT</p>
+                </div>
+            </div>
+            <div class="flex-1 overflow-y-auto">
+                <nav class="flex flex-col gap-5 px-3 py-4" aria-label="Main navigation">
+                                            <div>
+                            <p class="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-stone-400">Overview</p>
+                            <div class="flex flex-col gap-0.5">
+                                                                    <a href="https://atelier.osszcollection.com" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+                                        <span class="truncate">Dashboard</span>
+                                    </a>
+                                                            </div>
+                        </div>
+                                            <div>
+                            <p class="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-stone-400">Production</p>
+                            <div class="flex flex-col gap-0.5">
+                                                                    <a href="https://atelier.osszcollection.com/tasks" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/></svg>
+                                        <span class="truncate">Production</span>
+                                    </a>
+                                                                    <a href="https://atelier.osszcollection.com/tasks/create" @click="nav = false" aria-current="page" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left bg-sidebar-primary/20 text-sidebar-primary">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg>
+                                        <span class="truncate">Create Tasks</span>
+                                    </a>
+                                                                    <a href="https://atelier.osszcollection.com/orders" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+                                        <span class="truncate">Orders</span>
+                                    </a>
+                                                                    <a href="https://atelier.osszcollection.com/customers" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                                        <span class="truncate">Customers</span>
+                                    </a>
+                                                            </div>
+                        </div>
+                                            <div>
+                            <p class="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-stone-400">Insights</p>
+                            <div class="flex flex-col gap-0.5">
+                                                                    <a href="https://atelier.osszcollection.com/performance" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+                                        <span class="truncate">Performance</span>
+                                    </a>
+                                                                    <a href="https://atelier.osszcollection.com/incentives" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5"/></svg>
+                                        <span class="truncate">Incentives</span>
+                                    </a>
+                                                                    <a href="https://atelier.osszcollection.com/reports" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M8 13v2"/><path d="M12 13v4"/><path d="M16 13v2"/></svg>
+                                        <span class="truncate">Reports</span>
+                                    </a>
+                                                            </div>
+                        </div>
+                                            <div>
+                            <p class="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-stone-400">Administration</p>
+                            <div class="flex flex-col gap-0.5">
+                                                                    <a href="https://atelier.osszcollection.com/users" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/><path d="M8 10v4"/><path d="M12 10v2"/><path d="M16 10v4"/></svg>
+                                        <span class="truncate">Users &amp; Roles</span>
+                                    </a>
+                                                                    <a href="https://atelier.osszcollection.com/stages" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="M20 7h-9"/><path d="M14 17H5"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/></svg>
+                                        <span class="truncate">Production Stages</span>
+                                    </a>
+                                                                    <a href="https://atelier.osszcollection.com/audit" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="M15 12h-5"/><path d="M15 8h-5"/><path d="M19 17V5a2 2 0 0 0-2-2H4"/><path d="M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"/></svg>
+                                        <span class="truncate">Audit History</span>
+                                    </a>
+                                                            </div>
+                        </div>
+                                    </nav>
+            </div>
+            <div class="p-4 border-t border-sidebar-border text-[11px] text-stone-500">
+                Independent production system
+            </div>
+        </aside>
+
+        
+        
+        
+        <div x-show="nav" x-cloak x-transition.opacity.duration.200ms class="fixed inset-0 z-40 bg-black/60 lg:hidden" @click="nav = false" aria-hidden="true"></div>
+        <aside id="mobile-nav" x-show="nav" x-cloak
+               x-transition:enter="transition ease-out duration-200"
+               x-transition:enter-start="-translate-x-full"
+               x-transition:enter-end="translate-x-0"
+               x-transition:leave="transition ease-in duration-150"
+               x-transition:leave-start="translate-x-0"
+               x-transition:leave-end="-translate-x-full"
+               class="fixed left-0 top-0 z-50 h-full w-72 max-w-[85vw] flex flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border lg:hidden"
+               role="dialog" aria-modal="true" aria-label="Navigation">
+            <div class="relative flex items-center justify-center px-5 h-16 border-b border-sidebar-border">
+                <div class="text-center min-w-0">
+                    <p class="font-display font-bold leading-none">OSSZ ATELIER</p>
+                    <p class="text-[9px] tracking-[0.2em] text-stone-400 mt-1.5">PRODUCTION MGMT</p>
+                </div>
+                <button type="button" @click="nav = false" class="absolute right-3 inline-flex items-center justify-center size-8 rounded-md text-stone-400 hover:text-white hover:bg-white/5 transition-colors" aria-label="Close">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                </button>
+            </div>
+            <nav class="flex-1 overflow-y-auto flex flex-col gap-5 px-3 py-4" aria-label="Main navigation">
+                                    <div>
+                        <p class="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-stone-400">Overview</p>
+                        <div class="flex flex-col gap-0.5">
+                                                            <a href="https://atelier.osszcollection.com" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+                                    <span class="truncate">Dashboard</span>
+                                </a>
+                                                    </div>
+                    </div>
+                                    <div>
+                        <p class="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-stone-400">Production</p>
+                        <div class="flex flex-col gap-0.5">
+                                                            <a href="https://atelier.osszcollection.com/tasks" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/></svg>
+                                    <span class="truncate">Production</span>
+                                </a>
+                                                            <a href="https://atelier.osszcollection.com/tasks/create" @click="nav = false" aria-current="page" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left bg-sidebar-primary/20 text-sidebar-primary">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg>
+                                    <span class="truncate">Create Tasks</span>
+                                </a>
+                                                            <a href="https://atelier.osszcollection.com/orders" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+                                    <span class="truncate">Orders</span>
+                                </a>
+                                                            <a href="https://atelier.osszcollection.com/customers" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                                    <span class="truncate">Customers</span>
+                                </a>
+                                                    </div>
+                    </div>
+                                    <div>
+                        <p class="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-stone-400">Insights</p>
+                        <div class="flex flex-col gap-0.5">
+                                                            <a href="https://atelier.osszcollection.com/performance" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+                                    <span class="truncate">Performance</span>
+                                </a>
+                                                            <a href="https://atelier.osszcollection.com/incentives" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5"/></svg>
+                                    <span class="truncate">Incentives</span>
+                                </a>
+                                                            <a href="https://atelier.osszcollection.com/reports" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M8 13v2"/><path d="M12 13v4"/><path d="M16 13v2"/></svg>
+                                    <span class="truncate">Reports</span>
+                                </a>
+                                                    </div>
+                    </div>
+                                    <div>
+                        <p class="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-stone-400">Administration</p>
+                        <div class="flex flex-col gap-0.5">
+                                                            <a href="https://atelier.osszcollection.com/users" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/><path d="M8 10v4"/><path d="M12 10v2"/><path d="M16 10v4"/></svg>
+                                    <span class="truncate">Users &amp; Roles</span>
+                                </a>
+                                                            <a href="https://atelier.osszcollection.com/stages" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="M20 7h-9"/><path d="M14 17H5"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/></svg>
+                                    <span class="truncate">Production Stages</span>
+                                </a>
+                                                            <a href="https://atelier.osszcollection.com/audit" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="M15 12h-5"/><path d="M15 8h-5"/><path d="M19 17V5a2 2 0 0 0-2-2H4"/><path d="M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"/></svg>
+                                    <span class="truncate">Audit History</span>
+                                </a>
+                                                    </div>
+                    </div>
+                            </nav>
+        </aside>
+
+        
+        
+        
+        <div class="flex-1 flex flex-col min-w-0">
+            <header class="sticky top-0 z-30 relative flex items-center gap-2 sm:gap-3 h-16 px-4 sm:px-6 border-b bg-background/95 backdrop-blur">
+                
+                <button type="button" class="lg:hidden inline-flex items-center justify-center size-9 -ml-1.5 rounded-md hover:bg-muted transition-colors" @click="nav = true" aria-label="Open menu" aria-controls="mobile-nav">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-5" aria-hidden="true"><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+                </button>
+
+                
+                <a href="https://atelier.osszcollection.com" aria-label="OSSZ Atelier logo — go to dashboard" class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 shrink-0 rounded-md max-[359px]:static max-[359px]:translate-x-0 max-[359px]:translate-y-0 max-[359px]:mx-auto">
+                    <img src="/img/ossz-logo.png" alt="OSSZ Atelier logo" class="h-7 sm:h-9 w-auto rounded-md ring-1 ring-black/10">
+                </a>
+
+                
+                <h1 class="hidden sm:block font-display text-lg font-semibold truncate min-w-0 max-w-[calc(50%-6.5rem)]">Create Production Tasks</h1>
+
+                
+                <div class="ml-auto max-[359px]:ml-0 flex items-center gap-1 sm:gap-1.5">
+                    
+                    <div role="group" aria-label="Language" title="Changer de langue" class="flex items-center gap-0.5 rounded-full border bg-background p-0.5 select-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="hidden sm:block size-3.5 ml-1 text-muted-foreground" aria-hidden="true"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg>
+                        <a href="https://atelier.osszcollection.com/locale/en" class="rounded-full px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide transition-colors bg-primary text-primary-foreground" aria-current="true">EN</a>
+                        <a href="https://atelier.osszcollection.com/locale/fr" class="rounded-full px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide transition-colors text-muted-foreground hover:text-foreground">FR</a>
+                    </div>
+
+                    
+                    <a href="https://atelier.osszcollection.com/notifications" class="relative inline-flex items-center justify-center size-8 sm:size-9 rounded-md hover:bg-muted transition-colors" aria-label="Notifications">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 sm:size-5" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+                                                    <span class="absolute -top-0.5 -right-0.5 min-w-4.5 h-4.5 px-1 rounded-full bg-red-600 text-white text-[10px] font-bold flex items-center justify-center">2</span>
+                                            </a>
+
+                    
+                                            <div class="relative" x-data="{ open: false }">
+                            <button type="button" @click="open = !open" @click.outside="open = false" @keydown.escape.window="open = false" :aria-expanded="open.toString()" aria-haspopup="menu" aria-label="Account menu" class="flex items-center gap-2 rounded-full hover:bg-muted p-0 sm:p-1 sm:pr-2 transition-colors">
+                                <span class="flex items-center justify-center size-8 rounded-full bg-primary/10 text-primary text-xs font-semibold">AS</span>
+                                <span class="hidden sm:block text-left">
+                                    <span class="block text-sm font-medium leading-none">Aminata Sow</span>
+                                    <span class="block text-[11px] text-muted-foreground mt-0.5">USR-001 · Management</span>
+                                </span>
+                            </button>
+                            <div x-show="open" x-cloak
+                                 x-transition:enter="transition ease-out duration-100"
+                                 x-transition:enter-start="opacity-0 scale-95"
+                                 x-transition:enter-end="opacity-100 scale-100"
+                                 x-transition:leave="transition ease-in duration-75"
+                                 x-transition:leave-start="opacity-100 scale-100"
+                                 x-transition:leave-end="opacity-0 scale-95"
+                                 class="absolute right-0 mt-2 w-60 rounded-lg border bg-card shadow-lg py-1 z-50" role="menu">
+                                <div class="px-3 py-2">
+                                    <p class="text-sm font-medium">Aminata Sow</p>
+                                    <p class="text-xs text-muted-foreground font-normal truncate">management@atelier.com</p>
+                                    <p class="text-xs text-muted-foreground font-normal mt-0.5">Management</p>
+                                                                            <p class="text-xs text-muted-foreground font-normal mt-0.5 font-mono">USR-001</p>
+                                                                    </div>
+                                <div class="h-px bg-border my-1"></div>
+                                <form method="POST" action="https://atelier.osszcollection.com/logout">
+                                    <input type="hidden" name="_token" value="dNzunr1u0Or0RPmvjYSF1yNP9NPtnIvIjrU6DnoG" autocomplete="off">                                    <button type="submit" role="menuitem" class="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-700 hover:bg-muted transition-colors">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+                                        Sign out
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                                    </div>
+            </header>
+
+            <main class="flex-1 px-4 sm:px-6 py-6 w-full max-w-[1400px] mx-auto">
+                
+<div>
+    <a href="https://atelier.osszcollection.com/tasks"
+       class="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors -ml-2 mb-2 px-2 h-8 rounded-md">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+        Back to tasks
+    </a>
+
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+        <div class="min-w-0">
+            <h1 class="font-display text-2xl font-bold tracking-tight">Create Production Tasks</h1>
+            <p class="text-sm text-muted-foreground mt-0.5">Break a customer order into individual garment-piece tasks. Each piece becomes a trackable task with its own checklist.</p>
+        </div>
+    </div>
+
+    
+            <form method="POST" action="https://atelier.osszcollection.com/tasks"
+              x-data='{
+                  orders: [{"id":"6ad14bdc-c6c1-4966-82c7-0d8d4fac0327","orderNumber":"OSSZ-2026-002","customerName":"Amina Cissé","customerPhone":"+237 699 551 122","orderDate":"09 Nov 2026","expectedDelivery":"09 Dec 2026","deliveryLocal":"2026-12-09T17:00","priority":"NORMAL","pieceCount":2,"instructions":"Embroidered neckline, matching trousers.","taskCount":2,"completedCount":0,"avgProgress":0},{"id":"af28fab7-699f-4865-89b0-b8ba86e63af5","orderNumber":"OSSZ-2026-001","customerName":"John Doe","customerPhone":"+237 677 123 456","orderDate":"26 Oct 2026","expectedDelivery":"25 Nov 2026","deliveryLocal":"2026-11-25T17:00","priority":"HIGH","pieceCount":3,"instructions":"Slim fit, midnight blue fabric, gold buttons.","taskCount":3,"completedCount":0,"avgProgress":40},{"id":"cc7ff7c6-4955-4f6e-8637-ed77c9d4b389","orderNumber":"OSSZ-2025-014","customerName":"Amina Cissé","customerPhone":"+237 699 551 122","orderDate":"01 Oct 2026","expectedDelivery":"03 Nov 2026","deliveryLocal":"2026-11-03T10:00","priority":"NORMAL","pieceCount":3,"instructions":"","taskCount":3,"completedCount":3,"avgProgress":100},{"id":"eef76f6c-f98a-41b9-a03f-6957c177d9c6","orderNumber":"OSSZ-2025-009","customerName":"John Doe","customerPhone":"+237 677 123 456","orderDate":"01 Sep 2026","expectedDelivery":"21 Sep 2026","deliveryLocal":"2026-09-21T10:00","priority":"NORMAL","pieceCount":1,"instructions":"","taskCount":1,"completedCount":1,"avgProgress":100}],
+                  selectedId: "",
+                  pieces: [],
+                  errorsByIndex: [],
+                  priorityLabels: {"LOW":"Low","NORMAL":"Normal","HIGH":"High","URGENT":"Urgent"},
+                  priorityClasses: {"LOW":"bg-stone-50 text-stone-600 border-stone-300","NORMAL":"bg-teal-50 text-teal-700 border-teal-300","HIGH":"bg-amber-50 text-amber-800 border-amber-300","URGENT":"bg-red-50 text-red-800 border-red-300"},
+                  templates: {"pieceNumber":"Piece {number}","removePiece":"Remove piece {number}","summaryOne":"{count} piece on order {order}","summaryMany":"{count} pieces on order {order}","createOne":"Create {count} Task","createMany":"Create {count} Tasks","existing":"{total} total ({completed} completed) — duplicate piece names are rejected.","existingProgress":"{total} total ({completed} completed, {progress}% average progress) — duplicate piece names are rejected.","pieceNamePlaceholder":"e.g. Jacket, Matching Trousers","instructionsPlaceholder":"Piece-specific production instructions","categoryForPiece":"Category for piece {number}","staffForPiece":"Staff for piece {number}","priorityForPiece":"Priority for piece {number}"},
+                  init() {
+                      if (this.pieces.length === 0) {
+                          this.pieces = [this.makeRow(this.findOrder(this.selectedId))];
+                      }
+                  },
+                  findOrder(id) {
+                      for (var i = 0; i < this.orders.length; i++) {
+                          if (this.orders[i].id === id) {
+                              return this.orders[i];
+                          }
+                      }
+                      return null;
+                  },
+                  get order() {
+                      return this.findOrder(this.selectedId);
+                  },
+                  makeRow(order) {
+                      return {
+                          garmentPiece: "",
+                          category: "FULL",
+                          staffId: "",
+                          priority: order !== null && order.priority ? order.priority : "NORMAL",
+                          deadline: order !== null && order.deliveryLocal ? order.deliveryLocal : "",
+                          instructions: ""
+                      };
+                  },
+                  selectOrder(id) {
+                      this.selectedId = id;
+                      this.pieces = [this.makeRow(this.findOrder(id))];
+                  },
+                  addPiece() {
+                      this.pieces.push(this.makeRow(this.order));
+                  },
+                  removePiece(index) {
+                      if (this.pieces.length > 1) {
+                          this.pieces.splice(index, 1);
+                      }
+                  },
+                  existingSummary(order) {
+                      if (order === null) {
+                          return "";
+                      }
+                      if (order.taskCount > 0) {
+                          return this.templates.existingProgress
+                              .replace("{total}", order.taskCount)
+                              .replace("{completed}", order.completedCount)
+                              .replace("{progress}", order.avgProgress);
+                      }
+                      return this.templates.existing
+                          .replace("{total}", order.taskCount)
+                          .replace("{completed}", order.completedCount);
+                  }
+              }'>
+            <input type="hidden" name="_token" value="dNzunr1u0Or0RPmvjYSF1yNP9NPtnIvIjrU6DnoG" autocomplete="off">
+            
+            <div class="rounded-xl border bg-card text-card-foreground shadow-sm mb-4">
+                <div class="flex items-center justify-between gap-2 border-b p-6 pb-3">
+                    <h2 class="font-semibold text-base">Customer order</h2>
+                </div>
+                <div class="p-6 pt-4 space-y-4">
+                    <div class="space-y-1.5">
+                        <label for="order-select" class="text-sm font-medium leading-none">Order</label>
+                        <select id="order-select" name="orderId" x-model="selectedId" @change="selectOrder($el.value)"
+                                class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                            <option value="">Select the order to break into tasks</option>
+                                                            <option value="6ad14bdc-c6c1-4966-82c7-0d8d4fac0327">OSSZ-2026-002 — Amina Cissé</option>
+                                                            <option value="af28fab7-699f-4865-89b0-b8ba86e63af5">OSSZ-2026-001 — John Doe</option>
+                                                            <option value="cc7ff7c6-4955-4f6e-8637-ed77c9d4b389">OSSZ-2025-014 — Amina Cissé</option>
+                                                            <option value="eef76f6c-f98a-41b9-a03f-6957c177d9c6">OSSZ-2025-009 — John Doe</option>
+                                                    </select>
+                                            </div>
+
+                    
+                    <template x-if="order">
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-3 rounded-lg border bg-muted/30 p-4">
+                            <div>
+                                <p class="text-xs font-medium text-muted-foreground uppercase tracking-wide">Customer</p>
+                                <p class="text-sm font-medium mt-0.5" x-text="order.customerName"></p>
+                            </div>
+                            <div>
+                                <p class="text-xs font-medium text-muted-foreground uppercase tracking-wide">Phone</p>
+                                <p class="text-sm mt-0.5" x-text="order.customerPhone || '—'"></p>
+                            </div>
+                            <div>
+                                <p class="text-xs font-medium text-muted-foreground uppercase tracking-wide">Order date</p>
+                                <p class="text-sm mt-0.5" x-text="order.orderDate"></p>
+                            </div>
+                            <div>
+                                <p class="text-xs font-medium text-muted-foreground uppercase tracking-wide">Expected delivery</p>
+                                <p class="text-sm mt-0.5" x-text="order.expectedDelivery"></p>
+                            </div>
+                            <div>
+                                <p class="text-xs font-medium text-muted-foreground uppercase tracking-wide">Priority</p>
+                                <div class="mt-1">
+                                    <span class="inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap"
+                                          :class="priorityClasses[order.priority] || ''"
+                                          x-text="priorityLabels[order.priority] || order.priority"></span>
+                                </div>
+                            </div>
+                            <div>
+                                <p class="text-xs font-medium text-muted-foreground uppercase tracking-wide">Pieces</p>
+                                <p class="text-sm mt-0.5" x-text="order.pieceCount"></p>
+                            </div>
+                            <div class="col-span-2 md:col-span-3">
+                                <p class="text-xs font-medium text-muted-foreground uppercase tracking-wide">Order instructions</p>
+                                <p class="text-sm mt-0.5 whitespace-pre-wrap" x-text="order.instructions || '—'"></p>
+                            </div>
+                            <div class="col-span-2 md:col-span-3">
+                                <p class="text-xs font-medium text-muted-foreground uppercase tracking-wide">Existing tasks on this order</p>
+                                <p class="text-sm mt-0.5" x-text="existingSummary(order)"></p>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            
+            <div class="rounded-xl border bg-card text-card-foreground shadow-sm mb-4">
+                <div class="flex items-center justify-between gap-2 border-b p-6 pb-3">
+                    <h2 class="font-semibold text-base">Garment pieces</h2>
+                    <button type="button" @click="addPiece()"
+                            class="inline-flex items-center justify-center gap-1.5 rounded-md text-xs font-medium h-8 px-3 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                        Add Piece
+                    </button>
+                </div>
+                <div class="p-6 pt-4 space-y-4">
+                    <template x-for="(piece, index) in pieces" :key="index">
+                        <div class="rounded-lg border p-4 space-y-3">
+                            <div class="flex items-center justify-between">
+                                <p class="text-sm font-semibold" x-text="templates.pieceNumber.replace('{number}', index + 1)"></p>
+                                <template x-if="pieces.length > 1">
+                                    <button type="button" @click="removePiece(index)"
+                                            :aria-label="templates.removePiece.replace('{number}', index + 1)"
+                                            class="inline-flex items-center justify-center size-8 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+                                    </button>
+                                </template>
+                            </div>
+
+                            <div class="grid gap-3 sm:grid-cols-2">
+                                <div class="space-y-1.5 sm:col-span-2">
+                                    <label class="text-sm font-medium leading-none" :for="'piece-' + index">Garment piece name *</label>
+                                    <input type="text" :id="'piece-' + index" x-model="piece.garmentPiece" required
+                                           :name="'pieces[' + index + '][garmentPiece]'"
+                                           :placeholder="templates.pieceNamePlaceholder"
+                                           class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                                    <p x-show="errorsByIndex[index]" x-text="errorsByIndex[index]" class="text-xs text-destructive"></p>
+                                </div>
+
+                                <div class="space-y-1.5">
+                                    <label class="text-sm font-medium leading-none" :for="'category-' + index">Category</label>
+                                    <select :id="'category-' + index" x-model="piece.category"
+                                            :name="'pieces[' + index + '][category]'"
+                                            :aria-label="templates.categoryForPiece.replace('{number}', index + 1)"
+                                            class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                                                                                    <option value="FULL">Full Production</option>
+                                                                                    <option value="CUTTING">Cutting Only</option>
+                                                                                    <option value="SEWING">Sewing/Stitching Only</option>
+                                                                                    <option value="FINISHING">Finishing</option>
+                                                                                    <option value="IRONING">Ironing Only</option>
+                                                                                    <option value="OTHER">Other Activity</option>
+                                                                            </select>
+                                </div>
+
+                                <div class="space-y-1.5">
+                                    <label class="text-sm font-medium leading-none" :for="'staff-' + index">Assigned staff</label>
+                                    <select :id="'staff-' + index" x-model="piece.staffId"
+                                            :name="'pieces[' + index + '][staffId]'"
+                                            :aria-label="templates.staffForPiece.replace('{number}', index + 1)"
+                                            class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                                        <option value="">Leave unassigned</option>
+                                                                                    <option value="9d021fb4-9b45-4888-8a52-efe93ae1876c">Hamidou Abdoul (2 active)</option>
+                                                                                    <option value="a4ee2330-0adc-4b6c-a982-f3172fff059d">Lawal Sani (1 active)</option>
+                                                                                    <option value="5a7833ca-1d5e-4a7d-975c-85c1dbc489a5">Ngozi Okafor (0 active)</option>
+                                                                            </select>
+                                </div>
+
+                                <div class="space-y-1.5">
+                                    <label class="text-sm font-medium leading-none" :for="'priority-' + index">Priority</label>
+                                    <select :id="'priority-' + index" x-model="piece.priority"
+                                            :name="'pieces[' + index + '][priority]'"
+                                            :aria-label="templates.priorityForPiece.replace('{number}', index + 1)"
+                                            class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                                                                                    <option value="LOW">Low</option>
+                                                                                    <option value="NORMAL">Normal</option>
+                                                                                    <option value="HIGH">High</option>
+                                                                                    <option value="URGENT">Urgent</option>
+                                                                            </select>
+                                </div>
+
+                                <div class="space-y-1.5">
+                                    <label class="text-sm font-medium leading-none" :for="'deadline-' + index">Deadline</label>
+                                    <input type="datetime-local" :id="'deadline-' + index" x-model="piece.deadline"
+                                           :name="'pieces[' + index + '][deadline]'"
+                                           class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                                </div>
+
+                                <div class="space-y-1.5 sm:col-span-2">
+                                    <label class="text-sm font-medium leading-none" :for="'instructions-' + index">Instructions (optional)</label>
+                                    <textarea :id="'instructions-' + index" x-model="piece.instructions"
+                                              :name="'pieces[' + index + '][instructions]'"
+                                              :placeholder="templates.instructionsPlaceholder"
+                                              class="flex min-h-20 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pb-2">
+                <p class="text-sm text-muted-foreground"
+                   x-text="(pieces.length === 1 ? templates.summaryOne : templates.summaryMany).replace('{count}', pieces.length).replace('{order}', order !== null ? order.orderNumber : '—')"></p>
+                <div class="flex gap-2">
+                    <a href="https://atelier.osszcollection.com/tasks"
+                       class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm font-medium h-9 px-4 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground transition-colors">
+                        Cancel
+                    </a>
+                    <button type="submit" :disabled="selectedId === ''"
+                            class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm font-medium h-9 px-4 bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors disabled:pointer-events-none disabled:opacity-50">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+                        <span x-text="(pieces.length === 1 ? templates.createOne : templates.createMany).replace('{count}', pieces.length)"></span>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+            </main>
+
+            
+            <footer class="mt-auto border-t bg-background">
+                <div class="max-w-[1400px] mx-auto px-4 sm:px-6 py-3 flex flex-col sm:flex-row items-center justify-between gap-1 text-xs text-muted-foreground" style="padding-bottom: max(0.75rem, env(safe-area-inset-bottom));">
+                    <p>© 2026 OSSZ Atelier — Independent Production Management System</p>
+                    <p>Own database · Own accounts · atelier.osszcollection.com</p>
+                </div>
+            </footer>
+        </div>
+    </div>
+</div>
+
+
+
+
+</body>
+</html>

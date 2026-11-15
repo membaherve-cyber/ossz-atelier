@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="whVIN4xNwUPquotyerAIbdB9tYLUJDQSI9fOraRY">
+    <title>Dashboard — OSSZ ATELIER</title>
+    <link rel="stylesheet" href="/css/app.css">
+    <script src="/js/alpine.min.js" defer></script>
+    <style>[x-cloak]{display:none !important;}</style>
+</head>
+<body class="bg-background text-foreground antialiased">
+
+<div class="min-h-screen flex flex-col bg-background" x-data="{ nav: false }" @keydown.escape.window="nav = false">
+    <div class="flex flex-1 min-h-0">
+
+        
+        
+        
+        <aside class="hidden lg:flex w-60 shrink-0 flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border sticky top-0 h-screen">
+            <div class="flex items-center justify-center px-5 h-16 border-b border-sidebar-border">
+                <div class="text-center min-w-0">
+                    <p class="font-display font-bold leading-none">OSSZ ATELIER</p>
+                    <p class="text-[9px] tracking-[0.2em] text-stone-400 mt-1.5">PRODUCTION MGMT</p>
+                </div>
+            </div>
+            <div class="flex-1 overflow-y-auto">
+                <nav class="flex flex-col gap-5 px-3 py-4" aria-label="Main navigation">
+                                            <div>
+                            <p class="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-stone-400">Overview</p>
+                            <div class="flex flex-col gap-0.5">
+                                                                    <a href="https://atelier.osszcollection.com" @click="nav = false" aria-current="page" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left bg-sidebar-primary/20 text-sidebar-primary">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+                                        <span class="truncate">Dashboard</span>
+                                    </a>
+                                                            </div>
+                        </div>
+                                            <div>
+                            <p class="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-stone-400">Production</p>
+                            <div class="flex flex-col gap-0.5">
+                                                                    <a href="https://atelier.osszcollection.com/tasks" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/></svg>
+                                        <span class="truncate">Production</span>
+                                    </a>
+                                                                    <a href="https://atelier.osszcollection.com/tasks/create" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg>
+                                        <span class="truncate">Create Tasks</span>
+                                    </a>
+                                                                    <a href="https://atelier.osszcollection.com/orders" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+                                        <span class="truncate">Orders</span>
+                                    </a>
+                                                                    <a href="https://atelier.osszcollection.com/customers" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                                        <span class="truncate">Customers</span>
+                                    </a>
+                                                            </div>
+                        </div>
+                                            <div>
+                            <p class="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-stone-400">Insights</p>
+                            <div class="flex flex-col gap-0.5">
+                                                                    <a href="https://atelier.osszcollection.com/performance" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+                                        <span class="truncate">Performance</span>
+                                    </a>
+                                                                    <a href="https://atelier.osszcollection.com/incentives" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5"/></svg>
+                                        <span class="truncate">Incentives</span>
+                                    </a>
+                                                                    <a href="https://atelier.osszcollection.com/reports" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M8 13v2"/><path d="M12 13v4"/><path d="M16 13v2"/></svg>
+                                        <span class="truncate">Reports</span>
+                                    </a>
+                                                            </div>
+                        </div>
+                                            <div>
+                            <p class="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-stone-400">Administration</p>
+                            <div class="flex flex-col gap-0.5">
+                                                                    <a href="https://atelier.osszcollection.com/users" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/><path d="M8 10v4"/><path d="M12 10v2"/><path d="M16 10v4"/></svg>
+                                        <span class="truncate">Staff Accounts</span>
+                                    </a>
+                                                                    <a href="https://atelier.osszcollection.com/stages" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="M20 7h-9"/><path d="M14 17H5"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/></svg>
+                                        <span class="truncate">Production Stages</span>
+                                    </a>
+                                                            </div>
+                        </div>
+                                    </nav>
+            </div>
+            <div class="p-4 border-t border-sidebar-border text-[11px] text-stone-500">
+                Independent production system
+            </div>
+        </aside>
+
+        
+        
+        
+        <div x-show="nav" x-cloak x-transition.opacity.duration.200ms class="fixed inset-0 z-40 bg-black/60 lg:hidden" @click="nav = false" aria-hidden="true"></div>
+        <aside id="mobile-nav" x-show="nav" x-cloak
+               x-transition:enter="transition ease-out duration-200"
+               x-transition:enter-start="-translate-x-full"
+               x-transition:enter-end="translate-x-0"
+               x-transition:leave="transition ease-in duration-150"
+               x-transition:leave-start="translate-x-0"
+               x-transition:leave-end="-translate-x-full"
+               class="fixed left-0 top-0 z-50 h-full w-72 max-w-[85vw] flex flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border lg:hidden"
+               role="dialog" aria-modal="true" aria-label="Navigation">
+            <div class="relative flex items-center justify-center px-5 h-16 border-b border-sidebar-border">
+                <div class="text-center min-w-0">
+                    <p class="font-display font-bold leading-none">OSSZ ATELIER</p>
+                    <p class="text-[9px] tracking-[0.2em] text-stone-400 mt-1.5">PRODUCTION MGMT</p>
+                </div>
+                <button type="button" @click="nav = false" class="absolute right-3 inline-flex items-center justify-center size-8 rounded-md text-stone-400 hover:text-white hover:bg-white/5 transition-colors" aria-label="Close">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                </button>
+            </div>
+            <nav class="flex-1 overflow-y-auto flex flex-col gap-5 px-3 py-4" aria-label="Main navigation">
+                                    <div>
+                        <p class="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-stone-400">Overview</p>
+                        <div class="flex flex-col gap-0.5">
+                                                            <a href="https://atelier.osszcollection.com" @click="nav = false" aria-current="page" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left bg-sidebar-primary/20 text-sidebar-primary">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+                                    <span class="truncate">Dashboard</span>
+                                </a>
+                                                    </div>
+                    </div>
+                                    <div>
+                        <p class="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-stone-400">Production</p>
+                        <div class="flex flex-col gap-0.5">
+                                                            <a href="https://atelier.osszcollection.com/tasks" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/></svg>
+                                    <span class="truncate">Production</span>
+                                </a>
+                                                            <a href="https://atelier.osszcollection.com/tasks/create" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg>
+                                    <span class="truncate">Create Tasks</span>
+                                </a>
+                                                            <a href="https://atelier.osszcollection.com/orders" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+                                    <span class="truncate">Orders</span>
+                                </a>
+                                                            <a href="https://atelier.osszcollection.com/customers" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                                    <span class="truncate">Customers</span>
+                                </a>
+                                                    </div>
+                    </div>
+                                    <div>
+                        <p class="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-stone-400">Insights</p>
+                        <div class="flex flex-col gap-0.5">
+                                                            <a href="https://atelier.osszcollection.com/performance" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+                                    <span class="truncate">Performance</span>
+                                </a>
+                                                            <a href="https://atelier.osszcollection.com/incentives" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5"/></svg>
+                                    <span class="truncate">Incentives</span>
+                                </a>
+                                                            <a href="https://atelier.osszcollection.com/reports" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M8 13v2"/><path d="M12 13v4"/><path d="M16 13v2"/></svg>
+                                    <span class="truncate">Reports</span>
+                                </a>
+                                                    </div>
+                    </div>
+                                    <div>
+                        <p class="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-stone-400">Administration</p>
+                        <div class="flex flex-col gap-0.5">
+                                                            <a href="https://atelier.osszcollection.com/users" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/><path d="M8 10v4"/><path d="M12 10v2"/><path d="M16 10v4"/></svg>
+                                    <span class="truncate">Staff Accounts</span>
+                                </a>
+                                                            <a href="https://atelier.osszcollection.com/stages" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="M20 7h-9"/><path d="M14 17H5"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/></svg>
+                                    <span class="truncate">Production Stages</span>
+                                </a>
+                                                    </div>
+                    </div>
+                            </nav>
+        </aside>
+
+        
+        
+        
+        <div class="flex-1 flex flex-col min-w-0">
+            <header class="sticky top-0 z-30 relative flex items-center gap-2 sm:gap-3 h-16 px-4 sm:px-6 border-b bg-background/95 backdrop-blur">
+                
+                <button type="button" class="lg:hidden inline-flex items-center justify-center size-9 -ml-1.5 rounded-md hover:bg-muted transition-colors" @click="nav = true" aria-label="Open menu" aria-controls="mobile-nav">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-5" aria-hidden="true"><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+                </button>
+
+                
+                <a href="https://atelier.osszcollection.com" aria-label="OSSZ Atelier logo — go to dashboard" class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 shrink-0 rounded-md max-[359px]:static max-[359px]:translate-x-0 max-[359px]:translate-y-0 max-[359px]:mx-auto">
+                    <img src="/img/ossz-logo.png" alt="OSSZ Atelier logo" class="h-7 sm:h-9 w-auto rounded-md ring-1 ring-black/10">
+                </a>
+
+                
+                <h1 class="hidden sm:block font-display text-lg font-semibold truncate min-w-0 max-w-[calc(50%-6.5rem)]">Dashboard</h1>
+
+                
+                <div class="ml-auto max-[359px]:ml-0 flex items-center gap-1 sm:gap-1.5">
+                    
+                    <div role="group" aria-label="Language" title="Changer de langue" class="flex items-center gap-0.5 rounded-full border bg-background p-0.5 select-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="hidden sm:block size-3.5 ml-1 text-muted-foreground" aria-hidden="true"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg>
+                        <a href="https://atelier.osszcollection.com/locale/en" class="rounded-full px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide transition-colors bg-primary text-primary-foreground" aria-current="true">EN</a>
+                        <a href="https://atelier.osszcollection.com/locale/fr" class="rounded-full px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide transition-colors text-muted-foreground hover:text-foreground">FR</a>
+                    </div>
+
+                    
+                    <a href="https://atelier.osszcollection.com/notifications" class="relative inline-flex items-center justify-center size-8 sm:size-9 rounded-md hover:bg-muted transition-colors" aria-label="Notifications">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 sm:size-5" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+                                                    <span class="absolute -top-0.5 -right-0.5 min-w-4.5 h-4.5 px-1 rounded-full bg-red-600 text-white text-[10px] font-bold flex items-center justify-center">2</span>
+                                            </a>
+
+                    
+                                            <div class="relative" x-data="{ open: false }">
+                            <button type="button" @click="open = !open" @click.outside="open = false" @keydown.escape.window="open = false" :aria-expanded="open.toString()" aria-haspopup="menu" aria-label="Account menu" class="flex items-center gap-2 rounded-full hover:bg-muted p-0 sm:p-1 sm:pr-2 transition-colors">
+                                <span class="flex items-center justify-center size-8 rounded-full bg-primary/10 text-primary text-xs font-semibold">DN</span>
+                                <span class="hidden sm:block text-left">
+                                    <span class="block text-sm font-medium leading-none">David Nkeng</span>
+                                    <span class="block text-[11px] text-muted-foreground mt-0.5">USR-002 · Admin</span>
+                                </span>
+                            </button>
+                            <div x-show="open" x-cloak
+                                 x-transition:enter="transition ease-out duration-100"
+                                 x-transition:enter-start="opacity-0 scale-95"
+                                 x-transition:enter-end="opacity-100 scale-100"
+                                 x-transition:leave="transition ease-in duration-75"
+                                 x-transition:leave-start="opacity-100 scale-100"
+                                 x-transition:leave-end="opacity-0 scale-95"
+                                 class="absolute right-0 mt-2 w-60 rounded-lg border bg-card shadow-lg py-1 z-50" role="menu">
+                                <div class="px-3 py-2">
+                                    <p class="text-sm font-medium">David Nkeng</p>
+                                    <p class="text-xs text-muted-foreground font-normal truncate">admin@atelier.com</p>
+                                    <p class="text-xs text-muted-foreground font-normal mt-0.5">Admin</p>
+                                                                            <p class="text-xs text-muted-foreground font-normal mt-0.5 font-mono">USR-002</p>
+                                                                    </div>
+                                <div class="h-px bg-border my-1"></div>
+                                <form method="POST" action="https://atelier.osszcollection.com/logout">
+                                    <input type="hidden" name="_token" value="whVIN4xNwUPquotyerAIbdB9tYLUJDQSI9fOraRY" autocomplete="off">                                    <button type="submit" role="menuitem" class="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-700 hover:bg-muted transition-colors">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+                                        Sign out
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                                    </div>
+            </header>
+
+            <main class="flex-1 px-4 sm:px-6 py-6 w-full max-w-[1400px] mx-auto">
+                    
+            
+        
+        
+        
+        <div>
+            
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                <div>
+                    <h1 class="font-display text-2xl font-bold tracking-tight">Admin Dashboard</h1>
+                    <p class="text-sm text-muted-foreground mt-0.5">Complete production overview across all registered orders and staff.</p>
+                </div>
+                <div class="flex flex-wrap items-center gap-2">
+                    <a href="https://atelier.osszcollection.com/tasks/create" class="inline-flex items-center gap-1.5 h-8 px-3 rounded-md bg-primary text-primary-foreground text-sm font-medium shadow-sm hover:bg-primary/90 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 text-primary" aria-hidden="true"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/></svg>
+                        Create Tasks
+                    </a>
+                </div>
+            </div>
+
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+                                    <div class="relative rounded-lg border bg-card p-4 shadow-sm cursor-pointer hover:shadow-md hover:border-primary/40 transition-all">
+                        <a href="https://atelier.osszcollection.com/orders" class="absolute inset-0 rounded-lg" aria-label="Registered Orders"><span class="sr-only">Registered Orders</span></a>
+                        <div class="flex items-start justify-between gap-2">
+                            <div class="min-w-0">
+                                <p class="text-xs font-medium text-muted-foreground uppercase tracking-wide truncate">Registered Orders</p>
+                                <p class="text-2xl font-bold mt-1 tabular-nums text-foreground">4</p>
+                            </div>
+                            <div class="shrink-0 rounded-lg bg-primary/10 p-2"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 text-primary" aria-hidden="true"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg></div>
+                        </div>
+                    </div>
+                                    <div class="relative rounded-lg border bg-card p-4 shadow-sm cursor-pointer hover:shadow-md hover:border-primary/40 transition-all">
+                        <a href="https://atelier.osszcollection.com/tasks" class="absolute inset-0 rounded-lg" aria-label="Active Tasks"><span class="sr-only">Active Tasks</span></a>
+                        <div class="flex items-start justify-between gap-2">
+                            <div class="min-w-0">
+                                <p class="text-xs font-medium text-muted-foreground uppercase tracking-wide truncate">Active Tasks</p>
+                                <p class="text-2xl font-bold mt-1 tabular-nums text-teal-700">5</p>
+                            </div>
+                            <div class="shrink-0 rounded-lg bg-primary/10 p-2"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 text-primary" aria-hidden="true"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/></svg></div>
+                        </div>
+                    </div>
+                                    <div class="relative rounded-lg border bg-card p-4 shadow-sm cursor-pointer hover:shadow-md hover:border-primary/40 transition-all">
+                        <a href="https://atelier.osszcollection.com/tasks" class="absolute inset-0 rounded-lg" aria-label="Unassigned"><span class="sr-only">Unassigned</span></a>
+                        <div class="flex items-start justify-between gap-2">
+                            <div class="min-w-0">
+                                <p class="text-xs font-medium text-muted-foreground uppercase tracking-wide truncate">Unassigned</p>
+                                <p class="text-2xl font-bold mt-1 tabular-nums text-amber-700">2</p>
+                            </div>
+                            <div class="shrink-0 rounded-lg bg-primary/10 p-2"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 text-primary" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></div>
+                        </div>
+                    </div>
+                                    <div class="relative rounded-lg border bg-card p-4 shadow-sm cursor-pointer hover:shadow-md hover:border-primary/40 transition-all">
+                        <a href="https://atelier.osszcollection.com/tasks" class="absolute inset-0 rounded-lg" aria-label="Ongoing"><span class="sr-only">Ongoing</span></a>
+                        <div class="flex items-start justify-between gap-2">
+                            <div class="min-w-0">
+                                <p class="text-xs font-medium text-muted-foreground uppercase tracking-wide truncate">Ongoing</p>
+                                <p class="text-2xl font-bold mt-1 tabular-nums text-foreground">3</p>
+                            </div>
+                            <div class="shrink-0 rounded-lg bg-primary/10 p-2"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 text-primary" aria-hidden="true"><line x1="12" x2="12" y1="2" y2="6"/><line x1="12" x2="12" y1="18" y2="22"/><line x1="4.93" x2="7.76" y1="4.93" y2="7.76"/><line x1="16.24" x2="19.07" y1="16.24" y2="19.07"/><line x1="2" x2="6" y1="12" y2="12"/><line x1="18" x2="22" y1="12" y2="12"/><line x1="4.93" x2="7.76" y1="19.07" y2="16.24"/><line x1="16.24" x2="19.07" y1="7.76" y2="4.93"/></svg></div>
+                        </div>
+                    </div>
+                                    <div class="relative rounded-lg border bg-card p-4 shadow-sm cursor-pointer hover:shadow-md hover:border-primary/40 transition-all">
+                        <a href="https://atelier.osszcollection.com/tasks" class="absolute inset-0 rounded-lg" aria-label="Awaiting Inspection"><span class="sr-only">Awaiting Inspection</span></a>
+                        <div class="flex items-start justify-between gap-2">
+                            <div class="min-w-0">
+                                <p class="text-xs font-medium text-muted-foreground uppercase tracking-wide truncate">Awaiting Inspection</p>
+                                <p class="text-2xl font-bold mt-1 tabular-nums text-amber-700">0</p>
+                            </div>
+                            <div class="shrink-0 rounded-lg bg-primary/10 p-2"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 text-primary" aria-hidden="true"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg></div>
+                        </div>
+                    </div>
+                                    <div class="relative rounded-lg border bg-card p-4 shadow-sm cursor-pointer hover:shadow-md hover:border-primary/40 transition-all">
+                        <a href="https://atelier.osszcollection.com/tasks" class="absolute inset-0 rounded-lg" aria-label="Ready for Pickup"><span class="sr-only">Ready for Pickup</span></a>
+                        <div class="flex items-start justify-between gap-2">
+                            <div class="min-w-0">
+                                <p class="text-xs font-medium text-muted-foreground uppercase tracking-wide truncate">Ready for Pickup</p>
+                                <p class="text-2xl font-bold mt-1 tabular-nums text-emerald-700">0</p>
+                            </div>
+                            <div class="shrink-0 rounded-lg bg-primary/10 p-2"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 text-primary" aria-hidden="true"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></div>
+                        </div>
+                    </div>
+                                    <div class="relative rounded-lg border bg-card p-4 shadow-sm cursor-pointer hover:shadow-md hover:border-primary/40 transition-all">
+                        <a href="https://atelier.osszcollection.com/tasks" class="absolute inset-0 rounded-lg" aria-label="Delivered"><span class="sr-only">Delivered</span></a>
+                        <div class="flex items-start justify-between gap-2">
+                            <div class="min-w-0">
+                                <p class="text-xs font-medium text-muted-foreground uppercase tracking-wide truncate">Delivered</p>
+                                <p class="text-2xl font-bold mt-1 tabular-nums text-foreground">4</p>
+                            </div>
+                            <div class="shrink-0 rounded-lg bg-primary/10 p-2"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 text-primary" aria-hidden="true"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></svg></div>
+                        </div>
+                    </div>
+                                    <div class="relative rounded-lg border bg-card p-4 shadow-sm cursor-pointer hover:shadow-md hover:border-primary/40 transition-all">
+                        <a href="https://atelier.osszcollection.com/tasks" class="absolute inset-0 rounded-lg" aria-label="Blocked"><span class="sr-only">Blocked</span></a>
+                        <div class="flex items-start justify-between gap-2">
+                            <div class="min-w-0">
+                                <p class="text-xs font-medium text-muted-foreground uppercase tracking-wide truncate">Blocked</p>
+                                <p class="text-2xl font-bold mt-1 tabular-nums text-foreground">0</p>
+                            </div>
+                            <div class="shrink-0 rounded-lg bg-primary/10 p-2"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 text-primary" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/></svg></div>
+                        </div>
+                    </div>
+                            </div>
+
+            
+            <div class="grid lg:grid-cols-2 gap-4 mb-4">
+                <section class="rounded-lg border bg-card shadow-sm">
+                    <div class="flex items-center justify-between gap-2 p-4 sm:p-6 pb-3">
+                        <h2 class="font-semibold text-base">Overdue Tasks</h2>
+                        <a href="https://atelier.osszcollection.com/tasks" class="inline-flex items-center h-7 px-2.5 rounded-md text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors">Production board</a>
+                    </div>
+                    <div class="p-4 sm:p-6 pt-0">
+                                                    <div class="divide-y rounded-lg border overflow-x-auto">
+                                                                                                        <a href="https://atelier.osszcollection.com/tasks/39f03973-1709-485f-9986-03c788cbab42" class="w-full flex items-center justify-between gap-3 px-4 py-2.5 text-left hover:bg-muted/50 transition-colors min-w-[420px]">
+                                        <div class="min-w-0">
+                                            <p class="text-sm font-medium truncate">TASK-0003 — Vest</p>
+                                            <p class="text-xs text-muted-foreground truncate">
+                                                OSSZ-2026-001 · John Doe · Lawal Sani
+                                            </p>
+                                        </div>
+                                        <div class="flex items-center gap-3 shrink-0">
+                                            <div class="flex items-center gap-2 min-w-28 w-28">
+                                                <div class="h-2 flex-1 rounded-full bg-muted overflow-hidden">
+                                                    <div class="h-full rounded-full bg-primary" style="width: 30%"></div>
+                                                </div>
+                                                <span class="text-xs font-semibold tabular-nums w-9 text-right ">30%</span>
+                                            </div>
+                                                                                            <span class="inline-flex items-center gap-1 text-sm whitespace-nowrap text-red-700 font-semibold">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3.5" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+                                                    Nov 13, 2026
+                                                </span>
+                                                                                    </div>
+                                    </a>
+                                                            </div>
+                                            </div>
+                </section>
+
+                <section class="rounded-lg border bg-card shadow-sm">
+                    <div class="flex items-center justify-between gap-2 p-4 sm:p-6 pb-3">
+                        <h2 class="font-semibold text-base">Due in the Next 7 Days</h2>
+                    </div>
+                    <div class="p-4 sm:p-6 pt-0">
+                                                    <div class="flex flex-col items-center justify-center gap-2 py-12 px-4 text-center">
+                                <div class="rounded-full bg-muted p-3"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-6 text-muted-foreground" aria-hidden="true"><path d="M21 7.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3.5"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h5"/><path d="M17.5 17.5 16 16.3V14"/><circle cx="16" cy="16" r="6"/></svg></div>
+                                <p class="font-medium">No imminent deadlines</p>
+                                <p class="text-sm text-muted-foreground max-w-sm">No tasks are due within the next seven days.</p>
+                            </div>
+                                            </div>
+                </section>
+            </div>
+
+            
+            <div class="grid lg:grid-cols-2 gap-4">
+                <section class="rounded-lg border bg-card shadow-sm">
+                    <div class="flex items-center justify-between gap-2 p-4 sm:p-6 pb-3">
+                        <h2 class="font-semibold text-base">Staff Workload (Active Tasks)</h2>
+                    </div>
+                    <div class="p-4 sm:p-6 pt-0">
+                                                    <div class="divide-y rounded-lg border max-h-96 overflow-y-auto">
+                                                                    <div class="flex items-center justify-between gap-3 px-4 py-2.5">
+                                        <div class="min-w-0">
+                                            <p class="text-sm font-medium truncate">Aminata Sow</p>
+                                            <p class="text-xs text-muted-foreground truncate">USR-001</p>
+                                        </div>
+                                        <span class="rounded-full bg-primary/10 text-primary text-sm font-bold px-2.5 py-0.5 tabular-nums shrink-0">0</span>
+                                    </div>
+                                                                    <div class="flex items-center justify-between gap-3 px-4 py-2.5">
+                                        <div class="min-w-0">
+                                            <p class="text-sm font-medium truncate">David Nkeng</p>
+                                            <p class="text-xs text-muted-foreground truncate">USR-002</p>
+                                        </div>
+                                        <span class="rounded-full bg-primary/10 text-primary text-sm font-bold px-2.5 py-0.5 tabular-nums shrink-0">0</span>
+                                    </div>
+                                                                    <div class="flex items-center justify-between gap-3 px-4 py-2.5">
+                                        <div class="min-w-0">
+                                            <p class="text-sm font-medium truncate">Hamidou Abdoul</p>
+                                            <p class="text-xs text-muted-foreground truncate">USR-003</p>
+                                        </div>
+                                        <span class="rounded-full bg-primary/10 text-primary text-sm font-bold px-2.5 py-0.5 tabular-nums shrink-0">2</span>
+                                    </div>
+                                                                    <div class="flex items-center justify-between gap-3 px-4 py-2.5">
+                                        <div class="min-w-0">
+                                            <p class="text-sm font-medium truncate">Lawal Sani</p>
+                                            <p class="text-xs text-muted-foreground truncate">USR-004</p>
+                                        </div>
+                                        <span class="rounded-full bg-primary/10 text-primary text-sm font-bold px-2.5 py-0.5 tabular-nums shrink-0">1</span>
+                                    </div>
+                                                                    <div class="flex items-center justify-between gap-3 px-4 py-2.5">
+                                        <div class="min-w-0">
+                                            <p class="text-sm font-medium truncate">Ngozi Okafor</p>
+                                            <p class="text-xs text-muted-foreground truncate">USR-005</p>
+                                        </div>
+                                        <span class="rounded-full bg-primary/10 text-primary text-sm font-bold px-2.5 py-0.5 tabular-nums shrink-0">0</span>
+                                    </div>
+                                                            </div>
+                                            </div>
+                </section>
+
+                <section class="rounded-lg border bg-card shadow-sm">
+                    <div class="flex items-center justify-between gap-2 p-4 sm:p-6 pb-3">
+                        <h2 class="font-semibold text-base">Recent Activity</h2>
+                    </div>
+                    <div class="p-4 sm:p-6 pt-0">
+                                                    <div class="divide-y rounded-lg border max-h-80 overflow-y-auto">
+                                                                                                        <div class="flex items-center gap-3 px-4 py-2.5">
+                                        <div class="min-w-0 flex-1">
+                                            <p class="text-sm truncate">
+                                                <span class="font-medium">David Nkeng</span>
+                                                <span class="text-muted-foreground"> — Login successful</span>
+                                            </p>
+                                            <p class="text-xs text-muted-foreground truncate">USER</p>
+                                        </div>
+                                        <span class="text-xs text-muted-foreground shrink-0 whitespace-nowrap">5 hours ago</span>
+                                    </div>
+                                                                                                        <div class="flex items-center gap-3 px-4 py-2.5">
+                                        <div class="min-w-0 flex-1">
+                                            <p class="text-sm truncate">
+                                                <span class="font-medium">Hamidou Abdoul</span>
+                                                <span class="text-muted-foreground"> — Login successful</span>
+                                            </p>
+                                            <p class="text-xs text-muted-foreground truncate">USER</p>
+                                        </div>
+                                        <span class="text-xs text-muted-foreground shrink-0 whitespace-nowrap">5 hours ago</span>
+                                    </div>
+                                                                                                        <div class="flex items-center gap-3 px-4 py-2.5">
+                                        <div class="min-w-0 flex-1">
+                                            <p class="text-sm truncate">
+                                                <span class="font-medium">David Nkeng</span>
+                                                <span class="text-muted-foreground"> — Customer created</span>
+                                            </p>
+                                            <p class="text-xs text-muted-foreground truncate">CUSTOMER</p>
+                                        </div>
+                                        <span class="text-xs text-muted-foreground shrink-0 whitespace-nowrap">6 hours ago</span>
+                                    </div>
+                                                                                                        <div class="flex items-center gap-3 px-4 py-2.5">
+                                        <div class="min-w-0 flex-1">
+                                            <p class="text-sm truncate">
+                                                <span class="font-medium">David Nkeng</span>
+                                                <span class="text-muted-foreground"> — Login successful</span>
+                                            </p>
+                                            <p class="text-xs text-muted-foreground truncate">USER</p>
+                                        </div>
+                                        <span class="text-xs text-muted-foreground shrink-0 whitespace-nowrap">6 hours ago</span>
+                                    </div>
+                                                                                                        <div class="flex items-center gap-3 px-4 py-2.5">
+                                        <div class="min-w-0 flex-1">
+                                            <p class="text-sm truncate">
+                                                <span class="font-medium">Aminata Sow</span>
+                                                <span class="text-muted-foreground"> — Login successful</span>
+                                            </p>
+                                            <p class="text-xs text-muted-foreground truncate">USER</p>
+                                        </div>
+                                        <span class="text-xs text-muted-foreground shrink-0 whitespace-nowrap">6 hours ago</span>
+                                    </div>
+                                                                                                        <div class="flex items-center gap-3 px-4 py-2.5">
+                                        <div class="min-w-0 flex-1">
+                                            <p class="text-sm truncate">
+                                                <span class="font-medium">Aminata Sow</span>
+                                                <span class="text-muted-foreground"> — Logout</span>
+                                            </p>
+                                            <p class="text-xs text-muted-foreground truncate">USER</p>
+                                        </div>
+                                        <span class="text-xs text-muted-foreground shrink-0 whitespace-nowrap">6 hours ago</span>
+                                    </div>
+                                                                                                        <div class="flex items-center gap-3 px-4 py-2.5">
+                                        <div class="min-w-0 flex-1">
+                                            <p class="text-sm truncate">
+                                                <span class="font-medium">Aminata Sow</span>
+                                                <span class="text-muted-foreground"> — Login successful</span>
+                                            </p>
+                                            <p class="text-xs text-muted-foreground truncate">USER</p>
+                                        </div>
+                                        <span class="text-xs text-muted-foreground shrink-0 whitespace-nowrap">6 hours ago</span>
+                                    </div>
+                                                                                                        <div class="flex items-center gap-3 px-4 py-2.5">
+                                        <div class="min-w-0 flex-1">
+                                            <p class="text-sm truncate">
+                                                <span class="font-medium">Aminata Sow</span>
+                                                <span class="text-muted-foreground"> — Login successful</span>
+                                            </p>
+                                            <p class="text-xs text-muted-foreground truncate">USER</p>
+                                        </div>
+                                        <span class="text-xs text-muted-foreground shrink-0 whitespace-nowrap">6 hours ago</span>
+                                    </div>
+                                                            </div>
+                                            </div>
+                </section>
+            </div>
+        </div>
+                </main>
+
+            
+            <footer class="mt-auto border-t bg-background">
+                <div class="max-w-[1400px] mx-auto px-4 sm:px-6 py-3 flex flex-col sm:flex-row items-center justify-between gap-1 text-xs text-muted-foreground" style="padding-bottom: max(0.75rem, env(safe-area-inset-bottom));">
+                    <p>© 2026 OSSZ Atelier — Independent Production Management System</p>
+                    <p>Own database · Own accounts · atelier.osszcollection.com</p>
+                </div>
+            </footer>
+        </div>
+    </div>
+</div>
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,831 @@
+                <h2 id="task-progress-title" class="font-semibold text-base">Progress &amp; Checklist</h2>
+            </div>
+            <div class="p-6 pt-4 space-y-4">
+                <div class="flex items-center gap-2 min-w-28">
+                    <div class="h-2 flex-1 rounded bg-muted overflow-hidden">
+                        <div class="h-full rounded transition-all bg-primary"
+                             style="width: 30%"></div>
+                    </div>
+                    <span class="text-xs font-semibold tabular-nums w-9 text-right">30%</span>
+                </div>
+                <p class="text-xs text-muted-foreground -mt-2">
+                    Current progress: <span class="font-semibold">30%</span>
+                </p>
+
+                                    <form method="POST" action="https://atelier.osszcollection.com/tasks/d479101f-23ec-4826-a048-0acee908e096/progress" class="rounded-lg border bg-muted/30 p-3 space-y-2">
+                        <input type="hidden" name="_token" value="dNzunr1u0Or0RPmvjYSF1yNP9NPtnIvIjrU6DnoG" autocomplete="off">                        <p class="text-sm font-medium">Update progress manually</p>
+                        <div class="flex flex-col sm:flex-row gap-2">
+                            <input type="number" name="value" min="0" max="100" step="1" inputmode="numeric" required
+                                   placeholder="30" aria-label="New progress percentage"
+                                   class="flex h-9 sm:w-28 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                            <input type="text" name="note" maxlength="500" placeholder="Optional note" aria-label="Progress note"
+                                   class="flex h-9 flex-1 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                            <button type="submit"
+                                    class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm font-medium h-9 px-4 bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors">
+                                Update
+                            </button>
+                        </div>
+                                                                            <p class="text-xs text-muted-foreground">Supervisor correction — manual values are recorded in the history with source &quot;Manual&quot;.</p>
+                                            </form>
+                
+                <div class="h-px bg-border" role="separator"></div>
+
+                
+                <form method="POST" action="https://atelier.osszcollection.com/tasks/d479101f-23ec-4826-a048-0acee908e096/stages"
+                      x-data='{
+                          saved: {"a2816ab5-5955-4967-a238-c17dda6b2e70":"COMPLETED","4dac9127-7603-476b-a2be-5288066a611f":"COMPLETED","5a7358fd-5c8f-4c12-8a01-6a714fe22fd6":"COMPLETED","b33947fc-de64-4c0a-902d-86df77476dd6":"COMPLETED","5c068d8a-7ae3-40cd-b7cd-3880ecb6b11c":"COMPLETED","cc8f6386-a24f-4eac-9bcd-5668aa630fe5":"IN_PROGRESS","ad551758-8aa7-404a-8e67-97e0d1d96492":"NOT_STARTED","60930782-4b0d-454a-bdda-35f1148571cf":"NOT_STARTED","89e65953-4f41-4f20-91b1-353596947bb5":"NOT_STARTED","4f50afc3-1cdf-4719-9e27-032ea66339dc":"NOT_STARTED","a9e63c5a-47d8-4586-849f-ba7ba2dbe146":"NOT_APPLICABLE","e7729a54-9d90-48fa-b48c-d3315b01c1dd":"NOT_APPLICABLE"},
+                          changes: {},
+                          comment: "",
+                          labels: {"NOT_STARTED":"Not Started","IN_PROGRESS":"In Progress","COMPLETED":"Completed","NOT_APPLICABLE":"Not Applicable"},
+                          templates: {"was":"was {state}","pendingOne":"1 pending change","pendingMany":"{count} pending changes"},
+                          setState(stageId, state) {
+                              if (this.saved[stageId] === state) {
+                                  delete this.changes[stageId];
+                              } else {
+                                  this.changes[stageId] = state;
+                              }
+                          },
+                          effective(stageId) {
+                              if (this.changes[stageId] !== undefined) {
+                                  return this.changes[stageId];
+                              }
+                              if (this.saved[stageId] !== undefined) {
+                                  return this.saved[stageId];
+                              }
+                              return "NOT_STARTED";
+                          },
+                          get changesCount() {
+                              return Object.keys(this.changes).length;
+                          },
+                          pendingBadge() {
+                              if (this.changesCount === 1) {
+                                  return this.templates.pendingOne;
+                              }
+                              return this.templates.pendingMany.replace("{count}", this.changesCount);
+                          },
+                          wasText(stageId) {
+                              var state = this.saved[stageId] !== undefined ? this.saved[stageId] : "NOT_STARTED";
+                              return this.templates.was.replace("{state}", this.labels[state] || state);
+                          },
+                          chipClass(state) {
+                              var map = {
+                                  NOT_STARTED: "bg-stone-100 text-stone-600",
+                                  IN_PROGRESS: "bg-amber-100 text-amber-800",
+                                  COMPLETED: "bg-emerald-100 text-emerald-800",
+                                  NOT_APPLICABLE: "bg-muted text-muted-foreground"
+                              };
+                              return map[state] || "";
+                          }
+                      }'>
+                    <input type="hidden" name="_token" value="dNzunr1u0Or0RPmvjYSF1yNP9NPtnIvIjrU6DnoG" autocomplete="off">
+                    <div class="flex items-center justify-between gap-2">
+                        <p class="text-sm font-medium">Production checklist</p>
+                        <template x-if="changesCount > 0">
+                            <span class="inline-flex items-center rounded-full border border-amber-300 bg-amber-50 text-amber-800 px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap"
+                                  x-text="pendingBadge()"></span>
+                        </template>
+                    </div>
+                    <p class="text-xs text-muted-foreground mt-0.5">
+                        Progress is recalculated from completed stages (in-progress counts half).
+                    </p>
+
+                                            <div class="mt-2 rounded-lg border divide-y">
+                                                                                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-4 py-3">
+                                    <div class="min-w-0">
+                                        <p class="text-sm font-medium flex items-center gap-2 flex-wrap">
+                                            Assigned
+                                                                                    </p>
+                                        <div class="mt-1 flex items-center gap-2 flex-wrap">
+                                            <span class="rounded-full px-2 py-0.5 text-xs font-medium"
+                                                  :class="chipClass(effective('a2816ab5-5955-4967-a238-c17dda6b2e70'))"
+                                                  x-text="labels[effective('a2816ab5-5955-4967-a238-c17dda6b2e70')] || effective('a2816ab5-5955-4967-a238-c17dda6b2e70')"></span>
+                                            <template x-if="changes['a2816ab5-5955-4967-a238-c17dda6b2e70'] !== undefined && changes['a2816ab5-5955-4967-a238-c17dda6b2e70'] !== saved['a2816ab5-5955-4967-a238-c17dda6b2e70']">
+                                                <span class="text-xs text-amber-700" x-text="wasText('a2816ab5-5955-4967-a238-c17dda6b2e70')"></span>
+                                            </template>
+                                        </div>
+                                    </div>
+
+                                                                            <div class="flex flex-wrap gap-1 shrink-0" role="group"
+                                             aria-label="State for Assigned">
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('a2816ab5-5955-4967-a238-c17dda6b2e70') === 'NOT_STARTED'"
+                                                        aria-label="Set Assigned to Not Started"
+                                                        @click="setState('a2816ab5-5955-4967-a238-c17dda6b2e70', 'NOT_STARTED')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('a2816ab5-5955-4967-a238-c17dda6b2e70') === 'NOT_STARTED'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    Not Started
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('a2816ab5-5955-4967-a238-c17dda6b2e70') === 'IN_PROGRESS'"
+                                                        aria-label="Set Assigned to In Progress"
+                                                        @click="setState('a2816ab5-5955-4967-a238-c17dda6b2e70', 'IN_PROGRESS')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('a2816ab5-5955-4967-a238-c17dda6b2e70') === 'IN_PROGRESS'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    In Progress
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('a2816ab5-5955-4967-a238-c17dda6b2e70') === 'COMPLETED'"
+                                                        aria-label="Set Assigned to Completed"
+                                                        @click="setState('a2816ab5-5955-4967-a238-c17dda6b2e70', 'COMPLETED')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('a2816ab5-5955-4967-a238-c17dda6b2e70') === 'COMPLETED'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    Completed
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('a2816ab5-5955-4967-a238-c17dda6b2e70') === 'NOT_APPLICABLE'"
+                                                        aria-label="Set Assigned to N/A"
+                                                        @click="setState('a2816ab5-5955-4967-a238-c17dda6b2e70', 'NOT_APPLICABLE')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('a2816ab5-5955-4967-a238-c17dda6b2e70') === 'NOT_APPLICABLE'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    N/A
+                                                </button>
+                                                                                    </div>
+                                                                    </div>
+                                                                                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-4 py-3">
+                                    <div class="min-w-0">
+                                        <p class="text-sm font-medium flex items-center gap-2 flex-wrap">
+                                            Ongoing
+                                                                                    </p>
+                                        <div class="mt-1 flex items-center gap-2 flex-wrap">
+                                            <span class="rounded-full px-2 py-0.5 text-xs font-medium"
+                                                  :class="chipClass(effective('4dac9127-7603-476b-a2be-5288066a611f'))"
+                                                  x-text="labels[effective('4dac9127-7603-476b-a2be-5288066a611f')] || effective('4dac9127-7603-476b-a2be-5288066a611f')"></span>
+                                            <template x-if="changes['4dac9127-7603-476b-a2be-5288066a611f'] !== undefined && changes['4dac9127-7603-476b-a2be-5288066a611f'] !== saved['4dac9127-7603-476b-a2be-5288066a611f']">
+                                                <span class="text-xs text-amber-700" x-text="wasText('4dac9127-7603-476b-a2be-5288066a611f')"></span>
+                                            </template>
+                                        </div>
+                                    </div>
+
+                                                                            <div class="flex flex-wrap gap-1 shrink-0" role="group"
+                                             aria-label="State for Ongoing">
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('4dac9127-7603-476b-a2be-5288066a611f') === 'NOT_STARTED'"
+                                                        aria-label="Set Ongoing to Not Started"
+                                                        @click="setState('4dac9127-7603-476b-a2be-5288066a611f', 'NOT_STARTED')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('4dac9127-7603-476b-a2be-5288066a611f') === 'NOT_STARTED'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    Not Started
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('4dac9127-7603-476b-a2be-5288066a611f') === 'IN_PROGRESS'"
+                                                        aria-label="Set Ongoing to In Progress"
+                                                        @click="setState('4dac9127-7603-476b-a2be-5288066a611f', 'IN_PROGRESS')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('4dac9127-7603-476b-a2be-5288066a611f') === 'IN_PROGRESS'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    In Progress
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('4dac9127-7603-476b-a2be-5288066a611f') === 'COMPLETED'"
+                                                        aria-label="Set Ongoing to Completed"
+                                                        @click="setState('4dac9127-7603-476b-a2be-5288066a611f', 'COMPLETED')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('4dac9127-7603-476b-a2be-5288066a611f') === 'COMPLETED'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    Completed
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('4dac9127-7603-476b-a2be-5288066a611f') === 'NOT_APPLICABLE'"
+                                                        aria-label="Set Ongoing to N/A"
+                                                        @click="setState('4dac9127-7603-476b-a2be-5288066a611f', 'NOT_APPLICABLE')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('4dac9127-7603-476b-a2be-5288066a611f') === 'NOT_APPLICABLE'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    N/A
+                                                </button>
+                                                                                    </div>
+                                                                    </div>
+                                                                                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-4 py-3">
+                                    <div class="min-w-0">
+                                        <p class="text-sm font-medium flex items-center gap-2 flex-wrap">
+                                            Cutting
+                                                                                    </p>
+                                        <div class="mt-1 flex items-center gap-2 flex-wrap">
+                                            <span class="rounded-full px-2 py-0.5 text-xs font-medium"
+                                                  :class="chipClass(effective('5a7358fd-5c8f-4c12-8a01-6a714fe22fd6'))"
+                                                  x-text="labels[effective('5a7358fd-5c8f-4c12-8a01-6a714fe22fd6')] || effective('5a7358fd-5c8f-4c12-8a01-6a714fe22fd6')"></span>
+                                            <template x-if="changes['5a7358fd-5c8f-4c12-8a01-6a714fe22fd6'] !== undefined && changes['5a7358fd-5c8f-4c12-8a01-6a714fe22fd6'] !== saved['5a7358fd-5c8f-4c12-8a01-6a714fe22fd6']">
+                                                <span class="text-xs text-amber-700" x-text="wasText('5a7358fd-5c8f-4c12-8a01-6a714fe22fd6')"></span>
+                                            </template>
+                                        </div>
+                                    </div>
+
+                                                                            <div class="flex flex-wrap gap-1 shrink-0" role="group"
+                                             aria-label="State for Cutting">
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('5a7358fd-5c8f-4c12-8a01-6a714fe22fd6') === 'NOT_STARTED'"
+                                                        aria-label="Set Cutting to Not Started"
+                                                        @click="setState('5a7358fd-5c8f-4c12-8a01-6a714fe22fd6', 'NOT_STARTED')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('5a7358fd-5c8f-4c12-8a01-6a714fe22fd6') === 'NOT_STARTED'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    Not Started
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('5a7358fd-5c8f-4c12-8a01-6a714fe22fd6') === 'IN_PROGRESS'"
+                                                        aria-label="Set Cutting to In Progress"
+                                                        @click="setState('5a7358fd-5c8f-4c12-8a01-6a714fe22fd6', 'IN_PROGRESS')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('5a7358fd-5c8f-4c12-8a01-6a714fe22fd6') === 'IN_PROGRESS'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    In Progress
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('5a7358fd-5c8f-4c12-8a01-6a714fe22fd6') === 'COMPLETED'"
+                                                        aria-label="Set Cutting to Completed"
+                                                        @click="setState('5a7358fd-5c8f-4c12-8a01-6a714fe22fd6', 'COMPLETED')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('5a7358fd-5c8f-4c12-8a01-6a714fe22fd6') === 'COMPLETED'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    Completed
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('5a7358fd-5c8f-4c12-8a01-6a714fe22fd6') === 'NOT_APPLICABLE'"
+                                                        aria-label="Set Cutting to N/A"
+                                                        @click="setState('5a7358fd-5c8f-4c12-8a01-6a714fe22fd6', 'NOT_APPLICABLE')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('5a7358fd-5c8f-4c12-8a01-6a714fe22fd6') === 'NOT_APPLICABLE'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    N/A
+                                                </button>
+                                                                                    </div>
+                                                                    </div>
+                                                                                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-4 py-3">
+                                    <div class="min-w-0">
+                                        <p class="text-sm font-medium flex items-center gap-2 flex-wrap">
+                                            Sewing/Stitching
+                                                                                    </p>
+                                        <div class="mt-1 flex items-center gap-2 flex-wrap">
+                                            <span class="rounded-full px-2 py-0.5 text-xs font-medium"
+                                                  :class="chipClass(effective('b33947fc-de64-4c0a-902d-86df77476dd6'))"
+                                                  x-text="labels[effective('b33947fc-de64-4c0a-902d-86df77476dd6')] || effective('b33947fc-de64-4c0a-902d-86df77476dd6')"></span>
+                                            <template x-if="changes['b33947fc-de64-4c0a-902d-86df77476dd6'] !== undefined && changes['b33947fc-de64-4c0a-902d-86df77476dd6'] !== saved['b33947fc-de64-4c0a-902d-86df77476dd6']">
+                                                <span class="text-xs text-amber-700" x-text="wasText('b33947fc-de64-4c0a-902d-86df77476dd6')"></span>
+                                            </template>
+                                        </div>
+                                    </div>
+
+                                                                            <div class="flex flex-wrap gap-1 shrink-0" role="group"
+                                             aria-label="State for Sewing/Stitching">
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('b33947fc-de64-4c0a-902d-86df77476dd6') === 'NOT_STARTED'"
+                                                        aria-label="Set Sewing/Stitching to Not Started"
+                                                        @click="setState('b33947fc-de64-4c0a-902d-86df77476dd6', 'NOT_STARTED')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('b33947fc-de64-4c0a-902d-86df77476dd6') === 'NOT_STARTED'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    Not Started
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('b33947fc-de64-4c0a-902d-86df77476dd6') === 'IN_PROGRESS'"
+                                                        aria-label="Set Sewing/Stitching to In Progress"
+                                                        @click="setState('b33947fc-de64-4c0a-902d-86df77476dd6', 'IN_PROGRESS')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('b33947fc-de64-4c0a-902d-86df77476dd6') === 'IN_PROGRESS'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    In Progress
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('b33947fc-de64-4c0a-902d-86df77476dd6') === 'COMPLETED'"
+                                                        aria-label="Set Sewing/Stitching to Completed"
+                                                        @click="setState('b33947fc-de64-4c0a-902d-86df77476dd6', 'COMPLETED')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('b33947fc-de64-4c0a-902d-86df77476dd6') === 'COMPLETED'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    Completed
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('b33947fc-de64-4c0a-902d-86df77476dd6') === 'NOT_APPLICABLE'"
+                                                        aria-label="Set Sewing/Stitching to N/A"
+                                                        @click="setState('b33947fc-de64-4c0a-902d-86df77476dd6', 'NOT_APPLICABLE')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('b33947fc-de64-4c0a-902d-86df77476dd6') === 'NOT_APPLICABLE'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    N/A
+                                                </button>
+                                                                                    </div>
+                                                                    </div>
+                                                                                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-4 py-3">
+                                    <div class="min-w-0">
+                                        <p class="text-sm font-medium flex items-center gap-2 flex-wrap">
+                                            Fitting
+                                                                                    </p>
+                                        <div class="mt-1 flex items-center gap-2 flex-wrap">
+                                            <span class="rounded-full px-2 py-0.5 text-xs font-medium"
+                                                  :class="chipClass(effective('5c068d8a-7ae3-40cd-b7cd-3880ecb6b11c'))"
+                                                  x-text="labels[effective('5c068d8a-7ae3-40cd-b7cd-3880ecb6b11c')] || effective('5c068d8a-7ae3-40cd-b7cd-3880ecb6b11c')"></span>
+                                            <template x-if="changes['5c068d8a-7ae3-40cd-b7cd-3880ecb6b11c'] !== undefined && changes['5c068d8a-7ae3-40cd-b7cd-3880ecb6b11c'] !== saved['5c068d8a-7ae3-40cd-b7cd-3880ecb6b11c']">
+                                                <span class="text-xs text-amber-700" x-text="wasText('5c068d8a-7ae3-40cd-b7cd-3880ecb6b11c')"></span>
+                                            </template>
+                                        </div>
+                                    </div>
+
+                                                                            <div class="flex flex-wrap gap-1 shrink-0" role="group"
+                                             aria-label="State for Fitting">
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('5c068d8a-7ae3-40cd-b7cd-3880ecb6b11c') === 'NOT_STARTED'"
+                                                        aria-label="Set Fitting to Not Started"
+                                                        @click="setState('5c068d8a-7ae3-40cd-b7cd-3880ecb6b11c', 'NOT_STARTED')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('5c068d8a-7ae3-40cd-b7cd-3880ecb6b11c') === 'NOT_STARTED'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    Not Started
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('5c068d8a-7ae3-40cd-b7cd-3880ecb6b11c') === 'IN_PROGRESS'"
+                                                        aria-label="Set Fitting to In Progress"
+                                                        @click="setState('5c068d8a-7ae3-40cd-b7cd-3880ecb6b11c', 'IN_PROGRESS')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('5c068d8a-7ae3-40cd-b7cd-3880ecb6b11c') === 'IN_PROGRESS'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    In Progress
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('5c068d8a-7ae3-40cd-b7cd-3880ecb6b11c') === 'COMPLETED'"
+                                                        aria-label="Set Fitting to Completed"
+                                                        @click="setState('5c068d8a-7ae3-40cd-b7cd-3880ecb6b11c', 'COMPLETED')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('5c068d8a-7ae3-40cd-b7cd-3880ecb6b11c') === 'COMPLETED'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    Completed
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('5c068d8a-7ae3-40cd-b7cd-3880ecb6b11c') === 'NOT_APPLICABLE'"
+                                                        aria-label="Set Fitting to N/A"
+                                                        @click="setState('5c068d8a-7ae3-40cd-b7cd-3880ecb6b11c', 'NOT_APPLICABLE')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('5c068d8a-7ae3-40cd-b7cd-3880ecb6b11c') === 'NOT_APPLICABLE'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    N/A
+                                                </button>
+                                                                                    </div>
+                                                                    </div>
+                                                                                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-4 py-3">
+                                    <div class="min-w-0">
+                                        <p class="text-sm font-medium flex items-center gap-2 flex-wrap">
+                                            Finishing
+                                                                                    </p>
+                                        <div class="mt-1 flex items-center gap-2 flex-wrap">
+                                            <span class="rounded-full px-2 py-0.5 text-xs font-medium"
+                                                  :class="chipClass(effective('cc8f6386-a24f-4eac-9bcd-5668aa630fe5'))"
+                                                  x-text="labels[effective('cc8f6386-a24f-4eac-9bcd-5668aa630fe5')] || effective('cc8f6386-a24f-4eac-9bcd-5668aa630fe5')"></span>
+                                            <template x-if="changes['cc8f6386-a24f-4eac-9bcd-5668aa630fe5'] !== undefined && changes['cc8f6386-a24f-4eac-9bcd-5668aa630fe5'] !== saved['cc8f6386-a24f-4eac-9bcd-5668aa630fe5']">
+                                                <span class="text-xs text-amber-700" x-text="wasText('cc8f6386-a24f-4eac-9bcd-5668aa630fe5')"></span>
+                                            </template>
+                                        </div>
+                                    </div>
+
+                                                                            <div class="flex flex-wrap gap-1 shrink-0" role="group"
+                                             aria-label="State for Finishing">
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('cc8f6386-a24f-4eac-9bcd-5668aa630fe5') === 'NOT_STARTED'"
+                                                        aria-label="Set Finishing to Not Started"
+                                                        @click="setState('cc8f6386-a24f-4eac-9bcd-5668aa630fe5', 'NOT_STARTED')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('cc8f6386-a24f-4eac-9bcd-5668aa630fe5') === 'NOT_STARTED'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    Not Started
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('cc8f6386-a24f-4eac-9bcd-5668aa630fe5') === 'IN_PROGRESS'"
+                                                        aria-label="Set Finishing to In Progress"
+                                                        @click="setState('cc8f6386-a24f-4eac-9bcd-5668aa630fe5', 'IN_PROGRESS')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('cc8f6386-a24f-4eac-9bcd-5668aa630fe5') === 'IN_PROGRESS'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    In Progress
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('cc8f6386-a24f-4eac-9bcd-5668aa630fe5') === 'COMPLETED'"
+                                                        aria-label="Set Finishing to Completed"
+                                                        @click="setState('cc8f6386-a24f-4eac-9bcd-5668aa630fe5', 'COMPLETED')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('cc8f6386-a24f-4eac-9bcd-5668aa630fe5') === 'COMPLETED'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    Completed
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('cc8f6386-a24f-4eac-9bcd-5668aa630fe5') === 'NOT_APPLICABLE'"
+                                                        aria-label="Set Finishing to N/A"
+                                                        @click="setState('cc8f6386-a24f-4eac-9bcd-5668aa630fe5', 'NOT_APPLICABLE')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('cc8f6386-a24f-4eac-9bcd-5668aa630fe5') === 'NOT_APPLICABLE'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    N/A
+                                                </button>
+                                                                                    </div>
+                                                                    </div>
+                                                                                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-4 py-3">
+                                    <div class="min-w-0">
+                                        <p class="text-sm font-medium flex items-center gap-2 flex-wrap">
+                                            Ironing
+                                                                                    </p>
+                                        <div class="mt-1 flex items-center gap-2 flex-wrap">
+                                            <span class="rounded-full px-2 py-0.5 text-xs font-medium"
+                                                  :class="chipClass(effective('ad551758-8aa7-404a-8e67-97e0d1d96492'))"
+                                                  x-text="labels[effective('ad551758-8aa7-404a-8e67-97e0d1d96492')] || effective('ad551758-8aa7-404a-8e67-97e0d1d96492')"></span>
+                                            <template x-if="changes['ad551758-8aa7-404a-8e67-97e0d1d96492'] !== undefined && changes['ad551758-8aa7-404a-8e67-97e0d1d96492'] !== saved['ad551758-8aa7-404a-8e67-97e0d1d96492']">
+                                                <span class="text-xs text-amber-700" x-text="wasText('ad551758-8aa7-404a-8e67-97e0d1d96492')"></span>
+                                            </template>
+                                        </div>
+                                    </div>
+
+                                                                            <div class="flex flex-wrap gap-1 shrink-0" role="group"
+                                             aria-label="State for Ironing">
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('ad551758-8aa7-404a-8e67-97e0d1d96492') === 'NOT_STARTED'"
+                                                        aria-label="Set Ironing to Not Started"
+                                                        @click="setState('ad551758-8aa7-404a-8e67-97e0d1d96492', 'NOT_STARTED')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('ad551758-8aa7-404a-8e67-97e0d1d96492') === 'NOT_STARTED'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    Not Started
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('ad551758-8aa7-404a-8e67-97e0d1d96492') === 'IN_PROGRESS'"
+                                                        aria-label="Set Ironing to In Progress"
+                                                        @click="setState('ad551758-8aa7-404a-8e67-97e0d1d96492', 'IN_PROGRESS')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('ad551758-8aa7-404a-8e67-97e0d1d96492') === 'IN_PROGRESS'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    In Progress
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('ad551758-8aa7-404a-8e67-97e0d1d96492') === 'COMPLETED'"
+                                                        aria-label="Set Ironing to Completed"
+                                                        @click="setState('ad551758-8aa7-404a-8e67-97e0d1d96492', 'COMPLETED')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('ad551758-8aa7-404a-8e67-97e0d1d96492') === 'COMPLETED'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    Completed
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('ad551758-8aa7-404a-8e67-97e0d1d96492') === 'NOT_APPLICABLE'"
+                                                        aria-label="Set Ironing to N/A"
+                                                        @click="setState('ad551758-8aa7-404a-8e67-97e0d1d96492', 'NOT_APPLICABLE')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('ad551758-8aa7-404a-8e67-97e0d1d96492') === 'NOT_APPLICABLE'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    N/A
+                                                </button>
+                                                                                    </div>
+                                                                    </div>
+                                                                                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-4 py-3">
+                                    <div class="min-w-0">
+                                        <p class="text-sm font-medium flex items-center gap-2 flex-wrap">
+                                            Quality Check
+                                                                                    </p>
+                                        <div class="mt-1 flex items-center gap-2 flex-wrap">
+                                            <span class="rounded-full px-2 py-0.5 text-xs font-medium"
+                                                  :class="chipClass(effective('60930782-4b0d-454a-bdda-35f1148571cf'))"
+                                                  x-text="labels[effective('60930782-4b0d-454a-bdda-35f1148571cf')] || effective('60930782-4b0d-454a-bdda-35f1148571cf')"></span>
+                                            <template x-if="changes['60930782-4b0d-454a-bdda-35f1148571cf'] !== undefined && changes['60930782-4b0d-454a-bdda-35f1148571cf'] !== saved['60930782-4b0d-454a-bdda-35f1148571cf']">
+                                                <span class="text-xs text-amber-700" x-text="wasText('60930782-4b0d-454a-bdda-35f1148571cf')"></span>
+                                            </template>
+                                        </div>
+                                    </div>
+
+                                                                            <div class="flex flex-wrap gap-1 shrink-0" role="group"
+                                             aria-label="State for Quality Check">
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('60930782-4b0d-454a-bdda-35f1148571cf') === 'NOT_STARTED'"
+                                                        aria-label="Set Quality Check to Not Started"
+                                                        @click="setState('60930782-4b0d-454a-bdda-35f1148571cf', 'NOT_STARTED')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('60930782-4b0d-454a-bdda-35f1148571cf') === 'NOT_STARTED'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    Not Started
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('60930782-4b0d-454a-bdda-35f1148571cf') === 'IN_PROGRESS'"
+                                                        aria-label="Set Quality Check to In Progress"
+                                                        @click="setState('60930782-4b0d-454a-bdda-35f1148571cf', 'IN_PROGRESS')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('60930782-4b0d-454a-bdda-35f1148571cf') === 'IN_PROGRESS'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    In Progress
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('60930782-4b0d-454a-bdda-35f1148571cf') === 'COMPLETED'"
+                                                        aria-label="Set Quality Check to Completed"
+                                                        @click="setState('60930782-4b0d-454a-bdda-35f1148571cf', 'COMPLETED')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('60930782-4b0d-454a-bdda-35f1148571cf') === 'COMPLETED'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    Completed
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('60930782-4b0d-454a-bdda-35f1148571cf') === 'NOT_APPLICABLE'"
+                                                        aria-label="Set Quality Check to N/A"
+                                                        @click="setState('60930782-4b0d-454a-bdda-35f1148571cf', 'NOT_APPLICABLE')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('60930782-4b0d-454a-bdda-35f1148571cf') === 'NOT_APPLICABLE'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    N/A
+                                                </button>
+                                                                                    </div>
+                                                                    </div>
+                                                                                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-4 py-3">
+                                    <div class="min-w-0">
+                                        <p class="text-sm font-medium flex items-center gap-2 flex-wrap">
+                                            Ready for Pickup
+                                                                                    </p>
+                                        <div class="mt-1 flex items-center gap-2 flex-wrap">
+                                            <span class="rounded-full px-2 py-0.5 text-xs font-medium"
+                                                  :class="chipClass(effective('89e65953-4f41-4f20-91b1-353596947bb5'))"
+                                                  x-text="labels[effective('89e65953-4f41-4f20-91b1-353596947bb5')] || effective('89e65953-4f41-4f20-91b1-353596947bb5')"></span>
+                                            <template x-if="changes['89e65953-4f41-4f20-91b1-353596947bb5'] !== undefined && changes['89e65953-4f41-4f20-91b1-353596947bb5'] !== saved['89e65953-4f41-4f20-91b1-353596947bb5']">
+                                                <span class="text-xs text-amber-700" x-text="wasText('89e65953-4f41-4f20-91b1-353596947bb5')"></span>
+                                            </template>
+                                        </div>
+                                    </div>
+
+                                                                            <div class="flex flex-wrap gap-1 shrink-0" role="group"
+                                             aria-label="State for Ready for Pickup">
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('89e65953-4f41-4f20-91b1-353596947bb5') === 'NOT_STARTED'"
+                                                        aria-label="Set Ready for Pickup to Not Started"
+                                                        @click="setState('89e65953-4f41-4f20-91b1-353596947bb5', 'NOT_STARTED')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('89e65953-4f41-4f20-91b1-353596947bb5') === 'NOT_STARTED'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    Not Started
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('89e65953-4f41-4f20-91b1-353596947bb5') === 'IN_PROGRESS'"
+                                                        aria-label="Set Ready for Pickup to In Progress"
+                                                        @click="setState('89e65953-4f41-4f20-91b1-353596947bb5', 'IN_PROGRESS')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('89e65953-4f41-4f20-91b1-353596947bb5') === 'IN_PROGRESS'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    In Progress
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('89e65953-4f41-4f20-91b1-353596947bb5') === 'COMPLETED'"
+                                                        aria-label="Set Ready for Pickup to Completed"
+                                                        @click="setState('89e65953-4f41-4f20-91b1-353596947bb5', 'COMPLETED')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('89e65953-4f41-4f20-91b1-353596947bb5') === 'COMPLETED'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    Completed
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('89e65953-4f41-4f20-91b1-353596947bb5') === 'NOT_APPLICABLE'"
+                                                        aria-label="Set Ready for Pickup to N/A"
+                                                        @click="setState('89e65953-4f41-4f20-91b1-353596947bb5', 'NOT_APPLICABLE')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('89e65953-4f41-4f20-91b1-353596947bb5') === 'NOT_APPLICABLE'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    N/A
+                                                </button>
+                                                                                    </div>
+                                                                    </div>
+                                                                                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-4 py-3">
+                                    <div class="min-w-0">
+                                        <p class="text-sm font-medium flex items-center gap-2 flex-wrap">
+                                            Delivered/Collected
+                                                                                    </p>
+                                        <div class="mt-1 flex items-center gap-2 flex-wrap">
+                                            <span class="rounded-full px-2 py-0.5 text-xs font-medium"
+                                                  :class="chipClass(effective('4f50afc3-1cdf-4719-9e27-032ea66339dc'))"
+                                                  x-text="labels[effective('4f50afc3-1cdf-4719-9e27-032ea66339dc')] || effective('4f50afc3-1cdf-4719-9e27-032ea66339dc')"></span>
+                                            <template x-if="changes['4f50afc3-1cdf-4719-9e27-032ea66339dc'] !== undefined && changes['4f50afc3-1cdf-4719-9e27-032ea66339dc'] !== saved['4f50afc3-1cdf-4719-9e27-032ea66339dc']">
+                                                <span class="text-xs text-amber-700" x-text="wasText('4f50afc3-1cdf-4719-9e27-032ea66339dc')"></span>
+                                            </template>
+                                        </div>
+                                    </div>
+
+                                                                            <div class="flex flex-wrap gap-1 shrink-0" role="group"
+                                             aria-label="State for Delivered/Collected">
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('4f50afc3-1cdf-4719-9e27-032ea66339dc') === 'NOT_STARTED'"
+                                                        aria-label="Set Delivered/Collected to Not Started"
+                                                        @click="setState('4f50afc3-1cdf-4719-9e27-032ea66339dc', 'NOT_STARTED')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('4f50afc3-1cdf-4719-9e27-032ea66339dc') === 'NOT_STARTED'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    Not Started
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('4f50afc3-1cdf-4719-9e27-032ea66339dc') === 'IN_PROGRESS'"
+                                                        aria-label="Set Delivered/Collected to In Progress"
+                                                        @click="setState('4f50afc3-1cdf-4719-9e27-032ea66339dc', 'IN_PROGRESS')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('4f50afc3-1cdf-4719-9e27-032ea66339dc') === 'IN_PROGRESS'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    In Progress
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('4f50afc3-1cdf-4719-9e27-032ea66339dc') === 'COMPLETED'"
+                                                        aria-label="Set Delivered/Collected to Completed"
+                                                        @click="setState('4f50afc3-1cdf-4719-9e27-032ea66339dc', 'COMPLETED')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('4f50afc3-1cdf-4719-9e27-032ea66339dc') === 'COMPLETED'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    Completed
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('4f50afc3-1cdf-4719-9e27-032ea66339dc') === 'NOT_APPLICABLE'"
+                                                        aria-label="Set Delivered/Collected to N/A"
+                                                        @click="setState('4f50afc3-1cdf-4719-9e27-032ea66339dc', 'NOT_APPLICABLE')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('4f50afc3-1cdf-4719-9e27-032ea66339dc') === 'NOT_APPLICABLE'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    N/A
+                                                </button>
+                                                                                    </div>
+                                                                    </div>
+                                                                                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-4 py-3">
+                                    <div class="min-w-0">
+                                        <p class="text-sm font-medium flex items-center gap-2 flex-wrap">
+                                            Blocked
+                                                                                    </p>
+                                        <div class="mt-1 flex items-center gap-2 flex-wrap">
+                                            <span class="rounded-full px-2 py-0.5 text-xs font-medium"
+                                                  :class="chipClass(effective('a9e63c5a-47d8-4586-849f-ba7ba2dbe146'))"
+                                                  x-text="labels[effective('a9e63c5a-47d8-4586-849f-ba7ba2dbe146')] || effective('a9e63c5a-47d8-4586-849f-ba7ba2dbe146')"></span>
+                                            <template x-if="changes['a9e63c5a-47d8-4586-849f-ba7ba2dbe146'] !== undefined && changes['a9e63c5a-47d8-4586-849f-ba7ba2dbe146'] !== saved['a9e63c5a-47d8-4586-849f-ba7ba2dbe146']">
+                                                <span class="text-xs text-amber-700" x-text="wasText('a9e63c5a-47d8-4586-849f-ba7ba2dbe146')"></span>
+                                            </template>
+                                        </div>
+                                    </div>
+
+                                                                            <div class="flex flex-wrap gap-1 shrink-0" role="group"
+                                             aria-label="State for Blocked">
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('a9e63c5a-47d8-4586-849f-ba7ba2dbe146') === 'NOT_STARTED'"
+                                                        aria-label="Set Blocked to Not Started"
+                                                        @click="setState('a9e63c5a-47d8-4586-849f-ba7ba2dbe146', 'NOT_STARTED')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('a9e63c5a-47d8-4586-849f-ba7ba2dbe146') === 'NOT_STARTED'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    Not Started
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('a9e63c5a-47d8-4586-849f-ba7ba2dbe146') === 'IN_PROGRESS'"
+                                                        aria-label="Set Blocked to In Progress"
+                                                        @click="setState('a9e63c5a-47d8-4586-849f-ba7ba2dbe146', 'IN_PROGRESS')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('a9e63c5a-47d8-4586-849f-ba7ba2dbe146') === 'IN_PROGRESS'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    In Progress
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('a9e63c5a-47d8-4586-849f-ba7ba2dbe146') === 'COMPLETED'"
+                                                        aria-label="Set Blocked to Completed"
+                                                        @click="setState('a9e63c5a-47d8-4586-849f-ba7ba2dbe146', 'COMPLETED')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('a9e63c5a-47d8-4586-849f-ba7ba2dbe146') === 'COMPLETED'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    Completed
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('a9e63c5a-47d8-4586-849f-ba7ba2dbe146') === 'NOT_APPLICABLE'"
+                                                        aria-label="Set Blocked to N/A"
+                                                        @click="setState('a9e63c5a-47d8-4586-849f-ba7ba2dbe146', 'NOT_APPLICABLE')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('a9e63c5a-47d8-4586-849f-ba7ba2dbe146') === 'NOT_APPLICABLE'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    N/A
+                                                </button>
+                                                                                    </div>
+                                                                    </div>
+                                                                                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-4 py-3">
+                                    <div class="min-w-0">
+                                        <p class="text-sm font-medium flex items-center gap-2 flex-wrap">
+                                            Other
+                                                                                    </p>
+                                        <div class="mt-1 flex items-center gap-2 flex-wrap">
+                                            <span class="rounded-full px-2 py-0.5 text-xs font-medium"
+                                                  :class="chipClass(effective('e7729a54-9d90-48fa-b48c-d3315b01c1dd'))"
+                                                  x-text="labels[effective('e7729a54-9d90-48fa-b48c-d3315b01c1dd')] || effective('e7729a54-9d90-48fa-b48c-d3315b01c1dd')"></span>
+                                            <template x-if="changes['e7729a54-9d90-48fa-b48c-d3315b01c1dd'] !== undefined && changes['e7729a54-9d90-48fa-b48c-d3315b01c1dd'] !== saved['e7729a54-9d90-48fa-b48c-d3315b01c1dd']">
+                                                <span class="text-xs text-amber-700" x-text="wasText('e7729a54-9d90-48fa-b48c-d3315b01c1dd')"></span>
+                                            </template>
+                                        </div>
+                                    </div>
+
+                                                                            <div class="flex flex-wrap gap-1 shrink-0" role="group"
+                                             aria-label="State for Other">
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('e7729a54-9d90-48fa-b48c-d3315b01c1dd') === 'NOT_STARTED'"
+                                                        aria-label="Set Other to Not Started"
+                                                        @click="setState('e7729a54-9d90-48fa-b48c-d3315b01c1dd', 'NOT_STARTED')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('e7729a54-9d90-48fa-b48c-d3315b01c1dd') === 'NOT_STARTED'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    Not Started
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('e7729a54-9d90-48fa-b48c-d3315b01c1dd') === 'IN_PROGRESS'"
+                                                        aria-label="Set Other to In Progress"
+                                                        @click="setState('e7729a54-9d90-48fa-b48c-d3315b01c1dd', 'IN_PROGRESS')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('e7729a54-9d90-48fa-b48c-d3315b01c1dd') === 'IN_PROGRESS'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    In Progress
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('e7729a54-9d90-48fa-b48c-d3315b01c1dd') === 'COMPLETED'"
+                                                        aria-label="Set Other to Completed"
+                                                        @click="setState('e7729a54-9d90-48fa-b48c-d3315b01c1dd', 'COMPLETED')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('e7729a54-9d90-48fa-b48c-d3315b01c1dd') === 'COMPLETED'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    Completed
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('e7729a54-9d90-48fa-b48c-d3315b01c1dd') === 'NOT_APPLICABLE'"
+                                                        aria-label="Set Other to N/A"
+                                                        @click="setState('e7729a54-9d90-48fa-b48c-d3315b01c1dd', 'NOT_APPLICABLE')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('e7729a54-9d90-48fa-b48c-d3315b01c1dd') === 'NOT_APPLICABLE'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    N/A
+                                                </button>
+                                                                                    </div>
+                                                                    </div>
+                                                    </div>
+
+                                                    <div class="mt-3 space-y-2">
+                                <input type="text" x-model="comment" maxlength="500"
+                                       aria-label="Checklist save comment"
+                                       placeholder="Optional comment attached to the next checklist save"
+                                       class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                                <div class="flex justify-end">
+                                    <button type="submit" :disabled="changesCount === 0"
+                                            class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm font-medium h-8 px-3 bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors disabled:pointer-events-none disabled:opacity-50">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/><path d="M7 3v4a1 1 0 0 0 1 1h7"/></svg>
+                                        Save Checklist<span x-show="changesCount > 0" class="tabular-nums" x-text="'(' + changesCount + ')'"></span>
+                                    </button>
+                                </div>
+                            </div>
+                                            
+                    
+                    <template x-for="(entry, i) in Object.entries(changes)" :key="entry[0]">
+                        <span>
+                            <input type="hidden" :name="'updates[' + i + '][stageId]'" :value="entry[0]">
+                            <input type="hidden" :name="'updates[' + i + '][state]'" :value="entry[1]">
+                            <input type="hidden" :name="'updates[' + i + '][comment]'" :value="comment">
+                        </span>
+                    </template>
+                </form>
+            </div>
+        </section>
+
+        
+        <section class="rounded-xl border bg-card text-card-foreground shadow-sm" aria-labelledby="task-actions-title">
+            <div class="flex items-center justify-between gap-2 border-b p-6 pb-3">

@@ -1,0 +1,735 @@
+     1→     1→<?php
+     2→     2→
+     3→     3→declare(strict_types=1);
+     4→     4→
+     5→     5→namespace App\Http\Controllers;
+     6→     6→
+     7→     7→use App\Models\IncentiveRecord;
+     8→     8→use App\Models\IncentiveScheme;
+     9→     9→use App\Models\User;
+    10→    10→use App\Services\Audit;
+    11→    11→use App\Services\PerformanceService;
+    12→    12→use App\Services\Permissions;
+    13→    13→use App\Support\Atelier;
+    14→    14→use App\Support\Trans;
+    15→    15→use Carbon\Carbon;
+    16→    16→use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+    17→    17→use Illuminate\Http\RedirectResponse;
+    18→    18→use Illuminate\Http\Request;
+    19→    19→use Illuminate\Support\Collection;
+    20→    20→use Illuminate\Validation\Rule;
+    21→    21→use Illuminate\View\View;
+    22→    22→use Throwable;
+    23→    23→
+    24→    24→/**
+    25→    25→ * Staff incentives (spec §3: GET /incentives + scheme management,
+    26→    26→ * recommendation generation, review and payment recording).
+    27→    27→ *
+    28→    28→ * 1:1 port of the Next.js reference implementation:
+    29→    29→ * - GET/POST src/app/api/atelier/incentives/schemes (+ [id]) — scheme
+    30→    30→ *   definitions. The schema has a SINGLE nullable `amount` column (FCFA);
+    31→    31→ *   schemes are never hard-deleted, only deactivated.
+    32→    32→ * - POST    src/app/api/atelier/incentives/records — recommendation
+    33→    33→ *   generation from the live performance engine (App\Services\
+    34→    34→ *   PerformanceService, parallel-built A1/R1 contract).
+    35→    35→ * - PATCH   src/app/api/atelier/incentives/records/[id] — review
+    36→    36→ *   (approve / reject, MANAGEMENT only via `perm:incentives.approve`)
+    37→    37→ *   and payment recording (`perm:incentives.payment`).
+    38→    38→ *
+    39→    39→ * Snapshot models: IncentiveRecord / IncentiveScheme keep denormalized
+    40→    40→ * scheme_name / staff_name / approved_by_name columns and define NO
+    41→    41→ * Eloquent relations (1:1 Prisma port), so this controller attaches the
+    42→    42→ * related models IN MEMORY — both access styles work in the views:
+    43→    43→ *   $record->user?->name / $record->scheme?->name /
+    44→    44→ *   $record->approvedBy?->name (null when the account / scheme was
+    45→    45→ *   deleted), or the never-null snapshots $record->staff_name /
+    46→    46→ *   $record->scheme_name / $record->approved_by_name; schemes expose
+    47→    47→ *   $scheme->recordsCount (also ->records_count).
+    48→    48→ *
+    49→    49→ * NO notifications are emitted for incentive decisions (report decision:
+    50→    50→ * incentives are reviewed inside the Management UI — toasts only).
+    51→    51→ *
+    52→    52→ * Deliberately does not extend a base Controller class, mirroring
+    53→    53→ * LoginController / LocaleController.
+    54→    54→ */
+    55→    55→class IncentiveController
+    56→    56→{
+    57→    57→    /** Evaluation records per page on the incentives screen. */
+    58→    58→    private const RECORDS_PER_PAGE = 20;
+    59→    59→
+    60→    60→    /**
+    61→    61→     * Scheme period type => performance-engine mapping (SCHEME_PERIOD_MAP
+    62→    62→     * port from the Next.js generate route): the range type handed to
+    63→    63→     * PerformanceService::forRange(), the accepted periodValue pattern and
+    64→    64→     * the toast key describing the expected format.
+    65→    65→     *
+    66→    66→     * MONTHLY / QUALITY / ON_TIME / CUSTOM are monthly formats, QUARTERLY
+    67→    67→     * expects YYYY-QN, ANNUAL expects YYYY.
+    68→    68→     *
+    69→    69→     * @var array<string, array{range: string, pattern: string, format: string}>
+    70→    70→     */
+    71→    71→    private const SCHEME_PERIOD_MAP = [
+    72→    72→        'MONTHLY' => ['range' => 'MONTH', 'pattern' => '/^\d{4}-(0[1-9]|1[0-2])$/', 'format' => 'formatMonth'],
+    73→    73→        'QUARTERLY' => ['range' => 'QUARTER', 'pattern' => '/^\d{4}-Q[1-4]$/', 'format' => 'formatQuarter'],
+    74→    74→        'ANNUAL' => ['range' => 'YEAR', 'pattern' => '/^\d{4}$/', 'format' => 'formatYear'],
+    75→    75→        'QUALITY' => ['range' => 'MONTH', 'pattern' => '/^\d{4}-(0[1-9]|1[0-2])$/', 'format' => 'formatMonth'],
+    76→    76→        'ON_TIME' => ['range' => 'MONTH', 'pattern' => '/^\d{4}-(0[1-9]|1[0-2])$/', 'format' => 'formatMonth'],
+    77→    77→        'CUSTOM' => ['range' => 'MONTH', 'pattern' => '/^\d{4}-(0[1-9]|1[0-2])$/', 'format' => 'formatMonth'],
+    78→    78→    ];
+    79→    79→
+    80→    80→    /**
+    81→    81→     * GET /incentives — schemes tab + evaluations tab (view contract #12).
+    82→    82→     *
+    83→    83→     * Records are paginated latest-first and filterable via the query
+    84→    84→     * string (status, period — uppercased, staff); the filter select
+    85→    85→     * values are echoed back through $filters.
+    86→    86→     */
+    87→    87→    public function index(Request $request): View
+    88→    88→    {
+    89→    89→        /** @var User $me */
+    90→    90→        $me = $request->user();
+    91→    91→
+    92→    92→        $filters = [
+    93→    93→            'status' => trim((string) $request->query('status', '')),
+    94→    94→            'period' => strtoupper(trim((string) $request->query('period', ''))),
+    95→    95→            'staff' => trim((string) $request->query('staff', '')),
+    96→    96→        ];
+    97→    97→
+    98→    98→        $recordsQuery = IncentiveRecord::query()->orderByDesc('created_at');
+    99→    99→
+   100→   100→        if ($filters['status'] !== '' && in_array($filters['status'], Atelier::INCENTIVE_STATUSES, true)) {
+   101→   101→            $recordsQuery->where('status', $filters['status']);
+   102→   102→        }
+   103→   103→
+   104→   104→        if ($filters['period'] !== '') {
+   105→   105→            $recordsQuery->where('period', $filters['period']);
+   106→   106→        }
+   107→   107→
+   108→   108→        if ($filters['staff'] !== '') {
+   109→   109→            $recordsQuery->where('staff_id', $filters['staff']);
+   110→   110→        }
+   111→   111→
+   112→   112→        $records = $recordsQuery
+   113→   113→            ->paginate(self::RECORDS_PER_PAGE)
+   114→   114→            ->withQueryString();
+   115→   115→
+   116→   116→        $this->hydrateRecords($records);
+   117→   117→
+   118→   118→        return view('incentives.index', [
+   119→   119→            'schemes' => $this->schemesWithRecordCounts(),
+   120→   120→            'records' => $records,
+   121→   121→            'filters' => $filters,
+   122→   122→            'staffList' => User::query()
+   123→   123→                ->where('is_active', true)
+   124→   124→                ->where('role', 'STAFF')
+   125→   125→                ->orderBy('name')
+   126→   126→                ->get(),
+   127→   127→            'canApprove' => $me->role === 'MANAGEMENT',
+   128→   128→            'canPrepare' => Permissions::allows($me, 'incentives.prepare'),
+   129→   129→            'canManageSchemes' => Permissions::allows($me, 'incentives.manage.schemes'),
+   130→   130→        ]);
+   131→   131→    }
+   132→   132→
+   133→   133→    /**
+   134→   134→     * POST /incentives/schemes — create a scheme (route perm
+   135→   135→     * incentives.manage.schemes — MANAGEMENT only).
+   136→   136→     *
+   137→   137→     * Input contract: name (2-120), periodType (INCENTIVE_PERIOD_TYPES),
+   138→   138→     * minScore (nullable 0-100), amount (nullable >= 0 — single amount
+   139→   139→     * column, FCFA), description (nullable max 2000), isActive (optional
+   140→   140→     * boolean, default true).
+   141→   141→     */
+   142→   142→    public function storeScheme(Request $request): RedirectResponse
+   143→   143→    {
+   144→   144→        /** @var User $me */
+   145→   145→        $me = $request->user();
+   146→   146→
+   147→   147→        $data = $request->validate([
+   148→   148→            'name' => ['required', 'string', 'min:2', 'max:120'],
+   149→   149→            'periodType' => ['required', 'string', Rule::in(Atelier::INCENTIVE_PERIOD_TYPES)],
+   150→   150→            'minScore' => ['nullable', 'numeric', 'min:0', 'max:100'],
+   151→   151→            'amount' => ['nullable', 'numeric', 'min:0'],
+   152→   152→            'description' => ['nullable', 'string', 'max:2000'],
+   153→   153→            'isActive' => ['nullable', 'boolean'],
+   154→   154→        ]);
+   155→   155→
+   156→   156→        $description = trim((string) ($data['description'] ?? ''));
+   157→   157→
+   158→   158→        $scheme = IncentiveScheme::query()->create([
+   159→   159→            'name' => trim((string) $data['name']),
+   160→   160→            'period_type' => (string) $data['periodType'],
+   161→   161→            'min_score' => isset($data['minScore']) ? (float) $data['minScore'] : null,
+   162→   162→            'amount' => isset($data['amount']) ? (float) $data['amount'] : null,
+   163→   163→            'description' => $description !== '' ? $description : null,
+   164→   164→            'is_active' => array_key_exists('isActive', $request->all())
+   165→   165→                ? $request->boolean('isActive')
+   166→   166→                : true,
+   167→   167→            'created_by_id' => $me->id,
+   168→   168→            'created_by_name' => $me->name,
+   169→   169→        ]);
+   170→   170→
+   171→   171→        Audit::log($me, 'INCENTIVE_SCHEME_CREATED', 'INCENTIVE_SCHEME', $scheme->id, [
+   172→   172→            'name' => $scheme->name,
+   173→   173→            'periodType' => $scheme->period_type,
+   174→   174→            'minScore' => $scheme->min_score,
+   175→   175→            'amount' => $scheme->amount,
+   176→   176→        ]);
+   177→   177→
+   178→   178→        return redirect()
+   179→   179→            ->back()
+   180→   180→            ->with('success', __('inc.toast.schemeCreated'));
+   181→   181→    }
+   182→   182→
+   183→   183→    /**
+   184→   184→     * POST /incentives/schemes/{id} — update a scheme (same fields as
+   185→   185→     * storeScheme, all optional: only keys actually present in the request
+   186→   186→     * are applied — PATCH semantics; present-but-empty values clear the
+   187→   187→     * nullable columns, mirroring the reference route).
+   188→   188→     */
+   189→   189→    public function updateScheme(Request $request, string $id): RedirectResponse
+   190→   190→    {
+   191→   191→        /** @var User $me */
+   192→   192→        $me = $request->user();
+   193→   193→
+   194→   194→        $data = $request->validate([
+   195→   195→            'name' => ['sometimes', 'string', 'min:2', 'max:120'],
+   196→   196→            'periodType' => ['sometimes', 'string', Rule::in(Atelier::INCENTIVE_PERIOD_TYPES)],
+   197→   197→            'minScore' => ['sometimes', 'nullable', 'numeric', 'min:0', 'max:100'],
+   198→   198→            'amount' => ['sometimes', 'nullable', 'numeric', 'min:0'],
+   199→   199→            'description' => ['sometimes', 'nullable', 'string', 'max:2000'],
+   200→   200→            'isActive' => ['sometimes', 'boolean'],
+   201→   201→        ]);
+   202→   202→
+   203→   203→        $scheme = IncentiveScheme::query()->findOrFail($id);
+   204→   204→
+   205→   205→        $input = $request->all();
+   206→   206→        $has = static fn (string $key): bool => array_key_exists($key, $input);
+   207→   207→
+   208→   208→        $update = [];
+   209→   209→        $changes = [];
+   210→   210→
+   211→   211→        if ($has('name')) {
+   212→   212→            $update['name'] = trim((string) ($data['name'] ?? ''));
+   213→   213→            $changes['name'] = $update['name'];
+   214→   214→        }
+   215→   215→
+   216→   216→        if ($has('periodType')) {
+   217→   217→            $update['period_type'] = (string) $data['periodType'];
+   218→   218→            $changes['periodType'] = $update['period_type'];
+   219→   219→        }
+   220→   220→
+   221→   221→        if ($has('minScore')) {
+   222→   222→            $update['min_score'] = $data['minScore'] !== null ? (float) $data['minScore'] : null;
+   223→   223→            $changes['minScore'] = $update['min_score'];
+   224→   224→        }
+   225→   225→
+   226→   226→        if ($has('amount')) {
+   227→   227→            $update['amount'] = $data['amount'] !== null ? (float) $data['amount'] : null;
+   228→   228→            $changes['amount'] = $update['amount'];
+   229→   229→        }
+   230→   230→
+   231→   231→        if ($has('description')) {
+   232→   232→            $description = trim((string) ($data['description'] ?? ''));
+   233→   233→            $update['description'] = $description !== '' ? $description : null;
+   234→   234→            $changes['description'] = $update['description'];
+   235→   235→        }
+   236→   236→
+   237→   237→        if ($has('isActive')) {
+   238→   238→            $update['is_active'] = $request->boolean('isActive');
+   239→   239→            $changes['isActive'] = $update['is_active'];
+   240→   240→        }
+   241→   241→
+   242→   242→        if ($update !== []) {
+   243→   243→            $scheme->forceFill($update)->save();
+   244→   244→        }
+   245→   245→
+   246→   246→        Audit::log($me, 'INCENTIVE_SCHEME_UPDATED', 'INCENTIVE_SCHEME', $scheme->id, [
+   247→   247→            'name' => $scheme->name,
+   248→   248→            'updated' => $changes,
+   249→   249→        ]);
+   250→   250→
+   251→   251→        return redirect()
+   252→   252→            ->back()
+   253→   253→            ->with('success', __('inc.toast.schemeUpdated'));
+   254→   254→    }
+   255→   255→
+   256→   256→    /**
+   257→   257→     * POST /incentives/generate — create PENDING recommendations from the
+   258→   258→     * performance engine (route perm incentives.prepare).
+   259→   259→     *
+   260→   260→     * Input contract: periodType (INCENTIVE_PERIOD_TYPES) + periodValue
+   261→   261→     * (required, format depends on the period type: MONTHLY / QUALITY /
+   262→   262→     * ON_TIME / CUSTOM = YYYY-MM, QUARTERLY = YYYY-QN, ANNUAL = YYYY);
+   263→   263→     * OPTIONAL schemeId narrows the run to a single scheme, otherwise
+   264→   264→     * every ACTIVE scheme of the posted period type is evaluated against
+   265→   265→     * every active STAFF account.
+   266→   266→     *
+   267→   267→     * Below-minScore staff are skipped; existing (scheme, staff, period)
+   268→   268→     * records are skipped silently (decisions are final — the reference
+   269→   269→     * route never touches APPROVED / REJECTED rows, and this port keeps
+   270→   270→     * PENDING rows immutable too). Created rows: eligible = true,
+   271→   271→     * proposed_amount = scheme amount (all created rows are eligible),
+   272→   272→     * status PENDING, payment_status UNPAID.
+   273→   273→     */
+   274→   274→    public function generate(Request $request): RedirectResponse
+   275→   275→    {
+   276→   276→        /** @var User $me */
+   277→   277→        $me = $request->user();
+   278→   278→
+   279→   279→        $data = $request->validate([
+   280→   280→            'periodType' => ['required', 'string', Rule::in(Atelier::INCENTIVE_PERIOD_TYPES)],
+   281→   281→            'periodValue' => ['required', 'string', 'max:20'],
+   282→   282→            'schemeId' => ['nullable', 'string'],
+   283→   283→        ]);
+   284→   284→
+   285→   285→        $periodType = (string) $data['periodType'];
+   286→   286→        $periodValue = strtoupper(trim((string) $data['periodValue']));
+   287→   287→        $format = self::SCHEME_PERIOD_MAP[$periodType];
+   288→   288→
+   289→   289→        if ($periodValue === '' || preg_match($format['pattern'], $periodValue) !== 1) {
+   290→   290→            return redirect()
+   291→   291→                ->back()
+   292→   292→                ->with('error', __('inc.toast.'.$format['format']));
+   293→   293→        }
+   294→   294→
+   295→   295→        // Target schemes: every ACTIVE scheme of the posted period type,
+   296→   296→        // or the single scheme named by the optional schemeId input.
+   297→   297→        $schemeId = trim((string) ($data['schemeId'] ?? ''));
+   298→   298→
+   299→   299→        $schemes = IncentiveScheme::query()
+   300→   300→            ->where('is_active', true)
+   301→   301→            ->when($schemeId !== '', fn ($query) => $query->where('id', $schemeId))
+   302→   302→            ->when($schemeId === '', fn ($query) => $query->where('period_type', $periodType))
+   303→   303→            ->orderBy('name')
+   304→   304→            ->get();
+   305→   305→
+   306→   306→        if ($schemes->isEmpty()) {
+   307→   307→            return redirect()
+   308→   308→                ->back()
+   309→   309→                ->with('error', __('inc.toast.selectSchemeDesc'));
+   310→   310→        }
+   311→   311→
+   312→   312→        $activeStaff = User::query()
+   313→   313→            ->where('is_active', true)
+   314→   314→            ->where('role', 'STAFF')
+   315→   315→            ->orderBy('name')
+   316→   316→            ->get();
+   317→   317→
+   318→   318→        // Existing (scheme, staff, period) rows — skipped silently.
+   319→   319→        $existing = IncentiveRecord::query()
+   320→   320→            ->where('period', $periodValue)
+   321→   321→            ->whereIn('scheme_id', $schemes->pluck('id'))
+   322→   322→            ->get(['scheme_id', 'staff_id']);
+   323→   323→
+   324→   324→        $existingKeys = [];
+   325→   325→
+   326→   326→        foreach ($existing as $row) {
+   327→   327→            $existingKeys[$row->scheme_id.'|'.$row->staff_id] = true;
+   328→   328→        }
+   329→   329→
+   330→   330→        $created = 0;
+   331→   331→
+   332→   332→        try {
+   333→   333→            // Performance results cached per range type (MONTH | QUARTER |
+   334→   334→            // YEAR — SCHEME_PERIOD_MAP port); the service is owned by the
+   335→   335→            // parallel R1 agent and called through its documented API.
+   336→   336→            $performance = [];
+   337→   337→
+   338→   338→            foreach ($schemes as $scheme) {
+   339→   339→                $rangeType = self::SCHEME_PERIOD_MAP[$scheme->period_type]['range'] ?? 'MONTH';
+   340→   340→
+   341→   341→                if (! array_key_exists($rangeType, $performance)) {
+   342→   342→                    $performance[$rangeType] = $this->performanceScores(
+   343→   343→                        PerformanceService::forRange($rangeType, $periodValue)
+   344→   344→                    );
+   345→   345→                }
+   346→   346→
+   347→   347→                $scores = $performance[$rangeType];
+   348→   348→                $field = $this->schemeScoreField($scheme->period_type);
+   349→   349→
+   350→   350→                foreach ($activeStaff as $staff) {
+   351→   351→                    $score = $scores[$staff->id][$field] ?? null;
+   352→   352→
+   353→   353→                    if ($score === null
+   354→   354→                        || ($scheme->min_score !== null && $score < $scheme->min_score)) {
+   355→   355→                        continue; // no score, or below the scheme threshold
+   356→   356→                    }
+   357→   357→
+   358→   358→                    if (isset($existingKeys[$scheme->id.'|'.$staff->id])) {
+   359→   359→                        continue; // already generated for (scheme, staff, period)
+   360→   360→                    }
+   361→   361→
+   362→   362→                    IncentiveRecord::query()->create([
+   363→   363→                        'scheme_id' => $scheme->id,
+   364→   364→                        'scheme_name' => $scheme->name,
+   365→   365→                        'staff_id' => $staff->id,
+   366→   366→                        'staff_name' => $staff->name,
+   367→   367→                        'period' => $periodValue,
+   368→   368→                        'performance_score' => $score,
+   369→   369→                        'eligible' => true,
+   370→   370→                        'proposed_amount' => $scheme->amount ?? 0,
+   371→   371→                        'status' => 'PENDING',
+   372→   372→                        'payment_status' => 'UNPAID',
+   373→   373→                    ]);
+   374→   374→
+   375→   375→                    $existingKeys[$scheme->id.'|'.$staff->id] = true;
+   376→   376→                    $created++;
+   377→   377→                }
+   378→   378→            }
+   379→   379→        } catch (Throwable) {
+   380→   380→            return redirect()
+   381→   381→                ->back()
+   382→   382→                ->with('error', __('inc.toast.generationFailed'));
+   383→   383→        }
+   384→   384→
+   385→   385→        Audit::log(
+   386→   386→            $me,
+   387→   387→            'INCENTIVE_RECOMMENDATIONS_GENERATED',
+   388→   388→            'INCENTIVE_SCHEME',
+   389→   389→            $schemes->count() === 1 ? $schemes->first()->id : null,
+   390→   390→            [
+   391→   391→                'created' => $created,
+   392→   392→                'period' => $periodValue,
+   393→   393→                'periodType' => $periodType,
+   394→   394→                'schemes' => $schemes->pluck('name')->all(),
+   395→   395→            ]
+   396→   396→        );
+   397→   397→
+   398→   398→        return redirect()
+   399→   399→            ->back()
+   400→   400→            ->with('success', Trans::fill('inc.toast.generatedDesc', [
+   401→   401→                'total' => $created,
+   402→   402→                'eligible' => $created,
+   403→   403→            ]));
+   404→   404→    }
+   405→   405→
+   406→   406→    /**
+   407→   407→     * POST /incentives/{id}/review — approve or reject a recommendation
+   408→   408→     * (route perm incentives.approve — MANAGEMENT only).
+   409→   409→     *
+   410→   410→     * Input contract: decision (approve|reject). approve requires
+   411→   411→     * approvedAmount (numeric > 0); reject requires rejectionReason
+   412→   412→     * (min 3, stored in management_comments — rejection is a Management
+   413→   413→     * decision). Optional comments / approvalComments are stored in
+   414→   414→     * approval_comments. Only PENDING records are reviewable; the
+   415→   415→     * decision is final (regeneration never touches reviewed rows).
+   416→   416→     */
+   417→   417→    public function review(Request $request, string $id): RedirectResponse
+   418→   418→    {
+   419→   419→        /** @var User $me */
+   420→   420→        $me = $request->user();
+   421→   421→
+   422→   422→        $base = $request->validate([
+   423→   423→            'decision' => ['required', 'string', Rule::in(['approve', 'reject'])],
+   424→   424→        ]);
+   425→   425→
+   426→   426→        $decision = (string) $base['decision'];
+   427→   427→
+   428→   428→        // Decision-specific requirements (validation errors, not flashes).
+   429→   429→        $data = $request->validate($decision === 'approve' ? [
+   430→   430→            'approvedAmount' => ['required', 'numeric', 'gt:0'],
+   431→   431→            'comments' => ['nullable', 'string', 'max:2000'],
+   432→   432→            'approvalComments' => ['nullable', 'string', 'max:2000'],
+   433→   433→        ] : [
+   434→   434→            'rejectionReason' => ['required', 'string', 'min:3', 'max:2000'],
+   435→   435→            'comments' => ['nullable', 'string', 'max:2000'],
+   436→   436→            'approvalComments' => ['nullable', 'string', 'max:2000'],
+   437→   437→        ]);
+   438→   438→
+   439→   439→        $record = IncentiveRecord::query()->findOrFail($id);
+   440→   440→
+   441→   441→        if ($record->status !== 'PENDING') {
+   442→   442→            return redirect()
+   443→   443→                ->back()
+   444→   444→                ->with('error', __('inc.toast.reviewFailed'));
+   445→   445→        }
+   446→   446→
+   447→   447→        $note = trim((string) ($data['approvalComments'] ?? $data['comments'] ?? ''));
+   448→   448→
+   449→   449→        if ($decision === 'approve') {
+   450→   450→            $amount = (float) $data['approvedAmount'];
+   451→   451→
+   452→   452→            $record->forceFill([
+   453→   453→                'status' => 'APPROVED',
+   454→   454→                'approved_amount' => $amount,
+   455→   455→                'approved_by_id' => $me->id,
+   456→   456→                'approved_by_name' => $me->name,
+   457→   457→                'approval_comments' => $note !== '' ? $note : null,
+   458→   458→            ])->save();
+   459→   459→
+   460→   460→            Audit::log($me, 'INCENTIVE_APPROVED', 'INCENTIVE_RECORD', $record->id, [
+   461→   461→                'recordId' => $record->id,
+   462→   462→                'amount' => $amount,
+   463→   463→                'staffName' => $record->staff_name,
+   464→   464→                'period' => $record->period,
+   465→   465→            ]);
+   466→   466→
+   467→   467→            return redirect()
+   468→   468→                ->back()
+   469→   469→                ->with('success', __('inc.toast.approvedTitle'));
+   470→   470→        }
+   471→   471→
+   472→   472→        $record->forceFill([
+   473→   473→            'status' => 'REJECTED',
+   474→   474→            'approved_by_id' => $me->id,
+   475→   475→            'approved_by_name' => $me->name,
+   476→   476→            'management_comments' => trim((string) $data['rejectionReason']),
+   477→   477→            'approval_comments' => $note !== '' ? $note : null,
+   478→   478→        ])->save();
+   479→   479→
+   480→   480→        Audit::log($me, 'INCENTIVE_REJECTED', 'INCENTIVE_RECORD', $record->id, [
+   481→   481→            'recordId' => $record->id,
+   482→   482→            'amount' => $record->proposed_amount,
+   483→   483→            'staffName' => $record->staff_name,
+   484→   484→            'period' => $record->period,
+   485→   485→        ]);
+   486→   486→
+   487→   487→        return redirect()
+   488→   488→            ->back()
+   489→   489→            ->with('success', __('inc.toast.rejectedTitle'));
+   490→   490→    }
+   491→   491→
+   492→   492→    /**
+   493→   493→     * POST /incentives/{id}/payment — record a payout (route perm
+   494→   494→     * incentives.payment — MANAGEMENT only).
+   495→   495→     *
+   496→   496→     * Input contract: paidAt (optional date, defaults to now) sets
+   497→   497→     * payment_status PAID + the payment_date column. Only APPROVED and
+   498→   498→     * still-unpaid records can be paid.
+   499→   499→     */
+   500→   500→    public function payment(Request $request, string $id): RedirectResponse
+   501→   501→    {
+   502→   502→        /** @var User $me */
+   503→   503→        $me = $request->user();
+   504→   504→
+   505→   505→        $data = $request->validate([
+   506→   506→            'paidAt' => ['nullable', 'date'],
+   507→   507→        ]);
+   508→   508→
+   509→   509→        $record = IncentiveRecord::query()->findOrFail($id);
+   510→   510→
+   511→   511→        if ($record->status !== 'APPROVED' || $record->payment_status === 'PAID') {
+   512→   512→            return redirect()
+   513→   513→                ->back()
+   514→   514→                ->with('error', __('inc.toast.paymentFailed'));
+   515→   515→        }
+   516→   516→
+   517→   517→        $paidAt = isset($data['paidAt']) && $data['paidAt'] !== null
+   518→   518→            ? Carbon::parse((string) $data['paidAt'])
+   519→   519→            : now();
+   520→   520→
+   521→   521→        $record->forceFill([
+   522→   522→            'payment_status' => 'PAID',
+   523→   523→            'payment_date' => $paidAt,
+   524→   524→        ])->save();
+   525→   525→
+   526→   526→        Audit::log($me, 'INCENTIVE_PAYMENT_RECORDED', 'INCENTIVE_RECORD', $record->id, [
+   527→   527→            'recordId' => $record->id,
+   528→   528→            'staffName' => $record->staff_name,
+   529→   529→            'amount' => $record->approved_amount,
+   530→   530→            'paymentDate' => $paidAt->format(DATE_ATOM),
+   531→   531→        ]);
+   532→   532→
+   533→   533→        return redirect()
+   534→   534→            ->back()
+   535→   535→            ->with('success', __('inc.toast.paymentRecorded'));
+   536→   536→    }
+   537→   537→
+   538→   538→    // ------------------------------------------------------------------
+   539→   539→    // View-data helpers (snapshot hydration)
+   540→   540→    // ------------------------------------------------------------------
+   541→   541→
+   542→   542→    /**
+   543→   543→     * All schemes, newest first, each carrying its evaluation count as an
+   544→   544→     * in-memory recordsCount / records_count attribute (IncentiveScheme
+   545→   545→     * has no Eloquent relations — the count cannot be eager-loaded).
+   546→   546→     */
+   547→   547→    private function schemesWithRecordCounts(): Collection
+   548→   548→    {
+   549→   549→        $schemes = IncentiveScheme::query()->orderByDesc('created_at')->get();
+   550→   550→
+   551→   551→        $counts = IncentiveRecord::query()
+   552→   552→            ->whereIn('scheme_id', $schemes->pluck('id'))
+   553→   553→            ->groupBy('scheme_id')
+   554→   554→            ->selectRaw('scheme_id, count(*) as aggregate')
+   555→   555→            ->pluck('aggregate', 'scheme_id');
+   556→   556→
+   557→   557→        return $schemes->each(static function (IncentiveScheme $scheme) use ($counts): void {
+   558→   558→            $count = (int) ($counts[$scheme->id] ?? 0);
+   559→   559→
+   560→   560→            $scheme->setAttribute('recordsCount', $count);
+   561→   561→            $scheme->setAttribute('records_count', $count);
+   562→   562→        });
+   563→   563→    }
+   564→   564→
+   565→   565→    /**
+   566→   566→     * Attach the related User / IncentiveScheme models to each record row
+   567→   567→     * IN MEMORY (IncentiveRecord has no Eloquent relations): ->user,
+   568→   568→     * ->scheme and ->approvedBy, null when the account / scheme was
+   569→   569→     * deleted — the snapshots (staff_name, scheme_name,
+   570→   570→     * approved_by_name) always exist.
+   571→   571→     */
+   572→   572→    private function hydrateRecords(LengthAwarePaginator $records): void
+   573→   573→    {
+   574→   574→        $rows = $records->getCollection();
+   575→   575→
+   576→   576→        $staffIds = $rows->pluck('staff_id')
+   577→   577→            ->filter(static fn ($id) => (string) $id !== '')
+   578→   578→            ->unique()
+   579→   579→            ->values();
+   580→   580→
+   581→   581→        $approverIds = $rows->pluck('approved_by_id')
+   582→   582→            ->filter(static fn ($id) => (string) $id !== '')
+   583→   583→            ->unique()
+   584→   584→            ->values();
+   585→   585→
+   586→   586→        $schemeIds = $rows->pluck('scheme_id')
+   587→   587→            ->filter(static fn ($id) => (string) $id !== '')
+   588→   588→            ->unique()
+   589→   589→            ->values();
+   590→   590→
+   591→   591→        $userIds = $staffIds->merge($approverIds)->unique()->values();
+   592→   592→
+   593→   593→        $users = $userIds->isEmpty()
+   594→   594→            ? Collection::make()
+   595→   595→            : User::query()->whereIn('id', $userIds)->get()->keyBy('id');
+   596→   596→
+   597→   597→        $schemes = $schemeIds->isEmpty()
+   598→   598→            ? Collection::make()
+   599→   599→            : IncentiveScheme::query()->whereIn('id', $schemeIds)->get()->keyBy('id');
+   600→   600→
+   601→   601→        $rows->each(static function (IncentiveRecord $record) use ($users, $schemes): void {
+   602→   602→            $record->setAttribute('user', $users->get($record->staff_id));
+   603→   603→            $record->setAttribute('scheme', $schemes->get($record->scheme_id));
+   604→   604→            $record->setAttribute('approvedBy', $users->get($record->approved_by_id));
+   605→   605→        });
+   606→   606→    }
+   607→   607→
+   608→   608→    // ------------------------------------------------------------------
+   609→   609→    // PerformanceService row parsing (defensive)
+   610→   610→    // ------------------------------------------------------------------
+   611→   611→
+   612→   612→    /**
+   613→   613→     * Normalize a PerformanceService result into a plain list of row
+   614→   614→     * arrays. Defensive per the A3 contract: accepts a plain list of rows
+   615→   615→     * OR a ['rows' => …] / ['staff' => …] envelope, arrays or Traversable.
+   616→   616→     *
+   617→   617→     * @return list<array<string, mixed>>
+   618→   618→     */
+   619→   619→    private function performanceRows(mixed $result): array
+   620→   620→    {
+   621→   621→        if ($result instanceof Traversable) {
+   622→   622→            $result = iterator_to_array($result);
+   623→   623→        }
+   624→   624→
+   625→   625→        if (! is_array($result)) {
+   626→   626→            return [];
+   627→   627→        }
+   628→   628→
+   629→   629→        foreach (['rows', 'staff'] as $key) {
+   630→   630→            if (isset($result[$key]) && is_array($result[$key])) {
+   631→   631→                return array_values($result[$key]);
+   632→   632→            }
+   633→   633→        }
+   634→   634→
+   635→   635→        return array_values($result);
+   636→   636→    }
+   637→   637→
+   638→   638→    /**
+   639→   639→     * Staff id of a performance row — read from the explicit staffId /
+   640→   640→     * staff_id / userId / user_id keys (Next.js StaffPerformance shape)
+   641→   641→     * or from the nested User model ('user' => User, the PerformanceService
+   642→   642→     * row shape).
+   643→   643→     *
+   644→   644→     * @param  array<string, mixed>  $row
+   645→   645→     */
+   646→   646→    private function rowStaffId(array $row): ?string
+   647→   647→    {
+   648→   648→        foreach (['staffId', 'staff_id', 'userId', 'user_id'] as $key) {
+   649→   649→            if (isset($row[$key]) && (string) $row[$key] !== '') {
+   650→   650→                return (string) $row[$key];
+   651→   651→            }
+   652→   652→        }
+   653→   653→
+   654→   654→        $user = $row['user'] ?? null;
+   655→   655→
+   656→   656→        return $user instanceof User ? (string) $user->id : null;
+   657→   657→    }
+   658→   658→
+   659→   659→    /**
+   660→   660→     * One numeric score of a performance row, read defensively: nested
+   661→   661→     * scores.<field> first (Next.js shape), then the flat <field> key
+   662→   662→     * (PerformanceService shape), then the overallScore / overall_score
+   663→   663→     * fallbacks for the overall score.
+   664→   664→     *
+   665→   665→     * @param  array<string, mixed>  $row
+   666→   666→     */
+   667→   667→    private function numericField(array $row, string $field): ?float
+   668→   668→    {
+   669→   669→        $scores = $row['scores'] ?? null;
+   670→   670→
+   671→   671→        if (is_array($scores) && isset($scores[$field]) && is_numeric($scores[$field])) {
+   672→   672→            return (float) $scores[$field];
+   673→   673→        }
+   674→   674→
+   675→   675→        if (isset($row[$field]) && is_numeric($row[$field])) {
+   676→   676→            return (float) $row[$field];
+   677→   677→        }
+   678→   678→
+   679→   679→        if ($field === 'overall') {
+   680→   680→            foreach (['overallScore', 'overall_score'] as $key) {
+   681→   681→                if (isset($row[$key]) && is_numeric($row[$key])) {
+   682→   682→                    return (float) $row[$key];
+   683→   683→                }
+   684→   684→            }
+   685→   685→        }
+   686→   686→
+   687→   687→        return null;
+   688→   688→    }
+   689→   689→
+   690→   690→    /**
+   691→   691→     * staffId => per-field performance scores (quality / timeliness /
+   692→   692→     * overall) for one PerformanceService result.
+   693→   693→     *
+   694→   694→     * @return array<string, array{quality: ?float, timeliness: ?float, overall: ?float}>
+   695→   695→     */
+   696→   696→    private function performanceScores(mixed $result): array
+   697→   697→    {
+   698→   698→        $scores = [];
+   699→   699→
+   700→   700→        foreach ($this->performanceRows($result) as $row) {
+   701→   701→            $staffId = $this->rowStaffId($row);
+   702→   702→
+   703→   703→            if ($staffId === null) {
+   704→   704→                continue;
+   705→   705→            }
+   706→   706→
+   707→   707→            $scores[$staffId] = [
+   708→   708→                'quality' => $this->numericField($row, 'quality'),
+   709→   709→                'timeliness' => $this->numericField($row, 'timeliness'),
+   710→   710→                'overall' => $this->numericField($row, 'overall'),
+   711→   711→            ];
+   712→   712→        }
+   713→   713→
+   714→   714→        return $scores;
+   715→   715→    }
+   716→   716→
+   717→   717→    /**
+   718→   718→     * Performance field a scheme scores against (Next.js parity): QUALITY
+   719→   719→     * schemes evaluate the quality score, ON_TIME the timeliness score,
+   720→   720→     * everything else the overall score.
+   721→   721→     */
+   722→   722→    private function schemeScoreField(string $periodType): string
+   723→   723→    {
+   724→   724→        if ($periodType === 'QUALITY') {
+   725→   725→            return 'quality';
+   726→   726→        }
+   727→   727→
+   728→   728→        if ($periodType === 'ON_TIME') {
+   729→   729→            return 'timeliness';
+   730→   730→        }
+   731→   731→
+   732→   732→        return 'overall';
+   733→   733→    }
+   734→   734→}
+   735→   735→

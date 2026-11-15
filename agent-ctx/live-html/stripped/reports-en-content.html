@@ -1,0 +1,169 @@
+<!-- TITLE: Reports — OSSZ ATELIER | source: reports-en.html | content-only (layout stripped) -->
+                    
+    <div class="space-y-4">
+        <p class="max-w-3xl text-sm text-muted-foreground">Period summary of registered orders, deliveries, completions and staff performance.</p>
+
+        
+        <section class="rounded-xl border bg-card shadow-sm" aria-labelledby="rep-period-heading">
+            <div class="flex flex-wrap items-center justify-between gap-3 border-b px-4 py-3 sm:px-6">
+                <h2 id="rep-period-heading" class="font-display text-base font-semibold">Reporting Period</h2>
+                <p class="text-sm font-medium text-muted-foreground">Nov 1, 2026 — Nov 30, 2026</p>
+            </div>
+
+            <form method="GET" action="https://atelier.osszcollection.com/reports" class="flex flex-wrap items-end gap-3 px-4 py-4 sm:px-6">
+                <div class="w-48 space-y-1.5">
+                    <label for="rep-period" class="text-sm font-medium">Report type</label>
+                    <select id="rep-period" name="period"
+                            class="h-9 w-full rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
+                        <option value="month" selected>Monthly report</option>
+                        <option value="quarter" >Quarterly report</option>
+                        <option value="year" >Annual report</option>
+                    </select>
+                </div>
+                <button type="submit"
+                        class="inline-flex h-9 items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-ring">
+                    Filter
+                </button>
+            </form>
+        </section>
+
+        
+        <div class="grid grid-cols-2 gap-3 md:grid-cols-4">
+            <div class="rounded-xl border bg-card p-4 shadow-sm">
+                <p class="text-xs font-medium text-muted-foreground">Tasks Registered</p>
+                <p class="mt-1 font-display text-2xl font-semibold tabular-nums">3</p>
+                <p class="mt-0.5 text-xs text-muted-foreground">created in period</p>
+            </div>
+            <div class="rounded-xl border bg-card p-4 shadow-sm">
+                <p class="text-xs font-medium text-muted-foreground">Tasks Completed</p>
+                <p class="mt-1 font-display text-2xl font-semibold tabular-nums">3</p>
+                <p class="mt-0.5 text-xs text-muted-foreground">approved in period</p>
+            </div>
+            <div class="rounded-xl border bg-card p-4 shadow-sm">
+                <p class="text-xs font-medium text-muted-foreground">Tasks Delivered</p>
+                <p class="mt-1 font-display text-2xl font-semibold tabular-nums">3</p>
+                <p class="mt-0.5 text-xs text-muted-foreground">collected in period</p>
+            </div>
+            <div class="rounded-xl border bg-card p-4 shadow-sm">
+                <p class="text-xs font-medium text-muted-foreground">Pieces Completed</p>
+                <p class="mt-1 font-display text-2xl font-semibold tabular-nums">3</p>
+                <p class="mt-0.5 text-xs text-muted-foreground">one task = one garment piece</p>
+            </div>
+            <div class="rounded-xl border bg-card p-4 shadow-sm">
+                <p class="text-xs font-medium text-muted-foreground">Avg Progress</p>
+                <p class="mt-1 font-display text-2xl font-semibold tabular-nums text-red-700">10%</p>
+                <p class="mt-0.5 text-xs text-muted-foreground">Nov 1, 2026 — Nov 30, 2026</p>
+            </div>
+            <div class="rounded-xl border bg-card p-4 shadow-sm">
+                <p class="text-xs font-medium text-muted-foreground">Overdue</p>
+                <p class="mt-1 font-display text-2xl font-semibold tabular-nums text-red-700">1</p>
+                <p class="mt-0.5 text-xs text-muted-foreground">Nov 1, 2026 — Nov 30, 2026</p>
+            </div>
+            <div class="rounded-xl border bg-card p-4 shadow-sm">
+                <p class="text-xs font-medium text-muted-foreground">Blocked</p>
+                <p class="mt-1 font-display text-2xl font-semibold tabular-nums ">0</p>
+                <p class="mt-0.5 text-xs text-muted-foreground">Nov 1, 2026 — Nov 30, 2026</p>
+            </div>
+            <div class="rounded-xl border bg-card p-4 shadow-sm">
+                <p class="text-xs font-medium text-muted-foreground">Cancelled</p>
+                <p class="mt-1 font-display text-2xl font-semibold tabular-nums">0</p>
+                <p class="mt-0.5 text-xs text-muted-foreground">Nov 1, 2026 — Nov 30, 2026</p>
+            </div>
+        </div>
+
+        
+        <div class="grid gap-4 lg:grid-cols-2">
+            <section class="rounded-xl border bg-card shadow-sm" aria-labelledby="rep-status-heading">
+                <div class="border-b px-4 py-3 sm:px-6">
+                    <h2 id="rep-status-heading" class="font-display text-base font-semibold">Tasks by Status</h2>
+                </div>
+                                                    <ul class="space-y-3 px-4 py-4 sm:px-6">
+                                                                                <li>
+                                <div class="flex items-center justify-between gap-3 text-sm">
+                                    <span class="flex min-w-0 items-center gap-2">
+                                        <span class="inline-block size-2.5 shrink-0 rounded-full bg-stone-300" aria-hidden="true"></span>
+                                        <span class="truncate">Unassigned</span>
+                                    </span>
+                                    <span class="shrink-0 font-medium tabular-nums">2 <span class="text-xs font-normal text-muted-foreground">(67%)</span></span>
+                                </div>
+                                <div class="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                                    <div class="h-full rounded-full bg-stone-300" style="width: 67%"></div>
+                                </div>
+                            </li>
+                                                                                <li>
+                                <div class="flex items-center justify-between gap-3 text-sm">
+                                    <span class="flex min-w-0 items-center gap-2">
+                                        <span class="inline-block size-2.5 shrink-0 rounded-full bg-amber-400" aria-hidden="true"></span>
+                                        <span class="truncate">Ongoing</span>
+                                    </span>
+                                    <span class="shrink-0 font-medium tabular-nums">1 <span class="text-xs font-normal text-muted-foreground">(33%)</span></span>
+                                </div>
+                                <div class="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                                    <div class="h-full rounded-full bg-amber-400" style="width: 33%"></div>
+                                </div>
+                            </li>
+                                            </ul>
+                            </section>
+
+            <section class="rounded-xl border bg-card shadow-sm" aria-labelledby="rep-category-heading">
+                <div class="border-b px-4 py-3 sm:px-6">
+                    <h2 id="rep-category-heading" class="font-display text-base font-semibold">Tasks by Category</h2>
+                </div>
+                                                    <ul class="space-y-3 px-4 py-4 sm:px-6">
+                                                                                <li>
+                                <div class="flex items-center justify-between gap-3 text-sm">
+                                    <span class="flex min-w-0 items-center gap-2">
+                                        <span class="inline-block size-2.5 shrink-0 rounded-full bg-teal-400" aria-hidden="true"></span>
+                                        <span class="truncate">Full Production</span>
+                                    </span>
+                                    <span class="shrink-0 font-medium tabular-nums">3 <span class="text-xs font-normal text-muted-foreground">(100%)</span></span>
+                                </div>
+                                <div class="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                                    <div class="h-full rounded-full bg-teal-400" style="width: 100%"></div>
+                                </div>
+                            </li>
+                                            </ul>
+                            </section>
+        </div>
+
+        
+        <section class="rounded-xl border bg-card shadow-sm" aria-labelledby="rep-top-staff-heading">
+            <div class="flex flex-wrap items-center justify-between gap-3 border-b px-4 py-3 sm:px-6">
+                <h2 id="rep-top-staff-heading" class="font-display text-base font-semibold">Top Staff</h2>
+                <p class="text-xs text-muted-foreground">Nov 1, 2026 — Nov 30, 2026</p>
+            </div>
+
+                            <div class="overflow-x-auto">
+                    <table class="w-full min-w-[480px] text-sm">
+                        <thead class="bg-muted/50 text-xs font-medium text-muted-foreground">
+                            <tr class="border-b">
+                                <th scope="col" class="px-4 py-2.5 text-left">Staff</th>
+                                <th scope="col" class="px-3 py-2.5 text-center">Completed</th>
+                                <th scope="col" class="px-3 py-2.5 text-center">Pieces</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                                                            <tr class="border-b transition-colors last:border-b-0 hover:bg-muted/30">
+                                    <td class="px-4 py-3">
+                                        <p class="font-medium">Hamidou Abdoul</p>
+                                        <p class="text-xs text-muted-foreground">USR-003</p>
+                                    </td>
+                                    <td class="px-3 py-3 text-center font-semibold tabular-nums">2</td>
+                                    <td class="px-3 py-3 text-center tabular-nums">2</td>
+                                </tr>
+                                                            <tr class="border-b transition-colors last:border-b-0 hover:bg-muted/30">
+                                    <td class="px-4 py-3">
+                                        <p class="font-medium">Lawal Sani</p>
+                                        <p class="text-xs text-muted-foreground">USR-004</p>
+                                    </td>
+                                    <td class="px-3 py-3 text-center font-semibold tabular-nums">1</td>
+                                    <td class="px-3 py-3 text-center tabular-nums">1</td>
+                                </tr>
+                                                    </tbody>
+                    </table>
+                </div>
+                    </section>
+
+        <p class="text-xs text-muted-foreground">Reports are generated from live production records — assignments, completions and inspection results.</p>
+    </div>
+            

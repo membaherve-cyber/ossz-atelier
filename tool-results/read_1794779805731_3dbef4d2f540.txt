@@ -1,0 +1,377 @@
+     1→<!-- TITLE: Staff Performance — OSSZ ATELIER | source: performance-en.html | content-only (layout stripped) -->
+     2→                    
+     3→    <div class="space-y-4">
+     4→        <p class="max-w-3xl text-sm text-muted-foreground">Metrics and weighted scores per staff member, computed from real assignments, completions and inspections.</p>
+     5→
+     6→        
+     7→        
+     8→        <section class="rounded-xl border bg-card shadow-sm" aria-labelledby="perf-period-heading">
+     9→            <div class="flex flex-wrap items-center justify-between gap-3 border-b px-4 py-3 sm:px-6">
+    10→                <h2 id="perf-period-heading" class="font-display text-base font-semibold">Reporting Period</h2>
+    11→                <p class="text-sm font-medium text-muted-foreground">November 2026</p>
+    12→            </div>
+    13→
+    14→            <form method="GET" action="https://atelier.osszcollection.com/performance" class="flex flex-wrap items-end gap-3 px-4 py-4 sm:px-6">
+    15→                <div class="w-40 space-y-1.5">
+    16→                    <label for="perf-type" class="text-sm font-medium">Period type</label>
+    17→                    <select id="perf-type" name="type"
+    18→                            class="h-9 w-full rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
+    19→                        <option value="MONTH" selected>Monthly</option>
+    20→                        <option value="QUARTER" >Quarterly</option>
+    21→                        <option value="YEAR" >Annual</option>
+    22→                    </select>
+    23→                </div>
+    24→
+    25→                <div class="w-44 space-y-1.5">
+    26→                    <label for="perf-value" class="text-sm font-medium">
+    27→                        Month
+    28→                    </label>
+    29→                    <input id="perf-value" name="value" value="2026-11" placeholder="2026-11"
+    30→                           class="h-9 w-full rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
+    31→                </div>
+    32→
+    33→                <button type="submit"
+    34→                        class="inline-flex h-9 items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-ring">
+    35→                    Apply
+    36→                </button>
+    37→
+    38→                <div class="flex items-center gap-1.5 pb-0.5">
+    39→                    <a href="https://atelier.osszcollection.com/performance?type=MONTH&amp;value=2026-10"
+    40→                       aria-label="Previous period"
+    41→                       class="inline-flex size-9 items-center justify-center rounded-md border bg-background hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring">
+    42→                        <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+    43→                    </a>
+    44→                    <a href="https://atelier.osszcollection.com/performance?type=MONTH&amp;value=2026-12"
+    45→                       aria-label="Next period"
+    46→                       class="inline-flex size-9 items-center justify-center rounded-md border bg-background hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring">
+    47→                        <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+    48→                    </a>
+    49→                </div>
+    50→            </form>
+    51→        </section>
+    52→
+    53→        
+    54→                    <section class="rounded-xl border bg-card shadow-sm" aria-labelledby="perf-weights-heading">
+    55→                <div class="flex flex-wrap items-center justify-between gap-3 border-b px-4 py-3 sm:px-6">
+    56→                    <h2 id="perf-weights-heading" class="font-display text-base font-semibold">Weights Configuration</h2>
+    57→                    <button type="submit" form="perf-weights-form"
+    58→                            class="inline-flex h-9 items-center gap-1.5 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-ring">
+    59→                        <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 0 2.8L10.4 19.2a2 2 0 0 1-1.4.6H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 .6-1.4L14.2 3.6A2 2 0 0 1 15.2 3z"/><path d="M16 8l-8 8"/></svg>
+    60→                        Save Weights
+    61→                    </button>
+    62→                </div>
+    63→
+    64→                <form id="perf-weights-form" method="POST" action="https://atelier.osszcollection.com/performance/config" class="px-4 py-4 sm:px-6">
+    65→                    <input type="hidden" name="_token" value="dNzunr1u0Or0RPmvjYSF1yNP9NPtnIvIjrU6DnoG" autocomplete="off">                    <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+    66→                        <div class="space-y-1.5">
+    67→                            <label for="w-productivity" class="text-sm font-medium">Productivity %</label>
+    68→                            <input id="w-productivity" type="number" min="0" max="100" name="productivityWeight"
+    69→                                   value="30"
+    70→                                   class="h-9 w-full rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
+    71→                                                    </div>
+    72→                        <div class="space-y-1.5">
+    73→                            <label for="w-timely" class="text-sm font-medium">Timely Completion %</label>
+    74→                            <input id="w-timely" type="number" min="0" max="100" name="timelyWeight"
+    75→                                   value="25"
+    76→                                   class="h-9 w-full rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
+    77→                                                    </div>
+    78→                        <div class="space-y-1.5">
+    79→                            <label for="w-quality" class="text-sm font-medium">Quality &amp; Approval %</label>
+    80→                            <input id="w-quality" type="number" min="0" max="100" name="qualityWeight"
+    81→                                   value="30"
+    82→                                   class="h-9 w-full rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
+    83→                                                    </div>
+    84→                        <div class="space-y-1.5">
+    85→                            <label for="w-reliability" class="text-sm font-medium">Reliability %</label>
+    86→                            <input id="w-reliability" type="number" min="0" max="100" name="reliabilityWeight"
+    87→                                   value="10"
+    88→                                   class="h-9 w-full rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
+    89→                                                    </div>
+    90→                        <div class="space-y-1.5">
+    91→                            <label for="w-management" class="text-sm font-medium">Management Assessment %</label>
+    92→                            <input id="w-management" type="number" min="0" max="100" name="managementWeight"
+    93→                                   value="5"
+    94→                                   class="h-9 w-full rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
+    95→                                                    </div>
+    96→                        <div class="space-y-1.5">
+    97→                            <label for="w-piece-target" class="text-sm font-medium">Piece Target / month</label>
+    98→                            <input id="w-piece-target" type="number" min="1" max="500" name="pieceTarget"
+    99→                                   value="20"
+   100→                                   class="h-9 w-full rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
+   101→                                                    </div>
+   102→                    </div>
+   103→
+   104→                    <div class="mt-4 flex flex-wrap items-center justify-between gap-2">
+   105→                        <p class="text-sm font-medium text-emerald-700">
+   106→                            Total weight: 100%
+   107→                            — balanced
+   108→                        </p>
+   109→                        <p class="text-xs text-muted-foreground">
+   110→                            Piece target: 20 pieces per month for 100% productivity.
+   111→                        </p>
+   112→                    </div>
+   113→                </form>
+   114→            </section>
+   115→        
+   116→        
+   117→                    <section class="rounded-xl border bg-card shadow-sm" aria-labelledby="perf-staff-heading">
+   118→                <div class="border-b px-4 py-3 sm:px-6">
+   119→                    <h2 id="perf-staff-heading" class="font-display text-base font-semibold">
+   120→                        Staff Performance — November 2026
+   121→                    </h2>
+   122→                </div>
+   123→
+   124→                <div class="overflow-x-auto">
+   125→                    <table class="w-full min-w-[1150px] text-sm">
+   126→                        <thead class="bg-muted/50 text-xs font-medium text-muted-foreground">
+   127→                            <tr class="border-b">
+   128→                                <th rowspan="2" scope="col" class="px-4 py-2.5 text-left">Staff</th>
+   129→                                <th colspan="8" scope="colgroup" class="border-l px-3 py-2.5 text-center">Recorded metrics</th>
+   130→                                <th colspan="5" scope="colgroup" class="border-l px-3 py-2.5 text-center">Scores</th>
+   131→                                <th rowspan="2" scope="col" class="border-l px-3 py-2.5 text-center">Overall</th>
+   132→                                <th rowspan="2" scope="col" class="border-l min-w-[130px] px-3 py-2.5 text-left">Mgmt Assessment</th>
+   133→                            </tr>
+   134→                            <tr class="border-b">
+   135→                                <th scope="col" class="border-l px-3 py-2.5 text-center">Assigned</th>
+   136→                                <th scope="col" class="px-3 py-2.5 text-center">Completed</th>
+   137→                                <th scope="col" class="px-3 py-2.5 text-center">On-time</th>
+   138→                                <th scope="col" class="px-3 py-2.5 text-center">Overdue</th>
+   139→                                <th scope="col" class="px-3 py-2.5 text-center">Avg Hours</th>
+   140→                                <th scope="col" class="px-3 py-2.5 text-center">Quality %</th>
+   141→                                <th scope="col" class="px-3 py-2.5 text-center">Corrections</th>
+   142→                                <th scope="col" class="px-3 py-2.5 text-center">Blocked</th>
+   143→                                <th scope="col" class="border-l px-3 py-2.5 text-center">Productivity</th>
+   144→                                <th scope="col" class="px-3 py-2.5 text-center">Timeliness</th>
+   145→                                <th scope="col" class="px-3 py-2.5 text-center">Quality</th>
+   146→                                <th scope="col" class="px-3 py-2.5 text-center">Reliability</th>
+   147→                                <th scope="col" class="px-3 py-2.5 text-center">Mgmt</th>
+   148→                            </tr>
+   149→                        </thead>
+   150→                        <tbody>
+   151→                                                                                            <tr class="border-b transition-colors last:border-b-0 hover:bg-muted/30">
+   152→                                    <td class="px-4 py-3">
+   153→                                        <div class="min-w-[160px]">
+   154→                                            <p class="font-medium">Hamidou Abdoul</p>
+   155→                                            <p class="truncate text-xs text-muted-foreground">USR-003 · hamidou@atelier.com</p>
+   156→                                        </div>
+   157→                                    </td>
+   158→                                    <td class="border-l px-3 py-3 text-center tabular-nums">0</td>
+   159→                                    <td class="px-3 py-3 text-center tabular-nums">
+   160→                                        2<span class="text-muted-foreground">/20</span>
+   161→                                    </td>
+   162→                                    <td class="px-3 py-3 text-center tabular-nums">2</td>
+   163→                                    <td class="px-3 py-3 text-center tabular-nums ">0</td>
+   164→                                    <td class="px-3 py-3 text-center tabular-nums">336</td>
+   165→                                    <td class="px-3 py-3 text-center tabular-nums">100%</td>
+   166→                                    <td class="px-3 py-3 text-center tabular-nums">0</td>
+   167→                                    <td class="px-3 py-3 text-center tabular-nums">0</td>
+   168→                                    <td class="border-l px-3 py-3 text-center tabular-nums text-red-700">10</td>
+   169→                                    <td class="px-3 py-3 text-center tabular-nums text-emerald-700">100</td>
+   170→                                    <td class="px-3 py-3 text-center tabular-nums text-emerald-700">100</td>
+   171→                                    <td class="px-3 py-3 text-center tabular-nums text-emerald-700">100</td>
+   172→                                    <td class="px-3 py-3 text-center tabular-nums text-muted-foreground">—</td>
+   173→                                    <td class="border-l px-3 py-3 text-center">
+   174→                                        <span class="font-bold tabular-nums text-amber-700">71.6</span>
+   175→                                    </td>
+   176→                                    <td class="border-l px-3 py-3">
+   177→                                                                                    <form method="POST" action="https://atelier.osszcollection.com/performance/assess"
+   178→                                                  class="flex items-center gap-1" aria-label="Management assessment for Hamidou Abdoul">
+   179→                                                <input type="hidden" name="_token" value="dNzunr1u0Or0RPmvjYSF1yNP9NPtnIvIjrU6DnoG" autocomplete="off">                                                <input type="hidden" name="staffId" value="9d021fb4-9b45-4888-8a52-efe93ae1876c">
+   180→                                                <input type="hidden" name="periodValue" value="2026-11">
+   181→                                                <label for="assess-9d021fb4-9b45-4888-8a52-efe93ae1876c" class="sr-only">Score (0-100)</label>
+   182→                                                <input id="assess-9d021fb4-9b45-4888-8a52-efe93ae1876c" type="number" min="0" max="100" name="score"
+   183→                                                       value=""
+   184→                                                       class="h-8 w-[76px] rounded-md border border-input bg-background px-2 text-center text-sm focus:outline-none focus:ring-2 focus:ring-ring">
+   185→                                                                                                <button type="submit"
+   186→                                                        aria-label="Save assessment for Hamidou Abdoul"
+   187→                                                        class="inline-flex size-8 items-center justify-center rounded-md hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring">
+   188→                                                    <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 0 2.8L10.4 19.2a2 2 0 0 1-1.4.6H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 .6-1.4L14.2 3.6A2 2 0 0 1 15.2 3z"/><path d="M16 8l-8 8"/></svg>
+   189→                                                </button>
+   190→                                            </form>
+   191→                                                                            </td>
+   192→                                </tr>
+   193→                                                                                            <tr class="border-b transition-colors last:border-b-0 hover:bg-muted/30">
+   194→                                    <td class="px-4 py-3">
+   195→                                        <div class="min-w-[160px]">
+   196→                                            <p class="font-medium">Lawal Sani</p>
+   197→                                            <p class="truncate text-xs text-muted-foreground">USR-004 · lawal@atelier.com</p>
+   198→                                        </div>
+   199→                                    </td>
+   200→                                    <td class="border-l px-3 py-3 text-center tabular-nums">1</td>
+   201→                                    <td class="px-3 py-3 text-center tabular-nums">
+   202→                                        1<span class="text-muted-foreground">/20</span>
+   203→                                    </td>
+   204→                                    <td class="px-3 py-3 text-center tabular-nums">0</td>
+   205→                                    <td class="px-3 py-3 text-center tabular-nums font-semibold text-red-700">2</td>
+   206→                                    <td class="px-3 py-3 text-center tabular-nums">264</td>
+   207→                                    <td class="px-3 py-3 text-center tabular-nums">0%</td>
+   208→                                    <td class="px-3 py-3 text-center tabular-nums">0</td>
+   209→                                    <td class="px-3 py-3 text-center tabular-nums">0</td>
+   210→                                    <td class="border-l px-3 py-3 text-center tabular-nums text-red-700">5</td>
+   211→                                    <td class="px-3 py-3 text-center tabular-nums text-red-700">0</td>
+   212→                                    <td class="px-3 py-3 text-center tabular-nums text-red-700">0</td>
+   213→                                    <td class="px-3 py-3 text-center tabular-nums text-emerald-700">100</td>
+   214→                                    <td class="px-3 py-3 text-center tabular-nums text-muted-foreground">—</td>
+   215→                                    <td class="border-l px-3 py-3 text-center">
+   216→                                        <span class="font-bold tabular-nums text-red-700">12.1</span>
+   217→                                    </td>
+   218→                                    <td class="border-l px-3 py-3">
+   219→                                                                                    <form method="POST" action="https://atelier.osszcollection.com/performance/assess"
+   220→                                                  class="flex items-center gap-1" aria-label="Management assessment for Lawal Sani">
+   221→                                                <input type="hidden" name="_token" value="dNzunr1u0Or0RPmvjYSF1yNP9NPtnIvIjrU6DnoG" autocomplete="off">                                                <input type="hidden" name="staffId" value="a4ee2330-0adc-4b6c-a982-f3172fff059d">
+   222→                                                <input type="hidden" name="periodValue" value="2026-11">
+   223→                                                <label for="assess-a4ee2330-0adc-4b6c-a982-f3172fff059d" class="sr-only">Score (0-100)</label>
+   224→                                                <input id="assess-a4ee2330-0adc-4b6c-a982-f3172fff059d" type="number" min="0" max="100" name="score"
+   225→                                                       value=""
+   226→                                                       class="h-8 w-[76px] rounded-md border border-input bg-background px-2 text-center text-sm focus:outline-none focus:ring-2 focus:ring-ring">
+   227→                                                                                                <button type="submit"
+   228→                                                        aria-label="Save assessment for Lawal Sani"
+   229→                                                        class="inline-flex size-8 items-center justify-center rounded-md hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring">
+   230→                                                    <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 0 2.8L10.4 19.2a2 2 0 0 1-1.4.6H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 .6-1.4L14.2 3.6A2 2 0 0 1 15.2 3z"/><path d="M16 8l-8 8"/></svg>
+   231→                                                </button>
+   232→                                            </form>
+   233→                                                                            </td>
+   234→                                </tr>
+   235→                                                                                            <tr class="border-b transition-colors last:border-b-0 hover:bg-muted/30">
+   236→                                    <td class="px-4 py-3">
+   237→                                        <div class="min-w-[160px]">
+   238→                                            <p class="font-medium">Ngozi Okafor</p>
+   239→                                            <p class="truncate text-xs text-muted-foreground">USR-005 · ngozi@atelier.com</p>
+   240→                                        </div>
+   241→                                    </td>
+   242→                                    <td class="border-l px-3 py-3 text-center tabular-nums">0</td>
+   243→                                    <td class="px-3 py-3 text-center tabular-nums">
+   244→                                        0<span class="text-muted-foreground">/20</span>
+   245→                                    </td>
+   246→                                    <td class="px-3 py-3 text-center tabular-nums">0</td>
+   247→                                    <td class="px-3 py-3 text-center tabular-nums ">0</td>
+   248→                                    <td class="px-3 py-3 text-center tabular-nums">—</td>
+   249→                                    <td class="px-3 py-3 text-center tabular-nums">0%</td>
+   250→                                    <td class="px-3 py-3 text-center tabular-nums">0</td>
+   251→                                    <td class="px-3 py-3 text-center tabular-nums">0</td>
+   252→                                    <td class="border-l px-3 py-3 text-center tabular-nums text-red-700">0</td>
+   253→                                    <td class="px-3 py-3 text-center tabular-nums text-red-700">0</td>
+   254→                                    <td class="px-3 py-3 text-center tabular-nums text-red-700">0</td>
+   255→                                    <td class="px-3 py-3 text-center tabular-nums text-emerald-700">100</td>
+   256→                                    <td class="px-3 py-3 text-center tabular-nums text-muted-foreground">—</td>
+   257→                                    <td class="border-l px-3 py-3 text-center">
+   258→                                        <span class="font-bold tabular-nums text-red-700">10.5</span>
+   259→                                    </td>
+   260→                                    <td class="border-l px-3 py-3">
+   261→                                                                                    <form method="POST" action="https://atelier.osszcollection.com/performance/assess"
+   262→                                                  class="flex items-center gap-1" aria-label="Management assessment for Ngozi Okafor">
+   263→                                                <input type="hidden" name="_token" value="dNzunr1u0Or0RPmvjYSF1yNP9NPtnIvIjrU6DnoG" autocomplete="off">                                                <input type="hidden" name="staffId" value="5a7833ca-1d5e-4a7d-975c-85c1dbc489a5">
+   264→                                                <input type="hidden" name="periodValue" value="2026-11">
+   265→                                                <label for="assess-5a7833ca-1d5e-4a7d-975c-85c1dbc489a5" class="sr-only">Score (0-100)</label>
+   266→                                                <input id="assess-5a7833ca-1d5e-4a7d-975c-85c1dbc489a5" type="number" min="0" max="100" name="score"
+   267→                                                       value=""
+   268→                                                       class="h-8 w-[76px] rounded-md border border-input bg-background px-2 text-center text-sm focus:outline-none focus:ring-2 focus:ring-ring">
+   269→                                                                                                <button type="submit"
+   270→                                                        aria-label="Save assessment for Ngozi Okafor"
+   271→                                                        class="inline-flex size-8 items-center justify-center rounded-md hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring">
+   272→                                                    <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 0 2.8L10.4 19.2a2 2 0 0 1-1.4.6H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 .6-1.4L14.2 3.6A2 2 0 0 1 15.2 3z"/><path d="M16 8l-8 8"/></svg>
+   273→                                                </button>
+   274→                                            </form>
+   275→                                                                            </td>
+   276→                                </tr>
+   277→                                                    </tbody>
+   278→                    </table>
+   279→                </div>
+   280→
+   281→                <p class="border-t px-4 py-3 text-xs text-muted-foreground sm:px-6">Productivity = pieces completed vs monthly target · Timeliness = on-time share of completions · Quality = share of approvals without corrections · Reliability = 100 − (blocks + corrections)/assigned · Overall = weighted sum (weights total 100)</p>
+   282→            </section>
+   283→
+   284→            <p class="flex items-center gap-1.5 text-xs text-muted-foreground">
+   285→                <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 7 13.5 15.5 8.5 10.5 2 17"/><path d="M16 7h6v6"/></svg>
+   286→                Scores are color coded: emerald 75+, amber 50+, red below 50.
+   287→            </p>
+   288→        
+   289→        
+   290→                    <div class="grid gap-4 lg:grid-cols-2">
+   291→                <section class="rounded-xl border bg-card shadow-sm" aria-labelledby="perf-assess-heading">
+   292→                    <div class="border-b px-4 py-3 sm:px-6">
+   293→                        <h2 id="perf-assess-heading" class="font-display text-base font-semibold">Management Assessments</h2>
+   294→                    </div>
+   295→
+   296→                    <form method="POST" action="https://atelier.osszcollection.com/performance/assess" class="space-y-4 px-4 py-4 sm:px-6">
+   297→                        <input type="hidden" name="_token" value="dNzunr1u0Or0RPmvjYSF1yNP9NPtnIvIjrU6DnoG" autocomplete="off">                        <div class="grid gap-4 sm:grid-cols-2">
+   298→                            <div class="space-y-1.5">
+   299→                                <label for="assess-staff" class="text-sm font-medium">Staff member <span class="text-red-600">*</span></label>
+   300→                                <select id="assess-staff" name="staffId" required
+   301→                                        class="h-9 w-full rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
+   302→                                    <option value="" disabled selected>— Staff member —</option>
+   303→                                                                            <option value="9d021fb4-9b45-4888-8a52-efe93ae1876c" >
+   304→                                            Hamidou Abdoul (USR-003)
+   305→                                        </option>
+   306→                                                                            <option value="a4ee2330-0adc-4b6c-a982-f3172fff059d" >
+   307→                                            Lawal Sani (USR-004)
+   308→                                        </option>
+   309→                                                                            <option value="5a7833ca-1d5e-4a7d-975c-85c1dbc489a5" >
+   310→                                            Ngozi Okafor (USR-005)
+   311→                                        </option>
+   312→                                                                    </select>
+   313→                                                            </div>
+   314→                            <div class="space-y-1.5">
+   315→                                <label for="assess-score" class="text-sm font-medium">Score (0-100) <span class="text-red-600">*</span></label>
+   316→                                <input id="assess-score" type="number" min="0" max="100" name="score" required value=""
+   317→                                       class="h-9 w-full rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
+   318→                                                            </div>
+   319→                        </div>
+   320→
+   321→                        <div class="space-y-1.5">
+   322→                            <label for="assess-period" class="text-sm font-medium">Period</label>
+   323→                            <input id="assess-period" name="periodValue" value="2026-11" placeholder="2026-11"
+   324→                                   class="h-9 w-full rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring sm:w-44">
+   325→                                                    </div>
+   326→
+   327→                        <div class="space-y-1.5">
+   328→                            <label for="assess-notes" class="text-sm font-medium">Notes <span class="text-xs font-normal text-muted-foreground">(optional)</span></label>
+   329→                            <textarea id="assess-notes" name="notes" rows="3" placeholder="Optional context recorded with the assessment."
+   330→                                      class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"></textarea>
+   331→                        </div>
+   332→
+   333→                        <div class="flex flex-wrap items-center justify-between gap-2">
+   334→                            <p class="text-xs text-muted-foreground">Enter a management assessment between 0 and 100.</p>
+   335→                            <button type="submit"
+   336→                                    class="inline-flex h-9 items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-ring">
+   337→                                Save Assessment
+   338→                            </button>
+   339→                        </div>
+   340→                    </form>
+   341→                </section>
+   342→
+   343→                <section class="rounded-xl border bg-card shadow-sm" aria-labelledby="perf-assess-recent-heading">
+   344→                    <div class="border-b px-4 py-3 sm:px-6">
+   345→                        <h2 id="perf-assess-recent-heading" class="font-display text-base font-semibold">Recent Assessments</h2>
+   346→                    </div>
+   347→
+   348→                                            <ul class="max-h-96 divide-y overflow-y-auto px-4 sm:px-6">
+   349→                                                            <li class="flex items-start justify-between gap-3 py-3">
+   350→                                    <div class="min-w-0">
+   351→                                        <p class="text-sm font-medium">Lawal Sani</p>
+   352→                                        <p class="text-xs text-muted-foreground">
+   353→                                            2026-10 · Nov 10, 2026
+   354→                                        </p>
+   355→                                                                                    <p class="mt-0.5 truncate text-xs text-muted-foreground">Good effort; watch deadlines and pressing quality.</p>
+   356→                                                                            </div>
+   357→                                    <span class="inline-flex shrink-0 items-center rounded-full border border-current text-amber-700 bg-muted/40 px-2 py-0.5 text-xs font-semibold tabular-nums">
+   358→                                        65/100
+   359→                                    </span>
+   360→                                </li>
+   361→                                                            <li class="flex items-start justify-between gap-3 py-3">
+   362→                                    <div class="min-w-0">
+   363→                                        <p class="text-sm font-medium">Hamidou Abdoul</p>
+   364→                                        <p class="text-xs text-muted-foreground">
+   365→                                            2026-10 · Nov 10, 2026
+   366→                                        </p>
+   367→                                                                                    <p class="mt-0.5 truncate text-xs text-muted-foreground">Excellent craftsmanship and autonomy.</p>
+   368→                                                                            </div>
+   369→                                    <span class="inline-flex shrink-0 items-center rounded-full border border-current text-emerald-700 bg-muted/40 px-2 py-0.5 text-xs font-semibold tabular-nums">
+   370→                                        88/100
+   371→                                    </span>
+   372→                                </li>
+   373→                                                    </ul>
+   374→                                    </section>
+   375→            </div>
+   376→            </div>
+   377→            

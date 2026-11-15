@@ -1,0 +1,252 @@
+     1→<!DOCTYPE html>
+     2→<html lang="en">
+     3→<head>
+     4→    <meta charset="utf-8">
+     5→    <meta name="viewport" content="width=device-width, initial-scale=1">
+     6→    <meta name="csrf-token" content="dNzunr1u0Or0RPmvjYSF1yNP9NPtnIvIjrU6DnoG">
+     7→    <title>Dashboard — OSSZ ATELIER</title>
+     8→    <link rel="stylesheet" href="/css/app.css">
+     9→    <script src="/js/alpine.min.js" defer></script>
+    10→    <style>[x-cloak]{display:none !important;}</style>
+    11→</head>
+    12→<body class="bg-background text-foreground antialiased">
+    13→
+    14→<div class="min-h-screen flex flex-col bg-background" x-data="{ nav: false }" @keydown.escape.window="nav = false">
+    15→    <div class="flex flex-1 min-h-0">
+    16→
+    17→        
+    18→        
+    19→        
+    20→        <aside class="hidden lg:flex w-60 shrink-0 flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border sticky top-0 h-screen">
+    21→            <div class="flex items-center justify-center px-5 h-16 border-b border-sidebar-border">
+    22→                <div class="text-center min-w-0">
+    23→                    <p class="font-display font-bold leading-none">OSSZ ATELIER</p>
+    24→                    <p class="text-[9px] tracking-[0.2em] text-stone-400 mt-1.5">PRODUCTION MGMT</p>
+    25→                </div>
+    26→            </div>
+    27→            <div class="flex-1 overflow-y-auto">
+    28→                <nav class="flex flex-col gap-5 px-3 py-4" aria-label="Main navigation">
+    29→                                            <div>
+    30→                            <p class="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-stone-400">Overview</p>
+    31→                            <div class="flex flex-col gap-0.5">
+    32→                                                                    <a href="https://atelier.osszcollection.com" @click="nav = false" aria-current="page" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left bg-sidebar-primary/20 text-sidebar-primary">
+    33→                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+    34→                                        <span class="truncate">Dashboard</span>
+    35→                                    </a>
+    36→                                                            </div>
+    37→                        </div>
+    38→                                            <div>
+    39→                            <p class="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-stone-400">Production</p>
+    40→                            <div class="flex flex-col gap-0.5">
+    41→                                                                    <a href="https://atelier.osszcollection.com/tasks" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+    42→                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/></svg>
+    43→                                        <span class="truncate">Production</span>
+    44→                                    </a>
+    45→                                                                    <a href="https://atelier.osszcollection.com/tasks/create" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+    46→                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg>
+    47→                                        <span class="truncate">Create Tasks</span>
+    48→                                    </a>
+    49→                                                                    <a href="https://atelier.osszcollection.com/orders" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+    50→                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+    51→                                        <span class="truncate">Orders</span>
+    52→                                    </a>
+    53→                                                                    <a href="https://atelier.osszcollection.com/customers" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+    54→                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    55→                                        <span class="truncate">Customers</span>
+    56→                                    </a>
+    57→                                                            </div>
+    58→                        </div>
+    59→                                            <div>
+    60→                            <p class="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-stone-400">Insights</p>
+    61→                            <div class="flex flex-col gap-0.5">
+    62→                                                                    <a href="https://atelier.osszcollection.com/performance" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+    63→                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+    64→                                        <span class="truncate">Performance</span>
+    65→                                    </a>
+    66→                                                                    <a href="https://atelier.osszcollection.com/incentives" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+    67→                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5"/></svg>
+    68→                                        <span class="truncate">Incentives</span>
+    69→                                    </a>
+    70→                                                                    <a href="https://atelier.osszcollection.com/reports" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+    71→                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M8 13v2"/><path d="M12 13v4"/><path d="M16 13v2"/></svg>
+    72→                                        <span class="truncate">Reports</span>
+    73→                                    </a>
+    74→                                                            </div>
+    75→                        </div>
+    76→                                            <div>
+    77→                            <p class="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-stone-400">Administration</p>
+    78→                            <div class="flex flex-col gap-0.5">
+    79→                                                                    <a href="https://atelier.osszcollection.com/users" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+    80→                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/><path d="M8 10v4"/><path d="M12 10v2"/><path d="M16 10v4"/></svg>
+    81→                                        <span class="truncate">Users &amp; Roles</span>
+    82→                                    </a>
+    83→                                                                    <a href="https://atelier.osszcollection.com/stages" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+    84→                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="M20 7h-9"/><path d="M14 17H5"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/></svg>
+    85→                                        <span class="truncate">Production Stages</span>
+    86→                                    </a>
+    87→                                                                    <a href="https://atelier.osszcollection.com/audit" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+    88→                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="M15 12h-5"/><path d="M15 8h-5"/><path d="M19 17V5a2 2 0 0 0-2-2H4"/><path d="M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"/></svg>
+    89→                                        <span class="truncate">Audit History</span>
+    90→                                    </a>
+    91→                                                            </div>
+    92→                        </div>
+    93→                                    </nav>
+    94→            </div>
+    95→            <div class="p-4 border-t border-sidebar-border text-[11px] text-stone-500">
+    96→                Independent production system
+    97→            </div>
+    98→        </aside>
+    99→
+   100→        
+   101→        
+   102→        
+   103→        <div x-show="nav" x-cloak x-transition.opacity.duration.200ms class="fixed inset-0 z-40 bg-black/60 lg:hidden" @click="nav = false" aria-hidden="true"></div>
+   104→        <aside id="mobile-nav" x-show="nav" x-cloak
+   105→               x-transition:enter="transition ease-out duration-200"
+   106→               x-transition:enter-start="-translate-x-full"
+   107→               x-transition:enter-end="translate-x-0"
+   108→               x-transition:leave="transition ease-in duration-150"
+   109→               x-transition:leave-start="translate-x-0"
+   110→               x-transition:leave-end="-translate-x-full"
+   111→               class="fixed left-0 top-0 z-50 h-full w-72 max-w-[85vw] flex flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border lg:hidden"
+   112→               role="dialog" aria-modal="true" aria-label="Navigation">
+   113→            <div class="relative flex items-center justify-center px-5 h-16 border-b border-sidebar-border">
+   114→                <div class="text-center min-w-0">
+   115→                    <p class="font-display font-bold leading-none">OSSZ ATELIER</p>
+   116→                    <p class="text-[9px] tracking-[0.2em] text-stone-400 mt-1.5">PRODUCTION MGMT</p>
+   117→                </div>
+   118→                <button type="button" @click="nav = false" class="absolute right-3 inline-flex items-center justify-center size-8 rounded-md text-stone-400 hover:text-white hover:bg-white/5 transition-colors" aria-label="Close">
+   119→                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+   120→                </button>
+   121→            </div>
+   122→            <nav class="flex-1 overflow-y-auto flex flex-col gap-5 px-3 py-4" aria-label="Main navigation">
+   123→                                    <div>
+   124→                        <p class="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-stone-400">Overview</p>
+   125→                        <div class="flex flex-col gap-0.5">
+   126→                                                            <a href="https://atelier.osszcollection.com" @click="nav = false" aria-current="page" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left bg-sidebar-primary/20 text-sidebar-primary">
+   127→                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+   128→                                    <span class="truncate">Dashboard</span>
+   129→                                </a>
+   130→                                                    </div>
+   131→                    </div>
+   132→                                    <div>
+   133→                        <p class="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-stone-400">Production</p>
+   134→                        <div class="flex flex-col gap-0.5">
+   135→                                                            <a href="https://atelier.osszcollection.com/tasks" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+   136→                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/></svg>
+   137→                                    <span class="truncate">Production</span>
+   138→                                </a>
+   139→                                                            <a href="https://atelier.osszcollection.com/tasks/create" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+   140→                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg>
+   141→                                    <span class="truncate">Create Tasks</span>
+   142→                                </a>
+   143→                                                            <a href="https://atelier.osszcollection.com/orders" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+   144→                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+   145→                                    <span class="truncate">Orders</span>
+   146→                                </a>
+   147→                                                            <a href="https://atelier.osszcollection.com/customers" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+   148→                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+   149→                                    <span class="truncate">Customers</span>
+   150→                                </a>
+   151→                                                    </div>
+   152→                    </div>
+   153→                                    <div>
+   154→                        <p class="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-stone-400">Insights</p>
+   155→                        <div class="flex flex-col gap-0.5">
+   156→                                                            <a href="https://atelier.osszcollection.com/performance" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+   157→                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+   158→                                    <span class="truncate">Performance</span>
+   159→                                </a>
+   160→                                                            <a href="https://atelier.osszcollection.com/incentives" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+   161→                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5"/></svg>
+   162→                                    <span class="truncate">Incentives</span>
+   163→                                </a>
+   164→                                                            <a href="https://atelier.osszcollection.com/reports" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+   165→                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M8 13v2"/><path d="M12 13v4"/><path d="M16 13v2"/></svg>
+   166→                                    <span class="truncate">Reports</span>
+   167→                                </a>
+   168→                                                    </div>
+   169→                    </div>
+   170→                                    <div>
+   171→                        <p class="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-stone-400">Administration</p>
+   172→                        <div class="flex flex-col gap-0.5">
+   173→                                                            <a href="https://atelier.osszcollection.com/users" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+   174→                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/><path d="M8 10v4"/><path d="M12 10v2"/><path d="M16 10v4"/></svg>
+   175→                                    <span class="truncate">Users &amp; Roles</span>
+   176→                                </a>
+   177→                                                            <a href="https://atelier.osszcollection.com/stages" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+   178→                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="M20 7h-9"/><path d="M14 17H5"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/></svg>
+   179→                                    <span class="truncate">Production Stages</span>
+   180→                                </a>
+   181→                                                            <a href="https://atelier.osszcollection.com/audit" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+   182→                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="M15 12h-5"/><path d="M15 8h-5"/><path d="M19 17V5a2 2 0 0 0-2-2H4"/><path d="M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"/></svg>
+   183→                                    <span class="truncate">Audit History</span>
+   184→                                </a>
+   185→                                                    </div>
+   186→                    </div>
+   187→                            </nav>
+   188→        </aside>
+   189→
+   190→        
+   191→        
+   192→        
+   193→        <div class="flex-1 flex flex-col min-w-0">
+   194→            <header class="sticky top-0 z-30 relative flex items-center gap-2 sm:gap-3 h-16 px-4 sm:px-6 border-b bg-background/95 backdrop-blur">
+   195→                
+   196→                <button type="button" class="lg:hidden inline-flex items-center justify-center size-9 -ml-1.5 rounded-md hover:bg-muted transition-colors" @click="nav = true" aria-label="Open menu" aria-controls="mobile-nav">
+   197→                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-5" aria-hidden="true"><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+   198→                </button>
+   199→
+   200→                
+   201→                <a href="https://atelier.osszcollection.com" aria-label="OSSZ Atelier logo — go to dashboard" class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 shrink-0 rounded-md max-[359px]:static max-[359px]:translate-x-0 max-[359px]:translate-y-0 max-[359px]:mx-auto">
+   202→                    <img src="/img/ossz-logo.png" alt="OSSZ Atelier logo" class="h-7 sm:h-9 w-auto rounded-md ring-1 ring-black/10">
+   203→                </a>
+   204→
+   205→                
+   206→                <h1 class="hidden sm:block font-display text-lg font-semibold truncate min-w-0 max-w-[calc(50%-6.5rem)]">Dashboard</h1>
+   207→
+   208→                
+   209→                <div class="ml-auto max-[359px]:ml-0 flex items-center gap-1 sm:gap-1.5">
+   210→                    
+   211→                    <div role="group" aria-label="Language" title="Changer de langue" class="flex items-center gap-0.5 rounded-full border bg-background p-0.5 select-none">
+   212→                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="hidden sm:block size-3.5 ml-1 text-muted-foreground" aria-hidden="true"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg>
+   213→                        <a href="https://atelier.osszcollection.com/locale/en" class="rounded-full px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide transition-colors bg-primary text-primary-foreground" aria-current="true">EN</a>
+   214→                        <a href="https://atelier.osszcollection.com/locale/fr" class="rounded-full px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide transition-colors text-muted-foreground hover:text-foreground">FR</a>
+   215→                    </div>
+   216→
+   217→                    
+   218→                    <a href="https://atelier.osszcollection.com/notifications" class="relative inline-flex items-center justify-center size-8 sm:size-9 rounded-md hover:bg-muted transition-colors" aria-label="Notifications">
+   219→                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 sm:size-5" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+   220→                                                    <span class="absolute -top-0.5 -right-0.5 min-w-4.5 h-4.5 px-1 rounded-full bg-red-600 text-white text-[10px] font-bold flex items-center justify-center">2</span>
+   221→                                            </a>
+   222→
+   223→                    
+   224→                                            <div class="relative" x-data="{ open: false }">
+   225→                            <button type="button" @click="open = !open" @click.outside="open = false" @keydown.escape.window="open = false" :aria-expanded="open.toString()" aria-haspopup="menu" aria-label="Account menu" class="flex items-center gap-2 rounded-full hover:bg-muted p-0 sm:p-1 sm:pr-2 transition-colors">
+   226→                                <span class="flex items-center justify-center size-8 rounded-full bg-primary/10 text-primary text-xs font-semibold">AS</span>
+   227→                                <span class="hidden sm:block text-left">
+   228→                                    <span class="block text-sm font-medium leading-none">Aminata Sow</span>
+   229→                                    <span class="block text-[11px] text-muted-foreground mt-0.5">USR-001 · Management</span>
+   230→                                </span>
+   231→                            </button>
+   232→                            <div x-show="open" x-cloak
+   233→                                 x-transition:enter="transition ease-out duration-100"
+   234→                                 x-transition:enter-start="opacity-0 scale-95"
+   235→                                 x-transition:enter-end="opacity-100 scale-100"
+   236→                                 x-transition:leave="transition ease-in duration-75"
+   237→                                 x-transition:leave-start="opacity-100 scale-100"
+   238→                                 x-transition:leave-end="opacity-0 scale-95"
+   239→                                 class="absolute right-0 mt-2 w-60 rounded-lg border bg-card shadow-lg py-1 z-50" role="menu">
+   240→                                <div class="px-3 py-2">
+   241→                                    <p class="text-sm font-medium">Aminata Sow</p>
+   242→                                    <p class="text-xs text-muted-foreground font-normal truncate">management@atelier.com</p>
+   243→                                    <p class="text-xs text-muted-foreground font-normal mt-0.5">Management</p>
+   244→                                                                            <p class="text-xs text-muted-foreground font-normal mt-0.5 font-mono">USR-001</p>
+   245→                                                                    </div>
+   246→                                <div class="h-px bg-border my-1"></div>
+   247→                                <form method="POST" action="https://atelier.osszcollection.com/logout">
+   248→                                    <input type="hidden" name="_token" value="dNzunr1u0Or0RPmvjYSF1yNP9NPtnIvIjrU6DnoG" autocomplete="off">                                    <button type="submit" role="menuitem" class="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-700 hover:bg-muted transition-colors">
+   249→                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+   250→                                        Sign out
+
+[showing lines 1-250 of 566; use offset=251 with limit to continue reading]

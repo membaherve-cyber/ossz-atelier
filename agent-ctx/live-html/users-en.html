@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="dNzunr1u0Or0RPmvjYSF1yNP9NPtnIvIjrU6DnoG">
+    <title>Users &amp; Roles — OSSZ ATELIER</title>
+    <link rel="stylesheet" href="/css/app.css">
+    <script src="/js/alpine.min.js" defer></script>
+    <style>[x-cloak]{display:none !important;}</style>
+</head>
+<body class="bg-background text-foreground antialiased">
+
+<div class="min-h-screen flex flex-col bg-background" x-data="{ nav: false }" @keydown.escape.window="nav = false">
+    <div class="flex flex-1 min-h-0">
+
+        
+        
+        
+        <aside class="hidden lg:flex w-60 shrink-0 flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border sticky top-0 h-screen">
+            <div class="flex items-center justify-center px-5 h-16 border-b border-sidebar-border">
+                <div class="text-center min-w-0">
+                    <p class="font-display font-bold leading-none">OSSZ ATELIER</p>
+                    <p class="text-[9px] tracking-[0.2em] text-stone-400 mt-1.5">PRODUCTION MGMT</p>
+                </div>
+            </div>
+            <div class="flex-1 overflow-y-auto">
+                <nav class="flex flex-col gap-5 px-3 py-4" aria-label="Main navigation">
+                                            <div>
+                            <p class="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-stone-400">Overview</p>
+                            <div class="flex flex-col gap-0.5">
+                                                                    <a href="https://atelier.osszcollection.com" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+                                        <span class="truncate">Dashboard</span>
+                                    </a>
+                                                            </div>
+                        </div>
+                                            <div>
+                            <p class="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-stone-400">Production</p>
+                            <div class="flex flex-col gap-0.5">
+                                                                    <a href="https://atelier.osszcollection.com/tasks" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/></svg>
+                                        <span class="truncate">Production</span>
+                                    </a>
+                                                                    <a href="https://atelier.osszcollection.com/tasks/create" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg>
+                                        <span class="truncate">Create Tasks</span>
+                                    </a>
+                                                                    <a href="https://atelier.osszcollection.com/orders" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+                                        <span class="truncate">Orders</span>
+                                    </a>
+                                                                    <a href="https://atelier.osszcollection.com/customers" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                                        <span class="truncate">Customers</span>
+                                    </a>
+                                                            </div>
+                        </div>
+                                            <div>
+                            <p class="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-stone-400">Insights</p>
+                            <div class="flex flex-col gap-0.5">
+                                                                    <a href="https://atelier.osszcollection.com/performance" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+                                        <span class="truncate">Performance</span>
+                                    </a>
+                                                                    <a href="https://atelier.osszcollection.com/incentives" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5"/></svg>
+                                        <span class="truncate">Incentives</span>
+                                    </a>
+                                                                    <a href="https://atelier.osszcollection.com/reports" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M8 13v2"/><path d="M12 13v4"/><path d="M16 13v2"/></svg>
+                                        <span class="truncate">Reports</span>
+                                    </a>
+                                                            </div>
+                        </div>
+                                            <div>
+                            <p class="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-stone-400">Administration</p>
+                            <div class="flex flex-col gap-0.5">
+                                                                    <a href="https://atelier.osszcollection.com/users" @click="nav = false" aria-current="page" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left bg-sidebar-primary/20 text-sidebar-primary">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/><path d="M8 10v4"/><path d="M12 10v2"/><path d="M16 10v4"/></svg>
+                                        <span class="truncate">Users &amp; Roles</span>
+                                    </a>
+                                                                    <a href="https://atelier.osszcollection.com/stages" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="M20 7h-9"/><path d="M14 17H5"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/></svg>
+                                        <span class="truncate">Production Stages</span>
+                                    </a>
+                                                                    <a href="https://atelier.osszcollection.com/audit" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="M15 12h-5"/><path d="M15 8h-5"/><path d="M19 17V5a2 2 0 0 0-2-2H4"/><path d="M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"/></svg>
+                                        <span class="truncate">Audit History</span>
+                                    </a>
+                                                            </div>
+                        </div>
+                                    </nav>
+            </div>
+            <div class="p-4 border-t border-sidebar-border text-[11px] text-stone-500">
+                Independent production system
+            </div>
+        </aside>
+
+        
+        
+        
+        <div x-show="nav" x-cloak x-transition.opacity.duration.200ms class="fixed inset-0 z-40 bg-black/60 lg:hidden" @click="nav = false" aria-hidden="true"></div>
+        <aside id="mobile-nav" x-show="nav" x-cloak
+               x-transition:enter="transition ease-out duration-200"
+               x-transition:enter-start="-translate-x-full"
+               x-transition:enter-end="translate-x-0"
+               x-transition:leave="transition ease-in duration-150"
+               x-transition:leave-start="translate-x-0"
+               x-transition:leave-end="-translate-x-full"
+               class="fixed left-0 top-0 z-50 h-full w-72 max-w-[85vw] flex flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border lg:hidden"
+               role="dialog" aria-modal="true" aria-label="Navigation">
+            <div class="relative flex items-center justify-center px-5 h-16 border-b border-sidebar-border">
+                <div class="text-center min-w-0">
+                    <p class="font-display font-bold leading-none">OSSZ ATELIER</p>
+                    <p class="text-[9px] tracking-[0.2em] text-stone-400 mt-1.5">PRODUCTION MGMT</p>
+                </div>
+                <button type="button" @click="nav = false" class="absolute right-3 inline-flex items-center justify-center size-8 rounded-md text-stone-400 hover:text-white hover:bg-white/5 transition-colors" aria-label="Close">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                </button>
+            </div>
+            <nav class="flex-1 overflow-y-auto flex flex-col gap-5 px-3 py-4" aria-label="Main navigation">
+                                    <div>
+                        <p class="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-stone-400">Overview</p>
+                        <div class="flex flex-col gap-0.5">
+                                                            <a href="https://atelier.osszcollection.com" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+                                    <span class="truncate">Dashboard</span>
+                                </a>
+                                                    </div>
+                    </div>
+                                    <div>
+                        <p class="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-stone-400">Production</p>
+                        <div class="flex flex-col gap-0.5">
+                                                            <a href="https://atelier.osszcollection.com/tasks" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/></svg>
+                                    <span class="truncate">Production</span>
+                                </a>
+                                                            <a href="https://atelier.osszcollection.com/tasks/create" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg>
+                                    <span class="truncate">Create Tasks</span>
+                                </a>
+                                                            <a href="https://atelier.osszcollection.com/orders" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+                                    <span class="truncate">Orders</span>
+                                </a>
+                                                            <a href="https://atelier.osszcollection.com/customers" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                                    <span class="truncate">Customers</span>
+                                </a>
+                                                    </div>
+                    </div>
+                                    <div>
+                        <p class="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-stone-400">Insights</p>
+                        <div class="flex flex-col gap-0.5">
+                                                            <a href="https://atelier.osszcollection.com/performance" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+                                    <span class="truncate">Performance</span>
+                                </a>
+                                                            <a href="https://atelier.osszcollection.com/incentives" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5"/></svg>
+                                    <span class="truncate">Incentives</span>
+                                </a>
+                                                            <a href="https://atelier.osszcollection.com/reports" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M8 13v2"/><path d="M12 13v4"/><path d="M16 13v2"/></svg>
+                                    <span class="truncate">Reports</span>
+                                </a>
+                                                    </div>
+                    </div>
+                                    <div>
+                        <p class="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-stone-400">Administration</p>
+                        <div class="flex flex-col gap-0.5">
+                                                            <a href="https://atelier.osszcollection.com/users" @click="nav = false" aria-current="page" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left bg-sidebar-primary/20 text-sidebar-primary">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/><path d="M8 10v4"/><path d="M12 10v2"/><path d="M16 10v4"/></svg>
+                                    <span class="truncate">Users &amp; Roles</span>
+                                </a>
+                                                            <a href="https://atelier.osszcollection.com/stages" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="M20 7h-9"/><path d="M14 17H5"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/></svg>
+                                    <span class="truncate">Production Stages</span>
+                                </a>
+                                                            <a href="https://atelier.osszcollection.com/audit" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="M15 12h-5"/><path d="M15 8h-5"/><path d="M19 17V5a2 2 0 0 0-2-2H4"/><path d="M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"/></svg>
+                                    <span class="truncate">Audit History</span>
+                                </a>
+                                                    </div>
+                    </div>
+                            </nav>
+        </aside>
+
+        
+        
+        
+        <div class="flex-1 flex flex-col min-w-0">
+            <header class="sticky top-0 z-30 relative flex items-center gap-2 sm:gap-3 h-16 px-4 sm:px-6 border-b bg-background/95 backdrop-blur">
+                
+                <button type="button" class="lg:hidden inline-flex items-center justify-center size-9 -ml-1.5 rounded-md hover:bg-muted transition-colors" @click="nav = true" aria-label="Open menu" aria-controls="mobile-nav">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-5" aria-hidden="true"><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+                </button>
+
+                
+                <a href="https://atelier.osszcollection.com" aria-label="OSSZ Atelier logo — go to dashboard" class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 shrink-0 rounded-md max-[359px]:static max-[359px]:translate-x-0 max-[359px]:translate-y-0 max-[359px]:mx-auto">
+                    <img src="/img/ossz-logo.png" alt="OSSZ Atelier logo" class="h-7 sm:h-9 w-auto rounded-md ring-1 ring-black/10">
+                </a>
+
+                
+                <h1 class="hidden sm:block font-display text-lg font-semibold truncate min-w-0 max-w-[calc(50%-6.5rem)]">Users &amp; Roles</h1>
+
+                
+                <div class="ml-auto max-[359px]:ml-0 flex items-center gap-1 sm:gap-1.5">
+                    
+                    <div role="group" aria-label="Language" title="Changer de langue" class="flex items-center gap-0.5 rounded-full border bg-background p-0.5 select-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="hidden sm:block size-3.5 ml-1 text-muted-foreground" aria-hidden="true"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg>
+                        <a href="https://atelier.osszcollection.com/locale/en" class="rounded-full px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide transition-colors bg-primary text-primary-foreground" aria-current="true">EN</a>
+                        <a href="https://atelier.osszcollection.com/locale/fr" class="rounded-full px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide transition-colors text-muted-foreground hover:text-foreground">FR</a>
+                    </div>
+
+                    
+                    <a href="https://atelier.osszcollection.com/notifications" class="relative inline-flex items-center justify-center size-8 sm:size-9 rounded-md hover:bg-muted transition-colors" aria-label="Notifications">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 sm:size-5" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+                                                    <span class="absolute -top-0.5 -right-0.5 min-w-4.5 h-4.5 px-1 rounded-full bg-red-600 text-white text-[10px] font-bold flex items-center justify-center">2</span>
+                                            </a>
+
+                    
+                                            <div class="relative" x-data="{ open: false }">
+                            <button type="button" @click="open = !open" @click.outside="open = false" @keydown.escape.window="open = false" :aria-expanded="open.toString()" aria-haspopup="menu" aria-label="Account menu" class="flex items-center gap-2 rounded-full hover:bg-muted p-0 sm:p-1 sm:pr-2 transition-colors">
+                                <span class="flex items-center justify-center size-8 rounded-full bg-primary/10 text-primary text-xs font-semibold">AS</span>
+                                <span class="hidden sm:block text-left">
+                                    <span class="block text-sm font-medium leading-none">Aminata Sow</span>
+                                    <span class="block text-[11px] text-muted-foreground mt-0.5">USR-001 · Management</span>
+                                </span>
+                            </button>
+                            <div x-show="open" x-cloak
+                                 x-transition:enter="transition ease-out duration-100"
+                                 x-transition:enter-start="opacity-0 scale-95"
+                                 x-transition:enter-end="opacity-100 scale-100"
+                                 x-transition:leave="transition ease-in duration-75"
+                                 x-transition:leave-start="opacity-100 scale-100"
+                                 x-transition:leave-end="opacity-0 scale-95"
+                                 class="absolute right-0 mt-2 w-60 rounded-lg border bg-card shadow-lg py-1 z-50" role="menu">
+                                <div class="px-3 py-2">
+                                    <p class="text-sm font-medium">Aminata Sow</p>
+                                    <p class="text-xs text-muted-foreground font-normal truncate">management@atelier.com</p>
+                                    <p class="text-xs text-muted-foreground font-normal mt-0.5">Management</p>
+                                                                            <p class="text-xs text-muted-foreground font-normal mt-0.5 font-mono">USR-001</p>
+                                                                    </div>
+                                <div class="h-px bg-border my-1"></div>
+                                <form method="POST" action="https://atelier.osszcollection.com/logout">
+                                    <input type="hidden" name="_token" value="dNzunr1u0Or0RPmvjYSF1yNP9NPtnIvIjrU6DnoG" autocomplete="off">                                    <button type="submit" role="menuitem" class="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-700 hover:bg-muted transition-colors">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+                                        Sign out
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                                    </div>
+            </header>
+
+            <main class="flex-1 px-4 sm:px-6 py-6 w-full max-w-[1400px] mx-auto">
+                
+<div class="space-y-4" x-data="{ createOpen: false }">
+
+    
+    <div class="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+        <div>
+            <h1 class="font-display text-2xl font-bold tracking-tight">Users &amp; Roles</h1>
+            <p class="mt-0.5 text-sm text-muted-foreground">Accounts with access to the atelier management system.</p>
+        </div>
+                    <button type="button" @click="createOpen = true"
+                    class="inline-flex h-9 items-center justify-center gap-1.5 whitespace-nowrap rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="M2 21a8 8 0 0 1 13.292-6"/><circle cx="10" cy="8" r="5"/><path d="M19 16v6"/><path d="M22 19h-6"/></svg>
+                Create Account
+            </button>
+            </div>
+
+    
+            <div class="overflow-x-auto rounded-lg border bg-card">
+            <table class="w-full min-w-[1020px] text-sm">
+                <thead>
+                    <tr class="border-b bg-muted/40 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        <th class="px-4 py-3">User ID</th>
+                        <th class="px-4 py-3">User</th>
+                        <th class="px-4 py-3">Role</th>
+                        <th class="px-4 py-3">Job title</th>
+                        <th class="px-4 py-3">Phone</th>
+                        <th class="px-4 py-3">Status</th>
+                        <th class="px-4 py-3 text-center">Active tasks</th>
+                        <th class="px-4 py-3">Created</th>
+                                                    <th class="px-4 py-3 text-right">Actions</th>
+                                            </tr>
+                </thead>
+                <tbody class="divide-y">
+                                                                    <tr class=" transition-colors hover:bg-muted/30">
+                            <td class="px-4 py-3">
+                                <span class="inline-flex rounded-md border bg-muted/50 px-2 py-1 font-mono text-xs font-semibold tracking-wide text-foreground">
+                                    USR-001
+                                </span>
+                            </td>
+                            <td class="max-w-52 px-4 py-3">
+                                <p class="truncate font-medium">Aminata Sow</p>
+                                <p class="truncate text-xs text-muted-foreground">management@atelier.com</p>
+                            </td>
+                            <td class="px-4 py-3">
+                                <span class="inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap bg-primary/10 text-primary border-primary/40">Management</span>
+                            </td>
+                            <td class="px-4 py-3 text-muted-foreground">Atelier Director</td>
+                            <td class="whitespace-nowrap px-4 py-3 text-muted-foreground">+237 677 000 001</td>
+                            <td class="px-4 py-3">
+                                <span class="inline-flex items-center gap-1.5 whitespace-nowrap text-sm text-emerald-700">
+                                    <span class="size-1.5 rounded-full bg-emerald-500" aria-hidden="true"></span>
+                                    Active
+                                </span>
+                            </td>
+                            <td class="px-4 py-3 text-center tabular-nums">
+                                <span class="inline-flex rounded-full bg-primary/10 px-2 py-0.5 text-xs font-bold text-primary">
+                                    0
+                                </span>
+                            </td>
+                            <td class="whitespace-nowrap px-4 py-3 text-muted-foreground">
+                                15 Nov 2026
+                            </td>
+                                                            <td class="px-4 py-3">
+                                    <div class="flex items-center justify-end">
+                                                                                    
+                                            <div x-data="{ open: false }">
+                                                <button type="button" @click="open = true"
+                                                        aria-label="Edit account Aminata Sow"
+                                                        class="inline-flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>
+                                                </button>
+                                                <div x-show="open" style="display: none;"
+                                                     class="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true"
+                                                     aria-label="Edit Account"
+                                                     @keydown.escape.window="open = false">
+                                                    <div class="fixed inset-0 bg-black/50" @click="open = false" aria-hidden="true"></div>
+                                                    <div class="relative flex min-h-full items-start justify-center p-4 sm:items-center">
+                                                        <div class="relative w-full max-w-lg rounded-lg border border-border bg-card text-card-foreground shadow-xl">
+                                                            <div class="flex items-start justify-between gap-4 border-b px-5 py-4">
+                                                                <div class="min-w-0">
+                                                                    <h2 class="text-base font-semibold">Edit Account</h2>
+                                                                    <p class="mt-0.5 truncate text-sm text-muted-foreground">management@atelier.com</p>
+                                                                </div>
+                                                                <button type="button" @click="open = false"
+                                                                        aria-label="Close"
+                                                                        class="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                                                                </button>
+                                                            </div>
+                                                            <form method="POST" action="https://atelier.osszcollection.com/users/847d3e8b-80de-453d-9cb2-fbfef8a32cde/update">
+                                                                <input type="hidden" name="_token" value="dNzunr1u0Or0RPmvjYSF1yNP9NPtnIvIjrU6DnoG" autocomplete="off">                                                                <input type="hidden" name="formId" value="user-edit-847d3e8b-80de-453d-9cb2-fbfef8a32cde" />
+                                                                <div class="max-h-[calc(85vh-11rem)] overflow-y-auto px-5 py-4">
+                                                                    <div class="grid gap-4 sm:grid-cols-2">
+                                                                        <div class="sm:col-span-2">
+                                                                            <label class="mb-1.5 block text-sm font-medium">Email *</label>
+                                                                            <p class="rounded-md border bg-muted/40 px-3 py-2 text-sm text-muted-foreground">management@atelier.com</p>
+                                                                        </div>
+                                                                        <div>
+                                                                            <label for="edit-name-847d3e8b-80de-453d-9cb2-fbfef8a32cde" class="mb-1.5 block text-sm font-medium">Full name *</label>
+                                                                            <input type="text" id="edit-name-847d3e8b-80de-453d-9cb2-fbfef8a32cde" name="name" value="Aminata Sow" maxlength="120" required
+                                                                                   class="h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50" />
+                                                                                                                                                    </div>
+                                                                                                                                                    <div>
+                                                                                <label for="edit-role-847d3e8b-80de-453d-9cb2-fbfef8a32cde" class="mb-1.5 block text-sm font-medium">Role</label>
+                                                                                <select id="edit-role-847d3e8b-80de-453d-9cb2-fbfef8a32cde" name="role"
+                                                                                        class="h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-sm shadow-sm transition-colors focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50">
+                                                                                                                                                                            <option value="MANAGEMENT" selected>Management</option>
+                                                                                                                                                                            <option value="ADMIN" >Admin</option>
+                                                                                                                                                                            <option value="STAFF" >Staff</option>
+                                                                                                                                                                    </select>
+                                                                                                                                                            </div>
+                                                                                                                                                <div>
+                                                                            <label for="edit-phone-847d3e8b-80de-453d-9cb2-fbfef8a32cde" class="mb-1.5 block text-sm font-medium">Phone</label>
+                                                                            <input type="text" id="edit-phone-847d3e8b-80de-453d-9cb2-fbfef8a32cde" name="phone" value="+237 677 000 001" maxlength="40"
+                                                                                   class="h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50" />
+                                                                                                                                                    </div>
+                                                                        <div>
+                                                                            <label for="edit-job-847d3e8b-80de-453d-9cb2-fbfef8a32cde" class="mb-1.5 block text-sm font-medium">Job title</label>
+                                                                            <input type="text" id="edit-job-847d3e8b-80de-453d-9cb2-fbfef8a32cde" name="jobTitle" value="Atelier Director" maxlength="120" placeholder="e.g. Tailor, Cutter"
+                                                                                   class="h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50" />
+                                                                                                                                                    </div>
+                                                                        <div class="sm:col-span-2">
+                                                                            <span class="mb-1.5 block text-sm font-medium">Account active</span>
+                                                                            <label class="flex min-h-11 items-center gap-2 text-sm">
+                                                                                <input type="hidden" name="isActive" value="0" />
+                                                                                <input type="checkbox" name="isActive" value="1" checked                                                                                       class="size-4 rounded border-input text-primary accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
+                                                                                Active
+                                                                            </label>
+                                                                        </div>
+                                                                        <div class="sm:col-span-2 border-t border-border pt-4">
+                                                                            <label for="edit-password-847d3e8b-80de-453d-9cb2-fbfef8a32cde" class="mb-1.5 block text-sm font-medium">New password</label>
+                                                                            <div class="relative" x-data="{ show: false }">
+                                                                                <input type="password" :type="show ? 'text' : 'password'" id="edit-password-847d3e8b-80de-453d-9cb2-fbfef8a32cde" name="password" value="" autocomplete="new-password" placeholder="At least 8 characters"
+                                                                                       class="h-9 w-full rounded-md border border-input bg-card px-3 py-1 pr-10 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50" />
+                                                                                <button type="button" @click="show = !show"
+                                                                                        :aria-label="show ? 'Hide password' : 'Show password'"
+                                                                                        class="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground">
+                                                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" x-show="! show" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                                                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" x-show="show" style="display: none" aria-hidden="true"><path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/><path d="m2 2 20 20"/></svg>
+                                                                                </button>
+                                                                            </div>
+                                                                            <p class="mt-1 text-xs text-muted-foreground">Leave blank to keep the current password.</p>
+                                                                                                                                                    </div>
+                                                                        <div class="sm:col-span-2">
+                                                                            <label for="edit-password-confirm-847d3e8b-80de-453d-9cb2-fbfef8a32cde" class="mb-1.5 block text-sm font-medium">Confirm new password</label>
+                                                                            <input type="password" id="edit-password-confirm-847d3e8b-80de-453d-9cb2-fbfef8a32cde" name="password_confirmation" value="" autocomplete="new-password"
+                                                                                   class="h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50" />
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="flex justify-end gap-2 rounded-b-lg border-t bg-muted/30 px-5 py-3">
+                                                                    <button type="button" @click="open = false"
+                                                                            class="inline-flex h-9 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border border-input bg-card px-4 text-sm font-medium shadow-sm transition-colors hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                                                                        Cancel
+                                                                    </button>
+                                                                    <button type="submit"
+                                                                            class="inline-flex h-9 items-center justify-center gap-1.5 whitespace-nowrap rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                                                                        Save Changes
+                                                                    </button>
+                                                                </div>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                                                            </div>
+                                </td>
+                                                    </tr>
+                                                                    <tr class=" transition-colors hover:bg-muted/30">
+                            <td class="px-4 py-3">
+                                <span class="inline-flex rounded-md border bg-muted/50 px-2 py-1 font-mono text-xs font-semibold tracking-wide text-foreground">
+                                    USR-002
+                                </span>
+                            </td>
+                            <td class="max-w-52 px-4 py-3">
+                                <p class="truncate font-medium">David Nkeng</p>
+                                <p class="truncate text-xs text-muted-foreground">admin@atelier.com</p>
+                            </td>
+                            <td class="px-4 py-3">
+                                <span class="inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap bg-teal-50 text-teal-800 border-teal-300">Admin</span>
+                            </td>
+                            <td class="px-4 py-3 text-muted-foreground">Production Administrator</td>
+                            <td class="whitespace-nowrap px-4 py-3 text-muted-foreground">+237 677 000 002</td>
+                            <td class="px-4 py-3">
+                                <span class="inline-flex items-center gap-1.5 whitespace-nowrap text-sm text-emerald-700">
+                                    <span class="size-1.5 rounded-full bg-emerald-500" aria-hidden="true"></span>
+                                    Active
+                                </span>
+                            </td>
+                            <td class="px-4 py-3 text-center tabular-nums">
+                                <span class="inline-flex rounded-full bg-primary/10 px-2 py-0.5 text-xs font-bold text-primary">
+                                    0
+                                </span>
+                            </td>
+                            <td class="whitespace-nowrap px-4 py-3 text-muted-foreground">
+                                15 Nov 2026
+                            </td>
+                                                            <td class="px-4 py-3">
+                                    <div class="flex items-center justify-end">
+                                                                                    
+                                            <div x-data="{ open: false }">
+                                                <button type="button" @click="open = true"
+                                                        aria-label="Edit account David Nkeng"
+                                                        class="inline-flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>
+                                                </button>
+                                                <div x-show="open" style="display: none;"
+                                                     class="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true"
+                                                     aria-label="Edit Account"
+                                                     @keydown.escape.window="open = false">
+                                                    <div class="fixed inset-0 bg-black/50" @click="open = false" aria-hidden="true"></div>
+                                                    <div class="relative flex min-h-full items-start justify-center p-4 sm:items-center">
+                                                        <div class="relative w-full max-w-lg rounded-lg border border-border bg-card text-card-foreground shadow-xl">
+                                                            <div class="flex items-start justify-between gap-4 border-b px-5 py-4">
+                                                                <div class="min-w-0">
+                                                                    <h2 class="text-base font-semibold">Edit Account</h2>
+                                                                    <p class="mt-0.5 truncate text-sm text-muted-foreground">admin@atelier.com</p>
+                                                                </div>
+                                                                <button type="button" @click="open = false"
+                                                                        aria-label="Close"
+                                                                        class="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                                                                </button>
+                                                            </div>
+                                                            <form method="POST" action="https://atelier.osszcollection.com/users/db60aa6e-5deb-4297-bacf-c2c337b75ebe/update">
+                                                                <input type="hidden" name="_token" value="dNzunr1u0Or0RPmvjYSF1yNP9NPtnIvIjrU6DnoG" autocomplete="off">                                                                <input type="hidden" name="formId" value="user-edit-db60aa6e-5deb-4297-bacf-c2c337b75ebe" />
+                                                                <div class="max-h-[calc(85vh-11rem)] overflow-y-auto px-5 py-4">
+                                                                    <div class="grid gap-4 sm:grid-cols-2">
+                                                                        <div class="sm:col-span-2">
+                                                                            <label class="mb-1.5 block text-sm font-medium">Email *</label>
+                                                                            <p class="rounded-md border bg-muted/40 px-3 py-2 text-sm text-muted-foreground">admin@atelier.com</p>
+                                                                        </div>
+                                                                        <div>
+                                                                            <label for="edit-name-db60aa6e-5deb-4297-bacf-c2c337b75ebe" class="mb-1.5 block text-sm font-medium">Full name *</label>
+                                                                            <input type="text" id="edit-name-db60aa6e-5deb-4297-bacf-c2c337b75ebe" name="name" value="David Nkeng" maxlength="120" required
+                                                                                   class="h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50" />
+                                                                                                                                                    </div>
+                                                                                                                                                    <div>
+                                                                                <label for="edit-role-db60aa6e-5deb-4297-bacf-c2c337b75ebe" class="mb-1.5 block text-sm font-medium">Role</label>
+                                                                                <select id="edit-role-db60aa6e-5deb-4297-bacf-c2c337b75ebe" name="role"
+                                                                                        class="h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-sm shadow-sm transition-colors focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50">
+                                                                                                                                                                            <option value="MANAGEMENT" >Management</option>
+                                                                                                                                                                            <option value="ADMIN" selected>Admin</option>
+                                                                                                                                                                            <option value="STAFF" >Staff</option>
+                                                                                                                                                                    </select>
+                                                                                                                                                            </div>
+                                                                                                                                                <div>
+                                                                            <label for="edit-phone-db60aa6e-5deb-4297-bacf-c2c337b75ebe" class="mb-1.5 block text-sm font-medium">Phone</label>
+                                                                            <input type="text" id="edit-phone-db60aa6e-5deb-4297-bacf-c2c337b75ebe" name="phone" value="+237 677 000 002" maxlength="40"
+                                                                                   class="h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50" />
+                                                                                                                                                    </div>
+                                                                        <div>
+                                                                            <label for="edit-job-db60aa6e-5deb-4297-bacf-c2c337b75ebe" class="mb-1.5 block text-sm font-medium">Job title</label>
+                                                                            <input type="text" id="edit-job-db60aa6e-5deb-4297-bacf-c2c337b75ebe" name="jobTitle" value="Production Administrator" maxlength="120" placeholder="e.g. Tailor, Cutter"
+                                                                                   class="h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50" />
+                                                                                                                                                    </div>
+                                                                        <div class="sm:col-span-2">
+                                                                            <span class="mb-1.5 block text-sm font-medium">Account active</span>
+                                                                            <label class="flex min-h-11 items-center gap-2 text-sm">
+                                                                                <input type="hidden" name="isActive" value="0" />
+                                                                                <input type="checkbox" name="isActive" value="1" checked                                                                                       class="size-4 rounded border-input text-primary accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
+                                                                                Active
+                                                                            </label>
+                                                                        </div>
+                                                                        <div class="sm:col-span-2 border-t border-border pt-4">
+                                                                            <label for="edit-password-db60aa6e-5deb-4297-bacf-c2c337b75ebe" class="mb-1.5 block text-sm font-medium">New password</label>
+                                                                            <div class="relative" x-data="{ show: false }">
+                                                                                <input type="password" :type="show ? 'text' : 'password'" id="edit-password-db60aa6e-5deb-4297-bacf-c2c337b75ebe" name="password" value="" autocomplete="new-password" placeholder="At least 8 characters"
+                                                                                       class="h-9 w-full rounded-md border border-input bg-card px-3 py-1 pr-10 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50" />
+                                                                                <button type="button" @click="show = !show"
+                                                                                        :aria-label="show ? 'Hide password' : 'Show password'"
+                                                                                        class="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground">
+                                                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" x-show="! show" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                                                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" x-show="show" style="display: none" aria-hidden="true"><path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/><path d="m2 2 20 20"/></svg>
+                                                                                </button>
+                                                                            </div>
+                                                                            <p class="mt-1 text-xs text-muted-foreground">Leave blank to keep the current password.</p>
+                                                                                                                                                    </div>
+                                                                        <div class="sm:col-span-2">
+                                                                            <label for="edit-password-confirm-db60aa6e-5deb-4297-bacf-c2c337b75ebe" class="mb-1.5 block text-sm font-medium">Confirm new password</label>
+                                                                            <input type="password" id="edit-password-confirm-db60aa6e-5deb-4297-bacf-c2c337b75ebe" name="password_confirmation" value="" autocomplete="new-password"
+                                                                                   class="h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50" />
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="flex justify-end gap-2 rounded-b-lg border-t bg-muted/30 px-5 py-3">
+                                                                    <button type="button" @click="open = false"
+                                                                            class="inline-flex h-9 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border border-input bg-card px-4 text-sm font-medium shadow-sm transition-colors hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                                                                        Cancel
+                                                                    </button>
+                                                                    <button type="submit"
+                                                                            class="inline-flex h-9 items-center justify-center gap-1.5 whitespace-nowrap rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                                                                        Save Changes
+                                                                    </button>
+                                                                </div>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                                                            </div>
+                                </td>
+                                                    </tr>
+                                                                    <tr class=" transition-colors hover:bg-muted/30">
+                            <td class="px-4 py-3">
+                                <span class="inline-flex rounded-md border bg-muted/50 px-2 py-1 font-mono text-xs font-semibold tracking-wide text-foreground">
+                                    USR-003
+                                </span>
+                            </td>
+                            <td class="max-w-52 px-4 py-3">
+                                <p class="truncate font-medium">Hamidou Abdoul</p>
+                                <p class="truncate text-xs text-muted-foreground">hamidou@atelier.com</p>
+                            </td>
+                            <td class="px-4 py-3">
+                                <span class="inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap bg-stone-100 text-stone-700 border-stone-300">Staff</span>
+                            </td>
+                            <td class="px-4 py-3 text-muted-foreground">Master Tailor</td>
+                            <td class="whitespace-nowrap px-4 py-3 text-muted-foreground">+237 677 000 003</td>
+                            <td class="px-4 py-3">
+                                <span class="inline-flex items-center gap-1.5 whitespace-nowrap text-sm text-emerald-700">
+                                    <span class="size-1.5 rounded-full bg-emerald-500" aria-hidden="true"></span>
+                                    Active
+                                </span>
+                            </td>
+                            <td class="px-4 py-3 text-center tabular-nums">
+                                <span class="inline-flex rounded-full bg-primary/10 px-2 py-0.5 text-xs font-bold text-primary">
+                                    2
+                                </span>
+                            </td>
+                            <td class="whitespace-nowrap px-4 py-3 text-muted-foreground">
+                                15 Nov 2026
+                            </td>
+                                                            <td class="px-4 py-3">
+                                    <div class="flex items-center justify-end">
+                                                                                    
+                                            <div x-data="{ open: false }">
+                                                <button type="button" @click="open = true"
+                                                        aria-label="Edit account Hamidou Abdoul"
+                                                        class="inline-flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>
+                                                </button>
+                                                <div x-show="open" style="display: none;"
+                                                     class="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true"
+                                                     aria-label="Edit Account"
+                                                     @keydown.escape.window="open = false">
+                                                    <div class="fixed inset-0 bg-black/50" @click="open = false" aria-hidden="true"></div>
+                                                    <div class="relative flex min-h-full items-start justify-center p-4 sm:items-center">
+                                                        <div class="relative w-full max-w-lg rounded-lg border border-border bg-card text-card-foreground shadow-xl">
+                                                            <div class="flex items-start justify-between gap-4 border-b px-5 py-4">
+                                                                <div class="min-w-0">
+                                                                    <h2 class="text-base font-semibold">Edit Account</h2>
+                                                                    <p class="mt-0.5 truncate text-sm text-muted-foreground">hamidou@atelier.com</p>
+                                                                </div>
+                                                                <button type="button" @click="open = false"
+                                                                        aria-label="Close"
+                                                                        class="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                                                                </button>
+                                                            </div>
+                                                            <form method="POST" action="https://atelier.osszcollection.com/users/9d021fb4-9b45-4888-8a52-efe93ae1876c/update">
+                                                                <input type="hidden" name="_token" value="dNzunr1u0Or0RPmvjYSF1yNP9NPtnIvIjrU6DnoG" autocomplete="off">                                                                <input type="hidden" name="formId" value="user-edit-9d021fb4-9b45-4888-8a52-efe93ae1876c" />
+                                                                <div class="max-h-[calc(85vh-11rem)] overflow-y-auto px-5 py-4">
+                                                                    <div class="grid gap-4 sm:grid-cols-2">
+                                                                        <div class="sm:col-span-2">
+                                                                            <label class="mb-1.5 block text-sm font-medium">Email *</label>
+                                                                            <p class="rounded-md border bg-muted/40 px-3 py-2 text-sm text-muted-foreground">hamidou@atelier.com</p>
+                                                                        </div>
+                                                                        <div>
+                                                                            <label for="edit-name-9d021fb4-9b45-4888-8a52-efe93ae1876c" class="mb-1.5 block text-sm font-medium">Full name *</label>
+                                                                            <input type="text" id="edit-name-9d021fb4-9b45-4888-8a52-efe93ae1876c" name="name" value="Hamidou Abdoul" maxlength="120" required
+                                                                                   class="h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50" />
+                                                                                                                                                    </div>
+                                                                                                                                                    <div>
+                                                                                <label for="edit-role-9d021fb4-9b45-4888-8a52-efe93ae1876c" class="mb-1.5 block text-sm font-medium">Role</label>
+                                                                                <select id="edit-role-9d021fb4-9b45-4888-8a52-efe93ae1876c" name="role"
+                                                                                        class="h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-sm shadow-sm transition-colors focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50">
+                                                                                                                                                                            <option value="MANAGEMENT" >Management</option>
+                                                                                                                                                                            <option value="ADMIN" >Admin</option>
+                                                                                                                                                                            <option value="STAFF" selected>Staff</option>
+                                                                                                                                                                    </select>
+                                                                                                                                                            </div>
+                                                                                                                                                <div>
+                                                                            <label for="edit-phone-9d021fb4-9b45-4888-8a52-efe93ae1876c" class="mb-1.5 block text-sm font-medium">Phone</label>
+                                                                            <input type="text" id="edit-phone-9d021fb4-9b45-4888-8a52-efe93ae1876c" name="phone" value="+237 677 000 003" maxlength="40"
+                                                                                   class="h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50" />
+                                                                                                                                                    </div>
+                                                                        <div>
+                                                                            <label for="edit-job-9d021fb4-9b45-4888-8a52-efe93ae1876c" class="mb-1.5 block text-sm font-medium">Job title</label>
+                                                                            <input type="text" id="edit-job-9d021fb4-9b45-4888-8a52-efe93ae1876c" name="jobTitle" value="Master Tailor" maxlength="120" placeholder="e.g. Tailor, Cutter"
+                                                                                   class="h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50" />
+                                                                                                                                                    </div>
+                                                                        <div class="sm:col-span-2">
+                                                                            <span class="mb-1.5 block text-sm font-medium">Account active</span>
+                                                                            <label class="flex min-h-11 items-center gap-2 text-sm">
+                                                                                <input type="hidden" name="isActive" value="0" />
+                                                                                <input type="checkbox" name="isActive" value="1" checked                                                                                       class="size-4 rounded border-input text-primary accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
+                                                                                Active
+                                                                            </label>
+                                                                        </div>
+                                                                        <div class="sm:col-span-2 border-t border-border pt-4">
+                                                                            <label for="edit-password-9d021fb4-9b45-4888-8a52-efe93ae1876c" class="mb-1.5 block text-sm font-medium">New password</label>
+                                                                            <div class="relative" x-data="{ show: false }">
+                                                                                <input type="password" :type="show ? 'text' : 'password'" id="edit-password-9d021fb4-9b45-4888-8a52-efe93ae1876c" name="password" value="" autocomplete="new-password" placeholder="At least 8 characters"
+                                                                                       class="h-9 w-full rounded-md border border-input bg-card px-3 py-1 pr-10 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50" />
+                                                                                <button type="button" @click="show = !show"
+                                                                                        :aria-label="show ? 'Hide password' : 'Show password'"
+                                                                                        class="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground">
+                                                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" x-show="! show" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                                                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" x-show="show" style="display: none" aria-hidden="true"><path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/><path d="m2 2 20 20"/></svg>
+                                                                                </button>
+                                                                            </div>
+                                                                            <p class="mt-1 text-xs text-muted-foreground">Leave blank to keep the current password.</p>
+                                                                                                                                                    </div>
+                                                                        <div class="sm:col-span-2">
+                                                                            <label for="edit-password-confirm-9d021fb4-9b45-4888-8a52-efe93ae1876c" class="mb-1.5 block text-sm font-medium">Confirm new password</label>
+                                                                            <input type="password" id="edit-password-confirm-9d021fb4-9b45-4888-8a52-efe93ae1876c" name="password_confirmation" value="" autocomplete="new-password"
+                                                                                   class="h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50" />
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="flex justify-end gap-2 rounded-b-lg border-t bg-muted/30 px-5 py-3">
+                                                                    <button type="button" @click="open = false"
+                                                                            class="inline-flex h-9 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border border-input bg-card px-4 text-sm font-medium shadow-sm transition-colors hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                                                                        Cancel
+                                                                    </button>
+                                                                    <button type="submit"
+                                                                            class="inline-flex h-9 items-center justify-center gap-1.5 whitespace-nowrap rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                                                                        Save Changes
+                                                                    </button>
+                                                                </div>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                                                            </div>
+                                </td>
+                                                    </tr>
+                                                                    <tr class=" transition-colors hover:bg-muted/30">
+                            <td class="px-4 py-3">
+                                <span class="inline-flex rounded-md border bg-muted/50 px-2 py-1 font-mono text-xs font-semibold tracking-wide text-foreground">
+                                    USR-004
+                                </span>
+                            </td>
+                            <td class="max-w-52 px-4 py-3">
+                                <p class="truncate font-medium">Lawal Sani</p>
+                                <p class="truncate text-xs text-muted-foreground">lawal@atelier.com</p>
+                            </td>
+                            <td class="px-4 py-3">
+                                <span class="inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap bg-stone-100 text-stone-700 border-stone-300">Staff</span>
+                            </td>
+                            <td class="px-4 py-3 text-muted-foreground">Tailor</td>
+                            <td class="whitespace-nowrap px-4 py-3 text-muted-foreground">+237 677 000 004</td>
+                            <td class="px-4 py-3">
+                                <span class="inline-flex items-center gap-1.5 whitespace-nowrap text-sm text-emerald-700">
+                                    <span class="size-1.5 rounded-full bg-emerald-500" aria-hidden="true"></span>
+                                    Active
+                                </span>
+                            </td>
+                            <td class="px-4 py-3 text-center tabular-nums">
+                                <span class="inline-flex rounded-full bg-primary/10 px-2 py-0.5 text-xs font-bold text-primary">
+                                    1
+                                </span>
+                            </td>
+                            <td class="whitespace-nowrap px-4 py-3 text-muted-foreground">
+                                15 Nov 2026
+                            </td>
+                                                            <td class="px-4 py-3">
+                                    <div class="flex items-center justify-end">
+                                                                                    
+                                            <div x-data="{ open: false }">
+                                                <button type="button" @click="open = true"
+                                                        aria-label="Edit account Lawal Sani"
+                                                        class="inline-flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>
+                                                </button>
+                                                <div x-show="open" style="display: none;"
+                                                     class="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true"
+                                                     aria-label="Edit Account"
+                                                     @keydown.escape.window="open = false">
+                                                    <div class="fixed inset-0 bg-black/50" @click="open = false" aria-hidden="true"></div>
+                                                    <div class="relative flex min-h-full items-start justify-center p-4 sm:items-center">
+                                                        <div class="relative w-full max-w-lg rounded-lg border border-border bg-card text-card-foreground shadow-xl">
+                                                            <div class="flex items-start justify-between gap-4 border-b px-5 py-4">
+                                                                <div class="min-w-0">
+                                                                    <h2 class="text-base font-semibold">Edit Account</h2>
+                                                                    <p class="mt-0.5 truncate text-sm text-muted-foreground">lawal@atelier.com</p>
+                                                                </div>
+                                                                <button type="button" @click="open = false"
+                                                                        aria-label="Close"
+                                                                        class="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                                                                </button>
+                                                            </div>
+                                                            <form method="POST" action="https://atelier.osszcollection.com/users/a4ee2330-0adc-4b6c-a982-f3172fff059d/update">
+                                                                <input type="hidden" name="_token" value="dNzunr1u0Or0RPmvjYSF1yNP9NPtnIvIjrU6DnoG" autocomplete="off">                                                                <input type="hidden" name="formId" value="user-edit-a4ee2330-0adc-4b6c-a982-f3172fff059d" />
+                                                                <div class="max-h-[calc(85vh-11rem)] overflow-y-auto px-5 py-4">
+                                                                    <div class="grid gap-4 sm:grid-cols-2">
+                                                                        <div class="sm:col-span-2">
+                                                                            <label class="mb-1.5 block text-sm font-medium">Email *</label>
+                                                                            <p class="rounded-md border bg-muted/40 px-3 py-2 text-sm text-muted-foreground">lawal@atelier.com</p>
+                                                                        </div>
+                                                                        <div>
+                                                                            <label for="edit-name-a4ee2330-0adc-4b6c-a982-f3172fff059d" class="mb-1.5 block text-sm font-medium">Full name *</label>
+                                                                            <input type="text" id="edit-name-a4ee2330-0adc-4b6c-a982-f3172fff059d" name="name" value="Lawal Sani" maxlength="120" required
+                                                                                   class="h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50" />
+                                                                                                                                                    </div>
+                                                                                                                                                    <div>
+                                                                                <label for="edit-role-a4ee2330-0adc-4b6c-a982-f3172fff059d" class="mb-1.5 block text-sm font-medium">Role</label>
+                                                                                <select id="edit-role-a4ee2330-0adc-4b6c-a982-f3172fff059d" name="role"
+                                                                                        class="h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-sm shadow-sm transition-colors focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50">
+                                                                                                                                                                            <option value="MANAGEMENT" >Management</option>
+                                                                                                                                                                            <option value="ADMIN" >Admin</option>
+                                                                                                                                                                            <option value="STAFF" selected>Staff</option>
+                                                                                                                                                                    </select>
+                                                                                                                                                            </div>
+                                                                                                                                                <div>
+                                                                            <label for="edit-phone-a4ee2330-0adc-4b6c-a982-f3172fff059d" class="mb-1.5 block text-sm font-medium">Phone</label>
+                                                                            <input type="text" id="edit-phone-a4ee2330-0adc-4b6c-a982-f3172fff059d" name="phone" value="+237 677 000 004" maxlength="40"
+                                                                                   class="h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50" />
+                                                                                                                                                    </div>
+                                                                        <div>
+                                                                            <label for="edit-job-a4ee2330-0adc-4b6c-a982-f3172fff059d" class="mb-1.5 block text-sm font-medium">Job title</label>
+                                                                            <input type="text" id="edit-job-a4ee2330-0adc-4b6c-a982-f3172fff059d" name="jobTitle" value="Tailor" maxlength="120" placeholder="e.g. Tailor, Cutter"
+                                                                                   class="h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50" />
+                                                                                                                                                    </div>
+                                                                        <div class="sm:col-span-2">
+                                                                            <span class="mb-1.5 block text-sm font-medium">Account active</span>
+                                                                            <label class="flex min-h-11 items-center gap-2 text-sm">
+                                                                                <input type="hidden" name="isActive" value="0" />
+                                                                                <input type="checkbox" name="isActive" value="1" checked                                                                                       class="size-4 rounded border-input text-primary accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
+                                                                                Active
+                                                                            </label>
+                                                                        </div>
+                                                                        <div class="sm:col-span-2 border-t border-border pt-4">
+                                                                            <label for="edit-password-a4ee2330-0adc-4b6c-a982-f3172fff059d" class="mb-1.5 block text-sm font-medium">New password</label>
+                                                                            <div class="relative" x-data="{ show: false }">
+                                                                                <input type="password" :type="show ? 'text' : 'password'" id="edit-password-a4ee2330-0adc-4b6c-a982-f3172fff059d" name="password" value="" autocomplete="new-password" placeholder="At least 8 characters"
+                                                                                       class="h-9 w-full rounded-md border border-input bg-card px-3 py-1 pr-10 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50" />
+                                                                                <button type="button" @click="show = !show"
+                                                                                        :aria-label="show ? 'Hide password' : 'Show password'"
+                                                                                        class="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground">
+                                                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" x-show="! show" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                                                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" x-show="show" style="display: none" aria-hidden="true"><path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/><path d="m2 2 20 20"/></svg>
+                                                                                </button>
+                                                                            </div>
+                                                                            <p class="mt-1 text-xs text-muted-foreground">Leave blank to keep the current password.</p>
+                                                                                                                                                    </div>
+                                                                        <div class="sm:col-span-2">
+                                                                            <label for="edit-password-confirm-a4ee2330-0adc-4b6c-a982-f3172fff059d" class="mb-1.5 block text-sm font-medium">Confirm new password</label>
+                                                                            <input type="password" id="edit-password-confirm-a4ee2330-0adc-4b6c-a982-f3172fff059d" name="password_confirmation" value="" autocomplete="new-password"
+                                                                                   class="h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50" />
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="flex justify-end gap-2 rounded-b-lg border-t bg-muted/30 px-5 py-3">
+                                                                    <button type="button" @click="open = false"
+                                                                            class="inline-flex h-9 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border border-input bg-card px-4 text-sm font-medium shadow-sm transition-colors hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                                                                        Cancel
+                                                                    </button>
+                                                                    <button type="submit"
+                                                                            class="inline-flex h-9 items-center justify-center gap-1.5 whitespace-nowrap rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                                                                        Save Changes
+                                                                    </button>
+                                                                </div>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                                                            </div>
+                                </td>
+                                                    </tr>
+                                                                    <tr class=" transition-colors hover:bg-muted/30">
+                            <td class="px-4 py-3">
+                                <span class="inline-flex rounded-md border bg-muted/50 px-2 py-1 font-mono text-xs font-semibold tracking-wide text-foreground">
+                                    USR-005
+                                </span>
+                            </td>
+                            <td class="max-w-52 px-4 py-3">
+                                <p class="truncate font-medium">Ngozi Okafor</p>
+                                <p class="truncate text-xs text-muted-foreground">ngozi@atelier.com</p>
+                            </td>
+                            <td class="px-4 py-3">
+                                <span class="inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap bg-stone-100 text-stone-700 border-stone-300">Staff</span>
+                            </td>
+                            <td class="px-4 py-3 text-muted-foreground">Finisher &amp; Ironing</td>
+                            <td class="whitespace-nowrap px-4 py-3 text-muted-foreground">+237 677 000 005</td>
+                            <td class="px-4 py-3">
+                                <span class="inline-flex items-center gap-1.5 whitespace-nowrap text-sm text-emerald-700">
+                                    <span class="size-1.5 rounded-full bg-emerald-500" aria-hidden="true"></span>
+                                    Active
+                                </span>
+                            </td>
+                            <td class="px-4 py-3 text-center tabular-nums">
+                                <span class="inline-flex rounded-full bg-primary/10 px-2 py-0.5 text-xs font-bold text-primary">
+                                    0
+                                </span>
+                            </td>
+                            <td class="whitespace-nowrap px-4 py-3 text-muted-foreground">
+                                15 Nov 2026
+                            </td>
+                                                            <td class="px-4 py-3">
+                                    <div class="flex items-center justify-end">
+                                                                                    
+                                            <div x-data="{ open: false }">
+                                                <button type="button" @click="open = true"
+                                                        aria-label="Edit account Ngozi Okafor"
+                                                        class="inline-flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>
+                                                </button>
+                                                <div x-show="open" style="display: none;"
+                                                     class="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true"
+                                                     aria-label="Edit Account"
+                                                     @keydown.escape.window="open = false">
+                                                    <div class="fixed inset-0 bg-black/50" @click="open = false" aria-hidden="true"></div>
+                                                    <div class="relative flex min-h-full items-start justify-center p-4 sm:items-center">
+                                                        <div class="relative w-full max-w-lg rounded-lg border border-border bg-card text-card-foreground shadow-xl">
+                                                            <div class="flex items-start justify-between gap-4 border-b px-5 py-4">
+                                                                <div class="min-w-0">
+                                                                    <h2 class="text-base font-semibold">Edit Account</h2>
+                                                                    <p class="mt-0.5 truncate text-sm text-muted-foreground">ngozi@atelier.com</p>
+                                                                </div>
+                                                                <button type="button" @click="open = false"
+                                                                        aria-label="Close"
+                                                                        class="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                                                                </button>
+                                                            </div>
+                                                            <form method="POST" action="https://atelier.osszcollection.com/users/5a7833ca-1d5e-4a7d-975c-85c1dbc489a5/update">
+                                                                <input type="hidden" name="_token" value="dNzunr1u0Or0RPmvjYSF1yNP9NPtnIvIjrU6DnoG" autocomplete="off">                                                                <input type="hidden" name="formId" value="user-edit-5a7833ca-1d5e-4a7d-975c-85c1dbc489a5" />
+                                                                <div class="max-h-[calc(85vh-11rem)] overflow-y-auto px-5 py-4">
+                                                                    <div class="grid gap-4 sm:grid-cols-2">
+                                                                        <div class="sm:col-span-2">
+                                                                            <label class="mb-1.5 block text-sm font-medium">Email *</label>
+                                                                            <p class="rounded-md border bg-muted/40 px-3 py-2 text-sm text-muted-foreground">ngozi@atelier.com</p>
+                                                                        </div>
+                                                                        <div>
+                                                                            <label for="edit-name-5a7833ca-1d5e-4a7d-975c-85c1dbc489a5" class="mb-1.5 block text-sm font-medium">Full name *</label>
+                                                                            <input type="text" id="edit-name-5a7833ca-1d5e-4a7d-975c-85c1dbc489a5" name="name" value="Ngozi Okafor" maxlength="120" required
+                                                                                   class="h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50" />
+                                                                                                                                                    </div>
+                                                                                                                                                    <div>
+                                                                                <label for="edit-role-5a7833ca-1d5e-4a7d-975c-85c1dbc489a5" class="mb-1.5 block text-sm font-medium">Role</label>
+                                                                                <select id="edit-role-5a7833ca-1d5e-4a7d-975c-85c1dbc489a5" name="role"
+                                                                                        class="h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-sm shadow-sm transition-colors focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50">
+                                                                                                                                                                            <option value="MANAGEMENT" >Management</option>
+                                                                                                                                                                            <option value="ADMIN" >Admin</option>
+                                                                                                                                                                            <option value="STAFF" selected>Staff</option>
+                                                                                                                                                                    </select>
+                                                                                                                                                            </div>
+                                                                                                                                                <div>
+                                                                            <label for="edit-phone-5a7833ca-1d5e-4a7d-975c-85c1dbc489a5" class="mb-1.5 block text-sm font-medium">Phone</label>
+                                                                            <input type="text" id="edit-phone-5a7833ca-1d5e-4a7d-975c-85c1dbc489a5" name="phone" value="+237 677 000 005" maxlength="40"
+                                                                                   class="h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50" />
+                                                                                                                                                    </div>
+                                                                        <div>
+                                                                            <label for="edit-job-5a7833ca-1d5e-4a7d-975c-85c1dbc489a5" class="mb-1.5 block text-sm font-medium">Job title</label>
+                                                                            <input type="text" id="edit-job-5a7833ca-1d5e-4a7d-975c-85c1dbc489a5" name="jobTitle" value="Finisher &amp; Ironing" maxlength="120" placeholder="e.g. Tailor, Cutter"
+                                                                                   class="h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50" />
+                                                                                                                                                    </div>
+                                                                        <div class="sm:col-span-2">
+                                                                            <span class="mb-1.5 block text-sm font-medium">Account active</span>
+                                                                            <label class="flex min-h-11 items-center gap-2 text-sm">
+                                                                                <input type="hidden" name="isActive" value="0" />
+                                                                                <input type="checkbox" name="isActive" value="1" checked                                                                                       class="size-4 rounded border-input text-primary accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
+                                                                                Active
+                                                                            </label>
+                                                                        </div>
+                                                                        <div class="sm:col-span-2 border-t border-border pt-4">
+                                                                            <label for="edit-password-5a7833ca-1d5e-4a7d-975c-85c1dbc489a5" class="mb-1.5 block text-sm font-medium">New password</label>
+                                                                            <div class="relative" x-data="{ show: false }">
+                                                                                <input type="password" :type="show ? 'text' : 'password'" id="edit-password-5a7833ca-1d5e-4a7d-975c-85c1dbc489a5" name="password" value="" autocomplete="new-password" placeholder="At least 8 characters"
+                                                                                       class="h-9 w-full rounded-md border border-input bg-card px-3 py-1 pr-10 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50" />
+                                                                                <button type="button" @click="show = !show"
+                                                                                        :aria-label="show ? 'Hide password' : 'Show password'"
+                                                                                        class="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground">
+                                                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" x-show="! show" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                                                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" x-show="show" style="display: none" aria-hidden="true"><path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/><path d="m2 2 20 20"/></svg>
+                                                                                </button>
+                                                                            </div>
+                                                                            <p class="mt-1 text-xs text-muted-foreground">Leave blank to keep the current password.</p>
+                                                                                                                                                    </div>
+                                                                        <div class="sm:col-span-2">
+                                                                            <label for="edit-password-confirm-5a7833ca-1d5e-4a7d-975c-85c1dbc489a5" class="mb-1.5 block text-sm font-medium">Confirm new password</label>
+                                                                            <input type="password" id="edit-password-confirm-5a7833ca-1d5e-4a7d-975c-85c1dbc489a5" name="password_confirmation" value="" autocomplete="new-password"
+                                                                                   class="h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50" />
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="flex justify-end gap-2 rounded-b-lg border-t bg-muted/30 px-5 py-3">
+                                                                    <button type="button" @click="open = false"
+                                                                            class="inline-flex h-9 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border border-input bg-card px-4 text-sm font-medium shadow-sm transition-colors hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                                                                        Cancel
+                                                                    </button>
+                                                                    <button type="submit"
+                                                                            class="inline-flex h-9 items-center justify-center gap-1.5 whitespace-nowrap rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                                                                        Save Changes
+                                                                    </button>
+                                                                </div>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                                                            </div>
+                                </td>
+                                                    </tr>
+                                    </tbody>
+            </table>
+        </div>
+    
+    
+            <div x-show="createOpen" style="display: none;"
+             class="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true"
+             aria-label="Create Account"
+             @keydown.escape.window="createOpen = false">
+            <div class="fixed inset-0 bg-black/50" @click="createOpen = false" aria-hidden="true"></div>
+            <div class="relative flex min-h-full items-start justify-center p-4 sm:items-center">
+                <div class="relative w-full max-w-lg rounded-lg border border-border bg-card text-card-foreground shadow-xl">
+                    <div class="flex items-start justify-between gap-4 border-b px-5 py-4">
+                        <div class="min-w-0">
+                            <h2 class="text-base font-semibold">Create Account</h2>
+                            <p class="mt-0.5 text-sm text-muted-foreground">New accounts can sign in immediately with the password you set.</p>
+                        </div>
+                        <button type="button" @click="createOpen = false"
+                                aria-label="Close"
+                                class="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                        </button>
+                    </div>
+                    <form method="POST" action="https://atelier.osszcollection.com/users">
+                        <input type="hidden" name="_token" value="dNzunr1u0Or0RPmvjYSF1yNP9NPtnIvIjrU6DnoG" autocomplete="off">                        <input type="hidden" name="formId" value="user-create" />
+                        <div class="max-h-[calc(85vh-11rem)] overflow-y-auto px-5 py-4"
+                             x-data="{ role: 'STAFF' }">
+                            <div class="grid gap-4 sm:grid-cols-2">
+                                <div>
+                                    <label for="new-name" class="mb-1.5 block text-sm font-medium">Full name *</label>
+                                    <input type="text" id="new-name" name="name" value="" maxlength="120" placeholder="e.g. Marie Ngo" required
+                                           class="h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50" />
+                                                                    </div>
+                                <div>
+                                    <label for="new-email" class="mb-1.5 block text-sm font-medium">Email *</label>
+                                    <input type="email" id="new-email" name="email" value="" placeholder="name@atelier.com" required
+                                           class="h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50" />
+                                                                    </div>
+                                <div>
+                                    <label for="new-password" class="mb-1.5 block text-sm font-medium">Password *</label>
+                                    <div class="relative" x-data="{ show: false }">
+                                        <input type="password" :type="show ? 'text' : 'password'" id="new-password" name="password" value="" autocomplete="new-password" placeholder="At least 8 characters" required
+                                               class="h-9 w-full rounded-md border border-input bg-card px-3 py-1 pr-10 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50" />
+                                        <button type="button" @click="show = !show"
+                                                :aria-label="show ? 'Hide password' : 'Show password'"
+                                                class="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" x-show="! show" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" x-show="show" style="display: none" aria-hidden="true"><path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/><path d="m2 2 20 20"/></svg>
+                                        </button>
+                                    </div>
+                                                                    </div>
+                                <div>
+                                    <label for="new-password-confirm" class="mb-1.5 block text-sm font-medium">Confirm password *</label>
+                                    <input type="password" id="new-password-confirm" name="password_confirmation" value="" autocomplete="new-password" required
+                                           class="h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50" />
+                                </div>
+                                <div>
+                                    <label for="new-role" class="mb-1.5 block text-sm font-medium">Role *</label>
+                                    <select id="new-role" name="role" x-model="role"
+                                            class="h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-sm shadow-sm transition-colors focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50">
+                                                                                    <option value="MANAGEMENT" >Management</option>
+                                                                                    <option value="ADMIN" >Admin</option>
+                                                                                    <option value="STAFF" selected>Staff</option>
+                                                                            </select>
+                                                                    </div>
+                                <div>
+                                    <label for="new-phone" class="mb-1.5 block text-sm font-medium">Phone</label>
+                                    <input type="text" id="new-phone" name="phone" value="" maxlength="40"
+                                           class="h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50" />
+                                                                    </div>
+                                <div>
+                                    <label for="new-job" class="mb-1.5 block text-sm font-medium">Job title</label>
+                                    <input type="text" id="new-job" name="jobTitle" value="" maxlength="120" placeholder="e.g. Tailor, Cutter"
+                                           class="h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50" />
+                                                                    </div>
+                                <div class="sm:col-span-2">
+                                    <span class="mb-1.5 block text-sm font-medium">Account active</span>
+                                    <label class="flex min-h-11 items-center gap-2 text-sm">
+                                        <input type="hidden" name="isActive" value="0" />
+                                        <input type="checkbox" name="isActive" value="1" checked                                               class="size-4 rounded border-input text-primary accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
+                                        Active
+                                    </label>
+                                </div>
+                                <div class="sm:col-span-2">
+                                    <div class="flex gap-2 rounded-lg border bg-muted/40 p-3">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1 1 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
+                                        <p class="text-xs text-muted-foreground">
+                                            <span x-show="role === 'MANAGEMENT'" style="display: none">Full access, final authority on incentives and critical decisions.</span>
+                                            <span x-show="role === 'ADMIN'" style="display: none">Operational management of customers, orders, production and staff accounts.</span>
+                                            <span x-show="role === 'STAFF'">Sees and updates only the tasks assigned to their own account. Staff accounts can be assigned production tasks.</span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex justify-end gap-2 rounded-b-lg border-t bg-muted/30 px-5 py-3">
+                            <button type="button" @click="createOpen = false"
+                                    class="inline-flex h-9 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border border-input bg-card px-4 text-sm font-medium shadow-sm transition-colors hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                                Cancel
+                            </button>
+                            <button type="submit"
+                                    class="inline-flex h-9 items-center justify-center gap-1.5 whitespace-nowrap rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                                Create Account
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+            </main>
+
+            
+            <footer class="mt-auto border-t bg-background">
+                <div class="max-w-[1400px] mx-auto px-4 sm:px-6 py-3 flex flex-col sm:flex-row items-center justify-between gap-1 text-xs text-muted-foreground" style="padding-bottom: max(0.75rem, env(safe-area-inset-bottom));">
+                    <p>© 2026 OSSZ Atelier — Independent Production Management System</p>
+                    <p>Own database · Own accounts · atelier.osszcollection.com</p>
+                </div>
+            </footer>
+        </div>
+    </div>
+</div>
+
+
+
+
+</body>
+</html>

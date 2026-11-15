@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="dNzunr1u0Or0RPmvjYSF1yNP9NPtnIvIjrU6DnoG">
+    <title>Production — OSSZ ATELIER</title>
+    <link rel="stylesheet" href="/css/app.css">
+    <script src="/js/alpine.min.js" defer></script>
+    <style>[x-cloak]{display:none !important;}</style>
+</head>
+<body class="bg-background text-foreground antialiased">
+
+<div class="min-h-screen flex flex-col bg-background" x-data="{ nav: false }" @keydown.escape.window="nav = false">
+    <div class="flex flex-1 min-h-0">
+
+        
+        
+        
+        <aside class="hidden lg:flex w-60 shrink-0 flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border sticky top-0 h-screen">
+            <div class="flex items-center justify-center px-5 h-16 border-b border-sidebar-border">
+                <div class="text-center min-w-0">
+                    <p class="font-display font-bold leading-none">OSSZ ATELIER</p>
+                    <p class="text-[9px] tracking-[0.2em] text-stone-400 mt-1.5">GESTION DE PRODUCTION</p>
+                </div>
+            </div>
+            <div class="flex-1 overflow-y-auto">
+                <nav class="flex flex-col gap-5 px-3 py-4" aria-label="Navigation principale">
+                                            <div>
+                            <p class="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-stone-400">Vue d&#039;ensemble</p>
+                            <div class="flex flex-col gap-0.5">
+                                                                    <a href="https://atelier.osszcollection.com" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+                                        <span class="truncate">Tableau de bord</span>
+                                    </a>
+                                                            </div>
+                        </div>
+                                            <div>
+                            <p class="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-stone-400">Production</p>
+                            <div class="flex flex-col gap-0.5">
+                                                                    <a href="https://atelier.osszcollection.com/tasks" @click="nav = false" aria-current="page" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left bg-sidebar-primary/20 text-sidebar-primary">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/></svg>
+                                        <span class="truncate">Production</span>
+                                    </a>
+                                                                    <a href="https://atelier.osszcollection.com/tasks/create" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg>
+                                        <span class="truncate">Créer des tâches</span>
+                                    </a>
+                                                                    <a href="https://atelier.osszcollection.com/orders" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+                                        <span class="truncate">Commandes</span>
+                                    </a>
+                                                                    <a href="https://atelier.osszcollection.com/customers" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                                        <span class="truncate">Clients</span>
+                                    </a>
+                                                            </div>
+                        </div>
+                                            <div>
+                            <p class="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-stone-400">Analyses</p>
+                            <div class="flex flex-col gap-0.5">
+                                                                    <a href="https://atelier.osszcollection.com/performance" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+                                        <span class="truncate">Performance</span>
+                                    </a>
+                                                                    <a href="https://atelier.osszcollection.com/incentives" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5"/></svg>
+                                        <span class="truncate">Primes</span>
+                                    </a>
+                                                                    <a href="https://atelier.osszcollection.com/reports" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M8 13v2"/><path d="M12 13v4"/><path d="M16 13v2"/></svg>
+                                        <span class="truncate">Rapports</span>
+                                    </a>
+                                                            </div>
+                        </div>
+                                            <div>
+                            <p class="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-stone-400">Administration</p>
+                            <div class="flex flex-col gap-0.5">
+                                                                    <a href="https://atelier.osszcollection.com/users" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/><path d="M8 10v4"/><path d="M12 10v2"/><path d="M16 10v4"/></svg>
+                                        <span class="truncate">Utilisateurs &amp; rôles</span>
+                                    </a>
+                                                                    <a href="https://atelier.osszcollection.com/stages" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="M20 7h-9"/><path d="M14 17H5"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/></svg>
+                                        <span class="truncate">Étapes de production</span>
+                                    </a>
+                                                                    <a href="https://atelier.osszcollection.com/audit" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="M15 12h-5"/><path d="M15 8h-5"/><path d="M19 17V5a2 2 0 0 0-2-2H4"/><path d="M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"/></svg>
+                                        <span class="truncate">Historique d&#039;audit</span>
+                                    </a>
+                                                            </div>
+                        </div>
+                                    </nav>
+            </div>
+            <div class="p-4 border-t border-sidebar-border text-[11px] text-stone-500">
+                Système de production indépendant
+            </div>
+        </aside>
+
+        
+        
+        
+        <div x-show="nav" x-cloak x-transition.opacity.duration.200ms class="fixed inset-0 z-40 bg-black/60 lg:hidden" @click="nav = false" aria-hidden="true"></div>
+        <aside id="mobile-nav" x-show="nav" x-cloak
+               x-transition:enter="transition ease-out duration-200"
+               x-transition:enter-start="-translate-x-full"
+               x-transition:enter-end="translate-x-0"
+               x-transition:leave="transition ease-in duration-150"
+               x-transition:leave-start="translate-x-0"
+               x-transition:leave-end="-translate-x-full"
+               class="fixed left-0 top-0 z-50 h-full w-72 max-w-[85vw] flex flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border lg:hidden"
+               role="dialog" aria-modal="true" aria-label="Navigation">
+            <div class="relative flex items-center justify-center px-5 h-16 border-b border-sidebar-border">
+                <div class="text-center min-w-0">
+                    <p class="font-display font-bold leading-none">OSSZ ATELIER</p>
+                    <p class="text-[9px] tracking-[0.2em] text-stone-400 mt-1.5">GESTION DE PRODUCTION</p>
+                </div>
+                <button type="button" @click="nav = false" class="absolute right-3 inline-flex items-center justify-center size-8 rounded-md text-stone-400 hover:text-white hover:bg-white/5 transition-colors" aria-label="Fermer">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                </button>
+            </div>
+            <nav class="flex-1 overflow-y-auto flex flex-col gap-5 px-3 py-4" aria-label="Navigation principale">
+                                    <div>
+                        <p class="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-stone-400">Vue d&#039;ensemble</p>
+                        <div class="flex flex-col gap-0.5">
+                                                            <a href="https://atelier.osszcollection.com" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+                                    <span class="truncate">Tableau de bord</span>
+                                </a>
+                                                    </div>
+                    </div>
+                                    <div>
+                        <p class="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-stone-400">Production</p>
+                        <div class="flex flex-col gap-0.5">
+                                                            <a href="https://atelier.osszcollection.com/tasks" @click="nav = false" aria-current="page" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left bg-sidebar-primary/20 text-sidebar-primary">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/></svg>
+                                    <span class="truncate">Production</span>
+                                </a>
+                                                            <a href="https://atelier.osszcollection.com/tasks/create" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg>
+                                    <span class="truncate">Créer des tâches</span>
+                                </a>
+                                                            <a href="https://atelier.osszcollection.com/orders" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+                                    <span class="truncate">Commandes</span>
+                                </a>
+                                                            <a href="https://atelier.osszcollection.com/customers" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                                    <span class="truncate">Clients</span>
+                                </a>
+                                                    </div>
+                    </div>
+                                    <div>
+                        <p class="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-stone-400">Analyses</p>
+                        <div class="flex flex-col gap-0.5">
+                                                            <a href="https://atelier.osszcollection.com/performance" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+                                    <span class="truncate">Performance</span>
+                                </a>
+                                                            <a href="https://atelier.osszcollection.com/incentives" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5"/></svg>
+                                    <span class="truncate">Primes</span>
+                                </a>
+                                                            <a href="https://atelier.osszcollection.com/reports" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M8 13v2"/><path d="M12 13v4"/><path d="M16 13v2"/></svg>
+                                    <span class="truncate">Rapports</span>
+                                </a>
+                                                    </div>
+                    </div>
+                                    <div>
+                        <p class="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-stone-400">Administration</p>
+                        <div class="flex flex-col gap-0.5">
+                                                            <a href="https://atelier.osszcollection.com/users" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/><path d="M8 10v4"/><path d="M12 10v2"/><path d="M16 10v4"/></svg>
+                                    <span class="truncate">Utilisateurs &amp; rôles</span>
+                                </a>
+                                                            <a href="https://atelier.osszcollection.com/stages" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="M20 7h-9"/><path d="M14 17H5"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/></svg>
+                                    <span class="truncate">Étapes de production</span>
+                                </a>
+                                                            <a href="https://atelier.osszcollection.com/audit" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="M15 12h-5"/><path d="M15 8h-5"/><path d="M19 17V5a2 2 0 0 0-2-2H4"/><path d="M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"/></svg>
+                                    <span class="truncate">Historique d&#039;audit</span>
+                                </a>
+                                                    </div>
+                    </div>
+                            </nav>
+        </aside>
+
+        
+        
+        
+        <div class="flex-1 flex flex-col min-w-0">
+            <header class="sticky top-0 z-30 relative flex items-center gap-2 sm:gap-3 h-16 px-4 sm:px-6 border-b bg-background/95 backdrop-blur">
+                
+                <button type="button" class="lg:hidden inline-flex items-center justify-center size-9 -ml-1.5 rounded-md hover:bg-muted transition-colors" @click="nav = true" aria-label="Ouvrir le menu" aria-controls="mobile-nav">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-5" aria-hidden="true"><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+                </button>
+
+                
+                <a href="https://atelier.osszcollection.com" aria-label="Logo OSSZ Atelier — aller au tableau de bord" class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 shrink-0 rounded-md max-[359px]:static max-[359px]:translate-x-0 max-[359px]:translate-y-0 max-[359px]:mx-auto">
+                    <img src="/img/ossz-logo.png" alt="Logo OSSZ Atelier" class="h-7 sm:h-9 w-auto rounded-md ring-1 ring-black/10">
+                </a>
+
+                
+                <h1 class="hidden sm:block font-display text-lg font-semibold truncate min-w-0 max-w-[calc(50%-6.5rem)]">Production</h1>
+
+                
+                <div class="ml-auto max-[359px]:ml-0 flex items-center gap-1 sm:gap-1.5">
+                    
+                    <div role="group" aria-label="Langue" title="Switch language" class="flex items-center gap-0.5 rounded-full border bg-background p-0.5 select-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="hidden sm:block size-3.5 ml-1 text-muted-foreground" aria-hidden="true"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg>
+                        <a href="https://atelier.osszcollection.com/locale/en" class="rounded-full px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide transition-colors text-muted-foreground hover:text-foreground">EN</a>
+                        <a href="https://atelier.osszcollection.com/locale/fr" class="rounded-full px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide transition-colors bg-primary text-primary-foreground" aria-current="true">FR</a>
+                    </div>
+
+                    
+                    <a href="https://atelier.osszcollection.com/notifications" class="relative inline-flex items-center justify-center size-8 sm:size-9 rounded-md hover:bg-muted transition-colors" aria-label="Notifications">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 sm:size-5" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+                                                    <span class="absolute -top-0.5 -right-0.5 min-w-4.5 h-4.5 px-1 rounded-full bg-red-600 text-white text-[10px] font-bold flex items-center justify-center">2</span>
+                                            </a>
+
+                    
+                                            <div class="relative" x-data="{ open: false }">
+                            <button type="button" @click="open = !open" @click.outside="open = false" @keydown.escape.window="open = false" :aria-expanded="open.toString()" aria-haspopup="menu" aria-label="Menu du compte" class="flex items-center gap-2 rounded-full hover:bg-muted p-0 sm:p-1 sm:pr-2 transition-colors">
+                                <span class="flex items-center justify-center size-8 rounded-full bg-primary/10 text-primary text-xs font-semibold">AS</span>
+                                <span class="hidden sm:block text-left">
+                                    <span class="block text-sm font-medium leading-none">Aminata Sow</span>
+                                    <span class="block text-[11px] text-muted-foreground mt-0.5">USR-001 · Direction</span>
+                                </span>
+                            </button>
+                            <div x-show="open" x-cloak
+                                 x-transition:enter="transition ease-out duration-100"
+                                 x-transition:enter-start="opacity-0 scale-95"
+                                 x-transition:enter-end="opacity-100 scale-100"
+                                 x-transition:leave="transition ease-in duration-75"
+                                 x-transition:leave-start="opacity-100 scale-100"
+                                 x-transition:leave-end="opacity-0 scale-95"
+                                 class="absolute right-0 mt-2 w-60 rounded-lg border bg-card shadow-lg py-1 z-50" role="menu">
+                                <div class="px-3 py-2">
+                                    <p class="text-sm font-medium">Aminata Sow</p>
+                                    <p class="text-xs text-muted-foreground font-normal truncate">management@atelier.com</p>
+                                    <p class="text-xs text-muted-foreground font-normal mt-0.5">Direction</p>
+                                                                            <p class="text-xs text-muted-foreground font-normal mt-0.5 font-mono">USR-001</p>
+                                                                    </div>
+                                <div class="h-px bg-border my-1"></div>
+                                <form method="POST" action="https://atelier.osszcollection.com/logout">
+                                    <input type="hidden" name="_token" value="dNzunr1u0Or0RPmvjYSF1yNP9NPtnIvIjrU6DnoG" autocomplete="off">                                    <button type="submit" role="menuitem" class="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-700 hover:bg-muted transition-colors">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+                                        Se déconnecter
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                                    </div>
+            </header>
+
+            <main class="flex-1 px-4 sm:px-6 py-6 w-full max-w-[1400px] mx-auto">
+                
+<div>
+    
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+        <div class="min-w-0">
+            <h1 class="font-display text-2xl font-bold tracking-tight">
+                Production
+            </h1>
+            <p class="text-sm text-muted-foreground mt-0.5">
+                Suivez toutes les tâches de production de confection de l&#039;atelier.
+            </p>
+        </div>
+                    <div class="flex flex-wrap items-center gap-2 shrink-0">
+                <a href="https://atelier.osszcollection.com/tasks/create"
+                   class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm font-medium h-9 px-3 bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                    Créer des tâches
+                </a>
+            </div>
+            </div>
+
+    
+    <div class="rounded-xl border bg-card text-card-foreground shadow-sm mb-4">
+        <div class="p-4">
+            <form method="GET" action="https://atelier.osszcollection.com/tasks" class="grid gap-3 md:grid-cols-2 lg:grid-cols-4" role="search">
+                <div class="space-y-1.5 lg:col-span-2">
+                    <label for="tasks-search" class="text-sm font-medium leading-none">Rechercher</label>
+                    <div class="relative">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="absolute left-2.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                        <input type="text" id="tasks-search" name="q" value=""
+                               placeholder="Numéro de commande, client, pièce ou code de tâche"
+                               class="flex h-9 w-full rounded-md border border-input bg-background pl-8 pr-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                    </div>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label for="tasks-status" class="text-sm font-medium leading-none">Statut</label>
+                    <select id="tasks-status" name="status" aria-label="Filtrer par statut"
+                            class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                        <option value="">Tous les statuts</option>
+                                                    <option value="UNASSIGNED" >Non affectée</option>
+                                                    <option value="ASSIGNED" >Affectée</option>
+                                                    <option value="ONGOING" >En cours</option>
+                                                    <option value="AWAITING_INSPECTION" >En attente d&#039;inspection</option>
+                                                    <option value="CHANGES_REQUESTED" >Retouches demandées</option>
+                                                    <option value="APPROVED" >Approuvée</option>
+                                                    <option value="READY_FOR_PICKUP" >Prêt pour retrait</option>
+                                                    <option value="DELIVERED" >Livrée/Récupérée</option>
+                                                    <option value="BLOCKED" >Bloquée</option>
+                                                    <option value="CANCELLED" >Annulée</option>
+                                            </select>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label for="tasks-sort" class="text-sm font-medium leading-none">Trier par</label>
+                    <select id="tasks-sort" name="sort" aria-label="Trier les tâches"
+                            class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                                                    <option value="updated" selected>Mises à jour récemment</option>
+                                                    <option value="deadline" >Échéance</option>
+                                                    <option value="progress" >Progression</option>
+                                                    <option value="created" >Plus récentes</option>
+                                            </select>
+                </div>
+
+                                    <div class="space-y-1.5">
+                        <label for="tasks-staff" class="text-sm font-medium leading-none">Personnel</label>
+                        <select id="tasks-staff" name="staff" aria-label="Filtrer par membre du personnel"
+                                class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                            <option value="">Tout le personnel</option>
+                            <option value="unassigned" >Non affectées</option>
+                                                            <option value="9d021fb4-9b45-4888-8a52-efe93ae1876c" >
+                                    Hamidou Abdoul (2 en cours)
+                                </option>
+                                                            <option value="a4ee2330-0adc-4b6c-a982-f3172fff059d" >
+                                    Lawal Sani (1 en cours)
+                                </option>
+                                                            <option value="5a7833ca-1d5e-4a7d-975c-85c1dbc489a5" >
+                                    Ngozi Okafor (0 en cours)
+                                </option>
+                                                    </select>
+                    </div>
+                
+                                    <div class="space-y-1.5">
+                        <label for="tasks-priority" class="text-sm font-medium leading-none">Priorité</label>
+                        <select id="tasks-priority" name="priority" aria-label="Filtrer par priorité"
+                                class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                            <option value="">Toutes les priorités</option>
+                                                            <option value="LOW" >Basse</option>
+                                                            <option value="NORMAL" >Normale</option>
+                                                            <option value="HIGH" >Haute</option>
+                                                            <option value="URGENT" >Urgente</option>
+                                                    </select>
+                    </div>
+                
+                                    <div class="space-y-1.5">
+                        <label for="tasks-from" class="text-sm font-medium leading-none">Échéance du</label>
+                        <input type="date" id="tasks-from" name="deadlineFrom" value=""
+                               class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label for="tasks-to" class="text-sm font-medium leading-none">Échéance au</label>
+                        <input type="date" id="tasks-to" name="deadlineTo" value=""
+                               class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                    </div>
+                
+                <div class="flex flex-wrap items-center gap-3 pt-1 lg:pt-6">
+                    <label for="tasks-overdue" class="inline-flex items-center gap-2.5 text-sm font-medium cursor-pointer">
+                        <input type="checkbox" id="tasks-overdue" name="overdue" value="1"
+                                                              class="size-4 rounded border-input accent-primary">
+                        En retard uniquement
+                    </label>
+                    <button type="submit"
+                            class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm font-medium h-9 px-4 bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors">
+                        Filtrer
+                    </button>
+                                    </div>
+            </form>
+        </div>
+    </div>
+
+    
+    <div class="rounded-xl border bg-card text-card-foreground shadow-sm">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm min-w-[900px]">
+                <caption class="sr-only">Production</caption>
+                <thead>
+                    <tr class="border-b bg-muted/50">
+                        <th scope="col" class="h-10 px-4 text-start font-medium text-muted-foreground w-[220px]">Tâche</th>
+                        <th scope="col" class="h-10 px-4 text-start font-medium text-muted-foreground w-[200px]">Commande</th>
+                        <th scope="col" class="h-10 px-4 text-start font-medium text-muted-foreground w-[150px]">Affectation</th>
+                        <th scope="col" class="h-10 px-4 text-start font-medium text-muted-foreground w-[160px]">Statut</th>
+                                                    <th scope="col" class="h-10 px-4 text-start font-medium text-muted-foreground w-[120px]">Priorité</th>
+                                                <th scope="col" class="h-10 px-4 text-start font-medium text-muted-foreground w-[170px]">Progression</th>
+                        <th scope="col" class="h-10 px-4 text-start font-medium text-muted-foreground w-[140px]">Échéance</th>
+                        <th scope="col" class="h-10 px-4 text-right font-medium text-muted-foreground">Dernière mise à jour</th>
+                    </tr>
+                </thead>
+                <tbody>
+                                                                    <tr tabindex="0" role="link"
+                            aria-label="Ouvrir la tâche TASK-0002 — Trousers"
+                            class="cursor-pointer outline-none border-b transition-colors hover:bg-muted/50 focus-visible:bg-muted/60 last:border-b-0"
+                            onclick="window.location.href='https://atelier.osszcollection.com/tasks/d479101f-23ec-4826-a048-0acee908e096'"
+                            onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.location.href='https://atelier.osszcollection.com/tasks/d479101f-23ec-4826-a048-0acee908e096'}">
+                            <td class="px-4 py-3 align-middle">
+                                <a href="https://atelier.osszcollection.com/tasks/d479101f-23ec-4826-a048-0acee908e096" class="block focus-visible:outline-none">
+                                    <p class="font-medium text-sm leading-tight">Trousers</p>
+                                    <p class="text-xs text-muted-foreground mt-0.5">TASK-0002</p>
+                                </a>
+                            </td>
+                            <td class="px-4 py-3 align-middle">
+                                <p class="text-sm leading-tight">OSSZ-2026-001</p>
+                                <p class="text-xs text-muted-foreground mt-0.5 truncate max-w-44">John Doe</p>
+                            </td>
+                            <td class="px-4 py-3 align-middle">
+                                                                    <span class="text-sm">Hamidou Abdoul</span>
+                                                            </td>
+                            <td class="px-4 py-3 align-middle">
+                                <span class="inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap bg-amber-50 text-amber-800 border-amber-300">En cours</span>
+                            </td>
+                                                            <td class="px-4 py-3 align-middle">
+                                    <span class="inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap bg-amber-50 text-amber-800 border-amber-300">Haute</span>
+                                </td>
+                                                        <td class="px-4 py-3 align-middle">
+                                <div class="flex items-center gap-2 min-w-28">
+                                    <div class="h-1.5 w-full rounded bg-muted overflow-hidden">
+                                        <div class="h-full rounded transition-all bg-primary"
+                                             style="width: 30%"></div>
+                                    </div>
+                                    <span class="text-xs font-semibold tabular-nums w-9 text-right">30%</span>
+                                </div>
+                            </td>
+                            <td class="px-4 py-3 align-middle whitespace-nowrap">
+                                                                    <span class="inline-flex items-center gap-1 text-sm whitespace-nowrap text-muted-foreground">
+                                                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3.5 opacity-60" aria-hidden="true"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M17.5 17.5 16 16.3V14"/><circle cx="16" cy="16" r="6"/></svg>
+                                                                                Nov 27, 2026
+                                    </span>
+                                                            </td>
+                            <td class="px-4 py-3 align-middle text-right text-xs text-muted-foreground whitespace-nowrap" title="15 nov. 2026, 00:41">
+                                il y a 20 heures
+                            </td>
+                        </tr>
+                                                                    <tr tabindex="0" role="link"
+                            aria-label="Ouvrir la tâche TASK-0005 — Matching Trousers"
+                            class="cursor-pointer outline-none border-b transition-colors hover:bg-muted/50 focus-visible:bg-muted/60 last:border-b-0"
+                            onclick="window.location.href='https://atelier.osszcollection.com/tasks/bf8e9a86-7525-432e-a473-d855f69ee6ed'"
+                            onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.location.href='https://atelier.osszcollection.com/tasks/bf8e9a86-7525-432e-a473-d855f69ee6ed'}">
+                            <td class="px-4 py-3 align-middle">
+                                <a href="https://atelier.osszcollection.com/tasks/bf8e9a86-7525-432e-a473-d855f69ee6ed" class="block focus-visible:outline-none">
+                                    <p class="font-medium text-sm leading-tight">Matching Trousers</p>
+                                    <p class="text-xs text-muted-foreground mt-0.5">TASK-0005</p>
+                                </a>
+                            </td>
+                            <td class="px-4 py-3 align-middle">
+                                <p class="text-sm leading-tight">OSSZ-2026-002</p>
+                                <p class="text-xs text-muted-foreground mt-0.5 truncate max-w-44">Amina Cissé</p>
+                            </td>
+                            <td class="px-4 py-3 align-middle">
+                                                                    <span class="text-sm text-muted-foreground italic">Non affectée</span>
+                                                            </td>
+                            <td class="px-4 py-3 align-middle">
+                                <span class="inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap bg-stone-100 text-stone-700 border-stone-300">Non affectée</span>
+                            </td>
+                                                            <td class="px-4 py-3 align-middle">
+                                    <span class="inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap bg-teal-50 text-teal-700 border-teal-300">Normale</span>
+                                </td>
+                                                        <td class="px-4 py-3 align-middle">
+                                <div class="flex items-center gap-2 min-w-28">
+                                    <div class="h-1.5 w-full rounded bg-muted overflow-hidden">
+                                        <div class="h-full rounded transition-all bg-primary"
+                                             style="width: 0%"></div>
+                                    </div>
+                                    <span class="text-xs font-semibold tabular-nums w-9 text-right">0%</span>
+                                </div>
+                            </td>
+                            <td class="px-4 py-3 align-middle whitespace-nowrap">
+                                                                    <span class="inline-flex items-center gap-1 text-sm whitespace-nowrap text-muted-foreground">
+                                                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3.5 opacity-60" aria-hidden="true"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M17.5 17.5 16 16.3V14"/><circle cx="16" cy="16" r="6"/></svg>
+                                                                                Dec 9, 2026
+                                    </span>
+                                                            </td>
+                            <td class="px-4 py-3 align-middle text-right text-xs text-muted-foreground whitespace-nowrap" title="15 nov. 2026, 00:27">
+                                il y a 20 heures
+                            </td>
+                        </tr>
+                                                                    <tr tabindex="0" role="link"
+                            aria-label="Ouvrir la tâche TASK-0004 — Agbada Gown"
+                            class="cursor-pointer outline-none border-b transition-colors hover:bg-muted/50 focus-visible:bg-muted/60 last:border-b-0"
+                            onclick="window.location.href='https://atelier.osszcollection.com/tasks/54ec99fd-aa2d-49c8-b88e-bf62dc1e94be'"
+                            onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.location.href='https://atelier.osszcollection.com/tasks/54ec99fd-aa2d-49c8-b88e-bf62dc1e94be'}">
+                            <td class="px-4 py-3 align-middle">
+                                <a href="https://atelier.osszcollection.com/tasks/54ec99fd-aa2d-49c8-b88e-bf62dc1e94be" class="block focus-visible:outline-none">
+                                    <p class="font-medium text-sm leading-tight">Agbada Gown</p>
+                                    <p class="text-xs text-muted-foreground mt-0.5">TASK-0004</p>
+                                </a>
+                            </td>
+                            <td class="px-4 py-3 align-middle">
+                                <p class="text-sm leading-tight">OSSZ-2026-002</p>
+                                <p class="text-xs text-muted-foreground mt-0.5 truncate max-w-44">Amina Cissé</p>
+                            </td>
+                            <td class="px-4 py-3 align-middle">
+                                                                    <span class="text-sm text-muted-foreground italic">Non affectée</span>
+                                                            </td>
+                            <td class="px-4 py-3 align-middle">
+                                <span class="inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap bg-stone-100 text-stone-700 border-stone-300">Non affectée</span>
+                            </td>
+                                                            <td class="px-4 py-3 align-middle">
+                                    <span class="inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap bg-teal-50 text-teal-700 border-teal-300">Normale</span>
+                                </td>
+                                                        <td class="px-4 py-3 align-middle">
+                                <div class="flex items-center gap-2 min-w-28">
+                                    <div class="h-1.5 w-full rounded bg-muted overflow-hidden">
+                                        <div class="h-full rounded transition-all bg-primary"
+                                             style="width: 0%"></div>
+                                    </div>
+                                    <span class="text-xs font-semibold tabular-nums w-9 text-right">0%</span>
+                                </div>
+                            </td>
+                            <td class="px-4 py-3 align-middle whitespace-nowrap">
+                                                                    <span class="inline-flex items-center gap-1 text-sm whitespace-nowrap text-muted-foreground">
+                                                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3.5 opacity-60" aria-hidden="true"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M17.5 17.5 16 16.3V14"/><circle cx="16" cy="16" r="6"/></svg>
+                                                                                Dec 9, 2026
+                                    </span>
+                                                            </td>
+                            <td class="px-4 py-3 align-middle text-right text-xs text-muted-foreground whitespace-nowrap" title="15 nov. 2026, 00:27">
+                                il y a 20 heures
+                            </td>
+                        </tr>
+                                                                    <tr tabindex="0" role="link"
+                            aria-label="Ouvrir la tâche TASK-0003 — Vest"
+                            class="cursor-pointer outline-none border-b transition-colors hover:bg-muted/50 focus-visible:bg-muted/60 last:border-b-0"
+                            onclick="window.location.href='https://atelier.osszcollection.com/tasks/39f03973-1709-485f-9986-03c788cbab42'"
+                            onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.location.href='https://atelier.osszcollection.com/tasks/39f03973-1709-485f-9986-03c788cbab42'}">
+                            <td class="px-4 py-3 align-middle">
+                                <a href="https://atelier.osszcollection.com/tasks/39f03973-1709-485f-9986-03c788cbab42" class="block focus-visible:outline-none">
+                                    <p class="font-medium text-sm leading-tight">Vest</p>
+                                    <p class="text-xs text-muted-foreground mt-0.5">TASK-0003</p>
+                                </a>
+                            </td>
+                            <td class="px-4 py-3 align-middle">
+                                <p class="text-sm leading-tight">OSSZ-2026-001</p>
+                                <p class="text-xs text-muted-foreground mt-0.5 truncate max-w-44">John Doe</p>
+                            </td>
+                            <td class="px-4 py-3 align-middle">
+                                                                    <span class="text-sm">Lawal Sani</span>
+                                                            </td>
+                            <td class="px-4 py-3 align-middle">
+                                <span class="inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap bg-amber-50 text-amber-800 border-amber-300">En cours</span>
+                            </td>
+                                                            <td class="px-4 py-3 align-middle">
+                                    <span class="inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap bg-amber-50 text-amber-800 border-amber-300">Haute</span>
+                                </td>
+                                                        <td class="px-4 py-3 align-middle">
+                                <div class="flex items-center gap-2 min-w-28">
+                                    <div class="h-1.5 w-full rounded bg-muted overflow-hidden">
+                                        <div class="h-full rounded transition-all bg-primary"
+                                             style="width: 30%"></div>
+                                    </div>
+                                    <span class="text-xs font-semibold tabular-nums w-9 text-right">30%</span>
+                                </div>
+                            </td>
+                            <td class="px-4 py-3 align-middle whitespace-nowrap">
+                                                                    <span class="inline-flex items-center gap-1 text-sm whitespace-nowrap text-red-700 font-semibold">
+                                                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3.5" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+                                                                                Nov 13, 2026
+                                    </span>
+                                                            </td>
+                            <td class="px-4 py-3 align-middle text-right text-xs text-muted-foreground whitespace-nowrap" title="15 nov. 2026, 00:27">
+                                il y a 20 heures
+                            </td>
+                        </tr>
+                                                                    <tr tabindex="0" role="link"
+                            aria-label="Ouvrir la tâche TASK-0001 — Jacket"
+                            class="cursor-pointer outline-none border-b transition-colors hover:bg-muted/50 focus-visible:bg-muted/60 last:border-b-0"
+                            onclick="window.location.href='https://atelier.osszcollection.com/tasks/249a0587-0be4-4a63-9a3f-9ce5ca942a0f'"
+                            onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.location.href='https://atelier.osszcollection.com/tasks/249a0587-0be4-4a63-9a3f-9ce5ca942a0f'}">
+                            <td class="px-4 py-3 align-middle">
+                                <a href="https://atelier.osszcollection.com/tasks/249a0587-0be4-4a63-9a3f-9ce5ca942a0f" class="block focus-visible:outline-none">
+                                    <p class="font-medium text-sm leading-tight">Jacket</p>
+                                    <p class="text-xs text-muted-foreground mt-0.5">TASK-0001</p>
+                                </a>
+                            </td>
+                            <td class="px-4 py-3 align-middle">
+                                <p class="text-sm leading-tight">OSSZ-2026-001</p>
+                                <p class="text-xs text-muted-foreground mt-0.5 truncate max-w-44">John Doe</p>
+                            </td>
+                            <td class="px-4 py-3 align-middle">
+                                                                    <span class="text-sm">Hamidou Abdoul</span>
+                                                            </td>
+                            <td class="px-4 py-3 align-middle">
+                                <span class="inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap bg-amber-50 text-amber-800 border-amber-300">En cours</span>
+                            </td>
+                                                            <td class="px-4 py-3 align-middle">
+                                    <span class="inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap bg-amber-50 text-amber-800 border-amber-300">Haute</span>
+                                </td>
+                                                        <td class="px-4 py-3 align-middle">
+                                <div class="flex items-center gap-2 min-w-28">
+                                    <div class="h-1.5 w-full rounded bg-muted overflow-hidden">
+                                        <div class="h-full rounded transition-all bg-primary"
+                                             style="width: 60%"></div>
+                                    </div>
+                                    <span class="text-xs font-semibold tabular-nums w-9 text-right">60%</span>
+                                </div>
+                            </td>
+                            <td class="px-4 py-3 align-middle whitespace-nowrap">
+                                                                    <span class="inline-flex items-center gap-1 text-sm whitespace-nowrap text-muted-foreground">
+                                                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3.5 opacity-60" aria-hidden="true"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M17.5 17.5 16 16.3V14"/><circle cx="16" cy="16" r="6"/></svg>
+                                                                                Nov 27, 2026
+                                    </span>
+                                                            </td>
+                            <td class="px-4 py-3 align-middle text-right text-xs text-muted-foreground whitespace-nowrap" title="15 nov. 2026, 00:27">
+                                il y a 20 heures
+                            </td>
+                        </tr>
+                                                                    <tr tabindex="0" role="link"
+                            aria-label="Ouvrir la tâche TASK-0008 — Headwrap"
+                            class="cursor-pointer outline-none border-b transition-colors hover:bg-muted/50 focus-visible:bg-muted/60 last:border-b-0"
+                            onclick="window.location.href='https://atelier.osszcollection.com/tasks/9fc5d940-f183-4a54-bcb3-e806dd51afba'"
+                            onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.location.href='https://atelier.osszcollection.com/tasks/9fc5d940-f183-4a54-bcb3-e806dd51afba'}">
+                            <td class="px-4 py-3 align-middle">
+                                <a href="https://atelier.osszcollection.com/tasks/9fc5d940-f183-4a54-bcb3-e806dd51afba" class="block focus-visible:outline-none">
+                                    <p class="font-medium text-sm leading-tight">Headwrap</p>
+                                    <p class="text-xs text-muted-foreground mt-0.5">TASK-0008</p>
+                                </a>
+                            </td>
+                            <td class="px-4 py-3 align-middle">
+                                <p class="text-sm leading-tight">OSSZ-2025-014</p>
+                                <p class="text-xs text-muted-foreground mt-0.5 truncate max-w-44">Amina Cissé</p>
+                            </td>
+                            <td class="px-4 py-3 align-middle">
+                                                                    <span class="text-sm">Lawal Sani</span>
+                                                            </td>
+                            <td class="px-4 py-3 align-middle">
+                                <span class="inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap bg-stone-800 text-stone-50 border-stone-800">Livrée/Récupérée</span>
+                            </td>
+                                                            <td class="px-4 py-3 align-middle">
+                                    <span class="inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap bg-teal-50 text-teal-700 border-teal-300">Normale</span>
+                                </td>
+                                                        <td class="px-4 py-3 align-middle">
+                                <div class="flex items-center gap-2 min-w-28">
+                                    <div class="h-1.5 w-full rounded bg-muted overflow-hidden">
+                                        <div class="h-full rounded transition-all bg-emerald-600"
+                                             style="width: 100%"></div>
+                                    </div>
+                                    <span class="text-xs font-semibold tabular-nums w-9 text-right text-emerald-700">100%</span>
+                                </div>
+                            </td>
+                            <td class="px-4 py-3 align-middle whitespace-nowrap">
+                                                                    <span class="inline-flex items-center gap-1 text-sm whitespace-nowrap text-muted-foreground">
+                                                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3.5 opacity-60" aria-hidden="true"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M17.5 17.5 16 16.3V14"/><circle cx="16" cy="16" r="6"/></svg>
+                                                                                Nov 5, 2026
+                                    </span>
+                                                            </td>
+                            <td class="px-4 py-3 align-middle text-right text-xs text-muted-foreground whitespace-nowrap" title="08 nov. 2026, 10:00">
+                                il y a 1 semaine
+                            </td>
+                        </tr>
+                                                                    <tr tabindex="0" role="link"
+                            aria-label="Ouvrir la tâche TASK-0007 — Wrap Skirt"
+                            class="cursor-pointer outline-none border-b transition-colors hover:bg-muted/50 focus-visible:bg-muted/60 last:border-b-0"
+                            onclick="window.location.href='https://atelier.osszcollection.com/tasks/0c25b49f-b584-4cfa-9e75-db178a73fb8c'"
+                            onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.location.href='https://atelier.osszcollection.com/tasks/0c25b49f-b584-4cfa-9e75-db178a73fb8c'}">
+                            <td class="px-4 py-3 align-middle">
+                                <a href="https://atelier.osszcollection.com/tasks/0c25b49f-b584-4cfa-9e75-db178a73fb8c" class="block focus-visible:outline-none">
+                                    <p class="font-medium text-sm leading-tight">Wrap Skirt</p>
+                                    <p class="text-xs text-muted-foreground mt-0.5">TASK-0007</p>
+                                </a>
+                            </td>
+                            <td class="px-4 py-3 align-middle">
+                                <p class="text-sm leading-tight">OSSZ-2025-014</p>
+                                <p class="text-xs text-muted-foreground mt-0.5 truncate max-w-44">Amina Cissé</p>
+                            </td>
+                            <td class="px-4 py-3 align-middle">
+                                                                    <span class="text-sm">Hamidou Abdoul</span>
+                                                            </td>
+                            <td class="px-4 py-3 align-middle">
+                                <span class="inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap bg-stone-800 text-stone-50 border-stone-800">Livrée/Récupérée</span>
+                            </td>
+                                                            <td class="px-4 py-3 align-middle">
+                                    <span class="inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap bg-teal-50 text-teal-700 border-teal-300">Normale</span>
+                                </td>
+                                                        <td class="px-4 py-3 align-middle">
+                                <div class="flex items-center gap-2 min-w-28">
+                                    <div class="h-1.5 w-full rounded bg-muted overflow-hidden">
+                                        <div class="h-full rounded transition-all bg-emerald-600"
+                                             style="width: 100%"></div>
+                                    </div>
+                                    <span class="text-xs font-semibold tabular-nums w-9 text-right text-emerald-700">100%</span>
+                                </div>
+                            </td>
+                            <td class="px-4 py-3 align-middle whitespace-nowrap">
+                                                                    <span class="inline-flex items-center gap-1 text-sm whitespace-nowrap text-muted-foreground">
+                                                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3.5 opacity-60" aria-hidden="true"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M17.5 17.5 16 16.3V14"/><circle cx="16" cy="16" r="6"/></svg>
+                                                                                Nov 9, 2026
+                                    </span>
+                                                            </td>
+                            <td class="px-4 py-3 align-middle text-right text-xs text-muted-foreground whitespace-nowrap" title="08 nov. 2026, 10:00">
+                                il y a 1 semaine
+                            </td>
+                        </tr>
+                                                                    <tr tabindex="0" role="link"
+                            aria-label="Ouvrir la tâche TASK-0006 — Senegal Top"
+                            class="cursor-pointer outline-none border-b transition-colors hover:bg-muted/50 focus-visible:bg-muted/60 last:border-b-0"
+                            onclick="window.location.href='https://atelier.osszcollection.com/tasks/b0f93415-467f-4799-bfdf-5e659674d2d0'"
+                            onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.location.href='https://atelier.osszcollection.com/tasks/b0f93415-467f-4799-bfdf-5e659674d2d0'}">
+                            <td class="px-4 py-3 align-middle">
+                                <a href="https://atelier.osszcollection.com/tasks/b0f93415-467f-4799-bfdf-5e659674d2d0" class="block focus-visible:outline-none">
+                                    <p class="font-medium text-sm leading-tight">Senegal Top</p>
+                                    <p class="text-xs text-muted-foreground mt-0.5">TASK-0006</p>
+                                </a>
+                            </td>
+                            <td class="px-4 py-3 align-middle">
+                                <p class="text-sm leading-tight">OSSZ-2025-014</p>
+                                <p class="text-xs text-muted-foreground mt-0.5 truncate max-w-44">Amina Cissé</p>
+                            </td>
+                            <td class="px-4 py-3 align-middle">
+                                                                    <span class="text-sm">Hamidou Abdoul</span>
+                                                            </td>
+                            <td class="px-4 py-3 align-middle">
+                                <span class="inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap bg-stone-800 text-stone-50 border-stone-800">Livrée/Récupérée</span>
+                            </td>
+                                                            <td class="px-4 py-3 align-middle">
+                                    <span class="inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap bg-teal-50 text-teal-700 border-teal-300">Normale</span>
+                                </td>
+                                                        <td class="px-4 py-3 align-middle">
+                                <div class="flex items-center gap-2 min-w-28">
+                                    <div class="h-1.5 w-full rounded bg-muted overflow-hidden">
+                                        <div class="h-full rounded transition-all bg-emerald-600"
+                                             style="width: 100%"></div>
+                                    </div>
+                                    <span class="text-xs font-semibold tabular-nums w-9 text-right text-emerald-700">100%</span>
+                                </div>
+                            </td>
+                            <td class="px-4 py-3 align-middle whitespace-nowrap">
+                                                                    <span class="inline-flex items-center gap-1 text-sm whitespace-nowrap text-muted-foreground">
+                                                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3.5 opacity-60" aria-hidden="true"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M17.5 17.5 16 16.3V14"/><circle cx="16" cy="16" r="6"/></svg>
+                                                                                Nov 2, 2026
+                                    </span>
+                                                            </td>
+                            <td class="px-4 py-3 align-middle text-right text-xs text-muted-foreground whitespace-nowrap" title="03 nov. 2026, 10:00">
+                                il y a 1 semaine
+                            </td>
+                        </tr>
+                                                                    <tr tabindex="0" role="link"
+                            aria-label="Ouvrir la tâche TASK-0009 — Kaftan Gown"
+                            class="cursor-pointer outline-none border-b transition-colors hover:bg-muted/50 focus-visible:bg-muted/60 last:border-b-0"
+                            onclick="window.location.href='https://atelier.osszcollection.com/tasks/01809cd4-8021-4830-b09b-653861630613'"
+                            onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.location.href='https://atelier.osszcollection.com/tasks/01809cd4-8021-4830-b09b-653861630613'}">
+                            <td class="px-4 py-3 align-middle">
+                                <a href="https://atelier.osszcollection.com/tasks/01809cd4-8021-4830-b09b-653861630613" class="block focus-visible:outline-none">
+                                    <p class="font-medium text-sm leading-tight">Kaftan Gown</p>
+                                    <p class="text-xs text-muted-foreground mt-0.5">TASK-0009</p>
+                                </a>
+                            </td>
+                            <td class="px-4 py-3 align-middle">
+                                <p class="text-sm leading-tight">OSSZ-2025-009</p>
+                                <p class="text-xs text-muted-foreground mt-0.5 truncate max-w-44">John Doe</p>
+                            </td>
+                            <td class="px-4 py-3 align-middle">
+                                                                    <span class="text-sm">Hamidou Abdoul</span>
+                                                            </td>
+                            <td class="px-4 py-3 align-middle">
+                                <span class="inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap bg-stone-800 text-stone-50 border-stone-800">Livrée/Récupérée</span>
+                            </td>
+                                                            <td class="px-4 py-3 align-middle">
+                                    <span class="inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap bg-teal-50 text-teal-700 border-teal-300">Normale</span>
+                                </td>
+                                                        <td class="px-4 py-3 align-middle">
+                                <div class="flex items-center gap-2 min-w-28">
+                                    <div class="h-1.5 w-full rounded bg-muted overflow-hidden">
+                                        <div class="h-full rounded transition-all bg-emerald-600"
+                                             style="width: 100%"></div>
+                                    </div>
+                                    <span class="text-xs font-semibold tabular-nums w-9 text-right text-emerald-700">100%</span>
+                                </div>
+                            </td>
+                            <td class="px-4 py-3 align-middle whitespace-nowrap">
+                                                                    <span class="inline-flex items-center gap-1 text-sm whitespace-nowrap text-muted-foreground">
+                                                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3.5 opacity-60" aria-hidden="true"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M17.5 17.5 16 16.3V14"/><circle cx="16" cy="16" r="6"/></svg>
+                                                                                Sep 20, 2026
+                                    </span>
+                                                            </td>
+                            <td class="px-4 py-3 align-middle text-right text-xs text-muted-foreground whitespace-nowrap" title="21 sept. 2026, 10:00">
+                                il y a 1 mois
+                            </td>
+                        </tr>
+                                    </tbody>
+            </table>
+        </div>
+
+        
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-2 border-t px-4 py-3">
+            <p class="text-xs text-muted-foreground">
+                9 tâches au total
+            </p>
+            <div class="flex items-center gap-2">
+                                    <span class="inline-flex items-center gap-1 h-8 px-3 rounded-md border border-input bg-background text-xs font-medium opacity-50 cursor-not-allowed" aria-disabled="true">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+                        Précédent
+                    </span>
+                
+                <span class="text-xs text-muted-foreground tabular-nums whitespace-nowrap px-1">
+                    Page 1 sur 1
+                </span>
+
+                                    <span class="inline-flex items-center gap-1 h-8 px-3 rounded-md border border-input bg-background text-xs font-medium opacity-50 cursor-not-allowed" aria-disabled="true">
+                        Suivant
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+                    </span>
+                            </div>
+        </div>
+    </div>
+</div>
+            </main>
+
+            
+            <footer class="mt-auto border-t bg-background">
+                <div class="max-w-[1400px] mx-auto px-4 sm:px-6 py-3 flex flex-col sm:flex-row items-center justify-between gap-1 text-xs text-muted-foreground" style="padding-bottom: max(0.75rem, env(safe-area-inset-bottom));">
+                    <p>© 2026 OSSZ Atelier — Système indépendant de gestion de production</p>
+                    <p>Base de données propre · Comptes propres · atelier.osszcollection.com</p>
+                </div>
+            </footer>
+        </div>
+    </div>
+</div>
+
+
+
+
+</body>
+</html>

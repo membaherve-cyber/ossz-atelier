@@ -1,0 +1,1752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="FoqxOJPBCeBcEcTgro75n75k7A8w6HUqvv0u70td">
+    <title>Task Detail — OSSZ ATELIER</title>
+    <link rel="stylesheet" href="/css/app.css">
+    <script src="/js/alpine.min.js" defer></script>
+    <style>[x-cloak]{display:none !important;}</style>
+</head>
+<body class="bg-background text-foreground antialiased">
+
+<div class="min-h-screen flex flex-col bg-background" x-data="{ nav: false }" @keydown.escape.window="nav = false">
+    <div class="flex flex-1 min-h-0">
+
+        
+        
+        
+        <aside class="hidden lg:flex w-60 shrink-0 flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border sticky top-0 h-screen">
+            <div class="flex items-center justify-center px-5 h-16 border-b border-sidebar-border">
+                <div class="text-center min-w-0">
+                    <p class="font-display font-bold leading-none">OSSZ ATELIER</p>
+                    <p class="text-[9px] tracking-[0.2em] text-stone-400 mt-1.5">PRODUCTION MGMT</p>
+                </div>
+            </div>
+            <div class="flex-1 overflow-y-auto">
+                <nav class="flex flex-col gap-5 px-3 py-4" aria-label="Main navigation">
+                                            <div>
+                            <p class="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-stone-400">Workspace</p>
+                            <div class="flex flex-col gap-0.5">
+                                                                    <a href="https://atelier.osszcollection.com" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+                                        <span class="truncate">My Dashboard</span>
+                                    </a>
+                                                                    <a href="https://atelier.osszcollection.com/tasks" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg>
+                                        <span class="truncate">My Tasks</span>
+                                    </a>
+                                                                    <a href="https://atelier.osszcollection.com/notifications" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+                                        <span class="truncate">Notifications</span>
+                                    </a>
+                                                            </div>
+                        </div>
+                                    </nav>
+            </div>
+            <div class="p-4 border-t border-sidebar-border text-[11px] text-stone-500">
+                Independent production system
+            </div>
+        </aside>
+
+        
+        
+        
+        <div x-show="nav" x-cloak x-transition.opacity.duration.200ms class="fixed inset-0 z-40 bg-black/60 lg:hidden" @click="nav = false" aria-hidden="true"></div>
+        <aside id="mobile-nav" x-show="nav" x-cloak
+               x-transition:enter="transition ease-out duration-200"
+               x-transition:enter-start="-translate-x-full"
+               x-transition:enter-end="translate-x-0"
+               x-transition:leave="transition ease-in duration-150"
+               x-transition:leave-start="translate-x-0"
+               x-transition:leave-end="-translate-x-full"
+               class="fixed left-0 top-0 z-50 h-full w-72 max-w-[85vw] flex flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border lg:hidden"
+               role="dialog" aria-modal="true" aria-label="Navigation">
+            <div class="relative flex items-center justify-center px-5 h-16 border-b border-sidebar-border">
+                <div class="text-center min-w-0">
+                    <p class="font-display font-bold leading-none">OSSZ ATELIER</p>
+                    <p class="text-[9px] tracking-[0.2em] text-stone-400 mt-1.5">PRODUCTION MGMT</p>
+                </div>
+                <button type="button" @click="nav = false" class="absolute right-3 inline-flex items-center justify-center size-8 rounded-md text-stone-400 hover:text-white hover:bg-white/5 transition-colors" aria-label="Close">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                </button>
+            </div>
+            <nav class="flex-1 overflow-y-auto flex flex-col gap-5 px-3 py-4" aria-label="Main navigation">
+                                    <div>
+                        <p class="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-stone-400">Workspace</p>
+                        <div class="flex flex-col gap-0.5">
+                                                            <a href="https://atelier.osszcollection.com" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+                                    <span class="truncate">My Dashboard</span>
+                                </a>
+                                                            <a href="https://atelier.osszcollection.com/tasks" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg>
+                                    <span class="truncate">My Tasks</span>
+                                </a>
+                                                            <a href="https://atelier.osszcollection.com/notifications" @click="nav = false" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left text-stone-300 hover:bg-white/5 hover:text-white">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+                                    <span class="truncate">Notifications</span>
+                                </a>
+                                                    </div>
+                    </div>
+                            </nav>
+        </aside>
+
+        
+        
+        
+        <div class="flex-1 flex flex-col min-w-0">
+            <header class="sticky top-0 z-30 relative flex items-center gap-2 sm:gap-3 h-16 px-4 sm:px-6 border-b bg-background/95 backdrop-blur">
+                
+                <button type="button" class="lg:hidden inline-flex items-center justify-center size-9 -ml-1.5 rounded-md hover:bg-muted transition-colors" @click="nav = true" aria-label="Open menu" aria-controls="mobile-nav">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-5" aria-hidden="true"><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+                </button>
+
+                
+                <a href="https://atelier.osszcollection.com" aria-label="OSSZ Atelier logo — go to dashboard" class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 shrink-0 rounded-md max-[359px]:static max-[359px]:translate-x-0 max-[359px]:translate-y-0 max-[359px]:mx-auto">
+                    <img src="/img/ossz-logo.png" alt="OSSZ Atelier logo" class="h-7 sm:h-9 w-auto rounded-md ring-1 ring-black/10">
+                </a>
+
+                
+                <h1 class="hidden sm:block font-display text-lg font-semibold truncate min-w-0 max-w-[calc(50%-6.5rem)]">Task Detail</h1>
+
+                
+                <div class="ml-auto max-[359px]:ml-0 flex items-center gap-1 sm:gap-1.5">
+                    
+                    <div role="group" aria-label="Language" title="Changer de langue" class="flex items-center gap-0.5 rounded-full border bg-background p-0.5 select-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="hidden sm:block size-3.5 ml-1 text-muted-foreground" aria-hidden="true"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg>
+                        <a href="https://atelier.osszcollection.com/locale/en" class="rounded-full px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide transition-colors bg-primary text-primary-foreground" aria-current="true">EN</a>
+                        <a href="https://atelier.osszcollection.com/locale/fr" class="rounded-full px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide transition-colors text-muted-foreground hover:text-foreground">FR</a>
+                    </div>
+
+                    
+                    <a href="https://atelier.osszcollection.com/notifications" class="relative inline-flex items-center justify-center size-8 sm:size-9 rounded-md hover:bg-muted transition-colors" aria-label="Notifications">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 sm:size-5" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+                                                    <span class="absolute -top-0.5 -right-0.5 min-w-4.5 h-4.5 px-1 rounded-full bg-red-600 text-white text-[10px] font-bold flex items-center justify-center">2</span>
+                                            </a>
+
+                    
+                                            <div class="relative" x-data="{ open: false }">
+                            <button type="button" @click="open = !open" @click.outside="open = false" @keydown.escape.window="open = false" :aria-expanded="open.toString()" aria-haspopup="menu" aria-label="Account menu" class="flex items-center gap-2 rounded-full hover:bg-muted p-0 sm:p-1 sm:pr-2 transition-colors">
+                                <span class="flex items-center justify-center size-8 rounded-full bg-primary/10 text-primary text-xs font-semibold">HA</span>
+                                <span class="hidden sm:block text-left">
+                                    <span class="block text-sm font-medium leading-none">Hamidou Abdoul</span>
+                                    <span class="block text-[11px] text-muted-foreground mt-0.5">USR-003 · Staff</span>
+                                </span>
+                            </button>
+                            <div x-show="open" x-cloak
+                                 x-transition:enter="transition ease-out duration-100"
+                                 x-transition:enter-start="opacity-0 scale-95"
+                                 x-transition:enter-end="opacity-100 scale-100"
+                                 x-transition:leave="transition ease-in duration-75"
+                                 x-transition:leave-start="opacity-100 scale-100"
+                                 x-transition:leave-end="opacity-0 scale-95"
+                                 class="absolute right-0 mt-2 w-60 rounded-lg border bg-card shadow-lg py-1 z-50" role="menu">
+                                <div class="px-3 py-2">
+                                    <p class="text-sm font-medium">Hamidou Abdoul</p>
+                                    <p class="text-xs text-muted-foreground font-normal truncate">hamidou@atelier.com</p>
+                                    <p class="text-xs text-muted-foreground font-normal mt-0.5">Staff</p>
+                                                                            <p class="text-xs text-muted-foreground font-normal mt-0.5 font-mono">USR-003</p>
+                                                                    </div>
+                                <div class="h-px bg-border my-1"></div>
+                                <form method="POST" action="https://atelier.osszcollection.com/logout">
+                                    <input type="hidden" name="_token" value="FoqxOJPBCeBcEcTgro75n75k7A8w6HUqvv0u70td" autocomplete="off">                                    <button type="submit" role="menuitem" class="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-700 hover:bg-muted transition-colors">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+                                        Sign out
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                                    </div>
+            </header>
+
+            <main class="flex-1 px-4 sm:px-6 py-6 w-full max-w-[1400px] mx-auto">
+                
+<style>[x-cloak]{display:none!important}</style>
+
+<div x-data='{
+        dialog: null,
+        staffId: "",
+        reason: ""
+     }'
+     @keydown.escape.window="dialog = null">
+    <a href="https://atelier.osszcollection.com/tasks"
+       class="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors -ml-2 mb-2 px-2 h-8 rounded-md">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+        Back to tasks
+    </a>
+
+    
+    <div class="mb-4">
+        <div class="flex flex-col lg:flex-row lg:items-start justify-between gap-3">
+            <div class="min-w-0">
+                <h1 class="font-display text-2xl font-bold tracking-tight truncate">TASK-0002 — Trousers</h1>
+                <div class="flex flex-wrap items-center gap-x-4 gap-y-1.5 mt-1.5 text-sm text-muted-foreground">
+                    <span class="whitespace-nowrap">
+                                                    <span class="font-medium">OSSZ-2026-001</span>
+                                                · John Doe
+                    </span>
+                    <span class="whitespace-nowrap">
+                        Assignee:
+                        <span class="text-foreground font-medium">Hamidou Abdoul</span>
+                    </span>
+                                            <span class="inline-flex items-center gap-1 whitespace-nowrap">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3.5 opacity-60" aria-hidden="true"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M17.5 17.5 16 16.3V14"/><circle cx="16" cy="16" r="6"/></svg>
+                                                        27 Nov 2026
+                        </span>
+                                        <span>Created 31 Oct 2026</span>
+                </div>
+            </div>
+            <div class="flex flex-wrap gap-1.5 shrink-0">
+                <span class="inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap bg-amber-50 text-amber-800 border-amber-300">Ongoing</span>
+                <span class="inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap bg-amber-50 text-amber-800 border-amber-300">High</span>
+                <span class="inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap bg-secondary text-secondary-foreground border-transparent">Full Production</span>
+            </div>
+        </div>
+
+        
+        
+        
+            </div>
+
+    <div class="grid lg:grid-cols-3 gap-4 items-start">
+        
+        <section class="rounded-xl border bg-card text-card-foreground shadow-sm lg:col-span-2" aria-labelledby="task-progress-title">
+            <div class="flex items-center justify-between gap-2 border-b p-6 pb-3">
+                <h2 id="task-progress-title" class="font-semibold text-base">Progress &amp; Checklist</h2>
+            </div>
+            <div class="p-6 pt-4 space-y-4">
+                <div class="flex items-center gap-2 min-w-28">
+                    <div class="h-2 flex-1 rounded bg-muted overflow-hidden">
+                        <div class="h-full rounded transition-all bg-primary"
+                             style="width: 30%"></div>
+                    </div>
+                    <span class="text-xs font-semibold tabular-nums w-9 text-right">30%</span>
+                </div>
+                <p class="text-xs text-muted-foreground -mt-2">
+                    Current progress: <span class="font-semibold">30%</span>
+                </p>
+
+                                    <form method="POST" action="https://atelier.osszcollection.com/tasks/d479101f-23ec-4826-a048-0acee908e096/progress" class="rounded-lg border bg-muted/30 p-3 space-y-2">
+                        <input type="hidden" name="_token" value="FoqxOJPBCeBcEcTgro75n75k7A8w6HUqvv0u70td" autocomplete="off">                        <p class="text-sm font-medium">Update progress manually</p>
+                        <div class="flex flex-col sm:flex-row gap-2">
+                            <input type="number" name="value" min="0" max="100" step="1" inputmode="numeric" required
+                                   placeholder="30" aria-label="New progress percentage"
+                                   class="flex h-9 sm:w-28 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                            <input type="text" name="note" maxlength="500" placeholder="Optional note" aria-label="Progress note"
+                                   class="flex h-9 flex-1 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                            <button type="submit"
+                                    class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm font-medium h-9 px-4 bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors">
+                                Update
+                            </button>
+                        </div>
+                                                                    </form>
+                
+                <div class="h-px bg-border" role="separator"></div>
+
+                
+                <form method="POST" action="https://atelier.osszcollection.com/tasks/d479101f-23ec-4826-a048-0acee908e096/stages"
+                      x-data='{
+                          saved: {"a2816ab5-5955-4967-a238-c17dda6b2e70":"COMPLETED","4dac9127-7603-476b-a2be-5288066a611f":"COMPLETED","5a7358fd-5c8f-4c12-8a01-6a714fe22fd6":"COMPLETED","b33947fc-de64-4c0a-902d-86df77476dd6":"COMPLETED","5c068d8a-7ae3-40cd-b7cd-3880ecb6b11c":"COMPLETED","cc8f6386-a24f-4eac-9bcd-5668aa630fe5":"IN_PROGRESS","ad551758-8aa7-404a-8e67-97e0d1d96492":"NOT_STARTED","60930782-4b0d-454a-bdda-35f1148571cf":"NOT_STARTED","89e65953-4f41-4f20-91b1-353596947bb5":"NOT_STARTED","4f50afc3-1cdf-4719-9e27-032ea66339dc":"NOT_STARTED","a9e63c5a-47d8-4586-849f-ba7ba2dbe146":"NOT_APPLICABLE","e7729a54-9d90-48fa-b48c-d3315b01c1dd":"NOT_APPLICABLE"},
+                          changes: {},
+                          comment: "",
+                          labels: {"NOT_STARTED":"Not Started","IN_PROGRESS":"In Progress","COMPLETED":"Completed","NOT_APPLICABLE":"Not Applicable"},
+                          templates: {"was":"was {state}","pendingOne":"1 pending change","pendingMany":"{count} pending changes"},
+                          setState(stageId, state) {
+                              if (this.saved[stageId] === state) {
+                                  delete this.changes[stageId];
+                              } else {
+                                  this.changes[stageId] = state;
+                              }
+                          },
+                          effective(stageId) {
+                              if (this.changes[stageId] !== undefined) {
+                                  return this.changes[stageId];
+                              }
+                              if (this.saved[stageId] !== undefined) {
+                                  return this.saved[stageId];
+                              }
+                              return "NOT_STARTED";
+                          },
+                          get changesCount() {
+                              return Object.keys(this.changes).length;
+                          },
+                          pendingBadge() {
+                              if (this.changesCount === 1) {
+                                  return this.templates.pendingOne;
+                              }
+                              return this.templates.pendingMany.replace("{count}", this.changesCount);
+                          },
+                          wasText(stageId) {
+                              var state = this.saved[stageId] !== undefined ? this.saved[stageId] : "NOT_STARTED";
+                              return this.templates.was.replace("{state}", this.labels[state] || state);
+                          },
+                          chipClass(state) {
+                              var map = {
+                                  NOT_STARTED: "bg-stone-100 text-stone-600",
+                                  IN_PROGRESS: "bg-amber-100 text-amber-800",
+                                  COMPLETED: "bg-emerald-100 text-emerald-800",
+                                  NOT_APPLICABLE: "bg-muted text-muted-foreground"
+                              };
+                              return map[state] || "";
+                          }
+                      }'>
+                    <input type="hidden" name="_token" value="FoqxOJPBCeBcEcTgro75n75k7A8w6HUqvv0u70td" autocomplete="off">
+                    <div class="flex items-center justify-between gap-2">
+                        <p class="text-sm font-medium">Production checklist</p>
+                        <template x-if="changesCount > 0">
+                            <span class="inline-flex items-center rounded-full border border-amber-300 bg-amber-50 text-amber-800 px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap"
+                                  x-text="pendingBadge()"></span>
+                        </template>
+                    </div>
+                    <p class="text-xs text-muted-foreground mt-0.5">
+                        Progress is recalculated from completed stages (in-progress counts half).
+                    </p>
+
+                                            <div class="mt-2 rounded-lg border divide-y">
+                                                                                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-4 py-3">
+                                    <div class="min-w-0">
+                                        <p class="text-sm font-medium flex items-center gap-2 flex-wrap">
+                                            Assigned
+                                                                                    </p>
+                                        <div class="mt-1 flex items-center gap-2 flex-wrap">
+                                            <span class="rounded-full px-2 py-0.5 text-xs font-medium"
+                                                  :class="chipClass(effective('a2816ab5-5955-4967-a238-c17dda6b2e70'))"
+                                                  x-text="labels[effective('a2816ab5-5955-4967-a238-c17dda6b2e70')] || effective('a2816ab5-5955-4967-a238-c17dda6b2e70')"></span>
+                                            <template x-if="changes['a2816ab5-5955-4967-a238-c17dda6b2e70'] !== undefined && changes['a2816ab5-5955-4967-a238-c17dda6b2e70'] !== saved['a2816ab5-5955-4967-a238-c17dda6b2e70']">
+                                                <span class="text-xs text-amber-700" x-text="wasText('a2816ab5-5955-4967-a238-c17dda6b2e70')"></span>
+                                            </template>
+                                        </div>
+                                    </div>
+
+                                                                            <div class="flex flex-wrap gap-1 shrink-0" role="group"
+                                             aria-label="State for Assigned">
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('a2816ab5-5955-4967-a238-c17dda6b2e70') === 'NOT_STARTED'"
+                                                        aria-label="Set Assigned to Not Started"
+                                                        @click="setState('a2816ab5-5955-4967-a238-c17dda6b2e70', 'NOT_STARTED')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('a2816ab5-5955-4967-a238-c17dda6b2e70') === 'NOT_STARTED'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    Not Started
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('a2816ab5-5955-4967-a238-c17dda6b2e70') === 'IN_PROGRESS'"
+                                                        aria-label="Set Assigned to In Progress"
+                                                        @click="setState('a2816ab5-5955-4967-a238-c17dda6b2e70', 'IN_PROGRESS')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('a2816ab5-5955-4967-a238-c17dda6b2e70') === 'IN_PROGRESS'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    In Progress
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('a2816ab5-5955-4967-a238-c17dda6b2e70') === 'COMPLETED'"
+                                                        aria-label="Set Assigned to Completed"
+                                                        @click="setState('a2816ab5-5955-4967-a238-c17dda6b2e70', 'COMPLETED')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('a2816ab5-5955-4967-a238-c17dda6b2e70') === 'COMPLETED'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    Completed
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('a2816ab5-5955-4967-a238-c17dda6b2e70') === 'NOT_APPLICABLE'"
+                                                        aria-label="Set Assigned to N/A"
+                                                        @click="setState('a2816ab5-5955-4967-a238-c17dda6b2e70', 'NOT_APPLICABLE')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('a2816ab5-5955-4967-a238-c17dda6b2e70') === 'NOT_APPLICABLE'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    N/A
+                                                </button>
+                                                                                    </div>
+                                                                    </div>
+                                                                                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-4 py-3">
+                                    <div class="min-w-0">
+                                        <p class="text-sm font-medium flex items-center gap-2 flex-wrap">
+                                            Ongoing
+                                                                                    </p>
+                                        <div class="mt-1 flex items-center gap-2 flex-wrap">
+                                            <span class="rounded-full px-2 py-0.5 text-xs font-medium"
+                                                  :class="chipClass(effective('4dac9127-7603-476b-a2be-5288066a611f'))"
+                                                  x-text="labels[effective('4dac9127-7603-476b-a2be-5288066a611f')] || effective('4dac9127-7603-476b-a2be-5288066a611f')"></span>
+                                            <template x-if="changes['4dac9127-7603-476b-a2be-5288066a611f'] !== undefined && changes['4dac9127-7603-476b-a2be-5288066a611f'] !== saved['4dac9127-7603-476b-a2be-5288066a611f']">
+                                                <span class="text-xs text-amber-700" x-text="wasText('4dac9127-7603-476b-a2be-5288066a611f')"></span>
+                                            </template>
+                                        </div>
+                                    </div>
+
+                                                                            <div class="flex flex-wrap gap-1 shrink-0" role="group"
+                                             aria-label="State for Ongoing">
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('4dac9127-7603-476b-a2be-5288066a611f') === 'NOT_STARTED'"
+                                                        aria-label="Set Ongoing to Not Started"
+                                                        @click="setState('4dac9127-7603-476b-a2be-5288066a611f', 'NOT_STARTED')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('4dac9127-7603-476b-a2be-5288066a611f') === 'NOT_STARTED'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    Not Started
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('4dac9127-7603-476b-a2be-5288066a611f') === 'IN_PROGRESS'"
+                                                        aria-label="Set Ongoing to In Progress"
+                                                        @click="setState('4dac9127-7603-476b-a2be-5288066a611f', 'IN_PROGRESS')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('4dac9127-7603-476b-a2be-5288066a611f') === 'IN_PROGRESS'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    In Progress
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('4dac9127-7603-476b-a2be-5288066a611f') === 'COMPLETED'"
+                                                        aria-label="Set Ongoing to Completed"
+                                                        @click="setState('4dac9127-7603-476b-a2be-5288066a611f', 'COMPLETED')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('4dac9127-7603-476b-a2be-5288066a611f') === 'COMPLETED'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    Completed
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('4dac9127-7603-476b-a2be-5288066a611f') === 'NOT_APPLICABLE'"
+                                                        aria-label="Set Ongoing to N/A"
+                                                        @click="setState('4dac9127-7603-476b-a2be-5288066a611f', 'NOT_APPLICABLE')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('4dac9127-7603-476b-a2be-5288066a611f') === 'NOT_APPLICABLE'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    N/A
+                                                </button>
+                                                                                    </div>
+                                                                    </div>
+                                                                                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-4 py-3">
+                                    <div class="min-w-0">
+                                        <p class="text-sm font-medium flex items-center gap-2 flex-wrap">
+                                            Cutting
+                                                                                    </p>
+                                        <div class="mt-1 flex items-center gap-2 flex-wrap">
+                                            <span class="rounded-full px-2 py-0.5 text-xs font-medium"
+                                                  :class="chipClass(effective('5a7358fd-5c8f-4c12-8a01-6a714fe22fd6'))"
+                                                  x-text="labels[effective('5a7358fd-5c8f-4c12-8a01-6a714fe22fd6')] || effective('5a7358fd-5c8f-4c12-8a01-6a714fe22fd6')"></span>
+                                            <template x-if="changes['5a7358fd-5c8f-4c12-8a01-6a714fe22fd6'] !== undefined && changes['5a7358fd-5c8f-4c12-8a01-6a714fe22fd6'] !== saved['5a7358fd-5c8f-4c12-8a01-6a714fe22fd6']">
+                                                <span class="text-xs text-amber-700" x-text="wasText('5a7358fd-5c8f-4c12-8a01-6a714fe22fd6')"></span>
+                                            </template>
+                                        </div>
+                                    </div>
+
+                                                                            <div class="flex flex-wrap gap-1 shrink-0" role="group"
+                                             aria-label="State for Cutting">
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('5a7358fd-5c8f-4c12-8a01-6a714fe22fd6') === 'NOT_STARTED'"
+                                                        aria-label="Set Cutting to Not Started"
+                                                        @click="setState('5a7358fd-5c8f-4c12-8a01-6a714fe22fd6', 'NOT_STARTED')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('5a7358fd-5c8f-4c12-8a01-6a714fe22fd6') === 'NOT_STARTED'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    Not Started
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('5a7358fd-5c8f-4c12-8a01-6a714fe22fd6') === 'IN_PROGRESS'"
+                                                        aria-label="Set Cutting to In Progress"
+                                                        @click="setState('5a7358fd-5c8f-4c12-8a01-6a714fe22fd6', 'IN_PROGRESS')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('5a7358fd-5c8f-4c12-8a01-6a714fe22fd6') === 'IN_PROGRESS'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    In Progress
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('5a7358fd-5c8f-4c12-8a01-6a714fe22fd6') === 'COMPLETED'"
+                                                        aria-label="Set Cutting to Completed"
+                                                        @click="setState('5a7358fd-5c8f-4c12-8a01-6a714fe22fd6', 'COMPLETED')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('5a7358fd-5c8f-4c12-8a01-6a714fe22fd6') === 'COMPLETED'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    Completed
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('5a7358fd-5c8f-4c12-8a01-6a714fe22fd6') === 'NOT_APPLICABLE'"
+                                                        aria-label="Set Cutting to N/A"
+                                                        @click="setState('5a7358fd-5c8f-4c12-8a01-6a714fe22fd6', 'NOT_APPLICABLE')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('5a7358fd-5c8f-4c12-8a01-6a714fe22fd6') === 'NOT_APPLICABLE'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    N/A
+                                                </button>
+                                                                                    </div>
+                                                                    </div>
+                                                                                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-4 py-3">
+                                    <div class="min-w-0">
+                                        <p class="text-sm font-medium flex items-center gap-2 flex-wrap">
+                                            Sewing/Stitching
+                                                                                    </p>
+                                        <div class="mt-1 flex items-center gap-2 flex-wrap">
+                                            <span class="rounded-full px-2 py-0.5 text-xs font-medium"
+                                                  :class="chipClass(effective('b33947fc-de64-4c0a-902d-86df77476dd6'))"
+                                                  x-text="labels[effective('b33947fc-de64-4c0a-902d-86df77476dd6')] || effective('b33947fc-de64-4c0a-902d-86df77476dd6')"></span>
+                                            <template x-if="changes['b33947fc-de64-4c0a-902d-86df77476dd6'] !== undefined && changes['b33947fc-de64-4c0a-902d-86df77476dd6'] !== saved['b33947fc-de64-4c0a-902d-86df77476dd6']">
+                                                <span class="text-xs text-amber-700" x-text="wasText('b33947fc-de64-4c0a-902d-86df77476dd6')"></span>
+                                            </template>
+                                        </div>
+                                    </div>
+
+                                                                            <div class="flex flex-wrap gap-1 shrink-0" role="group"
+                                             aria-label="State for Sewing/Stitching">
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('b33947fc-de64-4c0a-902d-86df77476dd6') === 'NOT_STARTED'"
+                                                        aria-label="Set Sewing/Stitching to Not Started"
+                                                        @click="setState('b33947fc-de64-4c0a-902d-86df77476dd6', 'NOT_STARTED')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('b33947fc-de64-4c0a-902d-86df77476dd6') === 'NOT_STARTED'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    Not Started
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('b33947fc-de64-4c0a-902d-86df77476dd6') === 'IN_PROGRESS'"
+                                                        aria-label="Set Sewing/Stitching to In Progress"
+                                                        @click="setState('b33947fc-de64-4c0a-902d-86df77476dd6', 'IN_PROGRESS')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('b33947fc-de64-4c0a-902d-86df77476dd6') === 'IN_PROGRESS'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    In Progress
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('b33947fc-de64-4c0a-902d-86df77476dd6') === 'COMPLETED'"
+                                                        aria-label="Set Sewing/Stitching to Completed"
+                                                        @click="setState('b33947fc-de64-4c0a-902d-86df77476dd6', 'COMPLETED')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('b33947fc-de64-4c0a-902d-86df77476dd6') === 'COMPLETED'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    Completed
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('b33947fc-de64-4c0a-902d-86df77476dd6') === 'NOT_APPLICABLE'"
+                                                        aria-label="Set Sewing/Stitching to N/A"
+                                                        @click="setState('b33947fc-de64-4c0a-902d-86df77476dd6', 'NOT_APPLICABLE')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('b33947fc-de64-4c0a-902d-86df77476dd6') === 'NOT_APPLICABLE'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    N/A
+                                                </button>
+                                                                                    </div>
+                                                                    </div>
+                                                                                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-4 py-3">
+                                    <div class="min-w-0">
+                                        <p class="text-sm font-medium flex items-center gap-2 flex-wrap">
+                                            Fitting
+                                                                                    </p>
+                                        <div class="mt-1 flex items-center gap-2 flex-wrap">
+                                            <span class="rounded-full px-2 py-0.5 text-xs font-medium"
+                                                  :class="chipClass(effective('5c068d8a-7ae3-40cd-b7cd-3880ecb6b11c'))"
+                                                  x-text="labels[effective('5c068d8a-7ae3-40cd-b7cd-3880ecb6b11c')] || effective('5c068d8a-7ae3-40cd-b7cd-3880ecb6b11c')"></span>
+                                            <template x-if="changes['5c068d8a-7ae3-40cd-b7cd-3880ecb6b11c'] !== undefined && changes['5c068d8a-7ae3-40cd-b7cd-3880ecb6b11c'] !== saved['5c068d8a-7ae3-40cd-b7cd-3880ecb6b11c']">
+                                                <span class="text-xs text-amber-700" x-text="wasText('5c068d8a-7ae3-40cd-b7cd-3880ecb6b11c')"></span>
+                                            </template>
+                                        </div>
+                                    </div>
+
+                                                                            <div class="flex flex-wrap gap-1 shrink-0" role="group"
+                                             aria-label="State for Fitting">
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('5c068d8a-7ae3-40cd-b7cd-3880ecb6b11c') === 'NOT_STARTED'"
+                                                        aria-label="Set Fitting to Not Started"
+                                                        @click="setState('5c068d8a-7ae3-40cd-b7cd-3880ecb6b11c', 'NOT_STARTED')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('5c068d8a-7ae3-40cd-b7cd-3880ecb6b11c') === 'NOT_STARTED'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    Not Started
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('5c068d8a-7ae3-40cd-b7cd-3880ecb6b11c') === 'IN_PROGRESS'"
+                                                        aria-label="Set Fitting to In Progress"
+                                                        @click="setState('5c068d8a-7ae3-40cd-b7cd-3880ecb6b11c', 'IN_PROGRESS')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('5c068d8a-7ae3-40cd-b7cd-3880ecb6b11c') === 'IN_PROGRESS'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    In Progress
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('5c068d8a-7ae3-40cd-b7cd-3880ecb6b11c') === 'COMPLETED'"
+                                                        aria-label="Set Fitting to Completed"
+                                                        @click="setState('5c068d8a-7ae3-40cd-b7cd-3880ecb6b11c', 'COMPLETED')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('5c068d8a-7ae3-40cd-b7cd-3880ecb6b11c') === 'COMPLETED'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    Completed
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('5c068d8a-7ae3-40cd-b7cd-3880ecb6b11c') === 'NOT_APPLICABLE'"
+                                                        aria-label="Set Fitting to N/A"
+                                                        @click="setState('5c068d8a-7ae3-40cd-b7cd-3880ecb6b11c', 'NOT_APPLICABLE')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('5c068d8a-7ae3-40cd-b7cd-3880ecb6b11c') === 'NOT_APPLICABLE'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    N/A
+                                                </button>
+                                                                                    </div>
+                                                                    </div>
+                                                                                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-4 py-3">
+                                    <div class="min-w-0">
+                                        <p class="text-sm font-medium flex items-center gap-2 flex-wrap">
+                                            Finishing
+                                                                                    </p>
+                                        <div class="mt-1 flex items-center gap-2 flex-wrap">
+                                            <span class="rounded-full px-2 py-0.5 text-xs font-medium"
+                                                  :class="chipClass(effective('cc8f6386-a24f-4eac-9bcd-5668aa630fe5'))"
+                                                  x-text="labels[effective('cc8f6386-a24f-4eac-9bcd-5668aa630fe5')] || effective('cc8f6386-a24f-4eac-9bcd-5668aa630fe5')"></span>
+                                            <template x-if="changes['cc8f6386-a24f-4eac-9bcd-5668aa630fe5'] !== undefined && changes['cc8f6386-a24f-4eac-9bcd-5668aa630fe5'] !== saved['cc8f6386-a24f-4eac-9bcd-5668aa630fe5']">
+                                                <span class="text-xs text-amber-700" x-text="wasText('cc8f6386-a24f-4eac-9bcd-5668aa630fe5')"></span>
+                                            </template>
+                                        </div>
+                                    </div>
+
+                                                                            <div class="flex flex-wrap gap-1 shrink-0" role="group"
+                                             aria-label="State for Finishing">
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('cc8f6386-a24f-4eac-9bcd-5668aa630fe5') === 'NOT_STARTED'"
+                                                        aria-label="Set Finishing to Not Started"
+                                                        @click="setState('cc8f6386-a24f-4eac-9bcd-5668aa630fe5', 'NOT_STARTED')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('cc8f6386-a24f-4eac-9bcd-5668aa630fe5') === 'NOT_STARTED'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    Not Started
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('cc8f6386-a24f-4eac-9bcd-5668aa630fe5') === 'IN_PROGRESS'"
+                                                        aria-label="Set Finishing to In Progress"
+                                                        @click="setState('cc8f6386-a24f-4eac-9bcd-5668aa630fe5', 'IN_PROGRESS')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('cc8f6386-a24f-4eac-9bcd-5668aa630fe5') === 'IN_PROGRESS'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    In Progress
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('cc8f6386-a24f-4eac-9bcd-5668aa630fe5') === 'COMPLETED'"
+                                                        aria-label="Set Finishing to Completed"
+                                                        @click="setState('cc8f6386-a24f-4eac-9bcd-5668aa630fe5', 'COMPLETED')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('cc8f6386-a24f-4eac-9bcd-5668aa630fe5') === 'COMPLETED'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    Completed
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('cc8f6386-a24f-4eac-9bcd-5668aa630fe5') === 'NOT_APPLICABLE'"
+                                                        aria-label="Set Finishing to N/A"
+                                                        @click="setState('cc8f6386-a24f-4eac-9bcd-5668aa630fe5', 'NOT_APPLICABLE')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('cc8f6386-a24f-4eac-9bcd-5668aa630fe5') === 'NOT_APPLICABLE'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    N/A
+                                                </button>
+                                                                                    </div>
+                                                                    </div>
+                                                                                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-4 py-3">
+                                    <div class="min-w-0">
+                                        <p class="text-sm font-medium flex items-center gap-2 flex-wrap">
+                                            Ironing
+                                                                                    </p>
+                                        <div class="mt-1 flex items-center gap-2 flex-wrap">
+                                            <span class="rounded-full px-2 py-0.5 text-xs font-medium"
+                                                  :class="chipClass(effective('ad551758-8aa7-404a-8e67-97e0d1d96492'))"
+                                                  x-text="labels[effective('ad551758-8aa7-404a-8e67-97e0d1d96492')] || effective('ad551758-8aa7-404a-8e67-97e0d1d96492')"></span>
+                                            <template x-if="changes['ad551758-8aa7-404a-8e67-97e0d1d96492'] !== undefined && changes['ad551758-8aa7-404a-8e67-97e0d1d96492'] !== saved['ad551758-8aa7-404a-8e67-97e0d1d96492']">
+                                                <span class="text-xs text-amber-700" x-text="wasText('ad551758-8aa7-404a-8e67-97e0d1d96492')"></span>
+                                            </template>
+                                        </div>
+                                    </div>
+
+                                                                            <div class="flex flex-wrap gap-1 shrink-0" role="group"
+                                             aria-label="State for Ironing">
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('ad551758-8aa7-404a-8e67-97e0d1d96492') === 'NOT_STARTED'"
+                                                        aria-label="Set Ironing to Not Started"
+                                                        @click="setState('ad551758-8aa7-404a-8e67-97e0d1d96492', 'NOT_STARTED')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('ad551758-8aa7-404a-8e67-97e0d1d96492') === 'NOT_STARTED'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    Not Started
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('ad551758-8aa7-404a-8e67-97e0d1d96492') === 'IN_PROGRESS'"
+                                                        aria-label="Set Ironing to In Progress"
+                                                        @click="setState('ad551758-8aa7-404a-8e67-97e0d1d96492', 'IN_PROGRESS')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('ad551758-8aa7-404a-8e67-97e0d1d96492') === 'IN_PROGRESS'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    In Progress
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('ad551758-8aa7-404a-8e67-97e0d1d96492') === 'COMPLETED'"
+                                                        aria-label="Set Ironing to Completed"
+                                                        @click="setState('ad551758-8aa7-404a-8e67-97e0d1d96492', 'COMPLETED')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('ad551758-8aa7-404a-8e67-97e0d1d96492') === 'COMPLETED'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    Completed
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('ad551758-8aa7-404a-8e67-97e0d1d96492') === 'NOT_APPLICABLE'"
+                                                        aria-label="Set Ironing to N/A"
+                                                        @click="setState('ad551758-8aa7-404a-8e67-97e0d1d96492', 'NOT_APPLICABLE')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('ad551758-8aa7-404a-8e67-97e0d1d96492') === 'NOT_APPLICABLE'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    N/A
+                                                </button>
+                                                                                    </div>
+                                                                    </div>
+                                                                                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-4 py-3">
+                                    <div class="min-w-0">
+                                        <p class="text-sm font-medium flex items-center gap-2 flex-wrap">
+                                            Quality Check
+                                                                                    </p>
+                                        <div class="mt-1 flex items-center gap-2 flex-wrap">
+                                            <span class="rounded-full px-2 py-0.5 text-xs font-medium"
+                                                  :class="chipClass(effective('60930782-4b0d-454a-bdda-35f1148571cf'))"
+                                                  x-text="labels[effective('60930782-4b0d-454a-bdda-35f1148571cf')] || effective('60930782-4b0d-454a-bdda-35f1148571cf')"></span>
+                                            <template x-if="changes['60930782-4b0d-454a-bdda-35f1148571cf'] !== undefined && changes['60930782-4b0d-454a-bdda-35f1148571cf'] !== saved['60930782-4b0d-454a-bdda-35f1148571cf']">
+                                                <span class="text-xs text-amber-700" x-text="wasText('60930782-4b0d-454a-bdda-35f1148571cf')"></span>
+                                            </template>
+                                        </div>
+                                    </div>
+
+                                                                            <div class="flex flex-wrap gap-1 shrink-0" role="group"
+                                             aria-label="State for Quality Check">
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('60930782-4b0d-454a-bdda-35f1148571cf') === 'NOT_STARTED'"
+                                                        aria-label="Set Quality Check to Not Started"
+                                                        @click="setState('60930782-4b0d-454a-bdda-35f1148571cf', 'NOT_STARTED')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('60930782-4b0d-454a-bdda-35f1148571cf') === 'NOT_STARTED'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    Not Started
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('60930782-4b0d-454a-bdda-35f1148571cf') === 'IN_PROGRESS'"
+                                                        aria-label="Set Quality Check to In Progress"
+                                                        @click="setState('60930782-4b0d-454a-bdda-35f1148571cf', 'IN_PROGRESS')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('60930782-4b0d-454a-bdda-35f1148571cf') === 'IN_PROGRESS'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    In Progress
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('60930782-4b0d-454a-bdda-35f1148571cf') === 'COMPLETED'"
+                                                        aria-label="Set Quality Check to Completed"
+                                                        @click="setState('60930782-4b0d-454a-bdda-35f1148571cf', 'COMPLETED')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('60930782-4b0d-454a-bdda-35f1148571cf') === 'COMPLETED'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    Completed
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('60930782-4b0d-454a-bdda-35f1148571cf') === 'NOT_APPLICABLE'"
+                                                        aria-label="Set Quality Check to N/A"
+                                                        @click="setState('60930782-4b0d-454a-bdda-35f1148571cf', 'NOT_APPLICABLE')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('60930782-4b0d-454a-bdda-35f1148571cf') === 'NOT_APPLICABLE'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    N/A
+                                                </button>
+                                                                                    </div>
+                                                                    </div>
+                                                                                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-4 py-3">
+                                    <div class="min-w-0">
+                                        <p class="text-sm font-medium flex items-center gap-2 flex-wrap">
+                                            Ready for Pickup
+                                                                                    </p>
+                                        <div class="mt-1 flex items-center gap-2 flex-wrap">
+                                            <span class="rounded-full px-2 py-0.5 text-xs font-medium"
+                                                  :class="chipClass(effective('89e65953-4f41-4f20-91b1-353596947bb5'))"
+                                                  x-text="labels[effective('89e65953-4f41-4f20-91b1-353596947bb5')] || effective('89e65953-4f41-4f20-91b1-353596947bb5')"></span>
+                                            <template x-if="changes['89e65953-4f41-4f20-91b1-353596947bb5'] !== undefined && changes['89e65953-4f41-4f20-91b1-353596947bb5'] !== saved['89e65953-4f41-4f20-91b1-353596947bb5']">
+                                                <span class="text-xs text-amber-700" x-text="wasText('89e65953-4f41-4f20-91b1-353596947bb5')"></span>
+                                            </template>
+                                        </div>
+                                    </div>
+
+                                                                            <div class="flex flex-wrap gap-1 shrink-0" role="group"
+                                             aria-label="State for Ready for Pickup">
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('89e65953-4f41-4f20-91b1-353596947bb5') === 'NOT_STARTED'"
+                                                        aria-label="Set Ready for Pickup to Not Started"
+                                                        @click="setState('89e65953-4f41-4f20-91b1-353596947bb5', 'NOT_STARTED')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('89e65953-4f41-4f20-91b1-353596947bb5') === 'NOT_STARTED'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    Not Started
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('89e65953-4f41-4f20-91b1-353596947bb5') === 'IN_PROGRESS'"
+                                                        aria-label="Set Ready for Pickup to In Progress"
+                                                        @click="setState('89e65953-4f41-4f20-91b1-353596947bb5', 'IN_PROGRESS')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('89e65953-4f41-4f20-91b1-353596947bb5') === 'IN_PROGRESS'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    In Progress
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('89e65953-4f41-4f20-91b1-353596947bb5') === 'COMPLETED'"
+                                                        aria-label="Set Ready for Pickup to Completed"
+                                                        @click="setState('89e65953-4f41-4f20-91b1-353596947bb5', 'COMPLETED')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('89e65953-4f41-4f20-91b1-353596947bb5') === 'COMPLETED'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    Completed
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('89e65953-4f41-4f20-91b1-353596947bb5') === 'NOT_APPLICABLE'"
+                                                        aria-label="Set Ready for Pickup to N/A"
+                                                        @click="setState('89e65953-4f41-4f20-91b1-353596947bb5', 'NOT_APPLICABLE')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('89e65953-4f41-4f20-91b1-353596947bb5') === 'NOT_APPLICABLE'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    N/A
+                                                </button>
+                                                                                    </div>
+                                                                    </div>
+                                                                                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-4 py-3">
+                                    <div class="min-w-0">
+                                        <p class="text-sm font-medium flex items-center gap-2 flex-wrap">
+                                            Delivered/Collected
+                                                                                    </p>
+                                        <div class="mt-1 flex items-center gap-2 flex-wrap">
+                                            <span class="rounded-full px-2 py-0.5 text-xs font-medium"
+                                                  :class="chipClass(effective('4f50afc3-1cdf-4719-9e27-032ea66339dc'))"
+                                                  x-text="labels[effective('4f50afc3-1cdf-4719-9e27-032ea66339dc')] || effective('4f50afc3-1cdf-4719-9e27-032ea66339dc')"></span>
+                                            <template x-if="changes['4f50afc3-1cdf-4719-9e27-032ea66339dc'] !== undefined && changes['4f50afc3-1cdf-4719-9e27-032ea66339dc'] !== saved['4f50afc3-1cdf-4719-9e27-032ea66339dc']">
+                                                <span class="text-xs text-amber-700" x-text="wasText('4f50afc3-1cdf-4719-9e27-032ea66339dc')"></span>
+                                            </template>
+                                        </div>
+                                    </div>
+
+                                                                            <div class="flex flex-wrap gap-1 shrink-0" role="group"
+                                             aria-label="State for Delivered/Collected">
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('4f50afc3-1cdf-4719-9e27-032ea66339dc') === 'NOT_STARTED'"
+                                                        aria-label="Set Delivered/Collected to Not Started"
+                                                        @click="setState('4f50afc3-1cdf-4719-9e27-032ea66339dc', 'NOT_STARTED')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('4f50afc3-1cdf-4719-9e27-032ea66339dc') === 'NOT_STARTED'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    Not Started
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('4f50afc3-1cdf-4719-9e27-032ea66339dc') === 'IN_PROGRESS'"
+                                                        aria-label="Set Delivered/Collected to In Progress"
+                                                        @click="setState('4f50afc3-1cdf-4719-9e27-032ea66339dc', 'IN_PROGRESS')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('4f50afc3-1cdf-4719-9e27-032ea66339dc') === 'IN_PROGRESS'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    In Progress
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('4f50afc3-1cdf-4719-9e27-032ea66339dc') === 'COMPLETED'"
+                                                        aria-label="Set Delivered/Collected to Completed"
+                                                        @click="setState('4f50afc3-1cdf-4719-9e27-032ea66339dc', 'COMPLETED')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('4f50afc3-1cdf-4719-9e27-032ea66339dc') === 'COMPLETED'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    Completed
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('4f50afc3-1cdf-4719-9e27-032ea66339dc') === 'NOT_APPLICABLE'"
+                                                        aria-label="Set Delivered/Collected to N/A"
+                                                        @click="setState('4f50afc3-1cdf-4719-9e27-032ea66339dc', 'NOT_APPLICABLE')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('4f50afc3-1cdf-4719-9e27-032ea66339dc') === 'NOT_APPLICABLE'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    N/A
+                                                </button>
+                                                                                    </div>
+                                                                    </div>
+                                                                                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-4 py-3">
+                                    <div class="min-w-0">
+                                        <p class="text-sm font-medium flex items-center gap-2 flex-wrap">
+                                            Blocked
+                                                                                    </p>
+                                        <div class="mt-1 flex items-center gap-2 flex-wrap">
+                                            <span class="rounded-full px-2 py-0.5 text-xs font-medium"
+                                                  :class="chipClass(effective('a9e63c5a-47d8-4586-849f-ba7ba2dbe146'))"
+                                                  x-text="labels[effective('a9e63c5a-47d8-4586-849f-ba7ba2dbe146')] || effective('a9e63c5a-47d8-4586-849f-ba7ba2dbe146')"></span>
+                                            <template x-if="changes['a9e63c5a-47d8-4586-849f-ba7ba2dbe146'] !== undefined && changes['a9e63c5a-47d8-4586-849f-ba7ba2dbe146'] !== saved['a9e63c5a-47d8-4586-849f-ba7ba2dbe146']">
+                                                <span class="text-xs text-amber-700" x-text="wasText('a9e63c5a-47d8-4586-849f-ba7ba2dbe146')"></span>
+                                            </template>
+                                        </div>
+                                    </div>
+
+                                                                            <div class="flex flex-wrap gap-1 shrink-0" role="group"
+                                             aria-label="State for Blocked">
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('a9e63c5a-47d8-4586-849f-ba7ba2dbe146') === 'NOT_STARTED'"
+                                                        aria-label="Set Blocked to Not Started"
+                                                        @click="setState('a9e63c5a-47d8-4586-849f-ba7ba2dbe146', 'NOT_STARTED')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('a9e63c5a-47d8-4586-849f-ba7ba2dbe146') === 'NOT_STARTED'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    Not Started
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('a9e63c5a-47d8-4586-849f-ba7ba2dbe146') === 'IN_PROGRESS'"
+                                                        aria-label="Set Blocked to In Progress"
+                                                        @click="setState('a9e63c5a-47d8-4586-849f-ba7ba2dbe146', 'IN_PROGRESS')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('a9e63c5a-47d8-4586-849f-ba7ba2dbe146') === 'IN_PROGRESS'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    In Progress
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('a9e63c5a-47d8-4586-849f-ba7ba2dbe146') === 'COMPLETED'"
+                                                        aria-label="Set Blocked to Completed"
+                                                        @click="setState('a9e63c5a-47d8-4586-849f-ba7ba2dbe146', 'COMPLETED')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('a9e63c5a-47d8-4586-849f-ba7ba2dbe146') === 'COMPLETED'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    Completed
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('a9e63c5a-47d8-4586-849f-ba7ba2dbe146') === 'NOT_APPLICABLE'"
+                                                        aria-label="Set Blocked to N/A"
+                                                        @click="setState('a9e63c5a-47d8-4586-849f-ba7ba2dbe146', 'NOT_APPLICABLE')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('a9e63c5a-47d8-4586-849f-ba7ba2dbe146') === 'NOT_APPLICABLE'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    N/A
+                                                </button>
+                                                                                    </div>
+                                                                    </div>
+                                                                                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-4 py-3">
+                                    <div class="min-w-0">
+                                        <p class="text-sm font-medium flex items-center gap-2 flex-wrap">
+                                            Other
+                                                                                    </p>
+                                        <div class="mt-1 flex items-center gap-2 flex-wrap">
+                                            <span class="rounded-full px-2 py-0.5 text-xs font-medium"
+                                                  :class="chipClass(effective('e7729a54-9d90-48fa-b48c-d3315b01c1dd'))"
+                                                  x-text="labels[effective('e7729a54-9d90-48fa-b48c-d3315b01c1dd')] || effective('e7729a54-9d90-48fa-b48c-d3315b01c1dd')"></span>
+                                            <template x-if="changes['e7729a54-9d90-48fa-b48c-d3315b01c1dd'] !== undefined && changes['e7729a54-9d90-48fa-b48c-d3315b01c1dd'] !== saved['e7729a54-9d90-48fa-b48c-d3315b01c1dd']">
+                                                <span class="text-xs text-amber-700" x-text="wasText('e7729a54-9d90-48fa-b48c-d3315b01c1dd')"></span>
+                                            </template>
+                                        </div>
+                                    </div>
+
+                                                                            <div class="flex flex-wrap gap-1 shrink-0" role="group"
+                                             aria-label="State for Other">
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('e7729a54-9d90-48fa-b48c-d3315b01c1dd') === 'NOT_STARTED'"
+                                                        aria-label="Set Other to Not Started"
+                                                        @click="setState('e7729a54-9d90-48fa-b48c-d3315b01c1dd', 'NOT_STARTED')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('e7729a54-9d90-48fa-b48c-d3315b01c1dd') === 'NOT_STARTED'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    Not Started
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('e7729a54-9d90-48fa-b48c-d3315b01c1dd') === 'IN_PROGRESS'"
+                                                        aria-label="Set Other to In Progress"
+                                                        @click="setState('e7729a54-9d90-48fa-b48c-d3315b01c1dd', 'IN_PROGRESS')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('e7729a54-9d90-48fa-b48c-d3315b01c1dd') === 'IN_PROGRESS'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    In Progress
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('e7729a54-9d90-48fa-b48c-d3315b01c1dd') === 'COMPLETED'"
+                                                        aria-label="Set Other to Completed"
+                                                        @click="setState('e7729a54-9d90-48fa-b48c-d3315b01c1dd', 'COMPLETED')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('e7729a54-9d90-48fa-b48c-d3315b01c1dd') === 'COMPLETED'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    Completed
+                                                </button>
+                                                                                                                                            <button type="button"
+                                                        :aria-pressed="effective('e7729a54-9d90-48fa-b48c-d3315b01c1dd') === 'NOT_APPLICABLE'"
+                                                        aria-label="Set Other to N/A"
+                                                        @click="setState('e7729a54-9d90-48fa-b48c-d3315b01c1dd', 'NOT_APPLICABLE')"
+                                                        class="h-8 px-2.5 rounded-md text-xs font-medium border transition-colors"
+                                                        :class="effective('e7729a54-9d90-48fa-b48c-d3315b01c1dd') === 'NOT_APPLICABLE'
+                                                            ? 'bg-primary text-primary-foreground border-primary'
+                                                            : 'bg-background text-muted-foreground border-input hover:bg-accent hover:text-foreground'">
+                                                    N/A
+                                                </button>
+                                                                                    </div>
+                                                                    </div>
+                                                    </div>
+
+                                                    <div class="mt-3 space-y-2">
+                                <input type="text" x-model="comment" maxlength="500"
+                                       aria-label="Checklist save comment"
+                                       placeholder="Optional comment attached to the next checklist save"
+                                       class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                                <div class="flex justify-end">
+                                    <button type="submit" :disabled="changesCount === 0"
+                                            class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm font-medium h-8 px-3 bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors disabled:pointer-events-none disabled:opacity-50">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/><path d="M7 3v4a1 1 0 0 0 1 1h7"/></svg>
+                                        Save Checklist<span x-show="changesCount > 0" class="tabular-nums" x-text="'(' + changesCount + ')'"></span>
+                                    </button>
+                                </div>
+                            </div>
+                                            
+                    
+                    <template x-for="(entry, i) in Object.entries(changes)" :key="entry[0]">
+                        <span>
+                            <input type="hidden" :name="'updates[' + i + '][stageId]'" :value="entry[0]">
+                            <input type="hidden" :name="'updates[' + i + '][state]'" :value="entry[1]">
+                            <input type="hidden" :name="'updates[' + i + '][comment]'" :value="comment">
+                        </span>
+                    </template>
+                </form>
+            </div>
+        </section>
+
+        
+        <section class="rounded-xl border bg-card text-card-foreground shadow-sm" aria-labelledby="task-actions-title">
+            <div class="flex items-center justify-between gap-2 border-b p-6 pb-3">
+                <h2 id="task-actions-title" class="font-semibold text-base">Workflow Actions</h2>
+            </div>
+            <div class="p-6 pt-4">
+                <div class="space-y-2">
+                    
+                                            <div>
+                            <button type="button" @click="dialog = 'submit'"
+                                    disabled
+                                    class="w-full inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm font-medium h-9 px-4 bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors disabled:pointer-events-none disabled:opacity-50">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg>
+                                Submit for Inspection
+                            </button>
+                                                            <p class="text-xs text-muted-foreground mt-1">Reach 100% progress first.</p>
+                                                    </div>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                                            <div class="h-px bg-border my-3" role="separator"></div>
+                    
+                                            <button type="button" @click="reason = ''; dialog = 'block'"
+                                class="w-full inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm font-medium h-9 px-4 border border-amber-300 text-amber-800 hover:bg-amber-50 hover:text-amber-900 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/></svg>
+                            Block Task
+                        </button>
+                    
+                    
+                    
+                    
+                                    </div>
+            </div>
+        </section>
+
+        
+        <section class="rounded-xl border bg-card text-card-foreground shadow-sm lg:col-span-2" aria-labelledby="task-comments-title">
+            <div class="flex items-center justify-between gap-2 border-b p-6 pb-3">
+                <h2 id="task-comments-title" class="font-semibold text-base">Comments &amp; Issues</h2>
+                <span class="text-xs text-muted-foreground">0 total</span>
+            </div>
+            <div class="p-6 pt-4 space-y-4">
+                                    <div class="flex flex-col items-center justify-center gap-2 py-10 px-4 text-center">
+                        <div class="rounded-full bg-muted p-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-6 text-muted-foreground" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                        </div>
+                        <p class="font-medium">No notes yet</p>
+                        <p class="text-sm text-muted-foreground max-w-sm">Production notes and reported issues will appear here.</p>
+                    </div>
+                
+                                    <form method="POST" action="https://atelier.osszcollection.com/tasks/d479101f-23ec-4826-a048-0acee908e096/comment" class="space-y-2">
+                        <input type="hidden" name="_token" value="FoqxOJPBCeBcEcTgro75n75k7A8w6HUqvv0u70td" autocomplete="off">                        <textarea name="body" required maxlength="1000" aria-label="New comment"
+                                  placeholder="Write a production note or describe a problem..."
+                                  class="flex min-h-20 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"></textarea>
+                        <div class="flex flex-col sm:flex-row sm:justify-end gap-2">
+                            <button type="submit"
+                                    class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-xs font-medium h-8 px-3 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                                Add Note
+                            </button>
+                            <button type="submit" name="isIssue" value="1"
+                                    class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-xs font-medium h-8 px-3 border border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+                                Report Issue
+                            </button>
+                        </div>
+                                            </form>
+                            </div>
+        </section>
+
+        
+        <section class="rounded-xl border bg-card text-card-foreground shadow-sm" aria-labelledby="task-details-title">
+            <div class="flex items-center justify-between gap-2 border-b p-6 pb-3">
+                <h2 id="task-details-title" class="font-semibold text-base">Task Details</h2>
+            </div>
+            <div class="p-6 pt-4">
+                <div class="divide-y">
+                    <div class="flex items-start justify-between gap-3 py-2">
+                        <span class="text-xs font-medium text-muted-foreground uppercase tracking-wide pt-0.5">Order</span>
+                        <span class="text-sm text-right min-w-0 font-medium">
+                                                            OSSZ-2026-001
+                                                        — John Doe
+                        </span>
+                    </div>
+                    <div class="flex items-start justify-between gap-3 py-2">
+                        <span class="text-xs font-medium text-muted-foreground uppercase tracking-wide pt-0.5">Customer</span>
+                        <span class="text-sm text-right min-w-0">John Doe</span>
+                    </div>
+                    <div class="flex items-start justify-between gap-3 py-2">
+                        <span class="text-xs font-medium text-muted-foreground uppercase tracking-wide pt-0.5">Phone</span>
+                        <span class="text-sm text-right min-w-0">+237 677 123 456</span>
+                    </div>
+                    <div class="flex items-start justify-between gap-3 py-2">
+                        <span class="text-xs font-medium text-muted-foreground uppercase tracking-wide pt-0.5">Garment piece</span>
+                        <span class="text-sm text-right min-w-0 font-medium">Trousers</span>
+                    </div>
+                    <div class="flex items-start justify-between gap-3 py-2">
+                        <span class="text-xs font-medium text-muted-foreground uppercase tracking-wide pt-0.5">Assignee</span>
+                        <span class="text-sm text-right min-w-0">
+                                                            Hamidou Abdoul
+                                                    </span>
+                    </div>
+                    <div class="flex items-start justify-between gap-3 py-2">
+                        <span class="text-xs font-medium text-muted-foreground uppercase tracking-wide pt-0.5">Category</span>
+                        <span class="text-right min-w-0"><span class="inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap bg-secondary text-secondary-foreground border-transparent">Full Production</span>
+</span>
+                    </div>
+                    <div class="flex items-start justify-between gap-3 py-2">
+                        <span class="text-xs font-medium text-muted-foreground uppercase tracking-wide pt-0.5">Priority</span>
+                        <span class="text-right min-w-0"><span class="inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap bg-amber-50 text-amber-800 border-amber-300">High</span>
+</span>
+                    </div>
+                    <div class="flex items-start justify-between gap-3 py-2">
+                        <span class="text-xs font-medium text-muted-foreground uppercase tracking-wide pt-0.5">Deadline</span>
+                        <span class="text-sm text-right min-w-0">
+                                                            <span class="inline-flex items-center gap-1 whitespace-nowrap text-muted-foreground">
+                                                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3.5 opacity-60" aria-hidden="true"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M17.5 17.5 16 16.3V14"/><circle cx="16" cy="16" r="6"/></svg>
+                                                                        27 Nov 2026
+                                </span>
+                                                    </span>
+                    </div>
+                    <div class="flex items-start justify-between gap-3 py-2">
+                        <span class="text-xs font-medium text-muted-foreground uppercase tracking-wide pt-0.5">Created</span>
+                        <span class="text-sm text-right min-w-0">31 Oct 2026</span>
+                    </div>
+                    <div class="flex items-start justify-between gap-3 py-2">
+                        <span class="text-xs font-medium text-muted-foreground uppercase tracking-wide pt-0.5">Created by</span>
+                        <span class="text-sm text-right min-w-0">Aminata Sow</span>
+                    </div>
+                    <div class="flex items-start justify-between gap-3 py-2">
+                        <span class="text-xs font-medium text-muted-foreground uppercase tracking-wide pt-0.5">Completed</span>
+                        <span class="text-sm text-right min-w-0">—</span>
+                    </div>
+                    <div class="flex items-start justify-between gap-3 py-2">
+                        <span class="text-xs font-medium text-muted-foreground uppercase tracking-wide pt-0.5">Delivered</span>
+                        <span class="text-sm text-right min-w-0">—</span>
+                    </div>
+                </div>
+
+                                    <div class="mt-3">
+                        <p class="text-xs font-medium text-muted-foreground uppercase tracking-wide">Instructions</p>
+                        <p class="text-sm mt-1 rounded-lg border bg-muted/30 p-3 whitespace-pre-wrap">Slim fit, side adjusters instead of belt loops.</p>
+                    </div>
+                
+                                    <div class="mt-3">
+                        <p class="text-xs font-medium text-muted-foreground uppercase tracking-wide">Order instructions</p>
+                        <p class="text-sm mt-1 rounded-lg border bg-muted/30 p-3 whitespace-pre-wrap">Slim fit, midnight blue fabric, gold buttons.</p>
+                    </div>
+                            </div>
+        </section>
+
+        
+        <section class="rounded-xl border bg-card text-card-foreground shadow-sm lg:col-span-3" aria-labelledby="task-history-title" x-data="{ tab: 'all' }">
+            <div class="flex items-center justify-between gap-2 border-b p-6 pb-3">
+                <h2 id="task-history-title" class="font-semibold text-base">History</h2>
+                <span class="text-xs text-muted-foreground">13 events</span>
+            </div>
+            <div class="p-6 pt-4">
+                <div class="flex flex-wrap gap-1 rounded-lg bg-muted/50 p-1" role="tablist" aria-label="History">
+                                            <button type="button" role="tab"
+                                :aria-selected="tab === 'all'"
+                                @click="tab = 'all'"
+                                class="h-8 px-3 rounded-md text-sm font-medium transition-colors"
+                                :class="tab === 'all' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'">
+                            All
+                        </button>
+                                            <button type="button" role="tab"
+                                :aria-selected="tab === 'progress'"
+                                @click="tab = 'progress'"
+                                class="h-8 px-3 rounded-md text-sm font-medium transition-colors"
+                                :class="tab === 'progress' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'">
+                            Progress
+                        </button>
+                                            <button type="button" role="tab"
+                                :aria-selected="tab === 'checklist'"
+                                @click="tab = 'checklist'"
+                                class="h-8 px-3 rounded-md text-sm font-medium transition-colors"
+                                :class="tab === 'checklist' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'">
+                            Checklist
+                        </button>
+                                            <button type="button" role="tab"
+                                :aria-selected="tab === 'status'"
+                                @click="tab = 'status'"
+                                class="h-8 px-3 rounded-md text-sm font-medium transition-colors"
+                                :class="tab === 'status' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'">
+                            Status
+                        </button>
+                                            <button type="button" role="tab"
+                                :aria-selected="tab === 'inspections'"
+                                @click="tab = 'inspections'"
+                                class="h-8 px-3 rounded-md text-sm font-medium transition-colors"
+                                :class="tab === 'inspections' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'">
+                            Inspections
+                        </button>
+                                    </div>
+
+                                    <div class="mt-2 max-h-96 overflow-y-auto [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-track]:transparent rounded-lg border">
+                        <div class="divide-y px-4 py-1">
+                                                                                            <div class="flex gap-3 py-2.5" x-show="tab === 'all' || tab === 'progress'">
+                                    <div class="rounded-full p-1.5 shrink-0 mt-0.5 bg-emerald-50 text-emerald-700">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3.5" aria-hidden="true"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <p class="text-sm leading-snug">
+                                            <span class="font-medium">Aminata Sow</span>
+                                            <span class="text-muted-foreground">updated progress 80% → 30%</span>
+                                                                                            <span class="ml-1.5 inline-flex items-center rounded-full border px-1.5 py-0 text-[10px] font-medium align-middle">Manual</span>
+                                                                                    </p>
+                                                                                <p class="text-xs text-muted-foreground/80 mt-0.5" title="14 Nov 2026, 19:41">1 day ago</p>
+                                    </div>
+                                </div>
+                                                                                            <div class="flex gap-3 py-2.5" x-show="tab === 'all' || tab === 'checklist'">
+                                    <div class="rounded-full p-1.5 shrink-0 mt-0.5 bg-stone-100 text-stone-600">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3.5" aria-hidden="true"><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/></svg>
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <p class="text-sm leading-snug">
+                                            <span class="font-medium">Hamidou Abdoul</span>
+                                            <span class="text-muted-foreground">Finishing: Not Started → In Progress</span>
+                                                                                    </p>
+                                                                                <p class="text-xs text-muted-foreground/80 mt-0.5" title="13 Nov 2026, 10:00">2 days ago</p>
+                                    </div>
+                                </div>
+                                                                                            <div class="flex gap-3 py-2.5" x-show="tab === 'all' || tab === 'progress'">
+                                    <div class="rounded-full p-1.5 shrink-0 mt-0.5 bg-emerald-50 text-emerald-700">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3.5" aria-hidden="true"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <p class="text-sm leading-snug">
+                                            <span class="font-medium">Hamidou Abdoul</span>
+                                            <span class="text-muted-foreground">updated progress 60% → 80%</span>
+                                                                                            <span class="ml-1.5 inline-flex items-center rounded-full border px-1.5 py-0 text-[10px] font-medium align-middle">Manual</span>
+                                                                                    </p>
+                                                                                    <p class="text-xs text-muted-foreground mt-0.5 whitespace-pre-wrap break-words">Fitting done, finishing hem.</p>
+                                                                                <p class="text-xs text-muted-foreground/80 mt-0.5" title="12 Nov 2026, 10:00">3 days ago</p>
+                                    </div>
+                                </div>
+                                                                                            <div class="flex gap-3 py-2.5" x-show="tab === 'all' || tab === 'checklist'">
+                                    <div class="rounded-full p-1.5 shrink-0 mt-0.5 bg-stone-100 text-stone-600">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3.5" aria-hidden="true"><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/></svg>
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <p class="text-sm leading-snug">
+                                            <span class="font-medium">Hamidou Abdoul</span>
+                                            <span class="text-muted-foreground">Fitting: Not Started → Completed</span>
+                                                                                    </p>
+                                                                                <p class="text-xs text-muted-foreground/80 mt-0.5" title="11 Nov 2026, 10:00">4 days ago</p>
+                                    </div>
+                                </div>
+                                                                                            <div class="flex gap-3 py-2.5" x-show="tab === 'all' || tab === 'checklist'">
+                                    <div class="rounded-full p-1.5 shrink-0 mt-0.5 bg-stone-100 text-stone-600">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3.5" aria-hidden="true"><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/></svg>
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <p class="text-sm leading-snug">
+                                            <span class="font-medium">Hamidou Abdoul</span>
+                                            <span class="text-muted-foreground">Sewing/Stitching: Not Started → Completed</span>
+                                                                                    </p>
+                                                                                <p class="text-xs text-muted-foreground/80 mt-0.5" title="08 Nov 2026, 10:00">1 week ago</p>
+                                    </div>
+                                </div>
+                                                                                            <div class="flex gap-3 py-2.5" x-show="tab === 'all' || tab === 'progress'">
+                                    <div class="rounded-full p-1.5 shrink-0 mt-0.5 bg-emerald-50 text-emerald-700">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3.5" aria-hidden="true"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <p class="text-sm leading-snug">
+                                            <span class="font-medium">Hamidou Abdoul</span>
+                                            <span class="text-muted-foreground">updated progress 30% → 60%</span>
+                                                                                            <span class="ml-1.5 inline-flex items-center rounded-full border px-1.5 py-0 text-[10px] font-medium align-middle">Manual</span>
+                                                                                    </p>
+                                                                                <p class="text-xs text-muted-foreground/80 mt-0.5" title="08 Nov 2026, 10:00">1 week ago</p>
+                                    </div>
+                                </div>
+                                                                                            <div class="flex gap-3 py-2.5" x-show="tab === 'all' || tab === 'checklist'">
+                                    <div class="rounded-full p-1.5 shrink-0 mt-0.5 bg-stone-100 text-stone-600">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3.5" aria-hidden="true"><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/></svg>
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <p class="text-sm leading-snug">
+                                            <span class="font-medium">Hamidou Abdoul</span>
+                                            <span class="text-muted-foreground">Cutting: Not Started → Completed</span>
+                                                                                    </p>
+                                                                                <p class="text-xs text-muted-foreground/80 mt-0.5" title="04 Nov 2026, 10:00">1 week ago</p>
+                                    </div>
+                                </div>
+                                                                                            <div class="flex gap-3 py-2.5" x-show="tab === 'all' || tab === 'progress'">
+                                    <div class="rounded-full p-1.5 shrink-0 mt-0.5 bg-emerald-50 text-emerald-700">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3.5" aria-hidden="true"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <p class="text-sm leading-snug">
+                                            <span class="font-medium">Hamidou Abdoul</span>
+                                            <span class="text-muted-foreground">updated progress 0% → 30%</span>
+                                                                                            <span class="ml-1.5 inline-flex items-center rounded-full border px-1.5 py-0 text-[10px] font-medium align-middle">Manual</span>
+                                                                                    </p>
+                                                                                <p class="text-xs text-muted-foreground/80 mt-0.5" title="01 Nov 2026, 10:00">2 weeks ago</p>
+                                    </div>
+                                </div>
+                                                                                            <div class="flex gap-3 py-2.5" x-show="tab === 'all' || tab === 'status'">
+                                    <div class="rounded-full p-1.5 shrink-0 mt-0.5 bg-amber-50 text-amber-700">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3.5" aria-hidden="true"><path d="m16 3 4 4-4 4"/><path d="M20 7H4"/><path d="m8 21-4-4 4-4"/><path d="M4 17h16"/></svg>
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <p class="text-sm leading-snug">
+                                            <span class="font-medium">Hamidou Abdoul</span>
+                                            <span class="text-muted-foreground">changed status from Assigned to Ongoing</span>
+                                                                                    </p>
+                                                                                <p class="text-xs text-muted-foreground/80 mt-0.5" title="31 Oct 2026, 12:00">2 weeks ago</p>
+                                    </div>
+                                </div>
+                                                                                            <div class="flex gap-3 py-2.5" x-show="tab === 'all' || tab === 'checklist'">
+                                    <div class="rounded-full p-1.5 shrink-0 mt-0.5 bg-stone-100 text-stone-600">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3.5" aria-hidden="true"><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/></svg>
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <p class="text-sm leading-snug">
+                                            <span class="font-medium">Hamidou Abdoul</span>
+                                            <span class="text-muted-foreground">Ongoing: Not Started → Completed</span>
+                                                                                    </p>
+                                                                                <p class="text-xs text-muted-foreground/80 mt-0.5" title="31 Oct 2026, 12:00">2 weeks ago</p>
+                                    </div>
+                                </div>
+                                                                                            <div class="flex gap-3 py-2.5" x-show="tab === 'all'">
+                                    <div class="rounded-full p-1.5 shrink-0 mt-0.5 bg-teal-50 text-teal-700">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3.5" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <p class="text-sm leading-snug">
+                                            <span class="font-medium">Aminata Sow</span>
+                                            <span class="text-muted-foreground">assigned the task to Hamidou Abdoul</span>
+                                                                                    </p>
+                                                                                <p class="text-xs text-muted-foreground/80 mt-0.5" title="31 Oct 2026, 10:00">2 weeks ago</p>
+                                    </div>
+                                </div>
+                                                                                            <div class="flex gap-3 py-2.5" x-show="tab === 'all' || tab === 'status'">
+                                    <div class="rounded-full p-1.5 shrink-0 mt-0.5 bg-amber-50 text-amber-700">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3.5" aria-hidden="true"><path d="m16 3 4 4-4 4"/><path d="M20 7H4"/><path d="m8 21-4-4 4-4"/><path d="M4 17h16"/></svg>
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <p class="text-sm leading-snug">
+                                            <span class="font-medium">Aminata Sow</span>
+                                            <span class="text-muted-foreground">changed status from Unassigned to Assigned</span>
+                                                                                    </p>
+                                                                                <p class="text-xs text-muted-foreground/80 mt-0.5" title="31 Oct 2026, 10:00">2 weeks ago</p>
+                                    </div>
+                                </div>
+                                                                                            <div class="flex gap-3 py-2.5" x-show="tab === 'all' || tab === 'checklist'">
+                                    <div class="rounded-full p-1.5 shrink-0 mt-0.5 bg-stone-100 text-stone-600">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3.5" aria-hidden="true"><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/></svg>
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <p class="text-sm leading-snug">
+                                            <span class="font-medium">Hamidou Abdoul</span>
+                                            <span class="text-muted-foreground">Assigned: Not Started → Completed</span>
+                                                                                    </p>
+                                                                                <p class="text-xs text-muted-foreground/80 mt-0.5" title="31 Oct 2026, 10:00">2 weeks ago</p>
+                                    </div>
+                                </div>
+                                                    </div>
+                    </div>
+                            </div>
+        </section>
+    </div>
+
+    
+    <div x-show="dialog === 'assign'" x-cloak
+         class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="assign-dialog-title"
+         @click.self="dialog = null">
+        <form method="POST" action="https://atelier.osszcollection.com/tasks/d479101f-23ec-4826-a048-0acee908e096/assign"
+              class="w-full max-w-lg rounded-xl border bg-card text-card-foreground shadow-lg p-6 space-y-4">
+            <input type="hidden" name="_token" value="FoqxOJPBCeBcEcTgro75n75k7A8w6HUqvv0u70td" autocomplete="off">            <div>
+                <h3 id="assign-dialog-title" class="font-semibold text-lg">Reassign Task</h3>
+                <p class="text-sm text-muted-foreground mt-0.5">Select the staff member responsible for Trousers (TASK-0002).</p>
+            </div>
+            <div class="space-y-1.5">
+                <label for="assign-staff" class="text-sm font-medium leading-none">Staff member</label>
+                <select id="assign-staff" name="staffId" x-model="staffId"
+                        class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                    <option value="">Select staff member</option>
+                                            <option value="9d021fb4-9b45-4888-8a52-efe93ae1876c" disabled>
+                            Hamidou Abdoul (2 active) — current                        </option>
+                                            <option value="a4ee2330-0adc-4b6c-a982-f3172fff059d" >
+                            Lawal Sani (1 active)                        </option>
+                                            <option value="5a7833ca-1d5e-4a7d-975c-85c1dbc489a5" >
+                            Ngozi Okafor (0 active)                        </option>
+                                    </select>
+                            </div>
+            <div class="space-y-1.5">
+                <label for="assign-note" class="text-sm font-medium leading-none">Note (optional)</label>
+                <input type="text" id="assign-note" name="note" maxlength="1000"
+                       placeholder="Note sent with the assignment notification"
+                       class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+            </div>
+            <div class="flex justify-end gap-2">
+                <button type="button" @click="dialog = null"
+                        class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm font-medium h-9 px-4 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground transition-colors">
+                    Cancel
+                </button>
+                <button type="submit" :disabled="staffId === ''"
+                        class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm font-medium h-9 px-4 bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors disabled:pointer-events-none disabled:opacity-50">
+                    Reassign
+                </button>
+            </div>
+        </form>
+    </div>
+
+    
+    <div x-show="dialog === 'edit'" x-cloak
+         class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="edit-dialog-title"
+         @click.self="dialog = null">
+        <form method="POST" action="https://atelier.osszcollection.com/tasks/d479101f-23ec-4826-a048-0acee908e096/update"
+              class="w-full max-w-lg rounded-xl border bg-card text-card-foreground shadow-lg p-6 space-y-4">
+            <input type="hidden" name="_token" value="FoqxOJPBCeBcEcTgro75n75k7A8w6HUqvv0u70td" autocomplete="off">            <div>
+                <h3 id="edit-dialog-title" class="font-semibold text-lg">Edit Task Details</h3>
+                <p class="text-sm text-muted-foreground mt-0.5">Only the fields you change are submitted.</p>
+            </div>
+            <div class="space-y-1.5">
+                <label for="edit-piece" class="text-sm font-medium leading-none">Garment piece</label>
+                <input type="text" id="edit-piece" name="garmentPiece" maxlength="100" required
+                       value="Trousers"
+                       class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                            </div>
+            <div class="grid gap-3 sm:grid-cols-2">
+                <div class="space-y-1.5">
+                    <label for="edit-deadline" class="text-sm font-medium leading-none">Deadline</label>
+                    <input type="datetime-local" id="edit-deadline" name="deadline"
+                           value="2026-11-27T17:00"
+                           class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                </div>
+                <div class="space-y-1.5">
+                    <label for="edit-priority" class="text-sm font-medium leading-none">Priority</label>
+                    <select id="edit-priority" name="priority"
+                            class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                                                    <option value="LOW" >Low</option>
+                                                    <option value="NORMAL" >Normal</option>
+                                                    <option value="HIGH" selected>High</option>
+                                                    <option value="URGENT" >Urgent</option>
+                                            </select>
+                </div>
+            </div>
+            <div class="space-y-1.5">
+                <label for="edit-instructions" class="text-sm font-medium leading-none">Instructions</label>
+                <textarea id="edit-instructions" name="instructions" maxlength="2000"
+                          placeholder="Production instructions for this piece"
+                          class="flex min-h-20 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">Slim fit, side adjusters instead of belt loops.</textarea>
+            </div>
+            <div class="flex justify-end gap-2">
+                <button type="button" @click="dialog = null"
+                        class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm font-medium h-9 px-4 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground transition-colors">
+                    Cancel
+                </button>
+                <button type="submit"
+                        class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm font-medium h-9 px-4 bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors">
+                    Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+
+    
+    <div x-show="dialog === 'submit'" x-cloak
+         class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="submit-dialog-title"
+         @click.self="dialog = null">
+        <form method="POST" action="https://atelier.osszcollection.com/tasks/d479101f-23ec-4826-a048-0acee908e096/status"
+              class="w-full max-w-lg rounded-xl border bg-card text-card-foreground shadow-lg p-6 space-y-4">
+            <input type="hidden" name="_token" value="FoqxOJPBCeBcEcTgro75n75k7A8w6HUqvv0u70td" autocomplete="off">            <input type="hidden" name="action" value="submit">
+            <div>
+                <h3 id="submit-dialog-title" class="font-semibold text-lg">Submit for Inspection</h3>
+                <p class="text-sm text-muted-foreground mt-0.5">Your work will be reviewed by quality control. Make sure the checklist is complete.</p>
+            </div>
+            <div class="space-y-1.5">
+                <label for="submit-note" class="text-sm font-medium leading-none">Note (optional)</label>
+                <textarea id="submit-note" name="note" maxlength="1000"
+                          placeholder="Anything the inspector should know"
+                          class="flex min-h-20 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"></textarea>
+            </div>
+            <div class="flex justify-end gap-2">
+                <button type="button" @click="dialog = null"
+                        class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm font-medium h-9 px-4 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground transition-colors">
+                    Cancel
+                </button>
+                <button type="submit"
+                        class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm font-medium h-9 px-4 bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors">
+                    Submit
+                </button>
+            </div>
+        </form>
+    </div>
+
+    
+    <div x-show="dialog === 'inspect'" x-cloak
+         class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="inspect-dialog-title"
+         @click.self="dialog = null">
+        <form method="POST" action="https://atelier.osszcollection.com/tasks/d479101f-23ec-4826-a048-0acee908e096/inspect"
+              class="w-full max-w-lg rounded-xl border bg-card text-card-foreground shadow-lg p-6 space-y-4">
+            <input type="hidden" name="_token" value="FoqxOJPBCeBcEcTgro75n75k7A8w6HUqvv0u70td" autocomplete="off">            <div>
+                <h3 id="inspect-dialog-title" class="font-semibold text-lg">Quality Inspection</h3>
+                <p class="text-sm text-muted-foreground mt-0.5">Approve passes the garment to the pickup flow. Request changes returns it to the worker with correction instructions.</p>
+            </div>
+            <div class="space-y-2" role="radiogroup" aria-label="Quality Inspection">
+                                    <label class="flex items-center gap-2.5 rounded-lg border p-3 cursor-pointer hover:bg-muted/50 transition-colors has-[:checked]:border-primary has-[:checked]:bg-accent/50">
+                        <input type="radio" name="decision" value="APPROVED" checked class="size-4 accent-primary">
+                        <span class="text-sm font-medium">Approved</span>
+                    </label>
+                                    <label class="flex items-center gap-2.5 rounded-lg border p-3 cursor-pointer hover:bg-muted/50 transition-colors has-[:checked]:border-primary has-[:checked]:bg-accent/50">
+                        <input type="radio" name="decision" value="CHANGES_REQUESTED"  class="size-4 accent-primary">
+                        <span class="text-sm font-medium">Changes Requested</span>
+                    </label>
+                                    <label class="flex items-center gap-2.5 rounded-lg border p-3 cursor-pointer hover:bg-muted/50 transition-colors has-[:checked]:border-primary has-[:checked]:bg-accent/50">
+                        <input type="radio" name="decision" value="REOPENED"  class="size-4 accent-primary">
+                        <span class="text-sm font-medium">Reopened</span>
+                    </label>
+                                            </div>
+            <div class="space-y-1.5">
+                <label for="inspect-comments" class="text-sm font-medium leading-none">Inspection comments</label>
+                <textarea id="inspect-comments" name="comments" maxlength="2000"
+                          placeholder="Required when requesting changes — describe the corrections needed"
+                          class="flex min-h-20 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"></textarea>
+            </div>
+            <div class="flex justify-end gap-2">
+                <button type="button" @click="dialog = null"
+                        class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm font-medium h-9 px-4 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground transition-colors">
+                    Cancel
+                </button>
+                <button type="submit"
+                        class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm font-medium h-9 px-4 bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1 1 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
+                    Submit
+                </button>
+            </div>
+        </form>
+    </div>
+
+    
+    <div x-show="dialog === 'deliver'" x-cloak
+         class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="deliver-dialog-title"
+         @click.self="dialog = null">
+        <form method="POST" action="https://atelier.osszcollection.com/tasks/d479101f-23ec-4826-a048-0acee908e096/status"
+              class="w-full max-w-lg rounded-xl border bg-card text-card-foreground shadow-lg p-6 space-y-4">
+            <input type="hidden" name="_token" value="FoqxOJPBCeBcEcTgro75n75k7A8w6HUqvv0u70td" autocomplete="off">            <input type="hidden" name="action" value="deliver">
+            <div>
+                <h3 id="deliver-dialog-title" class="font-semibold text-lg">Mark Delivered/Collected</h3>
+                <p class="text-sm text-muted-foreground mt-0.5">Confirm that John Doe collected Trousers.</p>
+            </div>
+            <div class="space-y-1.5">
+                <label for="deliver-note" class="text-sm font-medium leading-none">Note (optional)</label>
+                <input type="text" id="deliver-note" name="note" maxlength="1000"
+                       placeholder="e.g. Collected by the customer in person"
+                       class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+            </div>
+            <div class="flex justify-end gap-2">
+                <button type="button" @click="dialog = null"
+                        class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm font-medium h-9 px-4 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground transition-colors">
+                    Cancel
+                </button>
+                <button type="submit"
+                        class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm font-medium h-9 px-4 bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18h-5"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.62l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></svg>
+                    Mark Delivered
+                </button>
+            </div>
+        </form>
+    </div>
+
+    
+    <div x-show="dialog === 'reopen'" x-cloak
+         class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="reopen-dialog-title"
+         @click.self="dialog = null">
+        <form method="POST" action="https://atelier.osszcollection.com/tasks/d479101f-23ec-4826-a048-0acee908e096/status"
+              class="w-full max-w-lg rounded-xl border bg-card text-card-foreground shadow-lg p-6 space-y-4">
+            <input type="hidden" name="_token" value="FoqxOJPBCeBcEcTgro75n75k7A8w6HUqvv0u70td" autocomplete="off">            <input type="hidden" name="action" value="reopen">
+            <div>
+                <h3 id="reopen-dialog-title" class="font-semibold text-lg">Reopen Task</h3>
+                <p class="text-sm text-muted-foreground mt-0.5">The task returns to Ongoing so production can resume. Comments are required.</p>
+            </div>
+            <div class="space-y-1.5">
+                <label for="reopen-comments" class="text-sm font-medium leading-none">Comments</label>
+                <textarea id="reopen-comments" name="reason" x-model="reason" maxlength="1000" required
+                          placeholder="Why is this task being reopened?"
+                          class="flex min-h-20 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"></textarea>
+                            </div>
+            <div class="flex justify-end gap-2">
+                <button type="button" @click="dialog = null"
+                        class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm font-medium h-9 px-4 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground transition-colors">
+                    Cancel
+                </button>
+                <button type="submit" :disabled="reason.trim().length < 3"
+                        class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm font-medium h-9 px-4 bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors disabled:pointer-events-none disabled:opacity-50">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11"/></svg>
+                    Reopen
+                </button>
+            </div>
+        </form>
+    </div>
+
+    
+    <div x-show="dialog === 'block'" x-cloak
+         class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="block-dialog-title"
+         @click.self="dialog = null">
+        <form method="POST" action="https://atelier.osszcollection.com/tasks/d479101f-23ec-4826-a048-0acee908e096/block"
+              class="w-full max-w-lg rounded-xl border bg-card text-card-foreground shadow-lg p-6 space-y-4">
+            <input type="hidden" name="_token" value="FoqxOJPBCeBcEcTgro75n75k7A8w6HUqvv0u70td" autocomplete="off">            <div>
+                <h3 id="block-dialog-title" class="font-semibold text-lg">Block Task</h3>
+                <p class="text-sm text-muted-foreground mt-0.5">Report what is blocking production. Management is notified immediately.</p>
+            </div>
+            <div class="space-y-1.5">
+                <label for="block-reason" class="text-sm font-medium leading-none">Reason (required)</label>
+                <textarea id="block-reason" name="reason" x-model="reason" maxlength="1000" required
+                          placeholder="e.g. Missing customer-provided fabric"
+                          class="flex min-h-20 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"></textarea>
+                            </div>
+            <div class="flex justify-end gap-2">
+                <button type="button" @click="dialog = null"
+                        class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm font-medium h-9 px-4 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground transition-colors">
+                    Cancel
+                </button>
+                <button type="submit" :disabled="reason.trim().length < 3"
+                        class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm font-medium h-9 px-4 bg-red-600 text-white shadow-sm hover:bg-red-700 transition-colors disabled:pointer-events-none disabled:opacity-50">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/></svg>
+                    Block Task
+                </button>
+            </div>
+        </form>
+    </div>
+
+    
+    <div x-show="dialog === 'unblock'" x-cloak
+         class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="unblock-dialog-title"
+         @click.self="dialog = null">
+        <form method="POST" action="https://atelier.osszcollection.com/tasks/d479101f-23ec-4826-a048-0acee908e096/unblock"
+              class="w-full max-w-lg rounded-xl border bg-card text-card-foreground shadow-lg p-6 space-y-4">
+            <input type="hidden" name="_token" value="FoqxOJPBCeBcEcTgro75n75k7A8w6HUqvv0u70td" autocomplete="off">            <div>
+                <h3 id="unblock-dialog-title" class="font-semibold text-lg">Unblock Task</h3>
+                <p class="text-sm text-muted-foreground mt-0.5">The blocker is cleared and production can resume.</p>
+            </div>
+            <div class="space-y-1.5">
+                <label for="unblock-note" class="text-sm font-medium leading-none">Note (optional)</label>
+                <input type="text" id="unblock-note" name="note" maxlength="1000"
+                       placeholder="How the blocker was resolved"
+                       class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+            </div>
+            <div class="flex justify-end gap-2">
+                <button type="button" @click="dialog = null"
+                        class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm font-medium h-9 px-4 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground transition-colors">
+                    Cancel
+                </button>
+                <button type="submit"
+                        class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm font-medium h-9 px-4 bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                    Unblock
+                </button>
+            </div>
+        </form>
+    </div>
+
+    
+    <div x-show="dialog === 'cancel'" x-cloak
+         class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="cancel-dialog-title"
+         @click.self="dialog = null">
+        <form method="POST" action="https://atelier.osszcollection.com/tasks/d479101f-23ec-4826-a048-0acee908e096/status"
+              class="w-full max-w-lg rounded-xl border bg-card text-card-foreground shadow-lg p-6 space-y-4">
+            <input type="hidden" name="_token" value="FoqxOJPBCeBcEcTgro75n75k7A8w6HUqvv0u70td" autocomplete="off">            <input type="hidden" name="action" value="cancel">
+            <div>
+                <h3 id="cancel-dialog-title" class="font-semibold text-lg">Cancel this task?</h3>
+                <p class="text-sm text-muted-foreground mt-0.5">TASK-0002 — Trousers (OSSZ-2026-001) will be permanently closed. This cannot be undone.</p>
+            </div>
+            <div class="space-y-1.5">
+                <label for="cancel-reason" class="text-sm font-medium leading-none">Reason (required)</label>
+                <textarea id="cancel-reason" name="reason" x-model="reason" maxlength="1000" required
+                          placeholder="e.g. Cancelled by the customer"
+                          class="flex min-h-20 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"></textarea>
+                            </div>
+            <div class="flex justify-end gap-2">
+                <button type="button" @click="dialog = null"
+                        class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm font-medium h-9 px-4 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground transition-colors">
+                    Keep Task
+                </button>
+                <button type="submit" :disabled="reason.trim().length < 3"
+                        class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm font-medium h-9 px-4 bg-destructive text-white shadow-sm hover:bg-destructive/90 transition-colors disabled:pointer-events-none disabled:opacity-50">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
+                    Cancel Task
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+            </main>
+
+            
+            <footer class="mt-auto border-t bg-background">
+                <div class="max-w-[1400px] mx-auto px-4 sm:px-6 py-3 flex flex-col sm:flex-row items-center justify-between gap-1 text-xs text-muted-foreground" style="padding-bottom: max(0.75rem, env(safe-area-inset-bottom));">
+                    <p>© 2026 OSSZ Atelier — Independent Production Management System</p>
+                    <p>Own database · Own accounts · atelier.osszcollection.com</p>
+                </div>
+            </footer>
+        </div>
+    </div>
+</div>
+
+
+
+
+</body>
+</html>

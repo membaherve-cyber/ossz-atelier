@@ -1,0 +1,282 @@
+   221→                                                        <div class="space-y-4">
+   222→                                                            <div>
+   223→                                                                <label class="mb-1.5 block text-sm font-medium">Code</label>
+   224→                                                                <p class="rounded-md border bg-muted/40 px-3 py-2 font-mono text-sm text-muted-foreground">ongoing</p>
+   225→                                                            </div>
+   226→                                                            <div>
+   227→                                                                <label for="stage-name-4dac9127-7603-476b-a2be-5288066a611f" class="mb-1.5 block text-sm font-medium">Name</label>
+   228→                                                                <input type="text" id="stage-name-4dac9127-7603-476b-a2be-5288066a611f" name="name" value="Ongoing" maxlength="80" placeholder="e.g. Fabric cutting" required
+   229→                                                                       class="h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50" />
+   230→                                                                                                                            </div>
+   231→                                                            <div>
+   232→                                                                <span class="mb-1.5 block text-sm font-medium">Applies to</span>
+   233→                                                                <div class="grid grid-cols-1 gap-2 rounded-lg border p-3 sm:grid-cols-2">
+   234→                                                                                                                                            <label class="flex min-h-11 cursor-pointer items-center gap-2 text-sm sm:min-h-0">
+   235→                                                                            <input type="checkbox" name="appliesTo[]" value="FULL" checked                                                                                   class="size-4 rounded border-input accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
+   236→                                                                            Full Production
+   237→                                                                        </label>
+   238→                                                                                                                                            <label class="flex min-h-11 cursor-pointer items-center gap-2 text-sm sm:min-h-0">
+   239→                                                                            <input type="checkbox" name="appliesTo[]" value="CUTTING" checked                                                                                   class="size-4 rounded border-input accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
+   240→                                                                            Cutting Only
+   241→                                                                        </label>
+   242→                                                                                                                                            <label class="flex min-h-11 cursor-pointer items-center gap-2 text-sm sm:min-h-0">
+   243→                                                                            <input type="checkbox" name="appliesTo[]" value="SEWING" checked                                                                                   class="size-4 rounded border-input accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
+   244→                                                                            Sewing/Stitching Only
+   245→                                                                        </label>
+   246→                                                                                                                                            <label class="flex min-h-11 cursor-pointer items-center gap-2 text-sm sm:min-h-0">
+   247→                                                                            <input type="checkbox" name="appliesTo[]" value="FINISHING" checked                                                                                   class="size-4 rounded border-input accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
+   248→                                                                            Finishing
+   249→                                                                        </label>
+   250→                                                                                                                                            <label class="flex min-h-11 cursor-pointer items-center gap-2 text-sm sm:min-h-0">
+   251→                                                                            <input type="checkbox" name="appliesTo[]" value="IRONING" checked                                                                                   class="size-4 rounded border-input accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
+   252→                                                                            Ironing Only
+   253→                                                                        </label>
+   254→                                                                                                                                            <label class="flex min-h-11 cursor-pointer items-center gap-2 text-sm sm:min-h-0">
+   255→                                                                            <input type="checkbox" name="appliesTo[]" value="OTHER" checked                                                                                   class="size-4 rounded border-input accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
+   256→                                                                            Other Activity
+   257→                                                                        </label>
+   258→                                                                                                                                    </div>
+   259→                                                                <p class="mt-1 text-xs text-muted-foreground">Leave all unchecked or check all to apply to every category.</p>
+   260→                                                            </div>
+   261→                                                            <div class="grid grid-cols-2 gap-3">
+   262→                                                                <div>
+   263→                                                                    <label for="stage-weight-4dac9127-7603-476b-a2be-5288066a611f" class="mb-1.5 block text-sm font-medium">Weight</label>
+   264→                                                                    <input type="number" id="stage-weight-4dac9127-7603-476b-a2be-5288066a611f" name="weight" value="1" min="0.1" max="10" step="0.1"
+   265→                                                                           class="h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-sm shadow-sm transition-colors focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50" />
+   266→                                                                                                                                    </div>
+   267→                                                                <div>
+   268→                                                                    <label for="stage-sort-4dac9127-7603-476b-a2be-5288066a611f" class="mb-1.5 block text-sm font-medium">Sort order</label>
+   269→                                                                    <input type="number" id="stage-sort-4dac9127-7603-476b-a2be-5288066a611f" name="sortOrder" value="2" min="0" max="999" step="1"
+   270→                                                                           class="h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-sm shadow-sm transition-colors focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50" />
+   271→                                                                                                                                    </div>
+   272→                                                            </div>
+   273→                                                            <div>
+   274→                                                                <span class="mb-1.5 block text-sm font-medium">Active</span>
+   275→                                                                <label class="flex min-h-11 items-center gap-2 text-sm">
+   276→                                                                    <input type="hidden" name="isActive" value="0" />
+   277→                                                                    <input type="checkbox" name="isActive" value="1" checked                                                                           class="size-4 rounded border-input accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
+   278→                                                                    Active
+   279→                                                                </label>
+   280→                                                            </div>
+   281→                                                        </div>
+   282→                                                    </div>
+   283→                                                    <div class="flex justify-end gap-2 rounded-b-lg border-t bg-muted/30 px-5 py-3">
+   284→                                                        <button type="button" @click="open = false"
+   285→                                                                class="inline-flex h-9 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border border-input bg-card px-4 text-sm font-medium shadow-sm transition-colors hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+   286→                                                            Cancel
+   287→                                                        </button>
+   288→                                                        <button type="submit"
+   289→                                                                class="inline-flex h-9 items-center justify-center gap-1.5 whitespace-nowrap rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+   290→                                                            Save Changes
+   291→                                                        </button>
+   292→                                                    </div>
+   293→                                                </form>
+   294→                                            </div>
+   295→                                        </div>
+   296→                                    </div>
+   297→                                </div>
+   298→                            </td>
+   299→                        </tr>
+   300→                                                                    <tr class=" transition-colors hover:bg-muted/30">
+   301→                            <td class="px-4 py-3 tabular-nums text-muted-foreground">3</td>
+   302→                            <td class="px-4 py-3 font-medium">Cutting</td>
+   303→                            <td class="px-4 py-3">
+   304→                                <code class="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">cutting</code>
+   305→                            </td>
+   306→                            <td class="px-4 py-3">
+   307→                                                                    <div class="flex flex-wrap gap-1">
+   308→                                                                                    <span class="inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap bg-secondary text-secondary-foreground border-transparent">Full Production</span>
+   309→                                                                                    <span class="inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap bg-secondary text-secondary-foreground border-transparent">Cutting Only</span>
+   310→                                                                            </div>
+   311→                                                            </td>
+   312→                            <td class="px-4 py-3 text-right tabular-nums">×1</td>
+   313→                            <td class="px-4 py-3 text-center">
+   314→                                <form method="POST" action="https://atelier.osszcollection.com/stages/5a7358fd-5c8f-4c12-8a01-6a714fe22fd6" class="inline">
+   315→                                    <input type="hidden" name="_token" value="dNzunr1u0Or0RPmvjYSF1yNP9NPtnIvIjrU6DnoG" autocomplete="off">                                    <input type="hidden" name="isActive" value="0" />
+   316→                                    <button type="submit" role="switch" aria-checked="true"
+   317→                                            aria-label="Deactivate stage Cutting"
+   318→                                            class="relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring bg-emerald-600">
+   319→                                        <span class="inline-block size-4 transform rounded-full bg-white shadow transition-transform translate-x-[18px]" aria-hidden="true"></span>
+   320→                                    </button>
+   321→                                </form>
+   322→                            </td>
+   323→                            <td class="px-4 py-3 text-right">
+   324→                                <div x-data="{ open: false }">
+   325→                                    <button type="button" @click="open = true"
+   326→                                            aria-label="Edit stage Cutting"
+   327→                                            class="inline-flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+   328→                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>
+   329→                                    </button>
+   330→                                    <div x-show="open" style="display: none;"
+   331→                                         class="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true"
+   332→                                         aria-label="Edit Stage"
+   333→                                         @keydown.escape.window="open = false">
+   334→                                        <div class="fixed inset-0 bg-black/50" @click="open = false" aria-hidden="true"></div>
+   335→                                        <div class="relative flex min-h-full items-start justify-center p-4 sm:items-center">
+   336→                                            <div class="relative w-full max-w-lg rounded-lg border border-border bg-card text-card-foreground shadow-xl">
+   337→                                                <div class="flex items-start justify-between gap-4 border-b px-5 py-4">
+   338→                                                    <div class="min-w-0">
+   339→                                                        <h2 class="text-base font-semibold">Edit Stage</h2>
+   340→                                                        <p class="mt-0.5 text-sm text-muted-foreground">Update the stage details. The stage code stays unchanged.</p>
+   341→                                                    </div>
+   342→                                                    <button type="button" @click="open = false"
+   343→                                                            aria-label="Close"
+   344→                                                            class="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+   345→                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+   346→                                                    </button>
+   347→                                                </div>
+   348→                                                                                                <form method="POST" action="https://atelier.osszcollection.com/stages/5a7358fd-5c8f-4c12-8a01-6a714fe22fd6">
+   349→                                                    <input type="hidden" name="_token" value="dNzunr1u0Or0RPmvjYSF1yNP9NPtnIvIjrU6DnoG" autocomplete="off">                                                    <input type="hidden" name="formId" value="stage-edit-5a7358fd-5c8f-4c12-8a01-6a714fe22fd6" />
+   350→                                                    <div class="max-h-[calc(85vh-11rem)] overflow-y-auto px-5 py-4">
+   351→                                                        <div class="space-y-4">
+   352→                                                            <div>
+   353→                                                                <label class="mb-1.5 block text-sm font-medium">Code</label>
+   354→                                                                <p class="rounded-md border bg-muted/40 px-3 py-2 font-mono text-sm text-muted-foreground">cutting</p>
+   355→                                                            </div>
+   356→                                                            <div>
+   357→                                                                <label for="stage-name-5a7358fd-5c8f-4c12-8a01-6a714fe22fd6" class="mb-1.5 block text-sm font-medium">Name</label>
+   358→                                                                <input type="text" id="stage-name-5a7358fd-5c8f-4c12-8a01-6a714fe22fd6" name="name" value="Cutting" maxlength="80" placeholder="e.g. Fabric cutting" required
+   359→                                                                       class="h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50" />
+   360→                                                                                                                            </div>
+   361→                                                            <div>
+   362→                                                                <span class="mb-1.5 block text-sm font-medium">Applies to</span>
+   363→                                                                <div class="grid grid-cols-1 gap-2 rounded-lg border p-3 sm:grid-cols-2">
+   364→                                                                                                                                            <label class="flex min-h-11 cursor-pointer items-center gap-2 text-sm sm:min-h-0">
+   365→                                                                            <input type="checkbox" name="appliesTo[]" value="FULL" checked                                                                                   class="size-4 rounded border-input accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
+   366→                                                                            Full Production
+   367→                                                                        </label>
+   368→                                                                                                                                            <label class="flex min-h-11 cursor-pointer items-center gap-2 text-sm sm:min-h-0">
+   369→                                                                            <input type="checkbox" name="appliesTo[]" value="CUTTING" checked                                                                                   class="size-4 rounded border-input accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
+   370→                                                                            Cutting Only
+   371→                                                                        </label>
+   372→                                                                                                                                            <label class="flex min-h-11 cursor-pointer items-center gap-2 text-sm sm:min-h-0">
+   373→                                                                            <input type="checkbox" name="appliesTo[]" value="SEWING"                                                                                    class="size-4 rounded border-input accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
+   374→                                                                            Sewing/Stitching Only
+   375→                                                                        </label>
+   376→                                                                                                                                            <label class="flex min-h-11 cursor-pointer items-center gap-2 text-sm sm:min-h-0">
+   377→                                                                            <input type="checkbox" name="appliesTo[]" value="FINISHING"                                                                                    class="size-4 rounded border-input accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
+   378→                                                                            Finishing
+   379→                                                                        </label>
+   380→                                                                                                                                            <label class="flex min-h-11 cursor-pointer items-center gap-2 text-sm sm:min-h-0">
+   381→                                                                            <input type="checkbox" name="appliesTo[]" value="IRONING"                                                                                    class="size-4 rounded border-input accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
+   382→                                                                            Ironing Only
+   383→                                                                        </label>
+   384→                                                                                                                                            <label class="flex min-h-11 cursor-pointer items-center gap-2 text-sm sm:min-h-0">
+   385→                                                                            <input type="checkbox" name="appliesTo[]" value="OTHER"                                                                                    class="size-4 rounded border-input accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
+   386→                                                                            Other Activity
+   387→                                                                        </label>
+   388→                                                                                                                                    </div>
+   389→                                                                <p class="mt-1 text-xs text-muted-foreground">Leave all unchecked or check all to apply to every category.</p>
+   390→                                                            </div>
+   391→                                                            <div class="grid grid-cols-2 gap-3">
+   392→                                                                <div>
+   393→                                                                    <label for="stage-weight-5a7358fd-5c8f-4c12-8a01-6a714fe22fd6" class="mb-1.5 block text-sm font-medium">Weight</label>
+   394→                                                                    <input type="number" id="stage-weight-5a7358fd-5c8f-4c12-8a01-6a714fe22fd6" name="weight" value="1" min="0.1" max="10" step="0.1"
+   395→                                                                           class="h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-sm shadow-sm transition-colors focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50" />
+   396→                                                                                                                                    </div>
+   397→                                                                <div>
+   398→                                                                    <label for="stage-sort-5a7358fd-5c8f-4c12-8a01-6a714fe22fd6" class="mb-1.5 block text-sm font-medium">Sort order</label>
+   399→                                                                    <input type="number" id="stage-sort-5a7358fd-5c8f-4c12-8a01-6a714fe22fd6" name="sortOrder" value="3" min="0" max="999" step="1"
+   400→                                                                           class="h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-sm shadow-sm transition-colors focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50" />
+   401→                                                                                                                                    </div>
+   402→                                                            </div>
+   403→                                                            <div>
+   404→                                                                <span class="mb-1.5 block text-sm font-medium">Active</span>
+   405→                                                                <label class="flex min-h-11 items-center gap-2 text-sm">
+   406→                                                                    <input type="hidden" name="isActive" value="0" />
+   407→                                                                    <input type="checkbox" name="isActive" value="1" checked                                                                           class="size-4 rounded border-input accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
+   408→                                                                    Active
+   409→                                                                </label>
+   410→                                                            </div>
+   411→                                                        </div>
+   412→                                                    </div>
+   413→                                                    <div class="flex justify-end gap-2 rounded-b-lg border-t bg-muted/30 px-5 py-3">
+   414→                                                        <button type="button" @click="open = false"
+   415→                                                                class="inline-flex h-9 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border border-input bg-card px-4 text-sm font-medium shadow-sm transition-colors hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+   416→                                                            Cancel
+   417→                                                        </button>
+   418→                                                        <button type="submit"
+   419→                                                                class="inline-flex h-9 items-center justify-center gap-1.5 whitespace-nowrap rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+   420→                                                            Save Changes
+   421→                                                        </button>
+   422→                                                    </div>
+   423→                                                </form>
+   424→                                            </div>
+   425→                                        </div>
+   426→                                    </div>
+   427→                                </div>
+   428→                            </td>
+   429→                        </tr>
+   430→                                                                    <tr class=" transition-colors hover:bg-muted/30">
+   431→                            <td class="px-4 py-3 tabular-nums text-muted-foreground">4</td>
+   432→                            <td class="px-4 py-3 font-medium">Sewing/Stitching</td>
+   433→                            <td class="px-4 py-3">
+   434→                                <code class="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">sewing</code>
+   435→                            </td>
+   436→                            <td class="px-4 py-3">
+   437→                                                                    <div class="flex flex-wrap gap-1">
+   438→                                                                                    <span class="inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap bg-secondary text-secondary-foreground border-transparent">Full Production</span>
+   439→                                                                                    <span class="inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap bg-secondary text-secondary-foreground border-transparent">Sewing/Stitching Only</span>
+   440→                                                                            </div>
+   441→                                                            </td>
+   442→                            <td class="px-4 py-3 text-right tabular-nums">×1</td>
+   443→                            <td class="px-4 py-3 text-center">
+   444→                                <form method="POST" action="https://atelier.osszcollection.com/stages/b33947fc-de64-4c0a-902d-86df77476dd6" class="inline">
+   445→                                    <input type="hidden" name="_token" value="dNzunr1u0Or0RPmvjYSF1yNP9NPtnIvIjrU6DnoG" autocomplete="off">                                    <input type="hidden" name="isActive" value="0" />
+   446→                                    <button type="submit" role="switch" aria-checked="true"
+   447→                                            aria-label="Deactivate stage Sewing/Stitching"
+   448→                                            class="relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring bg-emerald-600">
+   449→                                        <span class="inline-block size-4 transform rounded-full bg-white shadow transition-transform translate-x-[18px]" aria-hidden="true"></span>
+   450→                                    </button>
+   451→                                </form>
+   452→                            </td>
+   453→                            <td class="px-4 py-3 text-right">
+   454→                                <div x-data="{ open: false }">
+   455→                                    <button type="button" @click="open = true"
+   456→                                            aria-label="Edit stage Sewing/Stitching"
+   457→                                            class="inline-flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+   458→                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>
+   459→                                    </button>
+   460→                                    <div x-show="open" style="display: none;"
+   461→                                         class="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true"
+   462→                                         aria-label="Edit Stage"
+   463→                                         @keydown.escape.window="open = false">
+   464→                                        <div class="fixed inset-0 bg-black/50" @click="open = false" aria-hidden="true"></div>
+   465→                                        <div class="relative flex min-h-full items-start justify-center p-4 sm:items-center">
+   466→                                            <div class="relative w-full max-w-lg rounded-lg border border-border bg-card text-card-foreground shadow-xl">
+   467→                                                <div class="flex items-start justify-between gap-4 border-b px-5 py-4">
+   468→                                                    <div class="min-w-0">
+   469→                                                        <h2 class="text-base font-semibold">Edit Stage</h2>
+   470→                                                        <p class="mt-0.5 text-sm text-muted-foreground">Update the stage details. The stage code stays unchanged.</p>
+   471→                                                    </div>
+   472→                                                    <button type="button" @click="open = false"
+   473→                                                            aria-label="Close"
+   474→                                                            class="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+   475→                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+   476→                                                    </button>
+   477→                                                </div>
+   478→                                                                                                <form method="POST" action="https://atelier.osszcollection.com/stages/b33947fc-de64-4c0a-902d-86df77476dd6">
+   479→                                                    <input type="hidden" name="_token" value="dNzunr1u0Or0RPmvjYSF1yNP9NPtnIvIjrU6DnoG" autocomplete="off">                                                    <input type="hidden" name="formId" value="stage-edit-b33947fc-de64-4c0a-902d-86df77476dd6" />
+   480→                                                    <div class="max-h-[calc(85vh-11rem)] overflow-y-auto px-5 py-4">
+   481→                                                        <div class="space-y-4">
+   482→                                                            <div>
+   483→                                                                <label class="mb-1.5 block text-sm font-medium">Code</label>
+   484→                                                                <p class="rounded-md border bg-muted/40 px-3 py-2 font-mono text-sm text-muted-foreground">sewing</p>
+   485→                                                            </div>
+   486→                                                            <div>
+   487→                                                                <label for="stage-name-b33947fc-de64-4c0a-902d-86df77476dd6" class="mb-1.5 block text-sm font-medium">Name</label>
+   488→                                                                <input type="text" id="stage-name-b33947fc-de64-4c0a-902d-86df77476dd6" name="name" value="Sewing/Stitching" maxlength="80" placeholder="e.g. Fabric cutting" required
+   489→                                                                       class="h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50" />
+   490→                                                                                                                            </div>
+   491→                                                            <div>
+   492→                                                                <span class="mb-1.5 block text-sm font-medium">Applies to</span>
+   493→                                                                <div class="grid grid-cols-1 gap-2 rounded-lg border p-3 sm:grid-cols-2">
+   494→                                                                                                                                            <label class="flex min-h-11 cursor-pointer items-center gap-2 text-sm sm:min-h-0">
+   495→                                                                            <input type="checkbox" name="appliesTo[]" value="FULL" checked                                                                                   class="size-4 rounded border-input accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
+   496→                                                                            Full Production
+   497→                                                                        </label>
+   498→                                                                                                                                            <label class="flex min-h-11 cursor-pointer items-center gap-2 text-sm sm:min-h-0">
+   499→                                                                            <input type="checkbox" name="appliesTo[]" value="CUTTING"                                                                                    class="size-4 rounded border-input accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
+   500→                                                                            Cutting Only
+
+[showing lines 221-500 of 1695; use offset=501 with limit to continue reading]

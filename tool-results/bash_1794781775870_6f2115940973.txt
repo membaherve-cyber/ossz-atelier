@@ -1,0 +1,316 @@
+                                                            aria-label="Close"
+                                                            class="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                                                    </button>
+                                                </div>
+                                                                                                <form method="POST" action="https://atelier.osszcollection.com/stages/a9e63c5a-47d8-4586-849f-ba7ba2dbe146">
+                                                    <input type="hidden" name="_token" value="dNzunr1u0Or0RPmvjYSF1yNP9NPtnIvIjrU6DnoG" autocomplete="off">                                                    <input type="hidden" name="formId" value="stage-edit-a9e63c5a-47d8-4586-849f-ba7ba2dbe146" />
+                                                    <div class="max-h-[calc(85vh-11rem)] overflow-y-auto px-5 py-4">
+                                                        <div class="space-y-4">
+                                                            <div>
+                                                                <label class="mb-1.5 block text-sm font-medium">Code</label>
+                                                                <p class="rounded-md border bg-muted/40 px-3 py-2 font-mono text-sm text-muted-foreground">blocked</p>
+                                                            </div>
+                                                            <div>
+                                                                <label for="stage-name-a9e63c5a-47d8-4586-849f-ba7ba2dbe146" class="mb-1.5 block text-sm font-medium">Name</label>
+                                                                <input type="text" id="stage-name-a9e63c5a-47d8-4586-849f-ba7ba2dbe146" name="name" value="Blocked" maxlength="80" placeholder="e.g. Fabric cutting" required
+                                                                       class="h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50" />
+                                                                                                                            </div>
+                                                            <div>
+                                                                <span class="mb-1.5 block text-sm font-medium">Applies to</span>
+                                                                <div class="grid grid-cols-1 gap-2 rounded-lg border p-3 sm:grid-cols-2">
+                                                                                                                                            <label class="flex min-h-11 cursor-pointer items-center gap-2 text-sm sm:min-h-0">
+                                                                            <input type="checkbox" name="appliesTo[]" value="FULL" checked                                                                                   class="size-4 rounded border-input accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
+                                                                            Full Production
+                                                                        </label>
+                                                                                                                                            <label class="flex min-h-11 cursor-pointer items-center gap-2 text-sm sm:min-h-0">
+                                                                            <input type="checkbox" name="appliesTo[]" value="CUTTING" checked                                                                                   class="size-4 rounded border-input accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
+                                                                            Cutting Only
+                                                                        </label>
+                                                                                                                                            <label class="flex min-h-11 cursor-pointer items-center gap-2 text-sm sm:min-h-0">
+                                                                            <input type="checkbox" name="appliesTo[]" value="SEWING" checked                                                                                   class="size-4 rounded border-input accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
+                                                                            Sewing/Stitching Only
+                                                                        </label>
+                                                                                                                                            <label class="flex min-h-11 cursor-pointer items-center gap-2 text-sm sm:min-h-0">
+                                                                            <input type="checkbox" name="appliesTo[]" value="FINISHING" checked                                                                                   class="size-4 rounded border-input accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
+                                                                            Finishing
+                                                                        </label>
+                                                                                                                                            <label class="flex min-h-11 cursor-pointer items-center gap-2 text-sm sm:min-h-0">
+                                                                            <input type="checkbox" name="appliesTo[]" value="IRONING" checked                                                                                   class="size-4 rounded border-input accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
+                                                                            Ironing Only
+                                                                        </label>
+                                                                                                                                            <label class="flex min-h-11 cursor-pointer items-center gap-2 text-sm sm:min-h-0">
+                                                                            <input type="checkbox" name="appliesTo[]" value="OTHER" checked                                                                                   class="size-4 rounded border-input accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
+                                                                            Other Activity
+                                                                        </label>
+                                                                                                                                    </div>
+                                                                <p class="mt-1 text-xs text-muted-foreground">Leave all unchecked or check all to apply to every category.</p>
+                                                            </div>
+                                                            <div class="grid grid-cols-2 gap-3">
+                                                                <div>
+                                                                    <label for="stage-weight-a9e63c5a-47d8-4586-849f-ba7ba2dbe146" class="mb-1.5 block text-sm font-medium">Weight</label>
+                                                                    <input type="number" id="stage-weight-a9e63c5a-47d8-4586-849f-ba7ba2dbe146" name="weight" value="1" min="0.1" max="10" step="0.1"
+                                                                           class="h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-sm shadow-sm transition-colors focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50" />
+                                                                                                                                    </div>
+                                                                <div>
+                                                                    <label for="stage-sort-a9e63c5a-47d8-4586-849f-ba7ba2dbe146" class="mb-1.5 block text-sm font-medium">Sort order</label>
+                                                                    <input type="number" id="stage-sort-a9e63c5a-47d8-4586-849f-ba7ba2dbe146" name="sortOrder" value="11" min="0" max="999" step="1"
+                                                                           class="h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-sm shadow-sm transition-colors focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50" />
+                                                                                                                                    </div>
+                                                            </div>
+                                                            <div>
+                                                                <span class="mb-1.5 block text-sm font-medium">Active</span>
+                                                                <label class="flex min-h-11 items-center gap-2 text-sm">
+                                                                    <input type="hidden" name="isActive" value="0" />
+                                                                    <input type="checkbox" name="isActive" value="1" checked                                                                           class="size-4 rounded border-input accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
+                                                                    Active
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="flex justify-end gap-2 rounded-b-lg border-t bg-muted/30 px-5 py-3">
+                                                        <button type="button" @click="open = false"
+                                                                class="inline-flex h-9 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border border-input bg-card px-4 text-sm font-medium shadow-sm transition-colors hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                                                            Cancel
+                                                        </button>
+                                                        <button type="submit"
+                                                                class="inline-flex h-9 items-center justify-center gap-1.5 whitespace-nowrap rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                                                            Save Changes
+                                                        </button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                                                                    <tr class=" transition-colors hover:bg-muted/30">
+                            <td class="px-4 py-3 tabular-nums text-muted-foreground">12</td>
+                            <td class="px-4 py-3 font-medium">Other</td>
+                            <td class="px-4 py-3">
+                                <code class="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">other</code>
+                            </td>
+                            <td class="px-4 py-3">
+                                                                    <span class="inline-flex items-center rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap text-amber-900">
+                                        All categories
+                                    </span>
+                                                            </td>
+                            <td class="px-4 py-3 text-right tabular-nums">×1</td>
+                            <td class="px-4 py-3 text-center">
+                                <form method="POST" action="https://atelier.osszcollection.com/stages/e7729a54-9d90-48fa-b48c-d3315b01c1dd" class="inline">
+                                    <input type="hidden" name="_token" value="dNzunr1u0Or0RPmvjYSF1yNP9NPtnIvIjrU6DnoG" autocomplete="off">                                    <input type="hidden" name="isActive" value="0" />
+                                    <button type="submit" role="switch" aria-checked="true"
+                                            aria-label="Deactivate stage Other"
+                                            class="relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring bg-emerald-600">
+                                        <span class="inline-block size-4 transform rounded-full bg-white shadow transition-transform translate-x-[18px]" aria-hidden="true"></span>
+                                    </button>
+                                </form>
+                            </td>
+                            <td class="px-4 py-3 text-right">
+                                <div x-data="{ open: false }">
+                                    <button type="button" @click="open = true"
+                                            aria-label="Edit stage Other"
+                                            class="inline-flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>
+                                    </button>
+                                    <div x-show="open" style="display: none;"
+                                         class="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true"
+                                         aria-label="Edit Stage"
+                                         @keydown.escape.window="open = false">
+                                        <div class="fixed inset-0 bg-black/50" @click="open = false" aria-hidden="true"></div>
+                                        <div class="relative flex min-h-full items-start justify-center p-4 sm:items-center">
+                                            <div class="relative w-full max-w-lg rounded-lg border border-border bg-card text-card-foreground shadow-xl">
+                                                <div class="flex items-start justify-between gap-4 border-b px-5 py-4">
+                                                    <div class="min-w-0">
+                                                        <h2 class="text-base font-semibold">Edit Stage</h2>
+                                                        <p class="mt-0.5 text-sm text-muted-foreground">Update the stage details. The stage code stays unchanged.</p>
+                                                    </div>
+                                                    <button type="button" @click="open = false"
+                                                            aria-label="Close"
+                                                            class="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                                                    </button>
+                                                </div>
+                                                                                                <form method="POST" action="https://atelier.osszcollection.com/stages/e7729a54-9d90-48fa-b48c-d3315b01c1dd">
+                                                    <input type="hidden" name="_token" value="dNzunr1u0Or0RPmvjYSF1yNP9NPtnIvIjrU6DnoG" autocomplete="off">                                                    <input type="hidden" name="formId" value="stage-edit-e7729a54-9d90-48fa-b48c-d3315b01c1dd" />
+                                                    <div class="max-h-[calc(85vh-11rem)] overflow-y-auto px-5 py-4">
+                                                        <div class="space-y-4">
+                                                            <div>
+                                                                <label class="mb-1.5 block text-sm font-medium">Code</label>
+                                                                <p class="rounded-md border bg-muted/40 px-3 py-2 font-mono text-sm text-muted-foreground">other</p>
+                                                            </div>
+                                                            <div>
+                                                                <label for="stage-name-e7729a54-9d90-48fa-b48c-d3315b01c1dd" class="mb-1.5 block text-sm font-medium">Name</label>
+                                                                <input type="text" id="stage-name-e7729a54-9d90-48fa-b48c-d3315b01c1dd" name="name" value="Other" maxlength="80" placeholder="e.g. Fabric cutting" required
+                                                                       class="h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50" />
+                                                                                                                            </div>
+                                                            <div>
+                                                                <span class="mb-1.5 block text-sm font-medium">Applies to</span>
+                                                                <div class="grid grid-cols-1 gap-2 rounded-lg border p-3 sm:grid-cols-2">
+                                                                                                                                            <label class="flex min-h-11 cursor-pointer items-center gap-2 text-sm sm:min-h-0">
+                                                                            <input type="checkbox" name="appliesTo[]" value="FULL" checked                                                                                   class="size-4 rounded border-input accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
+                                                                            Full Production
+                                                                        </label>
+                                                                                                                                            <label class="flex min-h-11 cursor-pointer items-center gap-2 text-sm sm:min-h-0">
+                                                                            <input type="checkbox" name="appliesTo[]" value="CUTTING" checked                                                                                   class="size-4 rounded border-input accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
+                                                                            Cutting Only
+                                                                        </label>
+                                                                                                                                            <label class="flex min-h-11 cursor-pointer items-center gap-2 text-sm sm:min-h-0">
+                                                                            <input type="checkbox" name="appliesTo[]" value="SEWING" checked                                                                                   class="size-4 rounded border-input accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
+                                                                            Sewing/Stitching Only
+                                                                        </label>
+                                                                                                                                            <label class="flex min-h-11 cursor-pointer items-center gap-2 text-sm sm:min-h-0">
+                                                                            <input type="checkbox" name="appliesTo[]" value="FINISHING" checked                                                                                   class="size-4 rounded border-input accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
+                                                                            Finishing
+                                                                        </label>
+                                                                                                                                            <label class="flex min-h-11 cursor-pointer items-center gap-2 text-sm sm:min-h-0">
+                                                                            <input type="checkbox" name="appliesTo[]" value="IRONING" checked                                                                                   class="size-4 rounded border-input accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
+                                                                            Ironing Only
+                                                                        </label>
+                                                                                                                                            <label class="flex min-h-11 cursor-pointer items-center gap-2 text-sm sm:min-h-0">
+                                                                            <input type="checkbox" name="appliesTo[]" value="OTHER" checked                                                                                   class="size-4 rounded border-input accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
+                                                                            Other Activity
+                                                                        </label>
+                                                                                                                                    </div>
+                                                                <p class="mt-1 text-xs text-muted-foreground">Leave all unchecked or check all to apply to every category.</p>
+                                                            </div>
+                                                            <div class="grid grid-cols-2 gap-3">
+                                                                <div>
+                                                                    <label for="stage-weight-e7729a54-9d90-48fa-b48c-d3315b01c1dd" class="mb-1.5 block text-sm font-medium">Weight</label>
+                                                                    <input type="number" id="stage-weight-e7729a54-9d90-48fa-b48c-d3315b01c1dd" name="weight" value="1" min="0.1" max="10" step="0.1"
+                                                                           class="h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-sm shadow-sm transition-colors focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50" />
+                                                                                                                                    </div>
+                                                                <div>
+                                                                    <label for="stage-sort-e7729a54-9d90-48fa-b48c-d3315b01c1dd" class="mb-1.5 block text-sm font-medium">Sort order</label>
+                                                                    <input type="number" id="stage-sort-e7729a54-9d90-48fa-b48c-d3315b01c1dd" name="sortOrder" value="12" min="0" max="999" step="1"
+                                                                           class="h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-sm shadow-sm transition-colors focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50" />
+                                                                                                                                    </div>
+                                                            </div>
+                                                            <div>
+                                                                <span class="mb-1.5 block text-sm font-medium">Active</span>
+                                                                <label class="flex min-h-11 items-center gap-2 text-sm">
+                                                                    <input type="hidden" name="isActive" value="0" />
+                                                                    <input type="checkbox" name="isActive" value="1" checked                                                                           class="size-4 rounded border-input accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
+                                                                    Active
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="flex justify-end gap-2 rounded-b-lg border-t bg-muted/30 px-5 py-3">
+                                                        <button type="button" @click="open = false"
+                                                                class="inline-flex h-9 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border border-input bg-card px-4 text-sm font-medium shadow-sm transition-colors hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                                                            Cancel
+                                                        </button>
+                                                        <button type="submit"
+                                                                class="inline-flex h-9 items-center justify-center gap-1.5 whitespace-nowrap rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                                                            Save Changes
+                                                        </button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                                    </tbody>
+            </table>
+        </div>
+    
+    
+    <div x-show="addOpen" style="display: none;"
+         class="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true"
+         aria-label="Add Stage"
+         @keydown.escape.window="addOpen = false">
+        <div class="fixed inset-0 bg-black/50" @click="addOpen = false" aria-hidden="true"></div>
+        <div class="relative flex min-h-full items-start justify-center p-4 sm:items-center">
+            <div class="relative w-full max-w-lg rounded-lg border border-border bg-card text-card-foreground shadow-xl">
+                <div class="flex items-start justify-between gap-4 border-b px-5 py-4">
+                    <div class="min-w-0">
+                        <h2 class="text-base font-semibold">Add Stage</h2>
+                        <p class="mt-0.5 text-sm text-muted-foreground">Define a new checklist stage and the task categories it applies to.</p>
+                    </div>
+                    <button type="button" @click="addOpen = false"
+                            aria-label="Close"
+                            class="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                    </button>
+                </div>
+                                <form method="POST" action="https://atelier.osszcollection.com/stages">
+                    <input type="hidden" name="_token" value="dNzunr1u0Or0RPmvjYSF1yNP9NPtnIvIjrU6DnoG" autocomplete="off">                    <input type="hidden" name="formId" value="stage-create" />
+                    <div class="max-h-[calc(85vh-11rem)] overflow-y-auto px-5 py-4">
+                        <div class="space-y-4">
+                            <div>
+                                <label for="stage-name" class="mb-1.5 block text-sm font-medium">Name</label>
+                                <input type="text" id="stage-name" name="name" value="" maxlength="80" placeholder="e.g. Fabric cutting" required
+                                       class="h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50" />
+                                                            </div>
+                            <div>
+                                <span class="mb-1.5 block text-sm font-medium">Applies to</span>
+                                <div class="grid grid-cols-1 gap-2 rounded-lg border p-3 sm:grid-cols-2">
+                                                                            <label class="flex min-h-11 cursor-pointer items-center gap-2 text-sm sm:min-h-0">
+                                            <input type="checkbox" name="appliesTo[]" value="FULL"                                                    class="size-4 rounded border-input accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
+                                            Full Production
+                                        </label>
+                                                                            <label class="flex min-h-11 cursor-pointer items-center gap-2 text-sm sm:min-h-0">
+                                            <input type="checkbox" name="appliesTo[]" value="CUTTING"                                                    class="size-4 rounded border-input accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
+                                            Cutting Only
+                                        </label>
+                                                                            <label class="flex min-h-11 cursor-pointer items-center gap-2 text-sm sm:min-h-0">
+                                            <input type="checkbox" name="appliesTo[]" value="SEWING"                                                    class="size-4 rounded border-input accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
+                                            Sewing/Stitching Only
+                                        </label>
+                                                                            <label class="flex min-h-11 cursor-pointer items-center gap-2 text-sm sm:min-h-0">
+                                            <input type="checkbox" name="appliesTo[]" value="FINISHING"                                                    class="size-4 rounded border-input accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
+                                            Finishing
+                                        </label>
+                                                                            <label class="flex min-h-11 cursor-pointer items-center gap-2 text-sm sm:min-h-0">
+                                            <input type="checkbox" name="appliesTo[]" value="IRONING"                                                    class="size-4 rounded border-input accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
+                                            Ironing Only
+                                        </label>
+                                                                            <label class="flex min-h-11 cursor-pointer items-center gap-2 text-sm sm:min-h-0">
+                                            <input type="checkbox" name="appliesTo[]" value="OTHER"                                                    class="size-4 rounded border-input accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
+                                            Other Activity
+                                        </label>
+                                                                    </div>
+                                <p class="mt-1 text-xs text-muted-foreground">Leave all unchecked or check all to apply to every category.</p>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label for="stage-weight" class="mb-1.5 block text-sm font-medium">Weight</label>
+                                    <input type="number" id="stage-weight" name="weight" value="1" min="0.1" max="10" step="0.1"
+                                           class="h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-sm shadow-sm transition-colors focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50" />
+                                                                    </div>
+                                <div>
+                                    <label for="stage-sort" class="mb-1.5 block text-sm font-medium">Sort order</label>
+                                    <input type="number" id="stage-sort" name="sortOrder" value="" min="0" max="999" step="1"
+                                           class="h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-sm shadow-sm transition-colors focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50" />
+                                                                    </div>
+                            </div>
+                            <div>
+                                <span class="mb-1.5 block text-sm font-medium">Active</span>
+                                <label class="flex min-h-11 items-center gap-2 text-sm">
+                                    <input type="hidden" name="isActive" value="0" />
+                                    <input type="checkbox" name="isActive" value="1" checked                                           class="size-4 rounded border-input accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
+                                    Active
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex justify-end gap-2 rounded-b-lg border-t bg-muted/30 px-5 py-3">
+                        <button type="button" @click="addOpen = false"
+                                class="inline-flex h-9 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border border-input bg-card px-4 text-sm font-medium shadow-sm transition-colors hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                            Cancel
+                        </button>
+                        <button type="submit"
+                                class="inline-flex h-9 items-center justify-center gap-1.5 whitespace-nowrap rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                            Create stage
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+            

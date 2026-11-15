@@ -1,0 +1,83 @@
+<!-- TITLE: Notifications — OSSZ ATELIER | source: notifications-en.html | content-only (layout stripped) -->
+                    
+    <div x-data="{ tab: 'all' }">
+
+        
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+            <div>
+                <h1 class="font-display text-2xl font-bold tracking-tight">Notifications</h1>
+                <p class="text-sm text-muted-foreground mt-0.5">Production alerts for your account.</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+                <form method="POST" action="https://atelier.osszcollection.com/notifications/read">
+                    <input type="hidden" name="_token" value="dNzunr1u0Or0RPmvjYSF1yNP9NPtnIvIjrU6DnoG" autocomplete="off">                    <input type="hidden" name="all" value="1">
+                    <button type="submit"  class="inline-flex items-center gap-1.5 h-9 px-4 rounded-md border bg-background text-sm font-medium shadow-sm transition-colors hover:bg-muted disabled:opacity-50 disabled:pointer-events-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="M18 6 7 17l-5-5"/><path d="m22 10-7.5 7.5L13 16"/></svg>
+                        Mark all as read
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        
+        <div role="tablist" class="inline-flex items-center gap-1 rounded-lg bg-muted p-1 text-muted-foreground mb-4">
+            <button type="button" role="tab" @click="tab = 'all'" x-bind:aria-selected="(tab === 'all').toString()" class="rounded-md px-3 py-1.5 text-sm font-medium transition-colors" x-bind:class="tab === 'all' ? 'bg-background text-foreground shadow-sm' : 'hover:text-foreground'">
+                All (2)
+            </button>
+            <button type="button" role="tab" @click="tab = 'unread'" x-bind:aria-selected="(tab === 'unread').toString()" class="rounded-md px-3 py-1.5 text-sm font-medium transition-colors" x-bind:class="tab === 'unread' ? 'bg-background text-foreground shadow-sm' : 'hover:text-foreground'">
+                                    Unread (2)
+                            </button>
+        </div>
+
+                    
+            <div class="rounded-lg border divide-y max-h-[60vh] overflow-y-auto bg-card shadow-sm" x-show="tab === 'all' || true">
+                                                        <div x-show="tab === 'all' || true" class="bg-amber-50/60">
+                                                    
+                            <form method="POST" action="https://atelier.osszcollection.com/notifications/read" class="w-full">
+                                <input type="hidden" name="_token" value="dNzunr1u0Or0RPmvjYSF1yNP9NPtnIvIjrU6DnoG" autocomplete="off">                                <input type="hidden" name="id" value="4b93d188-4444-40e0-b8fb-c1a847d0cf33">
+                                <div class="w-full flex items-start gap-3 px-4 py-3 transition-colors hover:bg-muted/50">
+                                    <span class="mt-2 shrink-0" aria-hidden="true">
+                                        <span class="block size-2 rounded-full bg-primary"></span>
+                                    </span>
+                                    <button type="submit" title="Mark as read" class="min-w-0 flex-1 text-left">
+                                        <span class="flex flex-wrap items-center gap-2">
+                                            <span class="text-sm truncate font-semibold">Task overdue</span>
+                                            <span class="inline-flex items-center rounded-full border border-stone-300 bg-stone-50 text-stone-600 font-mono text-[10px] px-1.5 py-0">TASK_OVERDUE</span>
+                                        </span>
+                                                                                    <span class="block text-sm text-muted-foreground mt-0.5 line-clamp-2">TASK-0003 — Vest (OSSZ-2026-001) has passed its deadline.</span>
+                                                                            </button>
+                                    <span class="text-xs text-muted-foreground whitespace-nowrap shrink-0 mt-1">Nov 14, 2026, 10:00</span>
+                                                                            <a href="https://atelier.osszcollection.com/tasks/39f03973-1709-485f-9986-03c788cbab42" class="shrink-0 mt-0.5 inline-flex items-center justify-center size-7 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors" aria-label="View">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
+                                        </a>
+                                                                    </div>
+                            </form>
+                                            </div>
+                                                        <div x-show="tab === 'all' || true" class="bg-amber-50/60">
+                                                    
+                            <form method="POST" action="https://atelier.osszcollection.com/notifications/read" class="w-full">
+                                <input type="hidden" name="_token" value="dNzunr1u0Or0RPmvjYSF1yNP9NPtnIvIjrU6DnoG" autocomplete="off">                                <input type="hidden" name="id" value="3f787ef4-fc11-4eff-bddf-a27a64dd207a">
+                                <div class="w-full flex items-start gap-3 px-4 py-3 transition-colors hover:bg-muted/50">
+                                    <span class="mt-2 shrink-0" aria-hidden="true">
+                                        <span class="block size-2 rounded-full bg-primary"></span>
+                                    </span>
+                                    <button type="submit" title="Mark as read" class="min-w-0 flex-1 text-left">
+                                        <span class="flex flex-wrap items-center gap-2">
+                                            <span class="text-sm truncate font-semibold">Production issue reported</span>
+                                            <span class="inline-flex items-center rounded-full border border-stone-300 bg-stone-50 text-stone-600 font-mono text-[10px] px-1.5 py-0">ISSUE_REPORTED</span>
+                                        </span>
+                                                                                    <span class="block text-sm text-muted-foreground mt-0.5 line-clamp-2">Lawal Sani reported an issue on TASK-0003 — Vest: missing lining fabric.</span>
+                                                                            </button>
+                                    <span class="text-xs text-muted-foreground whitespace-nowrap shrink-0 mt-1">Nov 12, 2026, 11:00</span>
+                                                                            <a href="https://atelier.osszcollection.com/tasks/39f03973-1709-485f-9986-03c788cbab42" class="shrink-0 mt-0.5 inline-flex items-center justify-center size-7 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors" aria-label="View">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
+                                        </a>
+                                                                    </div>
+                            </form>
+                                            </div>
+                            </div>
+
+            
+            
+                        </div>
+            

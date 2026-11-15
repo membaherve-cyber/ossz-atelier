@@ -1,0 +1,35 @@
+                <h2 id="task-comments-title" class="font-semibold text-base">Comments &amp; Issues</h2>
+                <span class="text-xs text-muted-foreground">0 total</span>
+            </div>
+            <div class="p-6 pt-4 space-y-4">
+                                    <div class="flex flex-col items-center justify-center gap-2 py-10 px-4 text-center">
+                        <div class="rounded-full bg-muted p-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-6 text-muted-foreground" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                        </div>
+                        <p class="font-medium">No notes yet</p>
+                        <p class="text-sm text-muted-foreground max-w-sm">Production notes and reported issues will appear here.</p>
+                    </div>
+                
+                                    <form method="POST" action="https://atelier.osszcollection.com/tasks/d479101f-23ec-4826-a048-0acee908e096/comment" class="space-y-2">
+                        <input type="hidden" name="_token" value="dNzunr1u0Or0RPmvjYSF1yNP9NPtnIvIjrU6DnoG" autocomplete="off">                        <textarea name="body" required maxlength="1000" aria-label="New comment"
+                                  placeholder="Write a production note or describe a problem..."
+                                  class="flex min-h-20 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"></textarea>
+                        <div class="flex flex-col sm:flex-row sm:justify-end gap-2">
+                            <button type="submit"
+                                    class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-xs font-medium h-8 px-3 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                                Add Note
+                            </button>
+                            <button type="submit" name="isIssue" value="1"
+                                    class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-xs font-medium h-8 px-3 border border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+                                Report Issue
+                            </button>
+                        </div>
+                                            </form>
+                            </div>
+        </section>
+
+        
+        <section class="rounded-xl border bg-card text-card-foreground shadow-sm" aria-labelledby="task-details-title">
+            <div class="flex items-center justify-between gap-2 border-b p-6 pb-3">

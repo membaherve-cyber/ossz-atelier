@@ -1,0 +1,534 @@
+                <h2 id="task-history-title" class="font-semibold text-base">History</h2>
+                <span class="text-xs text-muted-foreground">13 events</span>
+            </div>
+            <div class="p-6 pt-4">
+                <div class="flex flex-wrap gap-1 rounded-lg bg-muted/50 p-1" role="tablist" aria-label="History">
+                                            <button type="button" role="tab"
+                                :aria-selected="tab === 'all'"
+                                @click="tab = 'all'"
+                                class="h-8 px-3 rounded-md text-sm font-medium transition-colors"
+                                :class="tab === 'all' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'">
+                            All
+                        </button>
+                                            <button type="button" role="tab"
+                                :aria-selected="tab === 'progress'"
+                                @click="tab = 'progress'"
+                                class="h-8 px-3 rounded-md text-sm font-medium transition-colors"
+                                :class="tab === 'progress' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'">
+                            Progress
+                        </button>
+                                            <button type="button" role="tab"
+                                :aria-selected="tab === 'checklist'"
+                                @click="tab = 'checklist'"
+                                class="h-8 px-3 rounded-md text-sm font-medium transition-colors"
+                                :class="tab === 'checklist' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'">
+                            Checklist
+                        </button>
+                                            <button type="button" role="tab"
+                                :aria-selected="tab === 'status'"
+                                @click="tab = 'status'"
+                                class="h-8 px-3 rounded-md text-sm font-medium transition-colors"
+                                :class="tab === 'status' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'">
+                            Status
+                        </button>
+                                            <button type="button" role="tab"
+                                :aria-selected="tab === 'inspections'"
+                                @click="tab = 'inspections'"
+                                class="h-8 px-3 rounded-md text-sm font-medium transition-colors"
+                                :class="tab === 'inspections' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'">
+                            Inspections
+                        </button>
+                                    </div>
+
+                                    <div class="mt-2 max-h-96 overflow-y-auto [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-track]:transparent rounded-lg border">
+                        <div class="divide-y px-4 py-1">
+                                                                                            <div class="flex gap-3 py-2.5" x-show="tab === 'all' || tab === 'progress'">
+                                    <div class="rounded-full p-1.5 shrink-0 mt-0.5 bg-emerald-50 text-emerald-700">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3.5" aria-hidden="true"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <p class="text-sm leading-snug">
+                                            <span class="font-medium">Aminata Sow</span>
+                                            <span class="text-muted-foreground">updated progress 80% → 30%</span>
+                                                                                            <span class="ml-1.5 inline-flex items-center rounded-full border px-1.5 py-0 text-[10px] font-medium align-middle">Manual</span>
+                                                                                    </p>
+                                                                                <p class="text-xs text-muted-foreground/80 mt-0.5" title="14 Nov 2026, 19:41">1 day ago</p>
+                                    </div>
+                                </div>
+                                                                                            <div class="flex gap-3 py-2.5" x-show="tab === 'all' || tab === 'checklist'">
+                                    <div class="rounded-full p-1.5 shrink-0 mt-0.5 bg-stone-100 text-stone-600">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3.5" aria-hidden="true"><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/></svg>
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <p class="text-sm leading-snug">
+                                            <span class="font-medium">Hamidou Abdoul</span>
+                                            <span class="text-muted-foreground">Finishing: Not Started → In Progress</span>
+                                                                                    </p>
+                                                                                <p class="text-xs text-muted-foreground/80 mt-0.5" title="13 Nov 2026, 10:00">2 days ago</p>
+                                    </div>
+                                </div>
+                                                                                            <div class="flex gap-3 py-2.5" x-show="tab === 'all' || tab === 'progress'">
+                                    <div class="rounded-full p-1.5 shrink-0 mt-0.5 bg-emerald-50 text-emerald-700">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3.5" aria-hidden="true"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <p class="text-sm leading-snug">
+                                            <span class="font-medium">Hamidou Abdoul</span>
+                                            <span class="text-muted-foreground">updated progress 60% → 80%</span>
+                                                                                            <span class="ml-1.5 inline-flex items-center rounded-full border px-1.5 py-0 text-[10px] font-medium align-middle">Manual</span>
+                                                                                    </p>
+                                                                                    <p class="text-xs text-muted-foreground mt-0.5 whitespace-pre-wrap break-words">Fitting done, finishing hem.</p>
+                                                                                <p class="text-xs text-muted-foreground/80 mt-0.5" title="12 Nov 2026, 10:00">3 days ago</p>
+                                    </div>
+                                </div>
+                                                                                            <div class="flex gap-3 py-2.5" x-show="tab === 'all' || tab === 'checklist'">
+                                    <div class="rounded-full p-1.5 shrink-0 mt-0.5 bg-stone-100 text-stone-600">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3.5" aria-hidden="true"><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/></svg>
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <p class="text-sm leading-snug">
+                                            <span class="font-medium">Hamidou Abdoul</span>
+                                            <span class="text-muted-foreground">Fitting: Not Started → Completed</span>
+                                                                                    </p>
+                                                                                <p class="text-xs text-muted-foreground/80 mt-0.5" title="11 Nov 2026, 10:00">4 days ago</p>
+                                    </div>
+                                </div>
+                                                                                            <div class="flex gap-3 py-2.5" x-show="tab === 'all' || tab === 'checklist'">
+                                    <div class="rounded-full p-1.5 shrink-0 mt-0.5 bg-stone-100 text-stone-600">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3.5" aria-hidden="true"><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/></svg>
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <p class="text-sm leading-snug">
+                                            <span class="font-medium">Hamidou Abdoul</span>
+                                            <span class="text-muted-foreground">Sewing/Stitching: Not Started → Completed</span>
+                                                                                    </p>
+                                                                                <p class="text-xs text-muted-foreground/80 mt-0.5" title="08 Nov 2026, 10:00">1 week ago</p>
+                                    </div>
+                                </div>
+                                                                                            <div class="flex gap-3 py-2.5" x-show="tab === 'all' || tab === 'progress'">
+                                    <div class="rounded-full p-1.5 shrink-0 mt-0.5 bg-emerald-50 text-emerald-700">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3.5" aria-hidden="true"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <p class="text-sm leading-snug">
+                                            <span class="font-medium">Hamidou Abdoul</span>
+                                            <span class="text-muted-foreground">updated progress 30% → 60%</span>
+                                                                                            <span class="ml-1.5 inline-flex items-center rounded-full border px-1.5 py-0 text-[10px] font-medium align-middle">Manual</span>
+                                                                                    </p>
+                                                                                <p class="text-xs text-muted-foreground/80 mt-0.5" title="08 Nov 2026, 10:00">1 week ago</p>
+                                    </div>
+                                </div>
+                                                                                            <div class="flex gap-3 py-2.5" x-show="tab === 'all' || tab === 'checklist'">
+                                    <div class="rounded-full p-1.5 shrink-0 mt-0.5 bg-stone-100 text-stone-600">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3.5" aria-hidden="true"><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/></svg>
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <p class="text-sm leading-snug">
+                                            <span class="font-medium">Hamidou Abdoul</span>
+                                            <span class="text-muted-foreground">Cutting: Not Started → Completed</span>
+                                                                                    </p>
+                                                                                <p class="text-xs text-muted-foreground/80 mt-0.5" title="04 Nov 2026, 10:00">1 week ago</p>
+                                    </div>
+                                </div>
+                                                                                            <div class="flex gap-3 py-2.5" x-show="tab === 'all' || tab === 'progress'">
+                                    <div class="rounded-full p-1.5 shrink-0 mt-0.5 bg-emerald-50 text-emerald-700">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3.5" aria-hidden="true"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <p class="text-sm leading-snug">
+                                            <span class="font-medium">Hamidou Abdoul</span>
+                                            <span class="text-muted-foreground">updated progress 0% → 30%</span>
+                                                                                            <span class="ml-1.5 inline-flex items-center rounded-full border px-1.5 py-0 text-[10px] font-medium align-middle">Manual</span>
+                                                                                    </p>
+                                                                                <p class="text-xs text-muted-foreground/80 mt-0.5" title="01 Nov 2026, 10:00">2 weeks ago</p>
+                                    </div>
+                                </div>
+                                                                                            <div class="flex gap-3 py-2.5" x-show="tab === 'all' || tab === 'status'">
+                                    <div class="rounded-full p-1.5 shrink-0 mt-0.5 bg-amber-50 text-amber-700">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3.5" aria-hidden="true"><path d="m16 3 4 4-4 4"/><path d="M20 7H4"/><path d="m8 21-4-4 4-4"/><path d="M4 17h16"/></svg>
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <p class="text-sm leading-snug">
+                                            <span class="font-medium">Hamidou Abdoul</span>
+                                            <span class="text-muted-foreground">changed status from Assigned to Ongoing</span>
+                                                                                    </p>
+                                                                                <p class="text-xs text-muted-foreground/80 mt-0.5" title="31 Oct 2026, 12:00">2 weeks ago</p>
+                                    </div>
+                                </div>
+                                                                                            <div class="flex gap-3 py-2.5" x-show="tab === 'all' || tab === 'checklist'">
+                                    <div class="rounded-full p-1.5 shrink-0 mt-0.5 bg-stone-100 text-stone-600">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3.5" aria-hidden="true"><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/></svg>
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <p class="text-sm leading-snug">
+                                            <span class="font-medium">Hamidou Abdoul</span>
+                                            <span class="text-muted-foreground">Ongoing: Not Started → Completed</span>
+                                                                                    </p>
+                                                                                <p class="text-xs text-muted-foreground/80 mt-0.5" title="31 Oct 2026, 12:00">2 weeks ago</p>
+                                    </div>
+                                </div>
+                                                                                            <div class="flex gap-3 py-2.5" x-show="tab === 'all'">
+                                    <div class="rounded-full p-1.5 shrink-0 mt-0.5 bg-teal-50 text-teal-700">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3.5" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <p class="text-sm leading-snug">
+                                            <span class="font-medium">Aminata Sow</span>
+                                            <span class="text-muted-foreground">assigned the task to Hamidou Abdoul</span>
+                                                                                    </p>
+                                                                                <p class="text-xs text-muted-foreground/80 mt-0.5" title="31 Oct 2026, 10:00">2 weeks ago</p>
+                                    </div>
+                                </div>
+                                                                                            <div class="flex gap-3 py-2.5" x-show="tab === 'all' || tab === 'status'">
+                                    <div class="rounded-full p-1.5 shrink-0 mt-0.5 bg-amber-50 text-amber-700">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3.5" aria-hidden="true"><path d="m16 3 4 4-4 4"/><path d="M20 7H4"/><path d="m8 21-4-4 4-4"/><path d="M4 17h16"/></svg>
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <p class="text-sm leading-snug">
+                                            <span class="font-medium">Aminata Sow</span>
+                                            <span class="text-muted-foreground">changed status from Unassigned to Assigned</span>
+                                                                                    </p>
+                                                                                <p class="text-xs text-muted-foreground/80 mt-0.5" title="31 Oct 2026, 10:00">2 weeks ago</p>
+                                    </div>
+                                </div>
+                                                                                            <div class="flex gap-3 py-2.5" x-show="tab === 'all' || tab === 'checklist'">
+                                    <div class="rounded-full p-1.5 shrink-0 mt-0.5 bg-stone-100 text-stone-600">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3.5" aria-hidden="true"><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/></svg>
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <p class="text-sm leading-snug">
+                                            <span class="font-medium">Hamidou Abdoul</span>
+                                            <span class="text-muted-foreground">Assigned: Not Started → Completed</span>
+                                                                                    </p>
+                                                                                <p class="text-xs text-muted-foreground/80 mt-0.5" title="31 Oct 2026, 10:00">2 weeks ago</p>
+                                    </div>
+                                </div>
+                                                    </div>
+                    </div>
+                            </div>
+        </section>
+    </div>
+
+    
+    <div x-show="dialog === 'assign'" x-cloak
+         class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="assign-dialog-title"
+         @click.self="dialog = null">
+        <form method="POST" action="https://atelier.osszcollection.com/tasks/d479101f-23ec-4826-a048-0acee908e096/assign"
+              class="w-full max-w-lg rounded-xl border bg-card text-card-foreground shadow-lg p-6 space-y-4">
+            <input type="hidden" name="_token" value="dNzunr1u0Or0RPmvjYSF1yNP9NPtnIvIjrU6DnoG" autocomplete="off">            <div>
+                <h3 id="assign-dialog-title" class="font-semibold text-lg">Reassign Task</h3>
+                <p class="text-sm text-muted-foreground mt-0.5">Select the staff member responsible for Trousers (TASK-0002).</p>
+            </div>
+            <div class="space-y-1.5">
+                <label for="assign-staff" class="text-sm font-medium leading-none">Staff member</label>
+                <select id="assign-staff" name="staffId" x-model="staffId"
+                        class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                    <option value="">Select staff member</option>
+                                            <option value="9d021fb4-9b45-4888-8a52-efe93ae1876c" disabled>
+                            Hamidou Abdoul (2 active) — current                        </option>
+                                            <option value="a4ee2330-0adc-4b6c-a982-f3172fff059d" >
+                            Lawal Sani (1 active)                        </option>
+                                            <option value="5a7833ca-1d5e-4a7d-975c-85c1dbc489a5" >
+                            Ngozi Okafor (0 active)                        </option>
+                                    </select>
+                            </div>
+            <div class="space-y-1.5">
+                <label for="assign-note" class="text-sm font-medium leading-none">Note (optional)</label>
+                <input type="text" id="assign-note" name="note" maxlength="1000"
+                       placeholder="Note sent with the assignment notification"
+                       class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+            </div>
+            <div class="flex justify-end gap-2">
+                <button type="button" @click="dialog = null"
+                        class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm font-medium h-9 px-4 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground transition-colors">
+                    Cancel
+                </button>
+                <button type="submit" :disabled="staffId === ''"
+                        class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm font-medium h-9 px-4 bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors disabled:pointer-events-none disabled:opacity-50">
+                    Reassign
+                </button>
+            </div>
+        </form>
+    </div>
+
+    
+    <div x-show="dialog === 'edit'" x-cloak
+         class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="edit-dialog-title"
+         @click.self="dialog = null">
+        <form method="POST" action="https://atelier.osszcollection.com/tasks/d479101f-23ec-4826-a048-0acee908e096/update"
+              class="w-full max-w-lg rounded-xl border bg-card text-card-foreground shadow-lg p-6 space-y-4">
+            <input type="hidden" name="_token" value="dNzunr1u0Or0RPmvjYSF1yNP9NPtnIvIjrU6DnoG" autocomplete="off">            <div>
+                <h3 id="edit-dialog-title" class="font-semibold text-lg">Edit Task Details</h3>
+                <p class="text-sm text-muted-foreground mt-0.5">Only the fields you change are submitted.</p>
+            </div>
+            <div class="space-y-1.5">
+                <label for="edit-piece" class="text-sm font-medium leading-none">Garment piece</label>
+                <input type="text" id="edit-piece" name="garmentPiece" maxlength="100" required
+                       value="Trousers"
+                       class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                            </div>
+            <div class="grid gap-3 sm:grid-cols-2">
+                <div class="space-y-1.5">
+                    <label for="edit-deadline" class="text-sm font-medium leading-none">Deadline</label>
+                    <input type="datetime-local" id="edit-deadline" name="deadline"
+                           value="2026-11-27T17:00"
+                           class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                </div>
+                <div class="space-y-1.5">
+                    <label for="edit-priority" class="text-sm font-medium leading-none">Priority</label>
+                    <select id="edit-priority" name="priority"
+                            class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                                                    <option value="LOW" >Low</option>
+                                                    <option value="NORMAL" >Normal</option>
+                                                    <option value="HIGH" selected>High</option>
+                                                    <option value="URGENT" >Urgent</option>
+                                            </select>
+                </div>
+            </div>
+            <div class="space-y-1.5">
+                <label for="edit-instructions" class="text-sm font-medium leading-none">Instructions</label>
+                <textarea id="edit-instructions" name="instructions" maxlength="2000"
+                          placeholder="Production instructions for this piece"
+                          class="flex min-h-20 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">Slim fit, side adjusters instead of belt loops.</textarea>
+            </div>
+            <div class="flex justify-end gap-2">
+                <button type="button" @click="dialog = null"
+                        class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm font-medium h-9 px-4 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground transition-colors">
+                    Cancel
+                </button>
+                <button type="submit"
+                        class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm font-medium h-9 px-4 bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors">
+                    Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+
+    
+    <div x-show="dialog === 'submit'" x-cloak
+         class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="submit-dialog-title"
+         @click.self="dialog = null">
+        <form method="POST" action="https://atelier.osszcollection.com/tasks/d479101f-23ec-4826-a048-0acee908e096/status"
+              class="w-full max-w-lg rounded-xl border bg-card text-card-foreground shadow-lg p-6 space-y-4">
+            <input type="hidden" name="_token" value="dNzunr1u0Or0RPmvjYSF1yNP9NPtnIvIjrU6DnoG" autocomplete="off">            <input type="hidden" name="action" value="submit">
+            <div>
+                <h3 id="submit-dialog-title" class="font-semibold text-lg">Submit for Inspection</h3>
+                <p class="text-sm text-muted-foreground mt-0.5">The task moves to Awaiting Inspection for quality control.</p>
+            </div>
+            <div class="space-y-1.5">
+                <label for="submit-note" class="text-sm font-medium leading-none">Note (optional)</label>
+                <textarea id="submit-note" name="note" maxlength="1000"
+                          placeholder="Anything the inspector should know"
+                          class="flex min-h-20 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"></textarea>
+            </div>
+            <div class="flex justify-end gap-2">
+                <button type="button" @click="dialog = null"
+                        class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm font-medium h-9 px-4 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground transition-colors">
+                    Cancel
+                </button>
+                <button type="submit"
+                        class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm font-medium h-9 px-4 bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors">
+                    Submit
+                </button>
+            </div>
+        </form>
+    </div>
+
+    
+    <div x-show="dialog === 'inspect'" x-cloak
+         class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="inspect-dialog-title"
+         @click.self="dialog = null">
+        <form method="POST" action="https://atelier.osszcollection.com/tasks/d479101f-23ec-4826-a048-0acee908e096/inspect"
+              class="w-full max-w-lg rounded-xl border bg-card text-card-foreground shadow-lg p-6 space-y-4">
+            <input type="hidden" name="_token" value="dNzunr1u0Or0RPmvjYSF1yNP9NPtnIvIjrU6DnoG" autocomplete="off">            <div>
+                <h3 id="inspect-dialog-title" class="font-semibold text-lg">Quality Inspection</h3>
+                <p class="text-sm text-muted-foreground mt-0.5">Approve passes the garment to the pickup flow. Request changes returns it to the worker with correction instructions.</p>
+            </div>
+            <div class="space-y-2" role="radiogroup" aria-label="Quality Inspection">
+                                    <label class="flex items-center gap-2.5 rounded-lg border p-3 cursor-pointer hover:bg-muted/50 transition-colors has-[:checked]:border-primary has-[:checked]:bg-accent/50">
+                        <input type="radio" name="decision" value="APPROVED" checked class="size-4 accent-primary">
+                        <span class="text-sm font-medium">Approved</span>
+                    </label>
+                                    <label class="flex items-center gap-2.5 rounded-lg border p-3 cursor-pointer hover:bg-muted/50 transition-colors has-[:checked]:border-primary has-[:checked]:bg-accent/50">
+                        <input type="radio" name="decision" value="CHANGES_REQUESTED"  class="size-4 accent-primary">
+                        <span class="text-sm font-medium">Changes Requested</span>
+                    </label>
+                                    <label class="flex items-center gap-2.5 rounded-lg border p-3 cursor-pointer hover:bg-muted/50 transition-colors has-[:checked]:border-primary has-[:checked]:bg-accent/50">
+                        <input type="radio" name="decision" value="REOPENED"  class="size-4 accent-primary">
+                        <span class="text-sm font-medium">Reopened</span>
+                    </label>
+                                            </div>
+            <div class="space-y-1.5">
+                <label for="inspect-comments" class="text-sm font-medium leading-none">Inspection comments</label>
+                <textarea id="inspect-comments" name="comments" maxlength="2000"
+                          placeholder="Required when requesting changes — describe the corrections needed"
+                          class="flex min-h-20 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"></textarea>
+            </div>
+            <div class="flex justify-end gap-2">
+                <button type="button" @click="dialog = null"
+                        class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm font-medium h-9 px-4 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground transition-colors">
+                    Cancel
+                </button>
+                <button type="submit"
+                        class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm font-medium h-9 px-4 bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1 1 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
+                    Submit
+                </button>
+            </div>
+        </form>
+    </div>
+
+    
+    <div x-show="dialog === 'deliver'" x-cloak
+         class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="deliver-dialog-title"
+         @click.self="dialog = null">
+        <form method="POST" action="https://atelier.osszcollection.com/tasks/d479101f-23ec-4826-a048-0acee908e096/status"
+              class="w-full max-w-lg rounded-xl border bg-card text-card-foreground shadow-lg p-6 space-y-4">
+            <input type="hidden" name="_token" value="dNzunr1u0Or0RPmvjYSF1yNP9NPtnIvIjrU6DnoG" autocomplete="off">            <input type="hidden" name="action" value="deliver">
+            <div>
+                <h3 id="deliver-dialog-title" class="font-semibold text-lg">Mark Delivered/Collected</h3>
+                <p class="text-sm text-muted-foreground mt-0.5">Confirm that John Doe collected Trousers.</p>
+            </div>
+            <div class="space-y-1.5">
+                <label for="deliver-note" class="text-sm font-medium leading-none">Note (optional)</label>
+                <input type="text" id="deliver-note" name="note" maxlength="1000"
+                       placeholder="e.g. Collected by the customer in person"
+                       class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+            </div>
+            <div class="flex justify-end gap-2">
+                <button type="button" @click="dialog = null"
+                        class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm font-medium h-9 px-4 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground transition-colors">
+                    Cancel
+                </button>
+                <button type="submit"
+                        class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm font-medium h-9 px-4 bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18h-5"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.62l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></svg>
+                    Mark Delivered
+                </button>
+            </div>
+        </form>
+    </div>
+
+    
+    <div x-show="dialog === 'reopen'" x-cloak
+         class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="reopen-dialog-title"
+         @click.self="dialog = null">
+        <form method="POST" action="https://atelier.osszcollection.com/tasks/d479101f-23ec-4826-a048-0acee908e096/status"
+              class="w-full max-w-lg rounded-xl border bg-card text-card-foreground shadow-lg p-6 space-y-4">
+            <input type="hidden" name="_token" value="dNzunr1u0Or0RPmvjYSF1yNP9NPtnIvIjrU6DnoG" autocomplete="off">            <input type="hidden" name="action" value="reopen">
+            <div>
+                <h3 id="reopen-dialog-title" class="font-semibold text-lg">Reopen Task</h3>
+                <p class="text-sm text-muted-foreground mt-0.5">The task returns to Ongoing so production can resume. Comments are required.</p>
+            </div>
+            <div class="space-y-1.5">
+                <label for="reopen-comments" class="text-sm font-medium leading-none">Comments</label>
+                <textarea id="reopen-comments" name="reason" x-model="reason" maxlength="1000" required
+                          placeholder="Why is this task being reopened?"
+                          class="flex min-h-20 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"></textarea>
+                            </div>
+            <div class="flex justify-end gap-2">
+                <button type="button" @click="dialog = null"
+                        class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm font-medium h-9 px-4 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground transition-colors">
+                    Cancel
+                </button>
+                <button type="submit" :disabled="reason.trim().length < 3"
+                        class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm font-medium h-9 px-4 bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors disabled:pointer-events-none disabled:opacity-50">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11"/></svg>
+                    Reopen
+                </button>
+            </div>
+        </form>
+    </div>
+
+    
+    <div x-show="dialog === 'block'" x-cloak
+         class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="block-dialog-title"
+         @click.self="dialog = null">
+        <form method="POST" action="https://atelier.osszcollection.com/tasks/d479101f-23ec-4826-a048-0acee908e096/block"
+              class="w-full max-w-lg rounded-xl border bg-card text-card-foreground shadow-lg p-6 space-y-4">
+            <input type="hidden" name="_token" value="dNzunr1u0Or0RPmvjYSF1yNP9NPtnIvIjrU6DnoG" autocomplete="off">            <div>
+                <h3 id="block-dialog-title" class="font-semibold text-lg">Block Task</h3>
+                <p class="text-sm text-muted-foreground mt-0.5">Report what is blocking production. Management is notified immediately.</p>
+            </div>
+            <div class="space-y-1.5">
+                <label for="block-reason" class="text-sm font-medium leading-none">Reason (required)</label>
+                <textarea id="block-reason" name="reason" x-model="reason" maxlength="1000" required
+                          placeholder="e.g. Missing customer-provided fabric"
+                          class="flex min-h-20 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"></textarea>
+                            </div>
+            <div class="flex justify-end gap-2">
+                <button type="button" @click="dialog = null"
+                        class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm font-medium h-9 px-4 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground transition-colors">
+                    Cancel
+                </button>
+                <button type="submit" :disabled="reason.trim().length < 3"
+                        class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm font-medium h-9 px-4 bg-red-600 text-white shadow-sm hover:bg-red-700 transition-colors disabled:pointer-events-none disabled:opacity-50">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/></svg>
+                    Block Task
+                </button>
+            </div>
+        </form>
+    </div>
+
+    
+    <div x-show="dialog === 'unblock'" x-cloak
+         class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="unblock-dialog-title"
+         @click.self="dialog = null">
+        <form method="POST" action="https://atelier.osszcollection.com/tasks/d479101f-23ec-4826-a048-0acee908e096/unblock"
+              class="w-full max-w-lg rounded-xl border bg-card text-card-foreground shadow-lg p-6 space-y-4">
+            <input type="hidden" name="_token" value="dNzunr1u0Or0RPmvjYSF1yNP9NPtnIvIjrU6DnoG" autocomplete="off">            <div>
+                <h3 id="unblock-dialog-title" class="font-semibold text-lg">Unblock Task</h3>
+                <p class="text-sm text-muted-foreground mt-0.5">The blocker is cleared and production can resume.</p>
+            </div>
+            <div class="space-y-1.5">
+                <label for="unblock-note" class="text-sm font-medium leading-none">Note (optional)</label>
+                <input type="text" id="unblock-note" name="note" maxlength="1000"
+                       placeholder="How the blocker was resolved"
+                       class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+            </div>
+            <div class="flex justify-end gap-2">
+                <button type="button" @click="dialog = null"
+                        class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm font-medium h-9 px-4 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground transition-colors">
+                    Cancel
+                </button>
+                <button type="submit"
+                        class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm font-medium h-9 px-4 bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                    Unblock
+                </button>
+            </div>
+        </form>
+    </div>
+
+    
+    <div x-show="dialog === 'cancel'" x-cloak
+         class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="cancel-dialog-title"
+         @click.self="dialog = null">
+        <form method="POST" action="https://atelier.osszcollection.com/tasks/d479101f-23ec-4826-a048-0acee908e096/status"
+              class="w-full max-w-lg rounded-xl border bg-card text-card-foreground shadow-lg p-6 space-y-4">
+            <input type="hidden" name="_token" value="dNzunr1u0Or0RPmvjYSF1yNP9NPtnIvIjrU6DnoG" autocomplete="off">            <input type="hidden" name="action" value="cancel">
+            <div>
+                <h3 id="cancel-dialog-title" class="font-semibold text-lg">Cancel this task?</h3>
+                <p class="text-sm text-muted-foreground mt-0.5">TASK-0002 — Trousers (OSSZ-2026-001) will be permanently closed. This cannot be undone.</p>
+            </div>
+            <div class="space-y-1.5">
+                <label for="cancel-reason" class="text-sm font-medium leading-none">Reason (required)</label>
+                <textarea id="cancel-reason" name="reason" x-model="reason" maxlength="1000" required
+                          placeholder="e.g. Cancelled by the customer"
+                          class="flex min-h-20 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"></textarea>
+                            </div>
+            <div class="flex justify-end gap-2">
+                <button type="button" @click="dialog = null"
+                        class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm font-medium h-9 px-4 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground transition-colors">
+                    Keep Task
+                </button>
+                <button type="submit" :disabled="reason.trim().length < 3"
+                        class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm font-medium h-9 px-4 bg-destructive text-white shadow-sm hover:bg-destructive/90 transition-colors disabled:pointer-events-none disabled:opacity-50">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
+                    Cancel Task
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+            
