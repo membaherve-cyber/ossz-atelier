@@ -65,3 +65,4 @@ db/*.db
 /tool-results/
 /verify-*.png
 /upload/pasted_image_*
+check-views.php
