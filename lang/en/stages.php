@@ -1,0 +1,57 @@
+<?php
+
+// OSSZ ATELIER — EN lines, ported from the "stages*" keys of the dict files (see stages.ts).
+// Accessed via __('stages.key').
+
+return [
+    'title' => 'Production Stages',
+    'description' => 'Configure the checklist stages available to production tasks. Different task categories use different stage sets.',
+    'addStage' => 'Add Stage',
+    'historyTitle' => 'Stage changes never rewrite history',
+    'historyDescription' => 'Existing task histories keep the stage names at the time of recording. Deactivating a stage removes it from new tasks only.',
+    'errorTitle' => 'Could not load the stage configuration',
+    'unexpectedError' => 'Unexpected error.',
+    'emptyTitle' => 'No stages configured',
+    'emptyDescription' => 'Create the first checklist stage to start building the production workflow.',
+    'col' => [
+        'sort' => 'Sort',
+        'name' => 'Name',
+        'code' => 'Code',
+        'appliesTo' => 'Applies To',
+        'weight' => 'Weight',
+        'active' => 'Active',
+    ],
+    'allCategories' => 'All categories',
+    'deactivateStageAria' => 'Deactivate stage {name}',
+    'activateStageAria' => 'Activate stage {name}',
+    'editStageAria' => 'Edit stage {name}',
+    'editTitle' => 'Edit Stage',
+    'editDescription' => 'Update the stage details. The stage code stays unchanged.',
+    'addDescription' => 'Define a new checklist stage and the task categories it applies to.',
+    'nameLabel' => 'Name',
+    'namePlaceholder' => 'e.g. Fabric cutting',
+    'appliesToLabel' => 'Applies to',
+    'appliesToHint' => 'Leave all unchecked or check all to apply to every category.',
+    'weightLabel' => 'Weight',
+    'sortOrderLabel' => 'Sort order',
+    'saving' => 'Saving…',
+    'createStage' => 'Create stage',
+    'invalidNameTitle' => 'Invalid name',
+    'invalidNameDesc' => 'The stage name must be between 2 and 80 characters.',
+    'invalidWeightTitle' => 'Invalid weight',
+    'invalidWeightDesc' => 'Weight must be a number between 0.1 and 10.',
+    'invalidSortTitle' => 'Invalid sort order',
+    'invalidSortDesc' => 'Sort order must be a whole number between 0 and 999.',
+    'updatedToastTitle' => 'Stage updated',
+    'createdToastTitle' => 'Stage created',
+    'savedToastDesc' => '"{name}" was saved successfully.',
+    'saveFailedToast' => 'Could not save the stage',
+    'activatedToastTitle' => 'Stage activated',
+    'deactivatedToastTitle' => 'Stage deactivated',
+    'activatedToastDesc' => '"{name}" is available to new tasks again.',
+    'deactivatedToastDesc' => '"{name}" will no longer be added to new tasks.',
+    'updateFailedToast' => 'Could not update the stage',
+
+    // Laravel-only additions (active checkbox in the create/edit form).
+    'activeLabel' => 'Active',
+];

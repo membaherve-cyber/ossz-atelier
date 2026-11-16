@@ -1,0 +1,51 @@
+<?php
+
+// OSSZ ATELIER — EN lines, ported from the "cust*" keys of the dict files (see customers.ts).
+// Accessed via __('cust.key').
+
+return [
+    'title' => 'Customers',
+    'subtitle' => 'Directory of registered customers with their order history.',
+    'register' => 'Register Customer',
+    'searchPlaceholder' => 'Search by name, phone, email or code…',
+    'searchLabel' => 'Search customers',
+    'loadFail' => 'Failed to load customers',
+    'loadFailedTitle' => 'Could not load customers',
+    'emptySearchTitle' => 'No customers match your search',
+    'emptyTitle' => 'No customers registered yet',
+    'emptySearchDesc' => 'Try a different name, phone number or customer code.',
+    'emptyDesc' => 'Register your first customer to start taking orders.',
+    'colCode' => 'Code',
+    'colName' => 'Name',
+    'colPhone' => 'Phone',
+    'colEmail' => 'Email',
+    'colAddress' => 'Address',
+    'colOrders' => 'Orders',
+    'colRegistered' => 'Registered',
+    'editAria' => 'Edit {name}',
+    'editTitle' => 'Edit Customer',
+    'editDesc' => 'Update the details of {name} ({code}).',
+    'registerDesc' => 'A unique customer code (CUST-XXXX) is generated automatically.',
+    'fieldName' => 'Name *',
+    'namePlaceholder' => 'e.g. Amina Cissé',
+    'fieldPhone' => 'Phone *',
+    'fieldEmail' => 'Email',
+    'fieldAddress' => 'Address',
+    'addressPlaceholder' => 'Neighbourhood, city',
+    'fieldNotes' => 'Notes',
+    'notesPlaceholder' => 'Preferences, measurements remarks, payment history…',
+    'namePhoneRequired' => 'Customer name and phone number are required.',
+    'updatedToast' => 'Customer updated',
+    'updatedToastDesc' => '{name} was saved.',
+    'registeredToast' => 'Customer registered',
+    'registeredToastDesc' => '{name} received code {code}.',
+    'updateFailed' => 'Could not update customer',
+    'registerFailed' => 'Could not register customer',
+
+    // Laravel-only additions (delete flow + row actions).
+    'hasOrdersError' => 'This customer already has orders and cannot be deleted.',
+    'deletedToast' => 'Customer deleted',
+    'deleteTitle' => 'Delete customer',
+    'deleteDesc' => '{name} will be permanently removed. This action cannot be undone.',
+    'deleteAria' => 'Delete customer {name}',
+];

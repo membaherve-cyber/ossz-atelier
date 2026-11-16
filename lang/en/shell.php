@@ -1,0 +1,70 @@
+<?php
+
+// OSSZ ATELIER — EN lines, ported from the "shell*" keys of the dict files (see shell.ts).
+// Accessed via __('shell.key').
+
+return [
+    'brandTag' => 'PRODUCTION MGMT',
+    'independent' => 'Independent production system',
+    'navAria' => 'Main navigation',
+    'section' => [
+        'workspace' => 'Workspace',
+        'overview' => 'Overview',
+        'production' => 'Production',
+        'insights' => 'Insights',
+        'administration' => 'Administration',
+    ],
+    'nav' => [
+        'dashboard' => 'Dashboard',
+        'myDashboard' => 'My Dashboard',
+        'myTasks' => 'My Tasks',
+        'notifications' => 'Notifications',
+        'tasks' => 'Production',
+        'taskCreate' => 'Create Tasks',
+        'orders' => 'Orders',
+        'customers' => 'Customers',
+        'performance' => 'Performance',
+        'incentives' => 'Incentives',
+        'reports' => 'Reports',
+        'users' => 'Users & Roles',
+        'staffAccounts' => 'Staff Accounts',
+        'stages' => 'Production Stages',
+        'audit' => 'Audit History',
+    ],
+    'view' => [
+        'dashboard' => 'Dashboard',
+        'tasks' => 'Production',
+        'taskCreate' => 'Create Production Tasks',
+        'taskDetail' => 'Task Detail',
+        'orders' => 'Orders',
+        'customers' => 'Customers',
+        'performance' => 'Staff Performance',
+        'incentives' => 'Incentive Management',
+        'reports' => 'Reports',
+        'users' => 'Users & Roles',
+        'staffAccounts' => 'Staff Accounts',
+        'audit' => 'Audit History',
+        'stages' => 'Production Stages',
+        'notifications' => 'Notifications',
+    ],
+    'logoAria' => 'OSSZ Atelier logo — go to dashboard',
+    'openMenu' => 'Open menu',
+    'navigation' => 'Navigation',
+    'bellAria' => 'Notifications',
+    'accountMenu' => 'Account menu',
+    'languageAria' => 'Language',
+    'languageTitle' => 'Switch language',
+    'bell' => [
+        'title' => 'Notifications',
+        'viewAll' => 'View all',
+        'markAllRead' => 'Mark all read',
+        'empty' => 'No notifications yet.',
+    ],
+    'user' => [
+        'signOut' => 'Sign out',
+    ],
+    'footer' => [
+        'left' => '© {year} OSSZ Atelier — Independent Production Management System',
+        'right' => 'Own database · Own accounts · atelier.osszcollection.com',
+    ],
+];
