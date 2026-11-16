@@ -477,6 +477,10 @@ export function OrdersView() {
         <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto">
           {detailLoading || !detail ? (
             <div className="space-y-3 py-2">
+              {/* Accessible title/description while the order loads (Radix
+                  requires them inside DialogContent). */}
+              <DialogTitle className="sr-only">{t("orders.detailTitle")}</DialogTitle>
+              <DialogDescription className="sr-only">{t("common.loading")}</DialogDescription>
               <Skeleton className="h-7 w-56" />
               <Skeleton className="h-24 w-full" />
               <Skeleton className="h-32 w-full" />

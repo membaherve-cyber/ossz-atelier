@@ -71,6 +71,20 @@ export function withApi<Args extends unknown[]>(
       if (err instanceof ZodError) {
         return NextResponse.json({ error: "Validation failed" }, { status: 400 });
       }
+      // Missing table/column (Prisma P2021/P2022) — happens transiently while
+      // the database schema is being (re)created at startup. Report it as a
+      // retryable state instead of a scary 500.
+      if (
+        err instanceof Error &&
+        "code" in err &&
+        ((err as { code?: string }).code === "P2021" ||
+          (err as { code?: string }).code === "P2022")
+      ) {
+        return NextResponse.json(
+          { error: "The database is being initialised. Please retry in a few seconds." },
+          { status: 503 }
+        );
+      }
       console.error("[api]", err);
       return NextResponse.json({ error: "Internal server error" }, { status: 500 });
     }

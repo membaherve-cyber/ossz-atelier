@@ -59,6 +59,7 @@ const entries: DictEntries = {
   "orders.tasksDonePlural": { en: "{done}/{total} tasks done", fr: "{done}/{total} tâches terminées" },
 
   // --- Order detail dialog ----------------------------------------------------------------
+  "orders.detailTitle": { en: "Order details", fr: "Détails de la commande" },
   "orders.detailMeta": { en: "Registered {date} · {name}", fr: "Enregistrée le {date} · {name}" },
   "orders.statOrderDate": { en: "Order date", fr: "Date de commande" },
   "orders.statDelivery": { en: "Expected delivery", fr: "Livraison prévue" },
