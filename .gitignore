@@ -55,3 +55,13 @@ server.log
 # Laravel deliverable has its own git repository
 /laravel-atelier/
 .gitdeploy/
+
+# runtime / local-only files
+.zscripts/dev.pid
+db/*.db
+!db/.gitkeep
+
+# session debug artifacts
+/tool-results/
+/verify-*.png
+/upload/pasted_image_*
