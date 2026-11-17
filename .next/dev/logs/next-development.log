@@ -1,0 +1,8 @@
+[00:00:00.828] Server  LOG     ✓ Ready in 642ms
+[00:00:03.869] Server  LOG     ○ Compiling / ...
+[00:09:38.432] Server  ERROR   Error: ENOENT: no such file or directory, scandir '/home/z/my-project/src/app'
+[00:09:38.443] Server  ERROR   ⨯ "unhandledRejection:" Error: ENOENT: no such file or directory, scandir '/home/z/my-project/src/app'
+[00:09:38.444] Server  ERROR   ⨯ "unhandledRejection: " Error: ENOENT: no such file or directory, scandir '/home/z/my-project/src/app'
+[00:09:38.456] Server  ERROR   Error: ENOENT: no such file or directory, scandir '/home/z/my-project/src/app'
+[00:09:38.457] Server  ERROR   Error: ENOENT: no such file or directory, scandir '/home/z/my-project/src/app'
+[00:09:41.119] Server  LOG     ○ Compiling /_not-found/page ...
