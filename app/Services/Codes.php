@@ -67,6 +67,38 @@ final class Codes
     }
 
     /**
+     * Next customer payment reference: PAY-0001, PAY-0002, ...
+     */
+    public static function payment(): string
+    {
+        return self::next('PAY', 4, 'payments', 'reference');
+    }
+
+    /**
+     * Next expense reference: EXP-0001, EXP-0002, ...
+     */
+    public static function expense(): string
+    {
+        return self::next('EXP', 4, 'expenses', 'reference');
+    }
+
+    /**
+     * Next staff advance reference: ADV-0001, ADV-0002, ...
+     */
+    public static function advance(): string
+    {
+        return self::next('ADV', 4, 'staff_advances', 'reference');
+    }
+
+    /**
+     * Next supplier purchase reference: PUR-0001, PUR-0002, ...
+     */
+    public static function purchase(): string
+    {
+        return self::next('PUR', 4, 'purchases', 'reference');
+    }
+
+    /**
      * Generate the next free code for the given entity kind and run
      * $attempt with it. If the insert inside $attempt trips the unique
      * constraint (concurrent request grabbed the same code), a fresh code
@@ -89,6 +121,10 @@ final class Codes
             'customer' => self::customer(...),
             'task' => self::task(...),
             'order' => self::order(...),
+            'payment' => self::payment(...),
+            'expense' => self::expense(...),
+            'advance' => self::advance(...),
+            'purchase' => self::purchase(...),
             default => throw new InvalidArgumentException("Unknown code kind [{$kind}]."),
         };
 

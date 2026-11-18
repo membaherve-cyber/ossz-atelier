@@ -4,19 +4,25 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Models\Expense;
+use App\Models\ExpenseCategory;
 use App\Models\IncentiveRecord;
 use App\Models\IncentiveScheme;
 use App\Models\User;
 use App\Services\Audit;
+use App\Services\Codes;
+use App\Services\Notifier;
 use App\Services\PerformanceService;
 use App\Services\Permissions;
 use App\Support\Atelier;
+use App\Support\Money;
 use App\Support\Trans;
 use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Throwable;
@@ -464,6 +470,16 @@ class IncentiveController
                 'period' => $record->period,
             ]);
 
+            // Accounting integration (spec §13): notify the staff member
+            // of the approval — the payable itself is booked when paid.
+            Notifier::users(
+                [$record->staff_id],
+                'INCENTIVE_APPROVED',
+                Trans::fill('inc.notifApproved', ['amount' => Money::format($amount), 'period' => $record->period]),
+                null,
+                null,
+            );
+
             return redirect()
                 ->back()
                 ->with('success', __('inc.toast.approvedTitle'));
@@ -504,6 +520,7 @@ class IncentiveController
 
         $data = $request->validate([
             'paidAt' => ['nullable', 'date'],
+            'method' => ['nullable', 'string', Rule::in(Atelier::PAYMENT_METHODS)],
         ]);
 
         $record = IncentiveRecord::query()->findOrFail($id);
@@ -518,16 +535,44 @@ class IncentiveController
             ? Carbon::parse((string) $data['paidAt'])
             : now();
 
-        $record->forceFill([
-            'payment_status' => 'PAID',
-            'payment_date' => $paidAt,
-        ])->save();
+        // Accounting integration (spec §13): mark paid AND book the
+        // financial payable as ONE ledger expense (source INCENTIVE_RECORD,
+        // unique per record) inside a single transaction — the incentive is
+        // never counted twice (payroll bonuses are separate manual entries
+        // and never auto-filled from incentives).
+        DB::transaction(function () use ($record, $paidAt, $me, $data): void {
+            $record->forceFill([
+                'payment_status' => 'PAID',
+                'payment_date' => $paidAt,
+            ])->save();
+
+            $category = ExpenseCategory::ensureBonusesCategory();
+
+            Expense::bookForSource('INCENTIVE_RECORD', $record->id, [
+                'expense_category_id' => $category->id,
+                'description' => "Incentive: {$record->staff_name} — {$record->scheme_name} ({$record->period})",
+                'amount' => (float) $record->approved_amount,
+                'currency' => Money::DEFAULT_CURRENCY,
+                'date_incurred' => $paidAt->toDateString(),
+                'date_paid' => $paidAt->toDateString(),
+                'method' => $data['method'] ?? 'CASH',
+                'payee' => $record->staff_name,
+                'responsible_staff_id' => $record->staff_id,
+                'status' => 'PAID',
+                'recorded_by_id' => $me->id,
+                'recorded_by_name' => $me->name,
+                'approved_by_id' => $me->id,
+                'approved_by_name' => $me->name,
+                'approved_at' => $paidAt,
+            ]);
+        });
 
         Audit::log($me, 'INCENTIVE_PAYMENT_RECORDED', 'INCENTIVE_RECORD', $record->id, [
             'recordId' => $record->id,
             'staffName' => $record->staff_name,
             'amount' => $record->approved_amount,
             'paymentDate' => $paidAt->format(DATE_ATOM),
+            'expenseBooked' => true,
         ]);
 
         return redirect()

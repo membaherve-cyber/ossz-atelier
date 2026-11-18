@@ -1,5 +1,12 @@
 <?php
 
+use App\Http\Controllers\Accounting\AdvanceController;
+use App\Http\Controllers\Accounting\DashboardController as AccountingDashboardController;
+use App\Http\Controllers\Accounting\ExpenseController;
+use App\Http\Controllers\Accounting\FinancialReportController;
+use App\Http\Controllers\Accounting\PaymentController;
+use App\Http\Controllers\Accounting\PayrollController;
+use App\Http\Controllers\Accounting\SupplierController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\AuditController;
 use App\Http\Controllers\CustomerController;
@@ -126,11 +133,16 @@ Route::post('/tasks/{id}/update', [TaskActionController::class, 'update'])
     ->middleware('perm:production.manage.details');
 
 // --------------------------------------------------------------------------
-// Orders
+// Orders — the unified order registration + garment-piece task assignment
+// workflow (enhancement spec §3) plus the dedicated order details page.
 // --------------------------------------------------------------------------
 Route::get('/orders', [OrderController::class, 'index'])
     ->name('orders.index')
     ->middleware('perm:orders.view');
+
+Route::get('/orders/create', [OrderController::class, 'create'])
+    ->name('orders.create')
+    ->middleware('perm:orders.manage');
 
 Route::post('/orders', [OrderController::class, 'store'])
     ->name('orders.store')
@@ -142,6 +154,10 @@ Route::get('/orders/{id}', [OrderController::class, 'show'])
 
 Route::post('/orders/{id}/update', [OrderController::class, 'update'])
     ->name('orders.update')
+    ->middleware('perm:orders.manage');
+
+Route::post('/orders/{id}/finalize', [OrderController::class, 'finalize'])
+    ->name('orders.finalize') // DRAFT → REGISTERED + staff notifications
     ->middleware('perm:orders.manage');
 
 Route::post('/orders/{id}/delete', [OrderController::class, 'destroy'])
@@ -265,3 +281,146 @@ Route::post('/notifications/read', [NotificationController::class, 'read'])
 Route::get('/audit', [AuditController::class, 'index'])
     ->name('audit.index')
     ->middleware('perm:audit.view');
+
+// --------------------------------------------------------------------------
+// ACCOUNTING (enhancement spec §4) — confidential financial module.
+// Management-only via the permission matrix; enforced SERVER-SIDE here
+// (hiding menu entries is never the authorization).
+// --------------------------------------------------------------------------
+Route::get('/accounting', [AccountingDashboardController::class, 'index'])
+    ->name('accounting.dashboard')
+    ->middleware('perm:accounting.view');
+
+// Income and customer payments (spec §6)
+Route::get('/payments', [PaymentController::class, 'index'])
+    ->name('payments.index')
+    ->middleware('perm:accounting.payments');
+
+Route::post('/payments', [PaymentController::class, 'store'])
+    ->name('payments.store')
+    ->middleware('perm:accounting.payments');
+
+Route::post('/payments/{id}/update', [PaymentController::class, 'update'])
+    ->name('payments.update')
+    ->middleware('perm:accounting.payments');
+
+Route::post('/payments/{id}/delete', [PaymentController::class, 'destroy'])
+    ->name('payments.destroy')
+    ->middleware('perm:accounting.payments');
+
+// Expenses (spec §7)
+Route::get('/expenses', [ExpenseController::class, 'index'])
+    ->name('expenses.index')
+    ->middleware('perm:accounting.expenses');
+
+Route::post('/expenses', [ExpenseController::class, 'store'])
+    ->name('expenses.store')
+    ->middleware('perm:accounting.expenses');
+
+Route::post('/expenses/{id}/update', [ExpenseController::class, 'update'])
+    ->name('expenses.update')
+    ->middleware('perm:accounting.expenses');
+
+Route::post('/expenses/{id}/review', [ExpenseController::class, 'review'])
+    ->name('expenses.review') // approve / reject / mark paid — accounting.approve
+    ->middleware('perm:accounting.approve');
+
+Route::post('/expenses/{id}/delete', [ExpenseController::class, 'destroy'])
+    ->name('expenses.destroy')
+    ->middleware('perm:accounting.expenses');
+
+Route::get('/expenses/{id}/receipt', [ExpenseController::class, 'receipt'])
+    ->name('expenses.receipt')
+    ->middleware('perm:accounting.expenses');
+
+Route::post('/expense-categories', [ExpenseController::class, 'storeCategory'])
+    ->name('expenses.categories.store')
+    ->middleware('perm:accounting.expenses');
+
+Route::post('/expense-categories/{id}', [ExpenseController::class, 'updateCategory'])
+    ->name('expenses.categories.update')
+    ->middleware('perm:accounting.expenses');
+
+// Salaries and payroll (spec §8)
+Route::get('/payroll', [PayrollController::class, 'index'])
+    ->name('payroll.index')
+    ->middleware('perm:accounting.payroll');
+
+Route::post('/payroll', [PayrollController::class, 'store'])
+    ->name('payroll.store') // create period + proposed items from profiles
+    ->middleware('perm:accounting.payroll');
+
+Route::post('/payroll/{id}/approve', [PayrollController::class, 'approve'])
+    ->name('payroll.approve')
+    ->middleware('perm:accounting.approve');
+
+Route::post('/payroll/items/{id}/update', [PayrollController::class, 'updateItem'])
+    ->name('payroll.items.update') // amounts + advance recovery application
+    ->middleware('perm:accounting.payroll');
+
+Route::post('/payroll/items/{id}/pay', [PayrollController::class, 'payItem'])
+    ->name('payroll.items.pay')
+    ->middleware('perm:accounting.payroll');
+
+Route::post('/payroll/{id}/delete', [PayrollController::class, 'destroy'])
+    ->name('payroll.destroy')
+    ->middleware('perm:accounting.payroll');
+
+// Staff advances (spec §9)
+Route::get('/advances', [AdvanceController::class, 'index'])
+    ->name('advances.index')
+    ->middleware('perm:accounting.advances');
+
+Route::post('/advances', [AdvanceController::class, 'store'])
+    ->name('advances.store')
+    ->middleware('perm:accounting.advances');
+
+Route::post('/advances/{id}/review', [AdvanceController::class, 'review'])
+    ->name('advances.review') // approve / reject — accounting.approve
+    ->middleware('perm:accounting.approve');
+
+Route::post('/advances/{id}/disburse', [AdvanceController::class, 'disburse'])
+    ->name('advances.disburse') // mark handed out + notify staff
+    ->middleware('perm:accounting.approve');
+
+Route::post('/advances/{id}/cancel', [AdvanceController::class, 'cancel'])
+    ->name('advances.cancel')
+    ->middleware('perm:accounting.approve');
+
+// Suppliers and purchases (spec §10)
+Route::get('/suppliers', [SupplierController::class, 'index'])
+    ->name('suppliers.index')
+    ->middleware('perm:accounting.suppliers');
+
+Route::post('/suppliers', [SupplierController::class, 'store'])
+    ->name('suppliers.store')
+    ->middleware('perm:accounting.suppliers');
+
+Route::post('/suppliers/{id}/update', [SupplierController::class, 'update'])
+    ->name('suppliers.update')
+    ->middleware('perm:accounting.suppliers');
+
+Route::post('/suppliers/{id}/delete', [SupplierController::class, 'destroy'])
+    ->name('suppliers.destroy')
+    ->middleware('perm:accounting.suppliers');
+
+Route::post('/purchases', [SupplierController::class, 'storePurchase'])
+    ->name('purchases.store')
+    ->middleware('perm:accounting.suppliers');
+
+Route::post('/purchases/{id}/update', [SupplierController::class, 'updatePurchase'])
+    ->name('purchases.update')
+    ->middleware('perm:accounting.suppliers');
+
+Route::post('/purchases/{id}/delete', [SupplierController::class, 'destroyPurchase'])
+    ->name('purchases.destroy')
+    ->middleware('perm:accounting.suppliers');
+
+Route::get('/purchases/{id}/receipt', [SupplierController::class, 'purchaseReceipt'])
+    ->name('purchases.receipt')
+    ->middleware('perm:accounting.suppliers');
+
+// Financial reports (spec §12) — CSV export via ?export=csv
+Route::get('/accounting/reports', [FinancialReportController::class, 'index'])
+    ->name('accounting.reports')
+    ->middleware('perm:accounting.reports');

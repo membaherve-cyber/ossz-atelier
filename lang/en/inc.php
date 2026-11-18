@@ -136,4 +136,8 @@ return [
         'paymentFailed' => 'Could not record payment',
         'unexpected' => 'Unexpected error.',
     ],
+
+    // Accounting integration (enhancement §13): staff notification message
+    // when Management approves an incentive.
+    'notifApproved' => 'Your incentive of {amount} for {period} was approved.',
 ];

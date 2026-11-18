@@ -36,6 +36,7 @@ class ProductionTask extends Model
     /** Prisma integers + datetimes. */
     protected $casts = [
         'progress' => 'integer',
+        'quantity' => 'integer',
         'deadline' => 'datetime',
         'completed_at' => 'datetime',
         'delivered_at' => 'datetime',

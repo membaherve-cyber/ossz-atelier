@@ -43,6 +43,10 @@ final class Notifier
         'READY_FOR_PICKUP' => 'Ready for pickup',
         'TASK_DELIVERED' => 'Garment delivered/collected',
         'TASK_CANCELLED' => 'Task cancelled',
+        // Accounting + workflow enhancement
+        'INCENTIVE_APPROVED' => 'Incentive approved',
+        'PAYROLL_PAID' => 'Salary paid',
+        'ADVANCE_DISBURSED' => 'Advance received',
     ];
 
     /**

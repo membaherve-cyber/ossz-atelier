@@ -136,4 +136,8 @@ return [
         'paymentFailed' => 'Impossible d\'enregistrer le paiement',
         'unexpected' => 'Erreur inattendue.',
     ],
+
+    // Intégration comptabilité (amélioration §13) : message de notification
+    // staff quand la Direction approuve une prime.
+    'notifApproved' => 'Votre prime de {amount} pour {period} a été approuvée.',
 ];

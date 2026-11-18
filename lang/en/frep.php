@@ -1,0 +1,82 @@
+<?php
+
+// OSSZ ATELIER — EN lines, financial reports (accounting enhancement §12).
+// Accessed via __('frep.key').
+
+return [
+    'title' => 'Financial Reports',
+    'subtitle' => 'Traceable income, cost and performance reports built from recorded data.',
+    'nav' => 'Financial Reports',
+
+    'reportType' => 'Report',
+    'fromDate' => 'From',
+    'toDate' => 'To',
+    'run' => 'Run Report',
+    'exportCsv' => 'Export CSV',
+    'print' => 'Print / Save as PDF',
+    'printedAt' => 'Printed on {date}',
+    'range' => 'Period: {from} — {to}',
+
+    // Report types (order = spec §12 list)
+    'type' => [
+        'daily' => 'Daily Income and Expenses',
+        'monthly' => 'Monthly Income and Expenses',
+        'annual' => 'Annual Financial Summary',
+        'expensesByCategory' => 'Expense Breakdown by Category',
+        'transportation' => 'Transportation Expenses',
+        'purchases' => 'Material Purchases',
+        'payroll' => 'Monthly Payroll Expenditure',
+        'outstandingSalaries' => 'Outstanding Salary Payments',
+        'advances' => 'Staff Advances',
+        'paymentHistory' => 'Customer Payment History',
+        'outstandingBalances' => 'Outstanding Customer Balances',
+        'profitability' => 'Order-level Profitability',
+        'performance' => 'Workshop Operating Performance',
+    ],
+
+    // Generic columns
+    'colPeriod' => 'Period',
+    'colDate' => 'Date',
+    'colIncome' => 'Income (Payments)',
+    'colExpenses' => 'Expenses',
+    'colNet' => 'Net',
+    'colYear' => 'Year',
+    'colRevenue' => 'Revenue (Order Value)',
+    'colSalaries' => 'Salaries',
+    'colCategory' => 'Category',
+    'colGroup' => 'Group',
+    'colCount' => 'Entries',
+    'colAmount' => 'Amount',
+    'colOrder' => 'Order',
+    'colCustomer' => 'Customer',
+    'colReference' => 'Reference',
+    'colMethod' => 'Method',
+    'colStaff' => 'Staff Member',
+    'colPayroll' => 'Payroll',
+    'colNetPay' => 'Net Pay',
+    'colPaymentStatus' => 'Payment',
+    'colPaymentDate' => 'Payment Date',
+    'colSupplier' => 'Supplier',
+    'colDescription' => 'Description',
+    'colTotal' => 'Total',
+    'colValue' => 'Order Value',
+    'colPaid' => 'Paid',
+    'colOutstanding' => 'Outstanding',
+    'colMaterials' => 'Materials',
+    'colTransport' => 'Transport',
+    'colOther' => 'Other Costs',
+    'colLabour' => 'Allocated Labour',
+    'colTotalCost' => 'Total Cost',
+    'colContribution' => 'Gross Contribution',
+    'colOrders' => 'Orders',
+    'colDelivered' => 'Delivered Orders',
+    'colTasksCompleted' => 'Tasks Completed',
+
+    'totalRow' => 'Total',
+    'averageRow' => 'Average',
+    'emptyTitle' => 'No data for this period',
+    'emptyDesc' => 'There are no recorded financial records matching this report and period.',
+
+    'incentivesIncluded' => 'Includes paid staff incentives booked automatically.',
+    'advancesNote' => 'Disbursed advances are a cash outflow, not an expense; recoveries reduce payroll net pay.',
+];

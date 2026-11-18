@@ -49,6 +49,17 @@ final class Atelier
         'incentives.approve',
         'incentives.payment',
         'audit.view',
+        // Accounting (enhancement spec §4.1/§15) — MANAGEMENT holds all of
+        // them via the matrix; ADMIN holds none unless Management extends
+        // the matrix; STAFF never sees confidential financial records.
+        'accounting.view',
+        'accounting.payments',
+        'accounting.expenses',
+        'accounting.payroll',
+        'accounting.advances',
+        'accounting.suppliers',
+        'accounting.reports',
+        'accounting.approve',
     ];
 
     /**
@@ -106,6 +117,10 @@ final class Atelier
         'READY_FOR_PICKUP',
         'TASK_DELIVERED',
         'TASK_CANCELLED',
+        // Accounting + workflow enhancement
+        'INCENTIVE_APPROVED',
+        'PAYROLL_PAID',
+        'ADVANCE_DISBURSED',
     ];
 
     /**
@@ -124,9 +139,69 @@ final class Atelier
     public const PAYMENT_STATUSES = ['UNPAID', 'PAID'];
 
     /**
+     * Order statuses (enhancement spec §3.2): a draft order keeps its tasks
+     * out of staff notifications until Management finalizes it.
+     */
+    public const ORDER_STATUSES = ['DRAFT', 'REGISTERED'];
+
+    /**
+     * Customer payment methods (enhancement spec §6).
+     */
+    public const PAYMENT_METHODS = ['CASH', 'MTN_MOMO', 'ORANGE_MONEY', 'BANK_TRANSFER', 'OTHER'];
+
+    /**
+     * Expense approval statuses (enhancement spec §7.4).
+     */
+    public const EXPENSE_STATUSES = ['DRAFT', 'PENDING', 'APPROVED', 'REJECTED', 'PAID'];
+
+    /**
+     * Expense category groups (enhancement spec §7.1 A–F).
+     */
+    public const EXPENSE_GROUPS = ['MATERIALS', 'TRANSPORT', 'OPERATIONS', 'SALARIES', 'ADMIN', 'OTHER'];
+
+    /**
+     * Staff remuneration types (enhancement spec §8.1).
+     */
+    public const REMUNERATION_TYPES = ['MONTHLY', 'DAILY', 'WEEKLY', 'TASK_BASED', 'COMMISSION', 'OTHER'];
+
+    /**
+     * Payroll period statuses (enhancement spec §8.2).
+     */
+    public const PAYROLL_STATUSES = ['DRAFT', 'PENDING', 'APPROVED', 'PARTIALLY_PAID', 'PAID'];
+
+    /**
+     * Payroll item payment statuses (enhancement spec §8.2).
+     */
+    public const PAYROLL_ITEM_STATUSES = ['PENDING', 'PAID'];
+
+    /**
+     * Staff advance statuses (enhancement spec §9).
+     */
+    public const ADVANCE_STATUSES = [
+        'PENDING_APPROVAL',
+        'APPROVED',
+        'DISBURSED',
+        'PARTIALLY_RECOVERED',
+        'FULLY_RECOVERED',
+        'CANCELLED',
+    ];
+
+    /**
+     * Supplier purchase payment statuses (enhancement spec §10).
+     */
+    public const PURCHASE_PAYMENT_STATUSES = ['UNPAID', 'PARTIAL', 'PAID'];
+
+    /**
+     * System sources of auto-booked expenses (enhancement spec §13/§14 —
+     * one ledger row per source, never duplicated).
+     */
+    public const EXPENSE_SOURCES = ['INCENTIVE_RECORD', 'PURCHASE'];
+
+    /**
      * Audit action codes — the exact keys of audit.action.* in
-     * src/components/atelier/i18n/dict/audit.ts (labels in lang audit.php).
-     * Written by App\Services\Audit::log().
+     * src/components/atelier/i18n/dict/audit.ts (labels in lang audit.php)
+     * plus the accounting enhancement additions. Written by
+     * App\Services\Audit::log().
      */
     public const AUDIT_ACTIONS = [
         'LOGIN_SUCCESS',
@@ -166,6 +241,35 @@ final class Atelier
         'INCENTIVE_APPROVED',
         'INCENTIVE_REJECTED',
         'INCENTIVE_PAYMENT_RECORDED',
+        // Accounting + unified order workflow (enhancement)
+        'ORDER_FINALIZED',
+        'ORDER_VALUE_UPDATED',
+        'PAYMENT_RECORDED',
+        'PAYMENT_UPDATED',
+        'PAYMENT_DELETED',
+        'EXPENSE_CATEGORY_CREATED',
+        'EXPENSE_CATEGORY_UPDATED',
+        'EXPENSE_RECORDED',
+        'EXPENSE_UPDATED',
+        'EXPENSE_REVIEWED',
+        'EXPENSE_DELETED',
+        'SALARY_PROFILE_CREATED',
+        'SALARY_PROFILE_UPDATED',
+        'PAYROLL_CREATED',
+        'PAYROLL_UPDATED',
+        'PAYROLL_APPROVED',
+        'PAYROLL_ITEM_PAID',
+        'ADVANCE_RECORDED',
+        'ADVANCE_REVIEWED',
+        'ADVANCE_DISBURSED',
+        'ADVANCE_CANCELLED',
+        'SUPPLIER_CREATED',
+        'SUPPLIER_UPDATED',
+        'SUPPLIER_DELETED',
+        'PURCHASE_RECORDED',
+        'PURCHASE_UPDATED',
+        'PURCHASE_DELETED',
+        'LABOUR_ALLOCATED',
     ];
 
     /**

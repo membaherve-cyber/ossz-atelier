@@ -8,14 +8,20 @@ use App\Support\Atelier;
 /**
  * OSSZ ATELIER — role & permission matrix.
  *
- * Ported VERBATIM from src/lib/permissions.ts:
+ * Ported VERBATIM from src/lib/permissions.ts, extended by the accounting
+ * enhancement:
  *   - MANAGEMENT holds every permission (sole final approver of
- *     incentives, audit visibility, Management-account management).
+ *     incentives, audit visibility, Management-account management, and
+ *     the full confidential accounting module — payments, expenses,
+ *     payroll, advances, suppliers, reports and approvals).
  *   - ADMIN holds the operational ADMIN_PERMISSIONS list (no
  *     performance.configure / performance.assess, no users.manage.all, no
- *     incentives.manage.schemes / approve / payment, no audit.view).
+ *     incentives.manage.schemes / approve / payment, no audit.view, and
+ *     NO accounting permissions — accounting is confidential and
+ *     Management-only until Management explicitly extends the matrix).
  *   - STAFF holds no global permissions — their access is strictly scoped
- *     to their own assigned tasks inside the controllers.
+ *     to their own assigned tasks inside the controllers (never to
+ *     financial records or other staff salaries).
  *
  * Consumed by App\Http\Middleware\EnsurePermission (alias `perm`) and by
  * the views to build the navigation per role.
