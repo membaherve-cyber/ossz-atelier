@@ -24,18 +24,18 @@
     // Nav items highlight ONLY on their index route (task/order detail pages
     // keep the nav neutral, exactly like the captured task-show page).
     $navActive = [
-        'dashboard' => $request->routeIs('dashboard'),
-        'tasks' => $request->routeIs('tasks.index'),
-        'create' => $request->routeIs('tasks.create'),
-        'orders' => $request->routeIs('orders.index'),
-        'customers' => $request->routeIs('customers.index'),
-        'performance' => $request->routeIs('performance.index'),
-        'incentives' => $request->routeIs('incentives.index'),
-        'reports' => $request->routeIs('reports.index'),
-        'users' => $request->routeIs('users.index'),
-        'stages' => $request->routeIs('stages.index'),
-        'audit' => $request->routeIs('audit.index'),
-        'notifications' => $request->routeIs('notifications.index'),
+        'dashboard' => request()->routeIs('dashboard'),
+        'tasks' => request()->routeIs('tasks.index'),
+        'create' => request()->routeIs('tasks.create'),
+        'orders' => request()->routeIs('orders.index'),
+        'customers' => request()->routeIs('customers.index'),
+        'performance' => request()->routeIs('performance.index'),
+        'incentives' => request()->routeIs('incentives.index'),
+        'reports' => request()->routeIs('reports.index'),
+        'users' => request()->routeIs('users.index'),
+        'stages' => request()->routeIs('stages.index'),
+        'audit' => request()->routeIs('audit.index'),
+        'notifications' => request()->routeIs('notifications.index'),
     ];
 
     // Avatar initials ("Aminata Sow" -> "AS").
