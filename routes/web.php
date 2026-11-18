@@ -366,6 +366,16 @@ Route::post('/payroll/{id}/delete', [PayrollController::class, 'destroy'])
     ->name('payroll.destroy')
     ->middleware('perm:accounting.payroll');
 
+// Salary profiles (spec §8.1) — managed from the payroll screen's
+// profiles tab
+Route::post('/salary-profiles', [PayrollController::class, 'storeProfile'])
+    ->name('salary.profiles.store')
+    ->middleware('perm:accounting.payroll');
+
+Route::post('/salary-profiles/{id}', [PayrollController::class, 'updateProfile'])
+    ->name('salary.profiles.update')
+    ->middleware('perm:accounting.payroll');
+
 // Staff advances (spec §9)
 Route::get('/advances', [AdvanceController::class, 'index'])
     ->name('advances.index')
