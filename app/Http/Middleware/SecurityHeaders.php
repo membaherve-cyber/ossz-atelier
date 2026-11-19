@@ -20,10 +20,12 @@ use Symfony\Component\HttpFoundation\Response;
  *   subdomain; includeSubDomains deliberately omitted so neighbouring
  *   subdomains of osszcollection.com are not affected).
  * - Content-Security-Policy — a pragmatic baseline that matches the app's
- *   architecture (Tailwind CSS + Alpine.js use inline attributes and
- *   inline <script> blocks, so 'unsafe-inline' is required for scripts
- *   and styles): everything else is locked to 'self', objects/frames/
- *   base-uri are blocked, and https-only upgrades are enforced.
+ *   architecture (Tailwind CSS + Alpine.js use inline attributes, inline
+ *   <script> blocks and runtime expression evaluation, so scripts require
+ *   'unsafe-inline' + 'unsafe-eval'): everything else is locked to 'self',
+ *   objects/frames/base-uri are blocked, and forms only post same-origin.
+ *   (Verified in-browser: without 'unsafe-eval' Alpine cannot evaluate
+ *   x-data/x-show expressions and the whole interactive layer dies.)
  */
 class SecurityHeaders
 {
@@ -39,7 +41,7 @@ class SecurityHeaders
         $response->headers->set(
             'Content-Security-Policy',
             "default-src 'self'; "
-            ."script-src 'self' 'unsafe-inline'; "
+            ."script-src 'self' 'unsafe-inline' 'unsafe-eval'; "
             ."style-src 'self' 'unsafe-inline'; "
             ."img-src 'self' data:; "
             ."font-src 'self'; "

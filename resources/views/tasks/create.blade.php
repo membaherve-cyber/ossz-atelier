@@ -80,39 +80,47 @@
                 </div>
             </div>
         @else
+            @php
+                // NOTE: built in PHP and passed to @json as single variables —
+                // multi-line @json([...]) arguments containing __() calls break
+                // Laravel's Blade directive compilation.
+                $priorityLabelsJson = [
+                    'LOW' => __('labels.priority.LOW'),
+                    'NORMAL' => __('labels.priority.NORMAL'),
+                    'HIGH' => __('labels.priority.HIGH'),
+                    'URGENT' => __('labels.priority.URGENT'),
+                ];
+                $priorityClassesJson = [
+                    'LOW' => 'bg-stone-50 text-stone-600 border-stone-300',
+                    'NORMAL' => 'bg-teal-50 text-teal-700 border-teal-300',
+                    'HIGH' => 'bg-amber-50 text-amber-800 border-amber-300',
+                    'URGENT' => 'bg-red-50 text-red-800 border-red-300',
+                ];
+                $taskTemplatesJson = [
+                    'pieceNumber' => __('tc.pieceNumber'),
+                    'removePiece' => __('tc.removePiece'),
+                    'summaryOne' => __('tc.summaryOne'),
+                    'summaryMany' => __('tc.summaryMany'),
+                    'createOne' => __('tc.createOne'),
+                    'createMany' => __('tc.createMany'),
+                    'existing' => __('tc.existingTasksSummary'),
+                    'existingProgress' => __('tc.existingTasksSummaryProgress'),
+                    'pieceNamePlaceholder' => __('tc.pieceNamePlaceholder'),
+                    'instructionsPlaceholder' => __('tc.instructionsPlaceholder'),
+                    'categoryForPiece' => __('tc.categoryForPiece'),
+                    'staffForPiece' => __('tc.staffForPiece'),
+                    'priorityForPiece' => __('tc.priorityForPiece'),
+                ];
+            @endphp
             <form method="POST" action="{{ route('tasks.store') }}"
               x-data='{
                   orders: @json($ordersJson),
                   selectedId: @js(old('orderId', $preselectOrderId ?? '')),
                   pieces: @json(old('pieces', [])),
                   errorsByIndex: @json($pieceErrors),
-                  priorityLabels: @json([
-                      "LOW" => __('labels.priority.LOW'),
-                      "NORMAL" => __('labels.priority.NORMAL'),
-                      "HIGH" => __('labels.priority.HIGH'),
-                      "URGENT" => __('labels.priority.URGENT'),
-                  ]),
-                  priorityClasses: @json([
-                      "LOW" => "bg-stone-50 text-stone-600 border-stone-300",
-                      "NORMAL" => "bg-teal-50 text-teal-700 border-teal-300",
-                      "HIGH" => "bg-amber-50 text-amber-800 border-amber-300",
-                      "URGENT" => "bg-red-50 text-red-800 border-red-300",
-                  ]),
-                  templates: @json([
-                      "pieceNumber" => __('tc.pieceNumber'),
-                      "removePiece" => __('tc.removePiece'),
-                      "summaryOne" => __('tc.summaryOne'),
-                      "summaryMany" => __('tc.summaryMany'),
-                      "createOne" => __('tc.createOne'),
-                      "createMany" => __('tc.createMany'),
-                      "existing" => __('tc.existingTasksSummary'),
-                      "existingProgress" => __('tc.existingTasksSummaryProgress'),
-                      "pieceNamePlaceholder" => __('tc.pieceNamePlaceholder'),
-                      "instructionsPlaceholder" => __('tc.instructionsPlaceholder'),
-                      "categoryForPiece" => __('tc.categoryForPiece'),
-                      "staffForPiece" => __('tc.staffForPiece'),
-                      "priorityForPiece" => __('tc.priorityForPiece'),
-                  ]),
+                  priorityLabels: @json($priorityLabelsJson),
+                  priorityClasses: @json($priorityClassesJson),
+                  templates: @json($taskTemplatesJson),
                   init() {
                       if (this.pieces.length === 0) {
                           this.pieces = [this.makeRow(this.findOrder(this.selectedId))];

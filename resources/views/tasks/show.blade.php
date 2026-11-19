@@ -193,22 +193,32 @@
 
                     <div class="h-px bg-border" role="separator"></div>
 
+                    @php
+                        // NOTE: these arrays are built in PHP and passed to @json as a
+                        // single variable — a multi-line @json([...]) argument
+                        // containing __() calls breaks Laravel's Blade directive
+                        // compilation (the argument capture stops at the first
+                        // inner closing paren, producing invalid PHP).
+                        $stageStateLabels = [
+                            'NOT_STARTED' => __('labels.stageState.NOT_STARTED'),
+                            'IN_PROGRESS' => __('labels.stageState.IN_PROGRESS'),
+                            'COMPLETED' => __('labels.stageState.COMPLETED'),
+                            'NOT_APPLICABLE' => __('labels.stageState.NOT_APPLICABLE'),
+                        ];
+                        $stageStateTemplates = [
+                            'was' => __('td.wasState'),
+                            'pendingOne' => __('td.pendingChange'),
+                            'pendingMany' => __('td.pendingChanges'),
+                        ];
+                    @endphp
+
                     <form method="POST" action="{{ route('tasks.stages', $task->id) }}"
                           x-data='{
                               saved: @json($savedStates),
                               changes: {},
                               comment: "",
-                              labels: @json([
-                                  "NOT_STARTED" => __('labels.stageState.NOT_STARTED'),
-                                  "IN_PROGRESS" => __('labels.stageState.IN_PROGRESS'),
-                                  "COMPLETED" => __('labels.stageState.COMPLETED'),
-                                  "NOT_APPLICABLE" => __('labels.stageState.NOT_APPLICABLE'),
-                              ]),
-                              templates: @json([
-                                  "was" => __('td.wasState'),
-                                  "pendingOne" => __('td.pendingChange'),
-                                  "pendingMany" => __('td.pendingChanges'),
-                              ]),
+                              labels: @json($stageStateLabels),
+                              templates: @json($stageStateTemplates),
                               setState(stageId, state) {
                                   if (this.saved[stageId] === state) {
                                       delete this.changes[stageId];
