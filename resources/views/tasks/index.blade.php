@@ -24,6 +24,17 @@
             || filled($filters['deadlineFrom'] ?? null)
             || filled($filters['deadlineTo'] ?? null);
 
+        // Active (non-default) filter count for the mobile filter toggle badge.
+        $activeFilterCount = count(array_filter([
+            $filters['q'] ?? null,
+            $filters['staff'] ?? null,
+            $filters['status'] ?? null,
+            $filters['priority'] ?? null,
+            ! empty($filters['overdue']) ? '1' : null,
+            $filters['deadlineFrom'] ?? null,
+            $filters['deadlineTo'] ?? null,
+        ], static fn ($value): bool => filled($value)));
+
         if ($isStaff) {
             $emptyTitle = __('tasks.emptyStaffTitle');
             $emptyDescription = __('tasks.emptyStaffDesc');
@@ -57,9 +68,30 @@
             @endif
         </div>
 
-        <div class="rounded-xl border bg-card text-card-foreground shadow-sm mb-4">
-            <div class="p-4">
-                <form method="GET" action="{{ route('tasks.index') }}" class="grid gap-3 md:grid-cols-2 lg:grid-cols-4" role="search">
+        <div class="rounded-xl border bg-card text-card-foreground shadow-sm mb-4" x-data="{ open: false }">
+            {{-- Mobile filter toggle (the panel is always visible from md up) --}}
+            <button type="button" @click="open = !open" :aria-expanded="open.toString()" aria-controls="tasks-filter-panel"
+                    class="md:hidden w-full flex items-center justify-between gap-2 p-4 text-left">
+                <span class="inline-flex items-center gap-2 text-sm font-medium">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 text-muted-foreground" aria-hidden="true"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                    {{ __('common.filter') }}
+                    @if ($activeFilterCount > 0)
+                        <span class="inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-primary/10 text-primary text-xs font-bold">{{ $activeFilterCount }}</span>
+                    @endif
+                </span>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 text-muted-foreground transition-transform duration-200" :class="open ? 'rotate-180' : ''" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+            </button>
+            <div id="tasks-filter-panel" x-show="open"
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0"
+                 x-transition:enter-end="opacity-100"
+                 x-transition:leave="transition ease-in duration-150"
+                 x-transition:leave-start="opacity-100"
+                 x-transition:leave-end="opacity-0"
+                 :class="open ? 'block' : 'hidden md:block'"
+                 class="md:!block">
+                <div class="p-4 pt-0 md:pt-4" style="--pt-md: 1rem">
+                    <form method="GET" action="{{ route('tasks.index') }}" class="grid gap-3 md:grid-cols-2 lg:grid-cols-4" role="search">
                     <div class="space-y-1.5 lg:col-span-2">
                         <label for="tasks-search" class="text-sm font-medium leading-none">{{ __('common.search') }}</label>
                         <div class="relative">
@@ -138,16 +170,95 @@
                             {{ __('tasks.overdueOnly') }}
                         </label>
                         <button type="submit"
-                                class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm font-medium h-9 px-4 bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors">
+                                class="btn-press inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm font-medium h-9 px-4 bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors">
                             {{ __('common.filter') }}
                         </button>
                     </div>
                 </form>
+                </div>
             </div>
         </div>
 
+        {{-- Mobile task cards (the table below takes over from md up) --}}
+        <div class="md:hidden space-y-3 mb-4">
+            @forelse ($tasks as $task)
+                @php
+                    $taskDone = $task->progress >= 100 || in_array($task->status, ['APPROVED', 'DELIVERED'], true);
+                    $assigneeInitials = $task->assignedStaff
+                        ? strtoupper(collect(explode(' ', trim((string) $task->assignedStaff->name)))
+                            ->filter()
+                            ->map(static fn (string $word): string => mb_substr($word, 0, 1))
+                            ->take(2)
+                            ->implode(''))
+                        : '';
+                @endphp
+                <a href="{{ route('tasks.show', $task->id) }}"
+                   aria-label="{{ \App\Support\Trans::fill('tasks.openTaskAria', ['code' => $task->code, 'piece' => $task->garment_piece]) }}"
+                   class="block rounded-xl border bg-card p-4 card-lift">
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="font-mono text-xs text-muted-foreground">{{ $task->code }}</span>
+                        <span class="flex items-center gap-1.5">
+                            @if (! $isStaff)
+                                <x-badges.priority :priority="$task->priority"/>
+                            @endif
+                            <x-badges.status :status="$task->status"/>
+                        </span>
+                    </div>
+                    <p class="font-semibold text-sm mt-1.5 truncate">{{ $task->garment_piece }}</p>
+                    <p class="text-xs text-muted-foreground mt-0.5 truncate">{{ $task->order?->order_number }} · {{ $task->order?->customer?->name }}</p>
+                    <div class="mt-2.5 flex flex-wrap items-center justify-between gap-2">
+                        @if ($task->assignedStaff)
+                            <span class="inline-flex items-center gap-1.5 min-w-0">
+                                <span class="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[10px] font-semibold text-primary">{{ $assigneeInitials }}</span>
+                                <span class="truncate text-xs">{{ $task->assignedStaff->name }}</span>
+                            </span>
+                        @else
+                            <span class="text-xs text-muted-foreground italic">{{ __('tasks.unassigned') }}</span>
+                        @endif
+                        @if ($task->deadline === null)
+                            <span class="text-muted-foreground text-xs">—</span>
+                        @elseif ($task->isOverdue())
+                            <span class="inline-flex items-center gap-1 text-xs whitespace-nowrap text-red-700 font-semibold">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3.5" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+                                {{ $task->deadline->format('M j, Y') }}
+                            </span>
+                        @else
+                            <span class="inline-flex items-center gap-1 text-xs whitespace-nowrap text-muted-foreground">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3.5 opacity-60" aria-hidden="true"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M17.5 17.5 16 16.3V14"/><circle cx="16" cy="16" r="6"/></svg>
+                                {{ $task->deadline->format('M j, Y') }}
+                            </span>
+                        @endif
+                    </div>
+                    <div class="mt-3 flex items-center gap-2">
+                        <div class="h-2 flex-1 rounded-full bg-muted overflow-hidden">
+                            <div class="h-full rounded-full bar-anim {{ $taskDone ? 'bg-emerald-600' : 'bg-primary' }}" style="width: {{ $task->progress }}%"></div>
+                        </div>
+                        <span class="text-xs font-semibold tabular-nums w-9 text-right{{ $taskDone ? ' text-emerald-700' : '' }}">{{ $task->progress }}%</span>
+                    </div>
+                </a>
+            @empty
+                <div class="rounded-xl border bg-card">
+                    <div class="flex flex-col items-center justify-center gap-2 py-10 px-4 text-center">
+                        <div class="rounded-full bg-muted p-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-6 text-muted-foreground" aria-hidden="true"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0l-4.38 1.46A2 2 0 0 0 2.5 5.77l2.76 14.42A2 2 0 0 0 7.22 22h9.56a2 2 0 0 0 1.96-1.8l2.76-14.43a2 2 0 0 0-1.12-2.31"/><path d="M9 6v3"/><path d="M15 6v3"/><path d="M9 12h6"/></svg>
+                        </div>
+                        <p class="font-medium">{{ $emptyTitle }}</p>
+                        <p class="text-sm text-muted-foreground max-w-sm">{{ $emptyDescription }}</p>
+                        @if (! $isStaff && $hasFilters)
+                            <div class="mt-2">
+                                <a href="{{ route('tasks.index') }}"
+                                   class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm font-medium h-8 px-3 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground transition-colors">
+                                    {{ __('tasks.clearFilters') }}
+                                </a>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            @endforelse
+        </div>
+
         <div class="rounded-xl border bg-card text-card-foreground shadow-sm">
-            <div class="overflow-x-auto">
+            <div class="hidden md:block overflow-x-auto">
                 <table class="w-full text-sm min-w-[900px]">
                     <caption class="sr-only">{{ $isStaff ? __('tasks.myTitle') : __('tasks.title') }}</caption>
                     <thead>
@@ -259,13 +370,13 @@
                 </p>
                 <div class="flex items-center gap-2">
                     @if ($tasks->onFirstPage())
-                        <span class="inline-flex items-center gap-1 h-8 px-3 rounded-md border border-input bg-background text-xs font-medium opacity-50 cursor-not-allowed" aria-disabled="true">
+                        <span class="inline-flex items-center gap-1 min-h-[44px] px-3 rounded-md border border-input bg-background text-xs font-medium opacity-50 cursor-not-allowed" aria-disabled="true">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
                             {{ __('tasks.previous') }}
                         </span>
                     @else
                         <a href="{{ $tasks->appends(request()->query())->previousPageUrl() }}"
-                           class="inline-flex items-center gap-1 h-8 px-3 rounded-md border border-input bg-background text-xs font-medium hover:bg-accent hover:text-accent-foreground transition-colors">
+                           class="btn-press inline-flex items-center gap-1 min-h-[44px] px-3 rounded-md border border-input bg-background text-xs font-medium hover:bg-accent hover:text-accent-foreground transition-colors">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
                             {{ __('tasks.previous') }}
                         </a>
@@ -277,12 +388,12 @@
 
                     @if ($tasks->hasMorePages())
                         <a href="{{ $tasks->appends(request()->query())->nextPageUrl() }}"
-                           class="inline-flex items-center gap-1 h-8 px-3 rounded-md border border-input bg-background text-xs font-medium hover:bg-accent hover:text-accent-foreground transition-colors">
+                           class="btn-press inline-flex items-center gap-1 min-h-[44px] px-3 rounded-md border border-input bg-background text-xs font-medium hover:bg-accent hover:text-accent-foreground transition-colors">
                             {{ __('tasks.next') }}
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
                         </a>
                     @else
-                        <span class="inline-flex items-center gap-1 h-8 px-3 rounded-md border border-input bg-background text-xs font-medium opacity-50 cursor-not-allowed" aria-disabled="true">
+                        <span class="inline-flex items-center gap-1 min-h-[44px] px-3 rounded-md border border-input bg-background text-xs font-medium opacity-50 cursor-not-allowed" aria-disabled="true">
                             {{ __('tasks.next') }}
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
                         </span>

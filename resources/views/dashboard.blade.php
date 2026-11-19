@@ -79,9 +79,14 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+            <div class="flex gap-2 overflow-x-auto scroll-thin pb-1 lg:hidden mb-4">
+                <a href="{{ route('tasks.index') }}" class="inline-flex items-center gap-1.5 rounded-full border bg-card px-4 py-2 text-sm font-medium btn-press whitespace-nowrap">{!! $icon($iconPaths['listTodo'], 'size-4 text-primary') !!}{{ __('shell.nav.myTasks') }}</a>
+                <a href="{{ route('notifications.index') }}" class="inline-flex items-center gap-1.5 rounded-full border bg-card px-4 py-2 text-sm font-medium btn-press whitespace-nowrap">{!! $icon($iconPaths['badgeCheck'], 'size-4 text-primary') !!}{{ __('shell.nav.notifications') }}</a>
+            </div>
+
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6 stagger">
                 @foreach ($staffCards as $card)
-                    <div class="relative rounded-lg border bg-card p-4 shadow-sm {{ $card['href'] ? ' cursor-pointer hover:shadow-md hover:border-primary/40 transition-all ' : '' }}">
+                    <div class="relative rounded-lg border bg-card p-4 shadow-sm card-lift {{ $card['href'] ? ' cursor-pointer hover:shadow-md hover:border-primary/40 transition-all ' : '' }}">
                         @if ($card['href'])
                             <a href="{{ $card['href'] }}" class="absolute inset-0 rounded-lg" aria-label="{{ $card['label'] }}"><span class="sr-only">{{ $card['label'] }}</span></a>
                         @endif
@@ -115,7 +120,7 @@
                                     $taskDone = $task->progress >= 100 || in_array($task->status, ['APPROVED', 'DELIVERED'], true);
                                     $barWidth = max(0, min(100, $task->progress));
                                 @endphp
-                                <a href="{{ route('tasks.show', $task->id) }}" class="w-full grid grid-cols-[1fr_auto] sm:grid-cols-[2fr_2fr_1fr_130px_150px] gap-x-4 items-center px-4 py-3 text-left hover:bg-muted/50 transition-colors min-w-[640px]">
+                                <a href="{{ route('tasks.show', $task->id) }}" class="card-lift w-full grid grid-cols-[1fr_auto] sm:grid-cols-[2fr_2fr_1fr_130px_150px] gap-x-4 items-center px-4 py-3 text-left hover:bg-muted/50 transition-colors min-w-0 sm:min-w-[640px]">
                                     <div class="min-w-0">
                                         <p class="font-medium text-sm truncate">
                                             {{ $task->garment_piece }} <span class="text-muted-foreground">· {{ $task->code }}</span>
@@ -144,7 +149,7 @@
                                     </div>
                                     <div class="flex items-center gap-2 min-w-28">
                                         <div class="h-2 flex-1 rounded-full bg-muted overflow-hidden">
-                                            <div class="h-full rounded-full {{ $taskDone ? 'bg-emerald-600' : 'bg-primary' }}" style="width: {{ $barWidth }}%"></div>
+                                            <div class="h-full rounded-full bar-anim {{ $taskDone ? 'bg-emerald-600' : 'bg-primary' }}" style="width: {{ $barWidth }}%"></div>
                                         </div>
                                         <span class="text-xs font-semibold tabular-nums w-9 text-right {{ $taskDone ? 'text-emerald-700' : '' }}">{{ $task->progress }}%</span>
                                     </div>
@@ -167,7 +172,7 @@
                     ['label' => __('dash.stat.ongoing'), 'value' => $stats['ongoing'], 'tone' => 'text-foreground', 'href' => route('tasks.index'), 'icon' => 'loader'],
                     ['label' => __('dash.stat.awaiting'), 'value' => $stats['awaitingInspection'], 'tone' => 'text-amber-700', 'href' => route('tasks.index'), 'icon' => 'clipboardCheck'],
                     ['label' => __('dash.stat.readyForPickup'), 'value' => $stats['readyForPickup'], 'tone' => 'text-emerald-700', 'href' => route('tasks.index'), 'icon' => 'shoppingBag'],
-                    ['label' => __('dash.stat.delivered'), 'value' => $stats['delivered'], 'tone' => 'text-foreground', 'href' => route('tasks.index'), 'icon' => 'truck'],
+                    ['label' => __('dash.stat.delivered'), 'value' => $stats['delivered'], 'tone' => 'text-foreground', 'href' => null, 'icon' => 'truck'],
                     ['label' => __('dash.stat.blocked'), 'value' => $stats['blocked'], 'tone' => $stats['blocked'] > 0 ? 'text-red-700' : 'text-foreground', 'href' => route('tasks.index'), 'icon' => 'ban'],
                 ];
             @endphp
@@ -185,10 +190,19 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+            {{-- Mobile quick actions (horizontal chip rail) --}}
+            <div class="flex gap-2 overflow-x-auto scroll-thin pb-1 lg:hidden mb-4">
+                <a href="{{ route('orders.create') }}" class="inline-flex items-center gap-1.5 rounded-full border bg-card px-4 py-2 text-sm font-medium btn-press whitespace-nowrap">{!! $icon($iconPaths['package'], 'size-4 text-primary') !!}{{ __('orders.newOrder') }}</a>
+                <a href="{{ route('tasks.index') }}" class="inline-flex items-center gap-1.5 rounded-full border bg-card px-4 py-2 text-sm font-medium btn-press whitespace-nowrap">{!! $icon($iconPaths['shirt'], 'size-4 text-primary') !!}{{ __('shell.nav.tasks') }}</a>
+                <a href="{{ route('customers.index') }}" class="inline-flex items-center gap-1.5 rounded-full border bg-card px-4 py-2 text-sm font-medium btn-press whitespace-nowrap">{!! $icon($iconPaths['users'], 'size-4 text-primary') !!}{{ __('shell.nav.customers') }}</a>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 mb-6 stagger">
                 @foreach ($managerCards as $card)
-                    <div class="relative rounded-lg border bg-card p-4 shadow-sm cursor-pointer hover:shadow-md hover:border-primary/40 transition-all">
-                        <a href="{{ $card['href'] }}" class="absolute inset-0 rounded-lg" aria-label="{{ $card['label'] }}"><span class="sr-only">{{ $card['label'] }}</span></a>
+                    <div class="relative rounded-lg border bg-card p-4 shadow-sm card-lift {{ $card['href'] ? ' cursor-pointer hover:shadow-md hover:border-primary/40 transition-all ' : '' }}">
+                        @if ($card['href'])
+                            <a href="{{ $card['href'] }}" class="absolute inset-0 rounded-lg" aria-label="{{ $card['label'] }}"><span class="sr-only">{{ $card['label'] }}</span></a>
+                        @endif
                         <div class="flex items-start justify-between gap-2">
                             <div class="min-w-0">
                                 <p class="text-xs font-medium text-muted-foreground uppercase tracking-wide truncate">{{ $card['label'] }}</p>
@@ -215,23 +229,23 @@
                                 <p class="text-sm text-muted-foreground max-w-sm">{{ __('dash.overdueEmptyDesc') }}</p>
                             </div>
                         @else
-                            <div class="divide-y rounded-lg border overflow-x-auto">
+                            <div class="divide-y rounded-lg border">
                                 @foreach ($overdue as $task)
                                     @php
                                         $taskDone = $task->progress >= 100 || in_array($task->status, ['APPROVED', 'DELIVERED'], true);
                                         $barWidth = max(0, min(100, $task->progress));
                                     @endphp
-                                    <a href="{{ route('tasks.show', $task->id) }}" class="w-full flex items-center justify-between gap-3 px-4 py-2.5 text-left hover:bg-muted/50 transition-colors min-w-[420px]">
+                                    <a href="{{ route('tasks.show', $task->id) }}" class="card-lift w-full flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 px-4 py-3 sm:py-2.5 text-left hover:bg-muted/50 transition-colors">
                                         <div class="min-w-0">
                                             <p class="text-sm font-medium truncate">{{ $task->code }} — {{ $task->garment_piece }}</p>
                                             <p class="text-xs text-muted-foreground truncate">
                                                 {{ $task->order?->order_number }} · {{ $task->order?->customer?->name }} · {{ $task->assignedStaff?->name ?? __('dash.unassigned') }}
                                             </p>
                                         </div>
-                                        <div class="flex items-center gap-3 shrink-0">
+                                        <div class="flex flex-wrap items-center gap-3 shrink-0">
                                             <div class="flex items-center gap-2 min-w-28 w-28">
                                                 <div class="h-2 flex-1 rounded-full bg-muted overflow-hidden">
-                                                    <div class="h-full rounded-full {{ $taskDone ? 'bg-emerald-600' : 'bg-primary' }}" style="width: {{ $barWidth }}%"></div>
+                                                    <div class="h-full rounded-full bar-anim {{ $taskDone ? 'bg-emerald-600' : 'bg-primary' }}" style="width: {{ $barWidth }}%"></div>
                                                 </div>
                                                 <span class="text-xs font-semibold tabular-nums w-9 text-right {{ $taskDone ? 'text-emerald-700' : '' }}">{{ $task->progress }}%</span>
                                             </div>
@@ -260,23 +274,23 @@
                                 <p class="text-sm text-muted-foreground max-w-sm">{{ __('dash.dueSoonEmptyDesc') }}</p>
                             </div>
                         @else
-                            <div class="divide-y rounded-lg border overflow-x-auto">
+                            <div class="divide-y rounded-lg border">
                                 @foreach ($dueSoon as $task)
                                     @php
                                         $taskDone = $task->progress >= 100 || in_array($task->status, ['APPROVED', 'DELIVERED'], true);
                                         $barWidth = max(0, min(100, $task->progress));
                                     @endphp
-                                    <a href="{{ route('tasks.show', $task->id) }}" class="w-full flex items-center justify-between gap-3 px-4 py-2.5 text-left hover:bg-muted/50 transition-colors min-w-[420px]">
+                                    <a href="{{ route('tasks.show', $task->id) }}" class="card-lift w-full flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 px-4 py-3 sm:py-2.5 text-left hover:bg-muted/50 transition-colors">
                                         <div class="min-w-0">
                                             <p class="text-sm font-medium truncate">{{ $task->code }} — {{ $task->garment_piece }}</p>
                                             <p class="text-xs text-muted-foreground truncate">
                                                 {{ $task->order?->order_number }} · {{ $task->assignedStaff?->name ?? __('dash.unassigned') }}
                                             </p>
                                         </div>
-                                        <div class="flex items-center gap-3 shrink-0">
+                                        <div class="flex flex-wrap items-center gap-3 shrink-0">
                                             <div class="flex items-center gap-2 min-w-28 w-28">
                                                 <div class="h-2 flex-1 rounded-full bg-muted overflow-hidden">
-                                                    <div class="h-full rounded-full {{ $taskDone ? 'bg-emerald-600' : 'bg-primary' }}" style="width: {{ $barWidth }}%"></div>
+                                                    <div class="h-full rounded-full bar-anim {{ $taskDone ? 'bg-emerald-600' : 'bg-primary' }}" style="width: {{ $barWidth }}%"></div>
                                                 </div>
                                                 <span class="text-xs font-semibold tabular-nums w-9 text-right {{ $taskDone ? 'text-emerald-700' : '' }}">{{ $task->progress }}%</span>
                                             </div>

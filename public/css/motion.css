@@ -1,0 +1,248 @@
+/* ==========================================================================
+   OSSZ ATELIER — motion.css (mobile-first UI/UX + animation layer)
+   --------------------------------------------------------------------------
+   Additive stylesheet loaded AFTER the prebuilt Tailwind v4 app.css
+   (no build step). Contains:
+     (a) reduced-motion guard          (g) toast entrance animation
+     (b) page-enter animation          (h) smooth scrolling + thin scrollbars
+     (c) card lift/press feedback      (i) bottom-nav safe-area padding
+     (d) button press feedback         (j) checkbox accent + check pop
+     (e) progress bar grow animation   (k) staggered list entrance
+     (f) skeleton shimmer
+     (l) no-build utility additions — the handful of Tailwind utilities used
+         by the mobile layer that are NOT present in the prebuilt app.css
+         (defined here by hand so the markup never depends on a rebuild).
+   ========================================================================== */
+
+/* (a) Respect prefers-reduced-motion: neuter every animation/transition. */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* (b) Page content entrance (also reused by the stagger children). */
+.page-enter {
+    animation: pageIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes pageIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: none; }
+}
+
+/* (c) Card hover lift + active press (touch feedback). */
+.card-lift {
+    transition: transform .18s ease, box-shadow .18s ease;
+}
+.card-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px -12px rgb(0 0 0 / .18);
+}
+.card-lift:active {
+    transform: scale(.985);
+}
+
+/* (d) Button press feedback. */
+.btn-press {
+    transition: transform .12s ease;
+}
+.btn-press:active {
+    transform: scale(.96);
+}
+
+/* (e) Progress bar grow-in (used with an inline width). */
+.bar-anim {
+    transform-origin: left;
+    animation: barGrow .9s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes barGrow {
+    from { transform: scaleX(0); }
+}
+
+/* (f) Skeleton shimmer placeholder. */
+.skeleton {
+    position: relative;
+    overflow: hidden;
+    background: color-mix(in srgb, currentColor 8%, transparent);
+}
+.skeleton::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(90deg, transparent, rgb(255 255 255 / .45), transparent);
+    animation: shimmer 1.4s infinite;
+}
+@keyframes shimmer {
+    100% { transform: translateX(100%); }
+}
+
+/* (g) Toast entrance. */
+.toast-in {
+    animation: toastIn .3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes toastIn {
+    from { opacity: 0; transform: translateY(12px) scale(.97); }
+    to { opacity: 1; transform: none; }
+}
+
+/* (h) Smooth scrolling + thin scrollbars for horizontal chip rails. */
+html {
+    scroll-behavior: smooth;
+}
+.scroll-thin::-webkit-scrollbar {
+    height: 6px;
+    width: 6px;
+}
+.scroll-thin::-webkit-scrollbar-thumb {
+    background: #d4d4dc;
+    border-radius: 9999px;
+}
+.scroll-thin::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+/* (i) Mobile bottom navigation: clear the iOS home-indicator safe area. */
+.bottom-nav {
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* (j) Checkboxes: brand accent + a small pop when checked. */
+input[type="checkbox"] {
+    accent-color: var(--color-primary);
+    width: 1.05rem;
+    height: 1.05rem;
+    transition: transform .15s ease;
+}
+input[type="checkbox"]:checked {
+    transform: scale(1.08);
+}
+
+/* (k) Staggered entrance for card grids / lists. */
+.stagger > * {
+    animation: pageIn .35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.stagger > *:nth-child(1) { animation-delay: .02s; }
+.stagger > *:nth-child(2) { animation-delay: .06s; }
+.stagger > *:nth-child(3) { animation-delay: .1s; }
+.stagger > *:nth-child(4) { animation-delay: .14s; }
+.stagger > *:nth-child(5) { animation-delay: .18s; }
+.stagger > *:nth-child(6) { animation-delay: .22s; }
+.stagger > *:nth-child(n+7) { animation-delay: .26s; }
+
+/* ==========================================================================
+   (l) No-build utility additions
+   --------------------------------------------------------------------------
+   The project ships a PREBUILT Tailwind v4 app.css with no build step, so
+   any utility class not already compiled into it would silently do nothing.
+   These are the exact utilities the mobile layer needs, written by hand with
+   the same values Tailwind v4 would emit (Tailwind breakpoints: sm 640px,
+   md 768px, lg 1024px, xl 1280px). A few of them (z-40, bg-black/60,
+   max-w-[85vw], pr-3, sm:p-6, bg-emerald-600, …) also repair classes that
+   were already referenced by existing views but missing from the build.
+   ========================================================================== */
+
+/* --- layout / stacking (bottom nav + drawer backdrop repair) --- */
+.z-40 { z-index: 40; }
+.bg-black\/60 { background-color: rgb(0 0 0 / .6); }
+.max-w-\[85vw\] { max-width: 85vw; }
+
+/* --- mobile bottom navigation --- */
+.grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.min-h-\[56px\] { min-height: 56px; }
+.bg-card\/95 { background-color: color-mix(in srgb, var(--color-card) 95%, transparent); }
+.bg-card\/90 { background-color: color-mix(in srgb, var(--color-card) 90%, transparent); }
+
+/* --- toast repositioning (above the bottom nav on mobile) --- */
+.bottom-20 { bottom: 5rem; }
+@media (min-width: 1024px) {
+    .lg\:bottom-6 { bottom: 1.5rem; }
+}
+
+/* --- footer clearance for the fixed bottom nav --- */
+.mb-14 { margin-bottom: 3.5rem; }
+@media (min-width: 1024px) {
+    .lg\:mb-0 { margin-bottom: 0; }
+}
+
+/* --- main content clearance for the fixed bottom nav --- */
+.pb-24 { padding-bottom: 6rem; }
+@media (min-width: 1024px) {
+    .lg\:pb-6 { padding-bottom: 1.5rem; }
+}
+
+/* --- manager stats grid (4 across on wide desktops) --- */
+@media (min-width: 1280px) {
+    .xl\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+/* --- drawer slide easing --- */
+.ease-\[cubic-bezier\(0\.16\,1\,0\.3\,1\)\] {
+    transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* --- modal bottom-sheet transition helpers --- */
+.rounded-t-2xl {
+    border-top-left-radius: var(--radius-2xl, 1rem);
+    border-top-right-radius: var(--radius-2xl, 1rem);
+}
+@media (min-width: 640px) {
+    .sm\:rounded-lg { border-radius: var(--radius-lg, .5rem); }
+}
+.translate-y-6 { translate: 0 1.5rem; }
+.translate-y-2 { translate: 0 .5rem; }
+.scale-95 { scale: 95%; }
+.scale-100 { scale: 100%; }
+@media (min-width: 640px) {
+    .sm\:scale-95 { scale: 95%; }
+    .sm\:scale-100 { scale: 100%; }
+}
+.max-w-lg { max-width: 32rem; }
+.min-h-full { min-height: 100%; }
+.rounded-b-lg {
+    border-bottom-left-radius: var(--radius-lg, .5rem);
+    border-bottom-right-radius: var(--radius-lg, .5rem);
+}
+.pt-5 { padding-top: 1.25rem; }
+.opacity-40 { opacity: .4; }
+
+/* --- tasks filter panel: always visible from md up, even though Alpine's
+       x-show sets an inline display:none while collapsed --- */
+@media (min-width: 768px) {
+    .md\:\!block { display: block !important; }
+}
+
+/* --- filter toggle chevron --- */
+.rotate-180 { rotate: 180deg; }
+
+/* --- touch-friendly pagination buttons --- */
+.min-h-\[44px\] { min-height: 44px; }
+
+/* --- responsive task rows / cards --- */
+@media (min-width: 640px) {
+    .sm\:min-w-\[640px\] { min-width: 640px; }
+    .sm\:py-2\.5 { padding-top: .625rem; padding-bottom: .625rem; }
+}
+
+/* --- dashboard section padding (p-4 sm:p-6 cards) --- */
+@media (min-width: 640px) {
+    .sm\:p-6 { padding: 1.5rem; }
+}
+
+/* --- form controls / buttons --- */
+.pr-3 { padding-right: .75rem; }
+.w-auto { width: auto; }
+@media (min-width: 640px) {
+    .sm\:w-auto { width: auto; }
+}
+
+/* --- progress bar "done" tone (referenced by existing dashboards) --- */
+.bg-emerald-600 { background-color: var(--color-emerald-600); }
+
+/* --- modal scroll regions (referenced by existing modals) --- */
+.max-h-\[calc\(85vh-11rem\)\] { max-height: calc(85vh - 11rem); }
+.min-h-\[72px\] { min-height: 72px; }
+.min-h-20 { min-height: 5rem; }
