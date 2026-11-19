@@ -84,6 +84,11 @@
                 // NOTE: built in PHP and passed to @json as single variables —
                 // multi-line @json([...]) arguments containing __() calls break
                 // Laravel's Blade directive compilation.
+                // The selected order is passed via @json (double-quoted JSON)
+                // — @js output is single-quoted JS, which terminates this
+                // single-quoted x-data attribute early and kills the whole
+                // Alpine component (selectedId is not defined).
+                $selectedOrderIdJson = (string) old('orderId', $preselectOrderId ?? '');
                 $priorityLabelsJson = [
                     'LOW' => __('labels.priority.LOW'),
                     'NORMAL' => __('labels.priority.NORMAL'),
@@ -115,7 +120,7 @@
             <form method="POST" action="{{ route('tasks.store') }}"
               x-data='{
                   orders: @json($ordersJson),
-                  selectedId: @js(old('orderId', $preselectOrderId ?? '')),
+                  selectedId: @json($selectedOrderIdJson),
                   pieces: @json(old('pieces', [])),
                   errorsByIndex: @json($pieceErrors),
                   priorityLabels: @json($priorityLabelsJson),
