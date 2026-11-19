@@ -4,7 +4,7 @@
 
 @section('content')
     @php
-        use App\Support\Js;
+        use Illuminate\Support\Js;
         use App\Support\Trans;
 
         // On validation failure, reopen the wizard at the step holding the
