@@ -182,6 +182,14 @@ final class AccountingService
         $cursor = $from->startOfMonth();
         $end = $to->startOfMonth();
 
+        // Very long ranges (e.g. "all time") are clamped to the LAST
+        // $maxBuckets months so the charts always cover recent activity
+        // instead of bucketing from the range start decades ago.
+        $windowStart = $end->subMonths($maxBuckets - 1);
+        if ($cursor < $windowStart) {
+            $cursor = $windowStart;
+        }
+
         while ($cursor <= $end && count($buckets) < $maxBuckets) {
             $key = $cursor->format('Y-m');
             $revenue = (float) ($revenueRows[$key] ?? 0);
