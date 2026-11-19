@@ -52,6 +52,7 @@ return [
 
     'emptyTitle' => 'Aucune avance enregistrée',
     'emptyFiltersTitle' => 'Aucune avance ne correspond aux filtres',
+    'emptyFiltersDesc' => 'Ajustez les filtres staff ou statut pour voir plus de résultats.',
     'emptyDesc' => 'Enregistrez une avance quand un membre du staff reçoit de l’argent avant la paie.',
 
     'createdToast' => 'Avance enregistrée.',

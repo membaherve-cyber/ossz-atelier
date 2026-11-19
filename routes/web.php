@@ -160,6 +160,10 @@ Route::post('/orders/{id}/finalize', [OrderController::class, 'finalize'])
     ->name('orders.finalize') // DRAFT → REGISTERED + staff notifications
     ->middleware('perm:orders.manage');
 
+Route::post('/orders/{id}/labour', [OrderController::class, 'allocateLabour'])
+    ->name('orders.labour') // explicit labour cost allocation (spec §11)
+    ->middleware('perm:accounting.payments');
+
 Route::post('/orders/{id}/delete', [OrderController::class, 'destroy'])
     ->name('orders.destroy') // only when the order has no tasks
     ->middleware('perm:orders.manage');

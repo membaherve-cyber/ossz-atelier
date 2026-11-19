@@ -66,6 +66,9 @@ class OrderController
      */
     public function index(Request $request): View
     {
+        /** @var User $me */
+        $me = $request->user();
+
         $q = trim((string) ($request->query('q') ?? $request->query('search') ?? ''));
         $priority = (string) ($request->query('priority') ?? '');
         $from = trim((string) ($request->query('from') ?? ''));
@@ -113,6 +116,7 @@ class OrderController
         return view('orders.index', [
             'orders' => $orders,
             'customers' => Customer::query()->orderBy('name')->get(),
+            'canSeeFinancials' => Permissions::allows($me, 'accounting.payments'),
             'filters' => [
                 'q' => $q,
                 'priority' => $priority,
@@ -513,7 +517,62 @@ class OrderController
             'canSeeFinancials' => Permissions::allows($me, 'accounting.payments'),
             'canManage' => Permissions::allows($me, 'orders.manage'),
             'priorities' => Atelier::PRIORITIES,
+            'staffList' => User::query()
+                ->where('is_active', true)
+                ->whereIn('role', Permissions::assignableRoles())
+                ->orderBy('name')
+                ->get(['id', 'name', 'role', 'job_title']),
         ]);
+    }
+
+    /**
+     * POST /orders/{id}/labour (route perm accounting.payments) — record an
+     * explicit, transparent labour cost allocation against the order (spec
+     * §11). Salaries are never auto-allocated; every allocation is a
+     * deliberate Management decision, kept separate from recorded
+     * expenses/purchases in the profitability breakdown.
+     */
+    public function allocateLabour(Request $request, string $id): RedirectResponse
+    {
+        /** @var User $me */
+        $me = $request->user();
+
+        if (! Permissions::allows($me, 'accounting.payments')) {
+            abort(403);
+        }
+
+        $order = Order::query()->findOrFail($id);
+
+        $data = $request->validate([
+            'staffId' => ['required', 'string', Rule::exists('users', 'id')->where('is_active', true)],
+            'amount' => ['required', 'numeric', 'gt:0'],
+            'method' => ['nullable', 'string', 'max:60'],
+            'note' => ['nullable', 'string', 'max:300'],
+        ]);
+
+        $staff = User::query()->findOrFail((string) $data['staffId']);
+
+        $allocation = \App\Models\OrderLabourAllocation::query()->create([
+            'order_id' => $order->id,
+            'staff_id' => $staff->id,
+            'staff_name' => $staff->name,
+            'amount' => round((float) $data['amount'], 2),
+            'currency' => 'XAF',
+            'method' => trim((string) ($data['method'] ?? '')) !== '' ? trim((string) $data['method']) : 'MANUAL',
+            'note' => $data['note'] ?? null,
+            'created_by_id' => $me->id,
+            'created_by_name' => $me->name,
+        ]);
+
+        Audit::log($me, 'LABOUR_ALLOCATED', 'ORDER', $order->id, [
+            'orderNumber' => $order->order_number,
+            'staffName' => $staff->name,
+            'amount' => $allocation->amount,
+        ]);
+
+        return redirect()
+            ->back()
+            ->with('success', __('orders.labourAllocated'));
     }
 
     /**

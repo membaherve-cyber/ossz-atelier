@@ -359,7 +359,7 @@
              @keydown.escape.window="createOpen = false"
              x-data="{
                 orders: {{ \Illuminate\Support\Js::from($orders->map(fn ($o) => ['id' => $o->id, 'label' => $o->order_number.' — '.optional($o->customer)->name, 'value' => (float) ($o->total_value ?? 0), 'paid' => (float) ($o->paid_total ?? 0)]) ) }},
-                orderId: @js(old('orderId')),
+                orderId: @js(old('orderId', request()->query('order', ''))),
                 amount: @js(old('amount')),
                 method: @js(old('method', 'CASH')),
                 fmt(v) { return new Intl.NumberFormat('{{ app()->getLocale() }}').format(Math.round(v || 0)) + ' XAF'; },

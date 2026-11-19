@@ -52,6 +52,7 @@ return [
 
     'emptyTitle' => 'No advances recorded yet',
     'emptyFiltersTitle' => 'No advances match your filters',
+    'emptyFiltersDesc' => 'Adjust the staff or status filters to see more results.',
     'emptyDesc' => 'Record an advance when staff receive money before salary payment.',
 
     'createdToast' => 'Advance recorded.',

@@ -319,13 +319,13 @@
             <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pb-2">
                 <p class="text-sm text-muted-foreground"
                    x-text="(pieces.length === 1 ? templates.summaryOne : templates.summaryMany).replace('{count}', pieces.length).replace('{order}', order !== null ? order.orderNumber : '—')"></p>
-                <div class="flex gap-2">
+                <div class="flex flex-col-reverse sm:flex-row gap-2">
                     <a href="{{ route('tasks.index') }}"
-                       class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm font-medium h-9 px-4 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground transition-colors">
+                       class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm font-medium min-h-[44px] sm:h-9 px-4 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground transition-colors btn-press">
                         {{ __('common.cancel') }}
                     </a>
                     <button type="submit" :disabled="selectedId === ''"
-                            class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm font-medium h-9 px-4 bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors disabled:pointer-events-none disabled:opacity-50">
+                            class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm font-medium min-h-[44px] sm:h-9 px-4 w-full sm:w-auto bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors disabled:pointer-events-none disabled:opacity-50 btn-press">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
                         <span x-text="(pieces.length === 1 ? templates.createOne : templates.createMany).replace('{count}', pieces.length)"></span>
                     </button>
