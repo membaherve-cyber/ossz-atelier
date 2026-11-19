@@ -27,9 +27,11 @@ class LocaleController
      * Only "en" and "fr" are accepted (the two locales shipped under
      * lang/); any other value leaves the session untouched.
      *
-     * The redirect uses the Referer header (i.e. "back") and falls back to
-     * the dashboard when no referer is present — this avoids redirect
-     * loops when the locale URL is entered directly in the address bar.
+     * The redirect target is validated as SAME-ORIGIN: the Referer header
+     * is client-controlled, so blindly redirecting to it would give any
+     * attacker a free open redirect off the app domain (phishing). A
+     * referer whose host+scheme do not match this application is ignored
+     * and the user lands on the dashboard instead.
      */
     public function switch(Request $request, string $lang): RedirectResponse
     {
@@ -39,10 +41,29 @@ class LocaleController
 
         $referer = $request->headers->get('referer');
 
-        if ($referer !== null && $referer !== '' && ! str_contains($referer, '/locale/')) {
+        if ($referer !== null && $referer !== '' && ! str_contains($referer, '/locale/') && $this->isSameOrigin($referer)) {
             return redirect()->away($referer);
         }
 
         return redirect('/');
+    }
+
+    /**
+     * Whether the referer URL belongs to this application: a plain
+     * http/https URL whose host matches the host of the current request.
+     */
+    private function isSameOrigin(string $referer): bool
+    {
+        $parsed = parse_url($referer);
+
+        if ($parsed === false || ! isset($parsed['host']) || ! isset($parsed['scheme'])) {
+            return false;
+        }
+
+        if (! in_array(strtolower($parsed['scheme']), ['http', 'https'], true)) {
+            return false;
+        }
+
+        return strcasecmp($parsed['host'], (string) request()->getHost()) === 0;
     }
 }

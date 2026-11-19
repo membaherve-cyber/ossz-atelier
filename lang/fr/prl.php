@@ -95,4 +95,6 @@ return [
     'errStaff' => 'Sélectionnez un membre du staff.',
     'errBaseAmount' => 'Saisissez le salaire ou le taux convenu.',
     'errEffectiveDate' => 'Saisissez une date d’effet valide.',
+
+    'errNegativeNet' => 'Les déductions + récupération d\'avance ne peuvent pas dépasser le salaire brut (salaire + indemnités + primes).',
 ];

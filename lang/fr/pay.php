@@ -56,4 +56,6 @@ return [
     'errDate' => 'Saisissez une date de paiement valide.',
     'errExceedsBalance' => 'Ce montant dépasse le solde restant de la commande.',
     'errNoValue' => 'La commande sélectionnée n’a pas de valeur totale. Modifiez d’abord la commande.',
+
+    'errOrderNotRegistered' => "Les paiements ne peuvent être enregistrés que sur des commandes ENREGISTRÉES. Finalisez d'abord le brouillon.",
 ];

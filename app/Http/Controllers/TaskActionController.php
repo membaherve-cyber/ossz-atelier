@@ -905,19 +905,32 @@ class TaskActionController
         $deadlineChanged = false;
         $instructionsChanged = false;
 
-        $deadlineInput = trim((string) ($data['deadline'] ?? ''));
+        // The edit dialog always submits every field, so a present-but-empty
+        // deadline is an EXPLICIT clear (not "keep the old value").
+        if (array_key_exists('deadline', $data)) {
+            $deadlineInput = trim((string) ($data['deadline'] ?? ''));
 
-        if ($deadlineInput !== '') {
-            $newDeadline = Carbon::parse($deadlineInput);
+            if ($deadlineInput === '') {
+                if ($task->deadline !== null) {
+                    $update['deadline'] = null;
+                    $changes['deadline'] = [
+                        'from' => $task->deadline->toIso8601String(),
+                        'to' => null,
+                    ];
+                    $deadlineChanged = true;
+                }
+            } else {
+                $newDeadline = Carbon::parse($deadlineInput);
 
-            if ($task->deadline === null
-                || $newDeadline->format('YmdHi') !== $task->deadline->format('YmdHi')) {
-                $update['deadline'] = $newDeadline;
-                $changes['deadline'] = [
-                    'from' => $task->deadline?->toIso8601String(),
-                    'to' => $newDeadline->toIso8601String(),
-                ];
-                $deadlineChanged = true;
+                if ($task->deadline === null
+                    || $newDeadline->format('YmdHi') !== $task->deadline->format('YmdHi')) {
+                    $update['deadline'] = $newDeadline;
+                    $changes['deadline'] = [
+                        'from' => $task->deadline?->toIso8601String(),
+                        'to' => $newDeadline->toIso8601String(),
+                    ];
+                    $deadlineChanged = true;
+                }
             }
         }
 
@@ -928,12 +941,21 @@ class TaskActionController
             $changes['priority'] = ['from' => $task->priority, 'to' => $priorityInput];
         }
 
-        $instructionsInput = trim((string) ($data['instructions'] ?? ''));
+        // Same explicit-clear semantics for the instructions field.
+        if (array_key_exists('instructions', $data)) {
+            $instructionsInput = trim((string) ($data['instructions'] ?? ''));
 
-        if ($instructionsInput !== '' && $instructionsInput !== (string) $task->instructions) {
-            $update['instructions'] = $instructionsInput;
-            $changes['instructions'] = 'updated';
-            $instructionsChanged = true;
+            if ($instructionsInput === '') {
+                if ((string) $task->instructions !== '') {
+                    $update['instructions'] = null;
+                    $changes['instructions'] = 'cleared';
+                    $instructionsChanged = true;
+                }
+            } elseif ($instructionsInput !== (string) $task->instructions) {
+                $update['instructions'] = $instructionsInput;
+                $changes['instructions'] = 'updated';
+                $instructionsChanged = true;
+            }
         }
 
         $garmentPieceInput = trim((string) ($data['garmentPiece'] ?? ''));

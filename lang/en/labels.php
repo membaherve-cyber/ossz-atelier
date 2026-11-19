@@ -74,6 +74,7 @@ return [
         'ORANGE_MONEY' => 'Orange Money',
         'BANK_TRANSFER' => 'Bank transfer',
         'OTHER' => 'Other',
+        'MANUAL' => 'Manual',
     ],
     'expStatus' => [
         'DRAFT' => 'Draft',

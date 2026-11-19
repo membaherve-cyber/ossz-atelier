@@ -23,7 +23,9 @@
         $canDeliver = $isSupervisor && $task->status === 'READY_FOR_PICKUP';
         $canReopen = $isSupervisor && in_array($task->status, ['APPROVED', 'READY_FOR_PICKUP'], true);
         $canBlock = ($isSupervisor || $isAssignee) && $inWork;
-        $canUnblock = ($isSupervisor || $isAssignee) && $task->status === 'BLOCKED';
+        // Unblock is supervisor-only (the controller 403s non-supervisors) —
+        // showing the button to assignees would only lead to a 403 page.
+        $canUnblock = $isSupervisor && $task->status === 'BLOCKED';
         $canCancel = $isSupervisor && ! $terminal;
         $noActions = ! $canAssign && ! $canEdit && ! $canSubmit && ! $canInspect && ! $canReady
             && ! $canDeliver && ! $canReopen && ! $canBlock && ! $canUnblock && ! $canCancel;
@@ -894,7 +896,11 @@
                     <p class="text-sm text-muted-foreground mt-0.5">{{ __('td.dialog.inspectDesc') }}</p>
                 </div>
                 <div class="space-y-2" role="radiogroup" aria-label="{{ __('td.dialog.inspectTitle') }}">
-                    @foreach (['APPROVED', 'CHANGES_REQUESTED', 'REOPENED'] as $decisionIndex => $decisionOption)
+                    {{-- REOPENED is intentionally NOT offered here: the dialog only
+                         opens from AWAITING_INSPECTION, and the controller only
+                         accepts REOPENED from APPROVED / READY_FOR_PICKUP (that
+                         path has its own dedicated reopen button). --}}
+                    @foreach (['APPROVED', 'CHANGES_REQUESTED'] as $decisionIndex => $decisionOption)
                         <label class="flex items-center gap-2.5 rounded-lg border p-3 cursor-pointer hover:bg-muted/50 transition-colors has-[:checked]:border-primary has-[:checked]:bg-accent/50">
                             <input type="radio" name="decision" value="{{ $decisionOption }}" {{ $decisionIndex === 0 ? 'checked' : '' }} class="size-4 accent-primary">
                             <span class="text-sm font-medium">{{ __('labels.inspection.'.$decisionOption) }}</span>

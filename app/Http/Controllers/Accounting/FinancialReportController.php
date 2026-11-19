@@ -213,15 +213,8 @@ class FinancialReportController
     private function monthlyReport(CarbonImmutable $from, CarbonImmutable $to): array
     {
         $rows = [];
-        $totalIncome = 0.0;
-        $totalExpenses = 0.0;
-        $totalSalaries = 0.0;
 
         foreach (AccountingService::monthlySeries($from, $to) as $bucket) {
-            $totalIncome += $bucket['payments'];
-            $totalExpenses += $bucket['expenses'];
-            $totalSalaries += $bucket['salaries'];
-
             $rows[] = [
                 'period' => $bucket['label'],
                 'income' => Money::amount($bucket['payments']),
@@ -230,6 +223,24 @@ class FinancialReportController
                 'net' => Money::amount($bucket['net']),
             ];
         }
+
+        // Summary totals come straight from the database over the FULL
+        // selected range — the chart buckets above are clamped to the last
+        // 24 months for long ranges, so summing them would under-report.
+        $totalIncome = (float) Payment::query()
+            ->whereBetween('payment_date', [$from->toDateString(), $to->toDateString()])
+            ->sum('amount');
+
+        $totalExpenses = (float) Expense::query()
+            ->whereIn('status', Expense::COST_STATUSES)
+            ->whereBetween('date_incurred', [$from->toDateString(), $to->toDateString()])
+            ->sum('amount');
+
+        $totalSalaries = (float) PayrollItem::query()
+            ->whereIn('payment_status', ['PENDING', 'PAID'])
+            ->whereHas('payroll', fn ($q) => $q->whereIn('status', ['APPROVED', 'PARTIALLY_PAID', 'PAID'])
+                ->whereBetween('period_start', [$from->toDateString(), $to->toDateString()]))
+            ->sum('net_pay');
 
         return $this->report('monthly', [
             'period' => __('frep.colPeriod'),
@@ -549,7 +560,13 @@ class FinancialReportController
         foreach ($advances as $advance) {
             $outstanding = $advance->outstanding();
 
-            $totalAmount += (float) $advance->amount;
+            // Only advances whose money actually left the workshop count
+            // towards the disbursed total — PENDING_APPROVAL / APPROVED /
+            // CANCELLED rows are listed for visibility but never issued.
+            if (in_array((string) $advance->status, StaffAdvance::DISBURSED_STATUSES, true)) {
+                $totalAmount += (float) $advance->amount;
+            }
+
             $totalOutstanding += $outstanding;
 
             $rows[] = [
@@ -747,13 +764,45 @@ class FinancialReportController
             ->groupBy('ym')->pluck('total', 'ym');
 
         $rows = [];
-        $totalRevenue = 0.0;
-        $totalIncome = 0.0;
-        $totalExpenses = 0.0;
-        $totalSalaries = 0.0;
-        $totalOrders = 0;
-        $totalDelivered = 0;
-        $totalTasks = 0;
+
+        // Summary totals come straight from the database over the FULL
+        // selected range — the chart buckets below are clamped to the last
+        // 24 months for long ranges, so summing them would under-report.
+        $totalRevenue = (float) Order::query()
+            ->where('status', 'REGISTERED')
+            ->whereBetween('order_date', [$from, $to])
+            ->sum('total_value');
+
+        $totalIncome = (float) Payment::query()
+            ->whereBetween('payment_date', [$from->toDateString(), $to->toDateString()])
+            ->sum('amount');
+
+        $totalExpenses = (float) Expense::query()
+            ->whereIn('status', Expense::COST_STATUSES)
+            ->whereBetween('date_incurred', [$from->toDateString(), $to->toDateString()])
+            ->sum('amount');
+
+        $totalSalaries = (float) PayrollItem::query()
+            ->whereIn('payment_status', ['PENDING', 'PAID'])
+            ->whereHas('payroll', fn ($q) => $q->whereIn('status', ['APPROVED', 'PARTIALLY_PAID', 'PAID'])
+                ->whereBetween('period_start', [$from->toDateString(), $to->toDateString()]))
+            ->sum('net_pay');
+
+        $totalOrders = (int) Order::query()
+            ->where('status', 'REGISTERED')
+            ->whereBetween('order_date', [$from, $to])
+            ->count();
+
+        $totalTasks = (int) ProductionTask::query()
+            ->whereNotNull('delivered_at')
+            ->whereBetween('delivered_at', [$from, $to])
+            ->count();
+
+        $totalDelivered = (int) ProductionTask::query()
+            ->whereNotNull('delivered_at')
+            ->whereBetween('delivered_at', [$from, $to])
+            ->distinct('order_id')
+            ->count('order_id');
 
         foreach (AccountingService::monthlySeries($from, $to) as $bucket) {
             $key = $bucket['key'];
@@ -761,14 +810,6 @@ class FinancialReportController
             $orders = (int) ($ordersByMonth[$key] ?? 0);
             $delivered = (int) ($deliveredOrdersByMonth[$key] ?? 0);
             $tasks = (int) ($tasksByMonth[$key] ?? 0);
-
-            $totalRevenue += $bucket['revenue'];
-            $totalIncome += $bucket['payments'];
-            $totalExpenses += $bucket['expenses'];
-            $totalSalaries += $bucket['salaries'];
-            $totalOrders += $orders;
-            $totalDelivered += $delivered;
-            $totalTasks += $tasks;
 
             $rows[] = [
                 'period' => $bucket['label'],

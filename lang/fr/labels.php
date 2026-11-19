@@ -74,6 +74,7 @@ return [
         'ORANGE_MONEY' => 'Orange Money',
         'BANK_TRANSFER' => 'Virement bancaire',
         'OTHER' => 'Autre',
+        'MANUAL' => 'Manuel',
     ],
     'expStatus' => [
         'DRAFT' => 'Brouillon',

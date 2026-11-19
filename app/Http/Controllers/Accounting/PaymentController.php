@@ -15,6 +15,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
@@ -128,40 +129,61 @@ class PaymentController
             'amount' => ['required', 'numeric', 'gt:0'],
             'paymentDate' => ['required', 'date'],
             'method' => ['nullable', 'string', Rule::in(Atelier::PAYMENT_METHODS)],
-            'txnRef' => ['nullable', 'string', 'max:100'],
+            'txnRef' => ['nullable', 'string', 'max:100', Rule::unique('payments', 'txn_ref')],
             'notes' => ['nullable', 'string', 'max:4000'],
         ]);
 
-        $order = Order::query()->findOrFail((string) $data['orderId']);
-
-        if ($order->total_value === null) {
-            throw ValidationException::withMessages([
-                'orderId' => __('pay.errNoValue'),
-            ]);
-        }
-
         $amount = round((float) $data['amount'], 2);
-        $outstanding = round((float) $order->total_value - $order->paidTotal(), 2);
 
-        if ($amount > $outstanding + 0.005) {
-            throw ValidationException::withMessages([
-                'amount' => __('pay.errExceedsBalance'),
-            ]);
-        }
+        // One transaction with a row lock on the order: the outstanding
+        // balance check and the insert are atomic, so two concurrent
+        // submissions can never both spend the same remaining balance
+        // (prevents over-collection races).
+        $payment = DB::transaction(function () use ($data, $me, $amount): Payment {
+            /** @var Order $order */
+            $order = Order::query()
+                ->whereKey((string) $data['orderId'])
+                ->lockForUpdate()
+                ->firstOrFail();
 
-        $payment = Codes::unique('payment', fn (string $reference): Payment => Payment::query()->create([
-            'reference' => $reference,
-            'order_id' => $order->id,
-            'customer_id' => $order->customer_id,
-            'amount' => $amount,
-            'currency' => Money::DEFAULT_CURRENCY,
-            'payment_date' => Carbon::parse((string) $data['paymentDate']),
-            'method' => (string) ($data['method'] ?? 'CASH'),
-            'txn_ref' => $data['txnRef'] ?? null,
-            'notes' => $data['notes'] ?? null,
-            'recorded_by_id' => $me->id,
-            'recorded_by_name' => $me->name,
-        ]));
+            // Only REGISTERED orders can receive payments — DRAFT orders
+            // are not billed and their value never counts as revenue.
+            if ($order->status !== 'REGISTERED') {
+                throw ValidationException::withMessages([
+                    'orderId' => __('pay.errOrderNotRegistered'),
+                ]);
+            }
+
+            if ($order->total_value === null) {
+                throw ValidationException::withMessages([
+                    'orderId' => __('pay.errNoValue'),
+                ]);
+            }
+
+            $outstanding = round((float) $order->total_value - $order->paidTotal(), 2);
+
+            if ($amount > $outstanding + 0.005) {
+                throw ValidationException::withMessages([
+                    'amount' => __('pay.errExceedsBalance'),
+                ]);
+            }
+
+            return Codes::unique('payment', fn (string $reference): Payment => Payment::query()->create([
+                'reference' => $reference,
+                'order_id' => $order->id,
+                'customer_id' => $order->customer_id,
+                'amount' => $amount,
+                'currency' => Money::DEFAULT_CURRENCY,
+                'payment_date' => Carbon::parse((string) $data['paymentDate']),
+                'method' => (string) ($data['method'] ?? 'CASH'),
+                'txn_ref' => $data['txnRef'] ?? null,
+                'notes' => $data['notes'] ?? null,
+                'recorded_by_id' => $me->id,
+                'recorded_by_name' => $me->name,
+            ]));
+        });
+
+        $order = $payment->order;
 
         Audit::log($me, 'PAYMENT_RECORDED', 'PAYMENT', $payment->id, [
             'reference' => $payment->reference,
@@ -200,67 +222,86 @@ class PaymentController
             'amount' => ['nullable', 'numeric', 'gt:0'],
             'paymentDate' => ['nullable', 'date'],
             'method' => ['nullable', 'string', Rule::in(Atelier::PAYMENT_METHODS)],
-            'txnRef' => ['nullable', 'string', 'max:100'],
+            'txnRef' => ['nullable', 'string', 'max:100', Rule::unique('payments', 'txn_ref')->ignore($payment->id)],
             'notes' => ['nullable', 'string', 'max:4000'],
         ]);
-
-        $order = isset($data['orderId'])
-            ? Order::query()->findOrFail((string) $data['orderId'])
-            : $payment->order;
-
-        if ($order->total_value === null) {
-            throw ValidationException::withMessages([
-                'orderId' => __('pay.errNoValue'),
-            ]);
-        }
 
         $amount = isset($data['amount'])
             ? round((float) $data['amount'], 2)
             : (float) $payment->amount;
 
-        // Outstanding balance of the target order excluding THIS payment.
-        $otherPaid = (float) $order->payments()->where('id', '!=', $payment->id)->sum('amount');
-        $outstanding = round((float) $order->total_value - $otherPaid, 2);
+        // Atomic balance re-check + save (the target order is locked for the
+        // whole transaction so concurrent edits cannot both pass against
+        // the same remaining balance).
+        [$changedColumns] = DB::transaction(function () use ($data, $payment, $me, $amount): array {
+            $targetOrderId = isset($data['orderId'])
+                ? (string) $data['orderId']
+                : (string) $payment->order_id;
 
-        if ($amount > $outstanding + 0.005) {
-            throw ValidationException::withMessages([
-                'amount' => __('pay.errExceedsBalance'),
-            ]);
-        }
+            /** @var Order $order */
+            $order = Order::query()
+                ->whereKey($targetOrderId)
+                ->lockForUpdate()
+                ->firstOrFail();
 
-        $update = [];
+            if ($order->status !== 'REGISTERED') {
+                throw ValidationException::withMessages([
+                    'orderId' => __('pay.errOrderNotRegistered'),
+                ]);
+            }
 
-        if (isset($data['orderId'])) {
-            $update['order_id'] = $order->id;
-            $update['customer_id'] = $order->customer_id;
-        }
+            if ($order->total_value === null) {
+                throw ValidationException::withMessages([
+                    'orderId' => __('pay.errNoValue'),
+                ]);
+            }
 
-        if (isset($data['amount'])) {
-            $update['amount'] = $amount;
-        }
+            // Outstanding balance of the target order excluding THIS payment.
+            $otherPaid = (float) $order->payments()->where('id', '!=', $payment->id)->sum('amount');
+            $outstanding = round((float) $order->total_value - $otherPaid, 2);
 
-        if (isset($data['paymentDate'])) {
-            $update['payment_date'] = Carbon::parse((string) $data['paymentDate']);
-        }
+            if ($amount > $outstanding + 0.005) {
+                throw ValidationException::withMessages([
+                    'amount' => __('pay.errExceedsBalance'),
+                ]);
+            }
 
-        if (isset($data['method'])) {
-            $update['method'] = (string) $data['method'];
-        }
+            $update = [];
 
-        if (array_key_exists('txnRef', $data)) {
-            $update['txn_ref'] = $data['txnRef'] ?? null;
-        }
+            if (isset($data['orderId'])) {
+                $update['order_id'] = $order->id;
+                $update['customer_id'] = $order->customer_id;
+            }
 
-        if (array_key_exists('notes', $data)) {
-            $update['notes'] = $data['notes'] ?? null;
-        }
+            if (isset($data['amount'])) {
+                $update['amount'] = $amount;
+            }
 
-        $payment->fill($update);
-        $changedColumns = array_keys($payment->getDirty());
+            if (isset($data['paymentDate'])) {
+                $update['payment_date'] = Carbon::parse((string) $data['paymentDate']);
+            }
 
-        if ($changedColumns !== []) {
-            $payment->save();
-        }
+            if (isset($data['method'])) {
+                $update['method'] = (string) $data['method'];
+            }
+
+            if (array_key_exists('txnRef', $data)) {
+                $update['txn_ref'] = $data['txnRef'] ?? null;
+            }
+
+            if (array_key_exists('notes', $data)) {
+                $update['notes'] = $data['notes'] ?? null;
+            }
+
+            $payment->fill($update);
+            $changedColumns = array_keys($payment->getDirty());
+
+            if ($changedColumns !== []) {
+                $payment->save();
+            }
+
+            return [$changedColumns];
+        });
 
         Audit::log($me, 'PAYMENT_UPDATED', 'PAYMENT', $payment->id, [
             'reference' => $payment->reference,

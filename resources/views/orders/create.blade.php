@@ -46,25 +46,38 @@
                 'assignments' => [['staffId' => '', 'note' => '']],
             ]];
         }
+
+        // All re-filled (old) form values are embedded as ONE JSON object
+        // via Js::from — never interpolated into JS string literals, where
+        // an apostrophe in e.g. "Robe d'été" or a backtick in a note would
+        // break the entire Alpine component after a validation error.
+        $initialState = [
+            'customerMode' => (string) old('customerMode', 'existing'),
+            'customerId' => (string) old('customerId', $preselectCustomer),
+            'newCustomer' => [
+                'name' => (string) old('newCustomerName', ''),
+                'phone' => (string) old('newCustomerPhone', ''),
+                'email' => (string) old('newCustomerEmail', ''),
+                'address' => (string) old('newCustomerAddress', ''),
+            ],
+            'order' => [
+                'number' => (string) old('orderNumber', ''),
+                'date' => (string) old('orderDate', now()->toDateString()),
+                'delivery' => (string) old('expectedDeliveryDate', ''),
+                'description' => (string) old('description', ''),
+                'category' => (string) old('garmentCategory', ''),
+                'priority' => (string) old('priority', 'NORMAL'),
+                'value' => (string) old('totalValue', ''),
+                'instructions' => (string) old('instructions', ''),
+                'notes' => (string) old('notes', ''),
+            ],
+        ];
     @endphp
 
     <div class="space-y-5"
          x-data="{
             step: {{ $errors->any() ? $stepOnError : 1 }},
-            customerMode: '{{ old('customerMode', 'existing') }}',
-            customerId: '{{ old('customerId', $preselectCustomer) }}',
-            newCustomer: { name: '{{ old('newCustomerName') }}', phone: '{{ old('newCustomerPhone') }}', email: '{{ old('newCustomerEmail') }}', address: '{{ old('newCustomerAddress') }}' },
-            order: {
-                number: '{{ old('orderNumber') }}',
-                date: '{{ old('orderDate', now()->toDateString()) }}',
-                delivery: '{{ old('expectedDeliveryDate') }}',
-                description: '{{ old('description') }}',
-                category: '{{ old('garmentCategory') }}',
-                priority: '{{ old('priority', 'NORMAL') }}',
-                value: '{{ old('totalValue') }}',
-                instructions: `{{ old('instructions') }}`,
-                notes: `{{ old('notes') }}`
-            },
+            ...{{ Js::from($initialState) }},
             pieces: {{ Js::from($initialPieces) }},
             staffList: {{ Js::from($staffList->map(fn ($s) => ['id' => $s->id, 'name' => $s->name, 'role' => $s->role, 'title' => $s->job_title])) }},
             customers: {{ Js::from($customers->map(fn ($c) => ['id' => $c->id, 'label' => $c->name.' · '.$c->phone])) }},
@@ -118,11 +131,14 @@
         <nav class="rounded-xl border bg-card p-4" aria-label="{{ __('orders.createTitle') }}">
             <ol class="flex items-center gap-1 sm:gap-2">
                 @php
+                    // Step icons carry full inner SVG markup (paths + shapes);
+                    // they are rendered with {!! !!} like the nav's $icon()
+                    // helper — a single-path <path d="..."> cannot hold them.
                     $steps = [
-                        1 => ['key' => 'stepCustomer', 'icon' => 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>'],
-                        2 => ['key' => 'stepOrder', 'icon' => 'M21 8V21H3V8"/><path d="M1 3h22v5H1z"/><path d="M10 12h4'],
-                        3 => ['key' => 'stepPieces', 'icon' => 'M3.34 15.55 12 21l8.66-5.45"/><path d="M3.34 9.45 12 15l8.66-5.55L12 3z"'],
-                        4 => ['key' => 'stepReview', 'icon' => 'M20 6 9 17l-5-5'],
+                        1 => ['key' => 'stepCustomer', 'icon' => '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>'],
+                        2 => ['key' => 'stepOrder', 'icon' => '<path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/>'],
+                        3 => ['key' => 'stepPieces', 'icon' => '<path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/>'],
+                        4 => ['key' => 'stepReview', 'icon' => '<path d="M20 6 9 17l-5-5"/>'],
                     ];
                 @endphp
                 @foreach ($steps as $n => $s)
@@ -134,7 +150,7 @@
                                 class="flex size-9 shrink-0 items-center justify-center rounded-full border-2 transition-all btn-press"
                                 :disabled="{{ $n }} >= step">
                             @if ($n < 4)
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="{{ $s['icon'] }}"/></svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true">{!! $steps[$n]['icon'] !!}</svg>
                             @else
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
                             @endif

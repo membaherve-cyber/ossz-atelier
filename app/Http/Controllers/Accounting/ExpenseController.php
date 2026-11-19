@@ -432,7 +432,10 @@ class ExpenseController
 
     /**
      * GET /expenses/{id}/receipt (route perm accounting.expenses) — stream
-     * the stored receipt attachment from storage/app/receipts.
+     * the stored receipt attachment from storage/app/receipts. The
+     * resolved path is verified to stay INSIDE storage/app (containment
+     * guard) so a tampered receipt_path can never stream arbitrary
+     * server files.
      */
     public function receipt(string $id): BinaryFileResponse
     {
@@ -440,9 +443,20 @@ class ExpenseController
 
         $path = $expense->receipt_path;
 
-        abort_unless(is_string($path) && $path !== '' && is_file(storage_path('app/'.$path)), 404);
+        abort_unless(is_string($path) && $path !== '', 404);
 
-        return response()->file(storage_path('app/'.$path));
+        $absolute = realpath(storage_path('app/'.$path));
+        $root = realpath(storage_path('app'));
+
+        abort_unless(
+            $absolute !== false
+            && $root !== false
+            && str_starts_with($absolute, $root.DIRECTORY_SEPARATOR)
+            && is_file($absolute),
+            404
+        );
+
+        return response()->file($absolute);
     }
 
     /**
@@ -577,6 +591,12 @@ class ExpenseController
     /**
      * Store an uploaded receipt under storage/app/receipts with a
      * collision-free filename; null when no valid file was submitted.
+     *
+     * Security: the extension is derived from the file CONTENT
+     * (guessExtension), never from the client-supplied filename, and only
+     * receipt-safe types are accepted — an upload can never plant an
+     * executable extension in storage. The route validation
+     * (mimes:jpg,jpeg,png,webp,pdf) is the first gate; this is the second.
      */
     private function storeReceipt(Request $request): ?string
     {
@@ -586,7 +606,13 @@ class ExpenseController
             return null;
         }
 
-        return $file->storeAs('receipts', uniqid().'-'.time().'.'.$file->extension(), 'local');
+        $extension = strtolower((string) $file->guessExtension());
+
+        if (! in_array($extension, ['jpg', 'jpeg', 'png', 'webp', 'pdf'], true)) {
+            return null;
+        }
+
+        return $file->storeAs('receipts', uniqid('', true).'-'.time().'.'.$extension, 'local');
     }
 
     /**

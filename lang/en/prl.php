@@ -97,4 +97,6 @@ return [
     'errStaff' => 'Select a staff member.',
     'errBaseAmount' => 'Enter the agreed salary or rate.',
     'errEffectiveDate' => 'Enter a valid effective date.',
+
+    'errNegativeNet' => 'Deductions + advance recovery cannot exceed the gross pay (salary + allowances + bonuses).',
 ];

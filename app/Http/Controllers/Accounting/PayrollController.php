@@ -128,6 +128,21 @@ class PayrollController
         }
 
         $payroll = DB::transaction(function () use ($data, $preview, $me, $start, $end): Payroll {
+            // Overlap check re-verified INSIDE the transaction (locked rows)
+            // so two concurrent submissions cannot both create overlapping
+            // periods by passing the pre-check above.
+            $overlaps = Payroll::query()
+                ->where('period_start', '<=', $end->toDateString())
+                ->where('period_end', '>=', $start->toDateString())
+                ->lockForUpdate()
+                ->exists();
+
+            if ($overlaps) {
+                throw ValidationException::withMessages([
+                    'periodEnd' => __('prl.errOverlap'),
+                ]);
+            }
+
             $payroll = Payroll::query()->create([
                 'label' => trim((string) $data['label']),
                 'period_start' => $start,
@@ -241,7 +256,22 @@ class PayrollController
         $deductions = array_key_exists('deductions', $data) ? (float) ($data['deductions'] ?? 0) : (float) $item->deductions;
         $target = array_key_exists('advanceRecovered', $data) ? (float) ($data['advanceRecovered'] ?? 0) : (float) $item->advance_recovered;
 
+        // A net pay can never go negative — deductions + advance recovery
+        // are capped at what the line actually pays out.
+        $gross = round($salary + $allowances + $bonuses, 2);
+        $outflows = round($deductions + $target, 2);
+
+        if ($outflows > $gross + 0.005) {
+            throw ValidationException::withMessages([
+                'deductions' => __('prl.errNegativeNet'),
+            ]);
+        }
+
         [$changedColumns] = DB::transaction(function () use ($item, $data, $me, $salary, $allowances, $bonuses, $deductions, $target): array {
+            // Lock the line so two concurrent edits of the same item cannot
+            // interleave their delete/re-insert of advance recoveries.
+            $item = PayrollItem::query()->whereKey($item->id)->lockForUpdate()->firstOrFail();
+
             // (a) Drop this line's recoveries and refresh the advances.
             $advanceIds = $item->advanceRecoveries()->pluck('advance_id')->unique()->values()->all();
 

@@ -27,7 +27,7 @@
                         @if ($order->status === 'DRAFT')
                             <span class="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-700">{{ __('labels.orderStatus.DRAFT') }}</span>
                         @endif
-                        <x-badges.priority :status="$order->priority" />
+                        <x-badges.priority :priority="$order->priority" />
                     </div>
                     <p class="mt-0.5 text-sm text-muted-foreground">{{ $order->description }}</p>
                 </div>
@@ -135,7 +135,7 @@
                                             <span class="font-mono text-[11px] font-semibold tracking-wide text-muted-foreground">{{ $task->code }}</span>
                                             <span class="font-semibold">{{ $task->garment_piece }}</span>
                                             <span class="text-xs tabular-nums text-muted-foreground">× {{ $task->quantity }}</span>
-                                            <x-badges.category :status="$task->category" />
+                                            <x-badges.category :category="$task->category" />
                                             <x-badges.status :status="$task->status" />
                                         </div>
                                         <div class="flex items-center gap-2">

@@ -229,7 +229,7 @@ class SupplierController
             'orderId' => ['nullable', 'string', Rule::exists('orders', 'id')],
             'notes' => ['nullable', 'string', 'max:4000'],
             'receipt' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp,pdf', 'max:2048'],
-            'items' => ['required', 'array', 'min:1'],
+            'items' => ['required', 'array', 'min:1', 'max:100'],
             'items.*.description' => ['required', 'string', 'max:300'],
             'items.*.quantity' => ['required', 'numeric', 'min:0.01'],
             'items.*.unitPrice' => ['required', 'numeric', 'min:0'],
@@ -319,7 +319,7 @@ class SupplierController
             'orderId' => ['nullable', 'string', Rule::exists('orders', 'id')],
             'notes' => ['nullable', 'string', 'max:4000'],
             'receipt' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp,pdf', 'max:2048'],
-            'items' => ['nullable', 'array', 'min:1'],
+            'items' => ['nullable', 'array', 'min:1', 'max:100'],
             'items.*.description' => ['required', 'string', 'max:300'],
             'items.*.quantity' => ['required', 'numeric', 'min:0.01'],
             'items.*.unitPrice' => ['required', 'numeric', 'min:0'],
@@ -327,7 +327,7 @@ class SupplierController
 
         $wasPaid = $purchase->payment_status === 'PAID';
 
-        [$changedColumns, $expenseBooked] = DB::transaction(function () use ($data, $me, $purchase, $wasPaid, $request): array {
+        [$changedColumns, $expenseBooked, $oldReceiptPath] = DB::transaction(function () use ($data, $me, $purchase, $wasPaid, $request): array {
             $update = [];
 
             if (isset($data['supplierId'])) {
@@ -380,7 +380,6 @@ class SupplierController
             $newReceipt = $this->storeReceipt($request);
 
             if ($newReceipt !== null) {
-                $this->deleteReceiptFile($purchase->receipt_path);
                 $update['receipt_path'] = $newReceipt;
             }
 
@@ -391,16 +390,57 @@ class SupplierController
                 $purchase->save();
             }
 
+            // ---- Keep the expense ledger in sync with the purchase --------
+            // A PAID purchase owns exactly one source_type=PURCHASE expense
+            // row: booking on the PAID transition, amount/category/date
+            // refresh on every paid edit, and removal when the purchase is
+            // switched back to an unpaid status (an unpaid purchase is not
+            // a cost that left the workshop).
             $expenseBooked = false;
+            $linkedExpense = Expense::query()
+                ->where('source_type', 'PURCHASE')
+                ->where('source_id', $purchase->id)
+                ->first();
 
-            if ($purchase->payment_status === 'PAID' && ! $wasPaid) {
-                $this->bookPurchaseExpense($purchase, $me);
-
-                $expenseBooked = true;
+            if ($purchase->payment_status === 'PAID') {
+                if ($linkedExpense === null) {
+                    if (! $wasPaid) {
+                        $this->bookPurchaseExpense($purchase, $me);
+                        $expenseBooked = true;
+                    }
+                } else {
+                    // Refresh the booked row so the ledger never shows a
+                    // stale amount/category/date after a paid-purchase edit.
+                    $linkedExpense->forceFill([
+                        'expense_category_id' => $purchase->expense_category_id
+                            ?? ExpenseCategory::defaultPurchaseCategory()->id,
+                        'description' => $purchase->description,
+                        'amount' => (float) $purchase->total_amount,
+                        'date_incurred' => $purchase->purchase_date->toDateString(),
+                        'date_paid' => $purchase->purchase_date->toDateString(),
+                        'method' => $purchase->method ?? 'CASH',
+                        'payee' => $purchase->supplier_name,
+                        'order_id' => $purchase->order_id,
+                    ])->save();
+                }
+            } elseif ($wasPaid) {
+                // PAID → UNPAID/PARTIAL: the money is no longer out, so the
+                // auto-booked cost must go (the audit trail keeps the
+                // purchase's own history).
+                $linkedExpense?->delete();
             }
 
-            return [$changedColumns, $expenseBooked];
+            // Old receipt file is only removed AFTER the transaction — a
+            // rollback must never leave the still-live row pointing at a
+            // deleted file.
+            $oldReceiptPath = $newReceipt !== null ? $purchase->getOriginal('receipt_path') : null;
+
+            return [$changedColumns, $expenseBooked, $oldReceiptPath];
         });
+
+        if ($oldReceiptPath !== null && $oldReceiptPath !== '') {
+            $this->deleteReceiptFile($oldReceiptPath);
+        }
 
         Audit::log($me, 'PURCHASE_UPDATED', 'PURCHASE', $purchase->id, [
             'reference' => $purchase->reference,
@@ -445,16 +485,15 @@ class SupplierController
     /**
      * GET /purchases/{id}/receipt (route perm accounting.suppliers) —
      * stream the stored purchase receipt from storage/app/receipts.
+     * The resolved path is verified to stay INSIDE storage/app so a
+     * tampered receipt_path can never make the app stream arbitrary
+     * server files.
      */
     public function purchaseReceipt(string $id): BinaryFileResponse
     {
         $purchase = Purchase::query()->findOrFail($id);
 
-        $path = $purchase->receipt_path;
-
-        abort_unless(is_string($path) && $path !== '' && is_file(storage_path('app/'.$path)), 404);
-
-        return response()->file(storage_path('app/'.$path));
+        return $this->receiptResponse($purchase->receipt_path);
     }
 
     // ------------------------------------------------------------------
@@ -521,6 +560,12 @@ class SupplierController
     /**
      * Store an uploaded receipt under storage/app/receipts with a
      * collision-free filename; null when no valid file was submitted.
+     *
+     * Security: the extension is derived from the file CONTENT (guessExtension),
+     * never from the client-supplied filename, and only receipt-safe types
+     * are accepted — an upload can never plant an executable extension in
+     * storage. The route validation (mimes:jpg,jpeg,png,webp,pdf) is the
+     * first gate; this is the second.
      */
     private function storeReceipt(Request $request): ?string
     {
@@ -530,7 +575,13 @@ class SupplierController
             return null;
         }
 
-        return $file->storeAs('receipts', uniqid().'-'.time().'.'.$file->extension(), 'local');
+        $extension = strtolower((string) $file->guessExtension());
+
+        if (! in_array($extension, ['jpg', 'jpeg', 'png', 'webp', 'pdf'], true)) {
+            return null;
+        }
+
+        return $file->storeAs('receipts', uniqid('', true).'-'.time().'.'.$extension, 'local');
     }
 
     /**
@@ -569,5 +620,27 @@ class SupplierController
         if ($messages !== []) {
             throw ValidationException::withMessages($messages);
         }
+    }
+
+    /**
+     * Stream a stored receipt file after verifying the resolved real path
+     * stays inside storage/app (path-containment guard).
+     */
+    private function receiptResponse(?string $path): BinaryFileResponse
+    {
+        abort_unless(is_string($path) && $path !== '', 404);
+
+        $absolute = realpath(storage_path('app/'.$path));
+        $root = realpath(storage_path('app'));
+
+        abort_unless(
+            $absolute !== false
+            && $root !== false
+            && str_starts_with($absolute, $root.DIRECTORY_SEPARATOR)
+            && is_file($absolute),
+            404
+        );
+
+        return response()->file($absolute);
     }
 }

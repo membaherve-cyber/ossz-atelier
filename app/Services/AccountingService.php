@@ -25,8 +25,11 @@ use Illuminate\Support\Facades\DB;
  * - Expenses              = Σ expenses with status APPROVED or PAID (date incurred in range).
  * - Salaries              = Σ payroll_items.net_pay of APPROVED/PARTIALLY_PAID/PAID payrolls
  *                           (period start in range). Advance recoveries are NOT extra costs.
- * - Net operating result  = revenue − expenses − salaries.
- * - Cash movement         = payments received − paid expenses − paid salaries − advance disbursements.
+ * - Net operating result  = revenue − expenses − salaries (accrual basis).
+ * - Cash movement         = payments received − PAID expenses − PAID salary
+ *                           lines − advance disbursements (cash basis —
+ *                           APPROVED-but-unpaid expenses and PENDING salary
+ *                           lines never move cash).
  *
  * Incentives paid enter exactly once through their auto-booked expense
  * (source INCENTIVE_RECORD); recovered advances never create expenses.
@@ -91,10 +94,26 @@ final class AccountingService
                 ->whereBetween('period_start', [$from->toDateString(), $to->toDateString()]))
             ->sum('net_pay');
 
+        // NOTE: array_merge, NOT "array union +" — `+` keeps only the left
+        // side's keys, which would silently drop FULLY_RECOVERED.
         $advancesDisbursed = (float) StaffAdvance::query()
-            ->whereIn('status', StaffAdvance::DISBURSED_STATUSES + ['FULLY_RECOVERED'])
+            ->whereIn('status', array_merge(StaffAdvance::DISBURSED_STATUSES, ['FULLY_RECOVERED']))
             ->whereBetween('date_issued', [$from->toDateString(), $to->toDateString()])
             ->sum('amount');
+
+        // ---- Cash-basis variants for the cash-movement card ---------------
+        // date_paid is authoritative when present; PAID rows recorded
+        // without one (manual PAID entry) fall back to date_incurred.
+        $paidExpenses = (float) Expense::query()
+            ->where('status', 'PAID')
+            ->whereBetween(DB::raw('COALESCE(date_paid, date_incurred)'), [$from->toDateString(), $to->toDateString()])
+            ->sum('amount');
+
+        $paidSalaries = (float) PayrollItem::query()
+            ->where('payment_status', 'PAID')
+            ->whereHas('payroll', fn ($q) => $q->whereIn('status', ['APPROVED', 'PARTIALLY_PAID', 'PAID'])
+                ->whereBetween('period_start', [$from->toDateString(), $to->toDateString()]))
+            ->sum('net_pay');
 
         // ---- As-of-now balances --------------------------------------------
         $outstandingBalances = (float) Order::query()
@@ -135,7 +154,7 @@ final class AccountingService
             'advancesOutstanding' => $advancesOutstanding,
             'advancesDisbursed' => $advancesDisbursed,
             'netResult' => $revenue - $expenses - $salaries,
-            'cashMovement' => $paymentsReceived - $expenses - $salaries - $advancesDisbursed,
+            'cashMovement' => $paymentsReceived - $paidExpenses - $paidSalaries - $advancesDisbursed,
             'monthRevenue' => $monthRevenue,
             'monthExpenses' => $monthExpenses,
             'series' => $series,

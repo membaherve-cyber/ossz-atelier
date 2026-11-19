@@ -56,4 +56,6 @@ return [
     'errDate' => 'Enter a valid payment date.',
     'errExceedsBalance' => 'This amount exceeds the outstanding balance of the order.',
     'errNoValue' => 'The selected order has no total value recorded. Edit the order first.',
+
+    'errOrderNotRegistered' => 'Payments can only be recorded against REGISTERED orders. Finalize the draft order first.',
 ];

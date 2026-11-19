@@ -34,3 +34,24 @@ AddHandler application/x-httpd-alt-php82___lsphp .php
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
 </IfModule>
+
+# 4. Security hardening (defence in depth; Laravel also sends its own
+#    response headers via App\Http\Middleware\SecurityHeaders).
+<IfModule mod_headers.c>
+    # Hide the PHP version banner from responses.
+    Header always unset X-Powered-By
+    Header always unset Server
+</IfModule>
+
+# 5. Never serve dotfiles, env files, logs, backups or dumps even if one
+#    is accidentally copied into the webroot (the app lives one level
+#    above, but this guards against operational mistakes).
+<FilesMatch "(^\.|\.(env|log|sql|bak|old|ini|lock|md|ya?ml|dist|sh))$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>

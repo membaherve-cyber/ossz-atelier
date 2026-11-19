@@ -18,6 +18,8 @@ use Illuminate\View\View;
  * Ported from src/app/api/atelier/auth/login + logout routes:
  * - rate limit 5 attempts / 60 s per email+IP (Laravel RateLimiter)
  * - inactive accounts are blocked and audited (LOGIN_BLOCKED_INACTIVE)
+ *   — but only AFTER the password is verified, so an unauthenticated
+ *   attacker can never use the distinct message to enumerate accounts
  * - failed attempts are audited (LOGIN_FAILED) and hit the limiter
  * - success regenerates the session id and audits LOGIN_SUCCESS
  *
@@ -70,7 +72,10 @@ class LoginController
 
         $user = User::where('email', $email)->first();
 
-        if ($user !== null && ! $user->is_active) {
+        if ($user !== null && ! $user->is_active && Auth::validate(['email' => $email, 'password' => $data['password']])) {
+            // Correct password on a deactivated account — the caller has
+            // proven credentials, so the specific inactive-account message
+            // leaks nothing an attacker could exploit for enumeration.
             Audit::log(null, 'LOGIN_BLOCKED_INACTIVE', 'USER', $user->id, ['email' => $email]);
 
             return redirect()
@@ -86,6 +91,18 @@ class LoginController
             return redirect()
                 ->back()
                 ->with('error', __('login.error'))
+                ->withInput($request->only('email'));
+        }
+
+        if (! $user?->is_active) {
+            // Defensive: attempt() succeeded but the account was deactivated
+            // between the two queries — end the session immediately.
+            Auth::logout();
+            RateLimiter::hit($key, self::DECAY_SECONDS);
+
+            return redirect()
+                ->back()
+                ->with('error', __('flash.loginInactive'))
                 ->withInput($request->only('email'));
         }
 
