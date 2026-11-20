@@ -9,6 +9,7 @@ use App\Http\Controllers\Accounting\PayrollController;
 use App\Http\Controllers\Accounting\SupplierController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\AuditController;
+use App\Http\Controllers\DailyReportController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\IncentiveController;
@@ -438,3 +439,37 @@ Route::get('/purchases/{id}/receipt', [SupplierController::class, 'purchaseRecei
 Route::get('/accounting/reports', [FinancialReportController::class, 'index'])
     ->name('accounting.reports')
     ->middleware('perm:accounting.reports');
+
+// --------------------------------------------------------------------------
+// DAILY BUSINESS-HEALTH E-MAIL (enhancement) — automated daily report to
+// the management distribution list. Management-only via accounting.view
+// (the report carries confidential financial KPIs). Delivery itself runs
+// through the `atelier:daily-report` artisan command (scheduler / cron).
+// --------------------------------------------------------------------------
+Route::get('/daily-report', [DailyReportController::class, 'index'])
+    ->name('dailyreport.index')
+    ->middleware('perm:accounting.view');
+
+Route::post('/daily-report/settings', [DailyReportController::class, 'updateSettings'])
+    ->name('dailyreport.settings')
+    ->middleware('perm:accounting.view');
+
+Route::post('/daily-report/recipients', [DailyReportController::class, 'storeRecipient'])
+    ->name('dailyreport.recipients.store')
+    ->middleware('perm:accounting.view');
+
+Route::post('/daily-report/recipients/{id}', [DailyReportController::class, 'updateRecipient'])
+    ->name('dailyreport.recipients.update')
+    ->middleware('perm:accounting.view');
+
+Route::post('/daily-report/recipients/{id}/delete', [DailyReportController::class, 'destroyRecipient'])
+    ->name('dailyreport.recipients.destroy')
+    ->middleware('perm:accounting.view');
+
+Route::post('/daily-report/send', [DailyReportController::class, 'send'])
+    ->name('dailyreport.send')
+    ->middleware('perm:accounting.view');
+
+Route::post('/daily-report/send-test', [DailyReportController::class, 'sendTest'])
+    ->name('dailyreport.sendTest')
+    ->middleware('perm:accounting.view');

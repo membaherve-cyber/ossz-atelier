@@ -33,6 +33,18 @@ Built with **Laravel 11** (PHP 8.2+), Blade + Alpine.js, MySQL.
 - Full audit trail of every action (who, what, when, details)
 - Bilingual UI (English / Français) switchable on every page
 
+### Daily Email Report (Management only)
+- Automated daily business-health e-mail: today's orders, completed pieces,
+  payments in, expenses out, production snapshot (overdue, blocked, on-time
+  rate), month-to-date financials, staff workload and an attention list
+- Distribution list managed in-app (Administration → Daily Report): add,
+  remove, activate/deactivate recipient addresses — `info@osszcollection.com`
+  active by default
+- Configurable send time + business timezone, section toggles, reply-to,
+  manual "Send Now" and "Send Test to My Inbox", delivery history log
+- Ships as `atelier:daily-report` artisan command + Laravel scheduler
+  (sendmail or SMTP transport — see DEPLOYMENT.md §6/§7)
+
 ---
 
 ## Requirements

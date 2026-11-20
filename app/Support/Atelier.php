@@ -270,6 +270,12 @@ final class Atelier
         'PURCHASE_UPDATED',
         'PURCHASE_DELETED',
         'LABOUR_ALLOCATED',
+        // Daily business-health e-mail (enhancement)
+        'DAILY_REPORT_SETTINGS_UPDATED',
+        'DAILY_REPORT_RECIPIENT_ADDED',
+        'DAILY_REPORT_RECIPIENT_UPDATED',
+        'DAILY_REPORT_RECIPIENT_REMOVED',
+        'DAILY_REPORT_SENT',
     ];
 
     /**

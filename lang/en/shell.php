@@ -40,9 +40,11 @@ return [
         'suppliers' => 'Suppliers and Purchases',
         'financialReports' => 'Financial Reports',
         'more' => 'More',
+        'dailyReport' => 'Daily Report',
     ],
     'view' => [
         'dashboard' => 'Dashboard',
+        'dailyReport' => 'Daily Email Report',
         'tasks' => 'Production',
         'taskCreate' => 'Create Production Tasks',
         'taskDetail' => 'Task Detail',

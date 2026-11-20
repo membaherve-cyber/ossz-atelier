@@ -98,5 +98,11 @@ return [
         'PURCHASE_UPDATED' => 'Purchase updated',
         'PURCHASE_DELETED' => 'Purchase deleted',
         'LABOUR_ALLOCATED' => 'Labour cost allocated',
+        // Daily business-health e-mail (enhancement)
+        'DAILY_REPORT_SETTINGS_UPDATED' => 'Daily report settings updated',
+        'DAILY_REPORT_RECIPIENT_ADDED' => 'Daily report recipient added',
+        'DAILY_REPORT_RECIPIENT_UPDATED' => 'Daily report recipient updated',
+        'DAILY_REPORT_RECIPIENT_REMOVED' => 'Daily report recipient removed',
+        'DAILY_REPORT_SENT' => 'Daily report sent',
     ],
 ];

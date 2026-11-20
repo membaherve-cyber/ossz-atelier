@@ -1,22 +1,48 @@
 <?php
 
+use App\Models\DailyReportSetting;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schedule;
+use Illuminate\Support\Facades\Schema;
+use Throwable;
 
 /*
 |--------------------------------------------------------------------------
 | Console Routes
 |--------------------------------------------------------------------------
 |
-| This file is where you may define all of your Closure based console
-| commands. Each Closure is bound to a command instance allowing a
-| simple approach to interacting with each command's IO methods.
+| Closure based commands live here alongside the scheduled tasks.
 |
-| Standard Laravel 11 skeleton content — OSSZ ATELIER adds no console
-| commands (seeding is handled by database/seeders/DatabaseSeeder.php).
+| Daily business-health e-mail: fires `atelier:daily-report` every day at
+| the send time configured on the Daily Report settings page (business
+| timezone). Requires ONE server cron entry running
+| `php artisan schedule:run` every minute — see DEPLOYMENT.md §7. The
+| settings lookup is guarded so artisan still works before the first
+| migration.
 |
 */
 
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
+
+$reportTime = '07:00';
+$reportTimezone = 'Africa/Douala';
+
+try {
+    if (Schema::hasTable('daily_report_settings')) {
+        $settings = DailyReportSetting::query()->find(1);
+
+        if ($settings instanceof DailyReportSetting) {
+            $reportTime = $settings->sendTime();
+            $reportTimezone = $settings->timezone()->getName();
+        }
+    }
+} catch (Throwable) {
+    // Fresh installation (table not migrated yet) — defaults apply.
+}
+
+Schedule::command('atelier:daily-report --trigger=scheduled')
+    ->dailyAt($reportTime)
+    ->timezone($reportTimezone);

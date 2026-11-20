@@ -98,5 +98,11 @@ return [
         'PURCHASE_UPDATED' => 'Achat mis à jour',
         'PURCHASE_DELETED' => 'Achat supprimé',
         'LABOUR_ALLOCATED' => 'Coût de main-d’œuvre alloué',
+        // Daily business-health e-mail (enhancement)
+        'DAILY_REPORT_SETTINGS_UPDATED' => 'Paramètres du rapport quotidien modifiés',
+        'DAILY_REPORT_RECIPIENT_ADDED' => 'Destinataire du rapport ajouté',
+        'DAILY_REPORT_RECIPIENT_UPDATED' => 'Destinataire du rapport modifié',
+        'DAILY_REPORT_RECIPIENT_REMOVED' => 'Destinataire du rapport retiré',
+        'DAILY_REPORT_SENT' => 'Rapport quotidien envoyé',
     ],
 ];

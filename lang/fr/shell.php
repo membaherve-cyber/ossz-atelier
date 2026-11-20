@@ -40,9 +40,11 @@ return [
         'suppliers' => 'Fournisseurs et Achats',
         'financialReports' => 'Rapports Financiers',
         'more' => 'Plus',
+        'dailyReport' => 'Rapport Quotidien',
     ],
     'view' => [
         'dashboard' => 'Tableau de bord',
+        'dailyReport' => 'Rapport Quotidien par E-mail',
         'tasks' => 'Production',
         'taskCreate' => 'Créer des tâches de production',
         'taskDetail' => 'Détail de la tâche',

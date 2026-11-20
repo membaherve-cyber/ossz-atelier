@@ -78,7 +78,72 @@ The domain must serve `public/` (never the app root — `.env` and `database/` w
 
 The included `public/.htaccess` handles the front controller, HTTPS redirects and blocks sensitive files.
 
-## 6. Permissions
+## 6. Daily report e-mail (mail transport)
+
+The application sends an automated **daily business-health report**
+(Administration → Daily Report) to the distribution list —
+`info@osszcollection.com` is active by default. Configure the transport in
+`.env`:
+
+**Option A — sendmail (recommended on Stellar shared hosting, zero
+credentials):**
+
+```env
+MAIL_MAILER=sendmail
+MAIL_FROM_ADDRESS="atelier@osszcollection.com"
+MAIL_FROM_NAME="${APP_NAME}"
+```
+
+**Option B — authenticated SMTP through a domain mailbox (best
+deliverability):** create a mailbox in cPanel (e.g. `atelier@osszcollection.com`),
+then:
+
+```env
+MAIL_MAILER=smtp
+MAIL_HOST=mail.osszcollection.com
+MAIL_PORT=465
+MAIL_USERNAME="atelier@osszcollection.com"
+MAIL_PASSWORD="the mailbox password"
+MAIL_FROM_ADDRESS="atelier@osszcollection.com"
+MAIL_FROM_NAME="${APP_NAME}"
+```
+
+After changing `.env` run `php artisan optimize:clear`. Verify delivery from
+the app: **Administration → Daily Report → Send Test to My Inbox**
+(logged in as Management). For development, `MAIL_MAILER=log` writes the
+rendered e-mail to `storage/logs/laravel.log` instead of sending.
+
+## 7. Daily report cron job (cPanel)
+
+The scheduled send needs ONE cron entry. In cPanel → **Cron Jobs** → add
+(run every minute — the application decides when to send, using the send
+time + timezone configured on the Daily Report page):
+
+```
+* * * * * cd /home/USER/atelier.osszcollection.com && /opt/cpanel/ea-php82/root/usr/bin/php artisan schedule:run >> /dev/null 2>&1
+```
+
+(Adjust the PHP path to the MultiPHP version chosen in step 1 — the
+command `which php` in cPanel Terminal shows the right binary.)
+
+Alternative — a single daily entry instead of every minute (fires at
+07:00 **server** time, so prefer the every-minute variant above):
+
+```
+0 7 * * * cd /home/USER/atelier.osszcollection.com && /opt/cpanel/ea-php82/root/usr/bin/php artisan atelier:daily-report >> /dev/null 2>&1
+```
+
+Notes:
+
+- The report sends at the time configured in **Administration → Daily
+  Report** (default 07:00 Africa/Douala) and never twice per day
+  (scheduled runs are deduplicated in `daily_report_logs`).
+- Recipients, send time, timezone and report sections are managed in the
+  app by Management — no code edits needed.
+- Every run (scheduled, manual, test) is recorded in the Send History on
+  the same page.
+
+## 8. Permissions (storage & bootstrap/cache)
 
 ```bash
 cd ~/atelier.osszcollection.com
@@ -87,7 +152,7 @@ chmod -R ug+w storage bootstrap/cache
 
 (storage holds compiled views, sessions and cache — must be writable by PHP)
 
-## 7. First login + hardening
+## 9. First login + hardening
 
 - Browse to `https://atelier.osszcollection.com` → you are redirected to `/login`
 - Sign in with `management@atelier.com` / `Atelier@2026`
@@ -118,4 +183,4 @@ php artisan optimize:clear
 
 - SQLite works for local dev (`DB_CONNECTION=sqlite`) — production uses MySQL
 - The `/up` health endpoint returns 200 when the app is up (Laravel default)
-- Queue/mail are left on `database`/`log` drivers — notifications are in-app only, no emails are sent
+- Queue stays on the `database` driver — notifications are in-app; the ONLY e-mail the app sends is the daily report (see §6/§7)
