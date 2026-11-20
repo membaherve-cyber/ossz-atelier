@@ -41,7 +41,7 @@ return [
     'jobTitlePlaceholder' => 'ex. Couturier, Coupeur',
     'roleHint' => [
         'management' => 'Accès complet, autorité finale sur les primes et les décisions critiques.',
-        'admin' => 'Gestion opérationnelle des clients, commandes, production et comptes du personnel.',
+        'admin' => 'Accès complet à toutes les fonctionnalités, y compris la comptabilité, les rapports et la gestion des comptes.',
         'staff' => 'Voit et met à jour uniquement les tâches affectées à son propre compte.',
         'staffExtra' => 'Les comptes du personnel peuvent se voir affecter des tâches de production.',
     ],

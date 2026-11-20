@@ -88,7 +88,7 @@ return [
     'fieldProfileStatus' => 'Status',
     'fieldProfileRemarks' => 'Management remarks',
     'selectStaff' => 'Select a staff member…',
-    'confidential' => 'Confidential — visible to Management only.',
+    'confidential' => 'Confidential — visible to Management and Admin only.',
     'emptyProfiles' => 'No salary profiles configured yet.',
     'emptyProfilesDesc' => 'Configure each staff member\'s remuneration to pre-fill payroll lines.',
 

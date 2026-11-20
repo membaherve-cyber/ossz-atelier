@@ -28,12 +28,15 @@ Built with **Laravel 11** (PHP 8.2+), Blade + Alpine.js, MySQL.
 - Incentive schemes with period-based generation, management approval workflow and payment recording
 
 ### Administration
-- Users & roles: MANAGEMENT, ADMIN (staff accounts only), STAFF
+- Users & roles: MANAGEMENT, ADMIN (full access to every feature, incl.
+  accounting and user management), STAFF (own tasks only)
+- Daily business-health e-mail settings (Administration → Daily Report):
+  distribution list, send time, section toggles — see below
 - Production stage configuration (weights, applicable garment categories, ordering)
 - Full audit trail of every action (who, what, when, details)
 - Bilingual UI (English / Français) switchable on every page
 
-### Daily Email Report (Management only)
+### Daily Email Report (Management & Admin)
 - Automated daily business-health e-mail: today's orders, completed pieces,
   payments in, expenses out, production snapshot (overdue, blocked, on-time
   rate), month-to-date financials, staff workload and an attention list

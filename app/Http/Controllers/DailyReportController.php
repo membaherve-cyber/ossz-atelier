@@ -21,9 +21,10 @@ use Throwable;
  * the recipients distribution-list management and the manual "Send now" /
  * "Send test" actions.
  *
- * Management-only: every route is gated by perm:accounting.view (the
- * report contains confidential financial KPIs, so the permission matrix
- * never grants it to ADMIN — consistent with the accounting module).
+ * Management and Admin only: every route is gated by perm:accounting.view
+ * (the report contains confidential financial KPIs, so the permission
+ * matrix keeps it away from STAFF — consistent with the accounting
+ * module).
  *
  * The actual delivery runs through the `atelier:daily-report` command so
  * scheduled, manual and test sends share one code path and one log.
@@ -232,7 +233,7 @@ class DailyReportController
 
     /**
      * POST /daily-report/send-test — test e-mail to the requesting
-     * Management user's own inbox only (trigger TEST).
+     * Management/Admin user's own inbox only (trigger TEST).
      */
     public function sendTest(Request $request): RedirectResponse
     {

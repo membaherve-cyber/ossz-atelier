@@ -86,7 +86,7 @@ return [
     'fieldProfileStatus' => 'Statut',
     'fieldProfileRemarks' => 'Remarques de la Direction',
     'selectStaff' => 'Sélectionner un membre du staff…',
-    'confidential' => 'Confidentiel — visible uniquement par la Direction.',
+    'confidential' => "Confidentiel — visible uniquement par la Direction et l'Admin.",
     'emptyProfiles' => 'Aucun profil de salaire configuré.',
     'emptyProfilesDesc' => 'Configurez la rémunération de chaque membre du staff pour pré-remplir les lignes de paie.',
 

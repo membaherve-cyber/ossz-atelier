@@ -39,7 +39,8 @@ use Throwable;
  *   generation from the live performance engine (App\Services\
  *   PerformanceService, parallel-built A1/R1 contract).
  * - PATCH   src/app/api/atelier/incentives/records/[id] — review
- *   (approve / reject, MANAGEMENT only via `perm:incentives.approve`)
+ *   (approve / reject, holders of `perm:incentives.approve` — Management
+ *   and Admin)
  *   and payment recording (`perm:incentives.payment`).
  *
  * Snapshot models: IncentiveRecord / IncentiveScheme keep denormalized
@@ -130,7 +131,7 @@ class IncentiveController
                 ->where('role', 'STAFF')
                 ->orderBy('name')
                 ->get(),
-            'canApprove' => $me->role === 'MANAGEMENT',
+            'canApprove' => Permissions::allows($me, 'incentives.approve'),
             'canPrepare' => Permissions::allows($me, 'incentives.prepare'),
             'canManageSchemes' => Permissions::allows($me, 'incentives.manage.schemes'),
         ]);
@@ -138,7 +139,7 @@ class IncentiveController
 
     /**
      * POST /incentives/schemes — create a scheme (route perm
-     * incentives.manage.schemes — MANAGEMENT only).
+     * incentives.manage.schemes — Management and Admin).
      *
      * Input contract: name (2-120), periodType (INCENTIVE_PERIOD_TYPES),
      * minScore (nullable 0-100), amount (nullable >= 0 — single amount
@@ -411,7 +412,7 @@ class IncentiveController
 
     /**
      * POST /incentives/{id}/review — approve or reject a recommendation
-     * (route perm incentives.approve — MANAGEMENT only).
+     * (route perm incentives.approve — Management and Admin).
      *
      * Input contract: decision (approve|reject). approve requires
      * approvedAmount (numeric > 0); reject requires rejectionReason
@@ -507,7 +508,7 @@ class IncentiveController
 
     /**
      * POST /incentives/{id}/payment — record a payout (route perm
-     * incentives.payment — MANAGEMENT only).
+     * incentives.payment — Management and Admin).
      *
      * Input contract: paidAt (optional date, defaults to now) sets
      * payment_status PAID + the payment_date column. Only APPROVED and

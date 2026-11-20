@@ -102,8 +102,8 @@
             ],
         ];
 
-        // Confidential accounting module — Management only (the permission
-        // matrix never grants accounting.* to ADMIN).
+        // Confidential accounting module — holders of accounting.view
+        // (Management and Admin, per the extended permission matrix).
         if ($can('accounting.view')) {
             $navTree[] = [
                 'label' => __('shell.section.accounting'),
@@ -130,7 +130,7 @@
         }
 
         $administration = array_values(array_filter([
-            ['route' => 'users.index', 'active' => 'users', 'label' => $me->role === 'ADMIN' ? __('shell.nav.staffAccounts') : __('shell.nav.users'), 'icon' => 'usersRound', 'can' => 'users.view'],
+            ['route' => 'users.index', 'active' => 'users', 'label' => $can('users.manage.all') ? __('shell.nav.users') : __('shell.nav.staffAccounts'), 'icon' => 'usersRound', 'can' => 'users.view'],
             ['route' => 'stages.index', 'active' => 'stages', 'label' => __('shell.nav.stages'), 'icon' => 'layers', 'can' => 'production.stages.configure'],
             ['route' => 'dailyreport.index', 'active' => 'dailyreport', 'label' => __('shell.nav.dailyReport'), 'icon' => 'mail', 'can' => 'accounting.view'],
             ['route' => 'audit.index', 'active' => 'audit', 'label' => __('shell.nav.audit'), 'icon' => 'scroll', 'can' => 'audit.view'],

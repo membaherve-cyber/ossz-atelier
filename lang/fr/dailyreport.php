@@ -5,7 +5,7 @@
 
 return [
     'title' => 'Rapport quotidien par e-mail',
-    'description' => 'Rapport quotidien automatique sur la santé de l’atelier, envoyé à la liste de diffusion de la direction.',
+    'description' => 'Rapport quotidien automatique sur la santé de l’atelier, envoyé à la liste de diffusion configurée.',
     'pageAria' => 'Paramètres du rapport quotidien',
 
     // Header actions

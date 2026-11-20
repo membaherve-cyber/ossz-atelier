@@ -14,7 +14,7 @@ use Illuminate\View\View;
 
 /**
  * Permanent audit trail browser (spec §3: GET /audit, `audit.view` —
- * Management only via the route middleware).
+ * Management and Admin via the route middleware).
  *
  * Ported from src/app/api/atelier/audit/route.ts: paginated, newest first
  * (created_at desc, then id desc as a stable tiebreaker), filterable by

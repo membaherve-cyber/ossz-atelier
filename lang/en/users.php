@@ -41,7 +41,7 @@ return [
     'jobTitlePlaceholder' => 'e.g. Tailor, Cutter',
     'roleHint' => [
         'management' => 'Full access, final authority on incentives and critical decisions.',
-        'admin' => 'Operational management of customers, orders, production and staff accounts.',
+        'admin' => 'Full access to every feature, including accounting, reports and user management.',
         'staff' => 'Sees and updates only the tasks assigned to their own account.',
         'staffExtra' => 'Staff accounts can be assigned production tasks.',
     ],

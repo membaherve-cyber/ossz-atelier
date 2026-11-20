@@ -5,7 +5,7 @@
 
 return [
     'title' => 'Daily Email Report',
-    'description' => 'Automated daily business-health report sent to the management distribution list.',
+    'description' => 'Automated daily business-health report sent to the configured distribution list.',
     'pageAria' => 'Daily email report settings',
 
     // Header actions

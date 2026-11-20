@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Log;
 use Throwable;
 
 /**
- * OSSZ ATELIER — permanent audit trail (Management-only visibility).
+ * OSSZ ATELIER — permanent audit trail (Management/Admin visibility).
  *
  * Ported from src/lib/atelier/audit.ts (logAudit). The audit trail is
  * append-only: entries can never be edited or deleted. Writing an entry is

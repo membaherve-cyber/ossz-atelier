@@ -8,6 +8,7 @@ use App\Models\ProductionTask;
 use App\Models\User;
 use App\Services\Audit;
 use App\Services\Codes;
+use App\Services\Permissions;
 use App\Support\Atelier;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\UniqueConstraintViolationException;
@@ -23,13 +24,15 @@ use Illuminate\Validation\ValidationException;
  *
  * Ported from the Next.js reference implementation:
  * - GET/POST src/app/api/atelier/users/route.ts — the account directory
- *   (ALL users, active and inactive) and account creation (Admins may only
- *   create STAFF accounts; unique email compared in its canonical
- *   lowercase/trimmed form; sequential USR-### codes);
+ *   (ALL users, active and inactive) and account creation (holders of
+ *     users.manage.all may create any role; accounts without it may only
+ *     create STAFF; unique email compared in its canonical
+ *     lowercase/trimmed form; sequential USR-### codes);
  * - PATCH src/app/api/atelier/users/[id]/route.ts — profile edits, role
  *   changes, activation toggles and password resets, with the reference's
  *   safeguards ported verbatim:
- *     - Admins may only manage STAFF accounts (target and resulting role);
+ *     - users.manage.all holders may manage any account, other roles only
+ *       STAFF accounts (target and resulting role);
  *     - nobody may deactivate their own account;
  *     - the last active MANAGEMENT account cannot be demoted or deactivated;
  *     - password resets are audited separately (USER_PASSWORD_RESET) and
@@ -103,7 +106,9 @@ class UserController
             'isActive' => ['nullable', 'boolean'],
         ]);
 
-        if ($me->role === 'ADMIN' && $data['role'] !== 'STAFF') {
+        // Without users.manage.all only STAFF accounts may be created
+        // (both ADMIN and any future restricted role).
+        if (! Permissions::allows($me, 'users.manage.all') && $data['role'] !== 'STAFF') {
             abort(403);
         }
 
@@ -176,9 +181,9 @@ class UserController
         // (hidden 0 / checkbox 1) flips it.
         $isActive = $request->has('isActive') ? $request->boolean('isActive') : null;
 
-        // Admins are restricted to staff accounts (both target and
-        // resulting role) — reference 403s.
-        if ($me->role === 'ADMIN') {
+        // Without users.manage.all the manager is restricted to staff
+        // accounts (both target and resulting role) — reference 403s.
+        if (! Permissions::allows($me, 'users.manage.all')) {
             if ($target->role !== 'STAFF') {
                 abort(403);
             }

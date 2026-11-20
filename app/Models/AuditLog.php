@@ -6,7 +6,7 @@ use App\Models\Concerns\HasUuid;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Permanent audit trail entry (Management-only visibility).
+ * Permanent audit trail entry (Management/Admin visibility).
  *
  * 1:1 port of the Prisma `AuditLog` model: `userId` / `userName` are
  * snapshots (no relation in Prisma), `details` is a JSON document

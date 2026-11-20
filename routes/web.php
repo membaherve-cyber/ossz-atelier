@@ -442,9 +442,10 @@ Route::get('/accounting/reports', [FinancialReportController::class, 'index'])
 
 // --------------------------------------------------------------------------
 // DAILY BUSINESS-HEALTH E-MAIL (enhancement) — automated daily report to
-// the management distribution list. Management-only via accounting.view
-// (the report carries confidential financial KPIs). Delivery itself runs
-// through the `atelier:daily-report` artisan command (scheduler / cron).
+// the management distribution list. Management and Admin via accounting.view
+// (the report carries confidential financial KPIs — never shown to STAFF).
+// Delivery itself runs through the `atelier:daily-report` artisan command
+// (scheduler / cron).
 // --------------------------------------------------------------------------
 Route::get('/daily-report', [DailyReportController::class, 'index'])
     ->name('dailyreport.index')

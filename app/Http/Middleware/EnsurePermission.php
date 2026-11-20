@@ -17,7 +17,8 @@ use Symfony\Component\HttpFoundation\Response;
  * Guests are rejected with 403 (the login screen itself is public and the
  * `auth` middleware handles the redirect-to-login behaviour on routes that
  * declare it); authenticated users are checked against the role matrix
- * (MANAGEMENT = all permissions, ADMIN = operational list, STAFF = none —
+ * (MANAGEMENT = all permissions, ADMIN = all permissions — management
+ * granted the admin account full feature parity —, STAFF = none —
  * staff access is scoped to their own tasks inside the controllers).
  */
 class EnsurePermission

@@ -87,7 +87,7 @@
                             @if (\App\Services\Permissions::allows($me, 'users.manage.staff'))
                                                             <td class="px-4 py-3">
                                     <div class="flex items-center justify-end">
-                                        @if (! ($me->role === 'ADMIN' && $user->role !== 'STAFF'))
+                                        @if (\App\Services\Permissions::allows($me, 'users.manage.all') || $user->role === 'STAFF')
                                             <div x-data="{ open: {{ $errors->any() && old('formId') === 'user-edit-'.$user->id ? 'true' : 'false' }} }">
                                                 <button type="button" @click="open = true"
                                                         aria-label="{{ \App\Support\Trans::fill('users.editAria', ['name' => $user->name]) }}"
@@ -132,7 +132,7 @@
                                                                             <label for="edit-role-{{ $user->id }}" class="mb-1.5 block text-sm font-medium">{{ __('users.roleLabel') }}</label>
                                                                             <select id="edit-role-{{ $user->id }}" name="role"
                                                                                     class="h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-sm shadow-sm transition-colors focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50">
-                                                                                @if ($me->role === 'ADMIN')
+                                                                                @if (! \App\Services\Permissions::allows($me, 'users.manage.all'))
                                                                                     <option value="STAFF" {{ old('role', $user->role) === 'STAFF' ? 'selected' : '' }}>{{ __('labels.role.STAFF') }}</option>
                                                                                 @else
                                                                                     <option value="MANAGEMENT" {{ old('role', $user->role) === 'MANAGEMENT' ? 'selected' : '' }}>{{ __('labels.role.MANAGEMENT') }}</option>
@@ -284,7 +284,7 @@
                                     <label for="new-role" class="mb-1.5 block text-sm font-medium">{{ __('users.roleRequired') }}</label>
                                     <select id="new-role" name="role" x-model="role"
                                             class="h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-sm shadow-sm transition-colors focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50">
-                                        @if ($me->role === 'ADMIN')
+                                        @if (! \App\Services\Permissions::allows($me, 'users.manage.all'))
                                             <option value="STAFF" {{ old('role', 'STAFF') === 'STAFF' ? 'selected' : '' }}>{{ __('labels.role.STAFF') }}</option>
                                         @else
                                             <option value="MANAGEMENT" {{ old('role', 'STAFF') === 'MANAGEMENT' ? 'selected' : '' }}>{{ __('labels.role.MANAGEMENT') }}</option>

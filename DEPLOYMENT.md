@@ -110,8 +110,9 @@ MAIL_FROM_NAME="${APP_NAME}"
 
 After changing `.env` run `php artisan optimize:clear`. Verify delivery from
 the app: **Administration → Daily Report → Send Test to My Inbox**
-(logged in as Management). For development, `MAIL_MAILER=log` writes the
-rendered e-mail to `storage/logs/laravel.log` instead of sending.
+(logged in as Management or Admin). For development, `MAIL_MAILER=log`
+writes the rendered e-mail to `storage/logs/laravel.log` instead of
+sending.
 
 ## 7. Daily report cron job (cPanel)
 
@@ -139,7 +140,7 @@ Notes:
   Report** (default 07:00 Africa/Douala) and never twice per day
   (scheduled runs are deduplicated in `daily_report_logs`).
 - Recipients, send time, timezone and report sections are managed in the
-  app by Management — no code edits needed.
+  app by Management or Admin — no code edits needed.
 - Every run (scheduled, manual, test) is recorded in the Send History on
   the same page.
 

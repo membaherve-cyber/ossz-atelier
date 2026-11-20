@@ -49,9 +49,9 @@ final class Atelier
         'incentives.approve',
         'incentives.payment',
         'audit.view',
-        // Accounting (enhancement spec §4.1/§15) — MANAGEMENT holds all of
-        // them via the matrix; ADMIN holds none unless Management extends
-        // the matrix; STAFF never sees confidential financial records.
+        // Accounting (enhancement spec §4.1/§15) — MANAGEMENT and ADMIN
+        // (full-parity matrix) hold all of them; STAFF never sees
+        // confidential financial records.
         'accounting.view',
         'accounting.payments',
         'accounting.expenses',
