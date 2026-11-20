@@ -58,7 +58,7 @@ export function NotificationsView() {
 
   const applyRead = (id: string) => {
     setData((d) =>
-      d
+      d && d.notifications
         ? {
             notifications: d.notifications.map((n) => (n.id === id ? { ...n, isRead: true } : n)),
             unreadCount: Math.max(0, d.unreadCount - 1),
@@ -92,7 +92,7 @@ export function NotificationsView() {
         all: true,
       });
       setData((d) =>
-        d
+        d && d.notifications
           ? { notifications: d.notifications.map((n) => ({ ...n, isRead: true })), unreadCount: 0 }
           : d
       );

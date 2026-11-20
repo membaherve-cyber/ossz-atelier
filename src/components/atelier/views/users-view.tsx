@@ -138,7 +138,7 @@ export function UsersView() {
   const load = useCallback(async () => {
     try {
       const res = await api.get<{ users: UserRecord[] }>("/api/atelier/users");
-      setUsers(res.users);
+      setUsers(res.users ?? []);
       setError(null);
     } catch (e) {
       // Empty string marks a generic failure; the translated message is

@@ -66,7 +66,11 @@ export function ReportsView() {
     setError(null);
     try {
       const res = await api.get<ReportsResponse>(`/api/atelier/reports${qs({ type: rType, value })}`);
-      setData(res);
+      if (res && res.staff && res.summary) {
+        setData(res);
+      } else {
+        setError(t("rep.loadErrorFallback"));
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : t("rep.loadErrorFallback"));
     } finally {

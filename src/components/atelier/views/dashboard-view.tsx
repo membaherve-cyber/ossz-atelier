@@ -51,7 +51,14 @@ export function DashboardView() {
     let cancelled = false;
     api
       .get<ManagerDashboard | StaffDashboard>("/api/atelier/dashboard")
-      .then((res) => !cancelled && setData(res))
+      .then((res) => {
+        if (cancelled) return;
+        if (res && res.stats && res.role) {
+          setData(res);
+        } else {
+          setError(t("dash.loadError"));
+        }
+      })
       .catch((e) => !cancelled && setError(e.message));
     return () => {
       cancelled = true;

@@ -72,15 +72,21 @@ export const useAppStore = create<AppState>((set) => ({
       "/api/atelier/auth/login",
       { email, password }
     );
+    // Guard against a malformed login response (missing user/token) so we
+    // never transition to "authenticated" with a null user — that would
+    // render a blank AppShell.
+    if (!res?.user || !res.user.id) {
+      throw new Error("Login response was incomplete.");
+    }
     // Persist the Bearer token so API calls keep working even when the
     // browser blocks the session cookie (embedded preview iframe).
-    setStoredToken(res.token);
+    setStoredToken(res.token ?? null);
     set({ user: res.user, status: "authenticated", view: "dashboard", viewParams: {} });
     try {
       const me = await api.get<{ unreadCount: number }>("/api/atelier/notifications?limit=1");
-      set({ unreadCount: me.unreadCount });
+      set({ unreadCount: me?.unreadCount ?? 0 });
     } catch {
-      // ignore
+      // ignore — notifications badge is non-critical
     }
     return res.user;
   },

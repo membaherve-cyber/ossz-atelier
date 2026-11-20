@@ -85,6 +85,36 @@ export function withApi<Args extends unknown[]>(
           { status: 503 }
         );
       }
+      // PrismaClientValidationError — a query references a field/model that
+      // doesn't exist in the schema (schema drift). Surface as a retryable
+      // 503 "service unavailable" rather than a 500 so clients can retry and
+      // ops see a distinct, actionable signal in logs.
+      if (err instanceof Error && err.name === "PrismaClientValidationError") {
+        console.error("[api] schema-drift:", err.message.split("\n")[0]);
+        return NextResponse.json(
+          { error: "Service is being prepared. Please retry in a moment." },
+          { status: 503 }
+        );
+      }
+      // Known Prisma request errors not already handled above (e.g. P2002
+      // unique violation, P2025 record not found). Map the common ones to
+      // sensible non-500 statuses so a missed `try` in a route never surfaces
+      // as a raw 500.
+      if (err instanceof Error && "code" in err) {
+        const code = (err as { code?: string }).code;
+        if (code === "P2002") {
+          return NextResponse.json(
+            { error: "A record with these details already exists." },
+            { status: 409 }
+          );
+        }
+        if (code === "P2025") {
+          return NextResponse.json(
+            { error: "The requested record was not found." },
+            { status: 404 }
+          );
+        }
+      }
       console.error("[api]", err);
       return NextResponse.json({ error: "Internal server error" }, { status: 500 });
     }

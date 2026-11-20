@@ -228,9 +228,13 @@ export function TaskDetailView() {
       if (!silent) setLoading(true);
       try {
         const res = await api.get<TaskDetail>(`/api/atelier/tasks/${taskId}`);
-        setDetail(res);
-        setFatal(null);
-        setFetchError(null);
+        if (res && res.task) {
+          setDetail(res);
+          setFatal(null);
+          setFetchError(null);
+        } else {
+          setFatal(tRef.current("td.loadFailed"));
+        }
       } catch (e) {
         if (e instanceof ApiClientError && (e.status === 403 || e.status === 404)) {
           setFatal(e.message);

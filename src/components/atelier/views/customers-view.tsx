@@ -74,7 +74,7 @@ export function CustomersView() {
       const res = await api.get<{ customers: Customer[] }>(
         `/api/atelier/customers${debouncedSearch ? `?search=${encodeURIComponent(debouncedSearch)}` : ""}`
       );
-      setCustomers(res.customers);
+      setCustomers(res.customers ?? []);
       setError(null);
     } catch (e) {
       setError(e instanceof Error ? e.message : t("cust.loadFail"));

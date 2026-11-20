@@ -135,7 +135,7 @@ export function OrdersView() {
       const res = await api.get<{ orders: OrderSummary[] }>(
         `/api/atelier/orders${qs({ search: debouncedSearch, priority, from, to })}`
       );
-      setOrders(res.orders);
+      setOrders(res.orders ?? []);
       setError(null);
     } catch (e) {
       setError(e instanceof Error ? e.message : t("orders.loadFail"));
@@ -145,7 +145,7 @@ export function OrdersView() {
   const loadCustomers = useCallback(async () => {
     try {
       const res = await api.get<{ customers: Customer[] }>("/api/atelier/customers");
-      setCustomers(res.customers);
+      setCustomers(res.customers ?? []);
     } catch {
       // Non-blocking: the new-customer mode remains available.
     }
@@ -165,7 +165,15 @@ export function OrdersView() {
     setDetailLoading(true);
     try {
       const res = await api.get<OrderDetail>(`/api/atelier/orders/${id}`);
-      setDetail(res);
+      if (res && res.order) {
+        setDetail(res);
+      } else {
+        toast({
+          title: t("orders.loadOrderFailed"),
+          variant: "destructive",
+        });
+        setDetailId(null);
+      }
     } catch (e) {
       toast({
         title: t("orders.loadOrderFailed"),

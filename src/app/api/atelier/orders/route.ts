@@ -238,7 +238,13 @@ export const POST = withApi(async (req: Request) => {
     where: { id: createdId },
     include: orderInclude,
   });
-  if (!order) throw new ApiError(500, "Order could not be loaded after creation.");
+  if (!order) {
+    // The order was committed but the immediate re-fetch returned nothing
+    // (e.g. replication lag / transient read). This is NOT a server error —
+    // the resource exists. Surface it as a retryable 503 so the client can
+    // refresh and find the order, rather than a scary 500.
+    throw new ApiError(503, "Order was created. Please refresh to view it.");
+  }
 
   await logAudit(user, "ORDER_CREATED", "ORDER", order.id, {
     orderNumber: order.orderNumber,

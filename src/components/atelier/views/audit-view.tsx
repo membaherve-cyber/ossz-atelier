@@ -110,8 +110,12 @@ export function AuditView() {
       )
       .then((res) => {
         if (cancelled) return;
-        setData(res);
-        setError(null);
+        if (res && res.entries) {
+          setData(res);
+          setError(null);
+        } else {
+          setError("");
+        }
       })
       .catch((err) => {
         if (cancelled) return;
@@ -136,7 +140,7 @@ export function AuditView() {
     setPage(1);
   };
 
-  const totalPages = data ? Math.max(1, Math.ceil(data.total / data.pageSize)) : 1;
+  const totalPages = data ? Math.max(1, Math.ceil((data.total ?? 0) / (data.pageSize ?? 1))) : 1;
 
   if (error !== null) {
     return (

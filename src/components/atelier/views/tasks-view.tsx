@@ -126,8 +126,8 @@ export function TasksView() {
             to: to || undefined,
           })
       );
-      setTasks(res.tasks);
-      setTotal(res.total);
+      setTasks(res.tasks ?? []);
+      setTotal(res.total ?? 0);
       setError(null);
     } catch (e) {
       const message = e instanceof Error ? e.message : t("tasks.loadFailed");

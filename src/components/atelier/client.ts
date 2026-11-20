@@ -44,11 +44,23 @@ async function request<T>(method: string, url: string, body?: unknown): Promise<
     body: body !== undefined ? JSON.stringify(body) : undefined,
     credentials: "same-origin",
   });
+  // Read the body once. A 200/204 with no JSON body must NOT silently become
+  // `{}` — that would let callers destructure `res.field` into `undefined`
+  // and crash the next render. Instead throw so the caller's catch block
+  // shows a proper error.
+  const text = await res.text();
   let data: Record<string, unknown> = {};
-  try {
-    data = await res.json();
-  } catch {
-    // non-JSON response
+  if (text.length > 0) {
+    try {
+      data = JSON.parse(text) as Record<string, unknown>;
+    } catch {
+      if (res.ok) {
+        throw new ApiClientError(res.status, "Malformed response from server");
+      }
+      // non-JSON error response — fall through with empty data
+    }
+  } else if (res.ok && res.status !== 204) {
+    throw new ApiClientError(res.status, "Empty response from server");
   }
   if (!res.ok) {
     // Stale/expired token: drop it so subsequent requests rely on the cookie

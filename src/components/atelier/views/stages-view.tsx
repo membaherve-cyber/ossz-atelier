@@ -256,7 +256,7 @@ export function StagesView() {
   const load = useCallback(async () => {
     try {
       const res = await api.get<{ stages: StageConfig[] }>("/api/atelier/stages");
-      setStages(res.stages);
+      setStages(res.stages ?? []);
       setError(null);
     } catch (err) {
       // Empty string marks a generic failure; the translated message is

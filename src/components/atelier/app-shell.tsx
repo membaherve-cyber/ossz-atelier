@@ -194,10 +194,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       const res = await api.get<{ notifications: NotificationRecord[]; unreadCount: number }>(
         "/api/atelier/notifications?limit=15"
       );
-      setNotifications(res.notifications);
-      setUnreadCount(res.unreadCount);
+      // Defensive: a malformed (empty) response must never set state to
+      // undefined, which would crash the bell dropdown render.
+      setNotifications(Array.isArray(res?.notifications) ? res.notifications : []);
+      setUnreadCount(typeof res?.unreadCount === "number" ? res.unreadCount : 0);
     } catch {
-      // ignore polling failures
+      // ignore polling failures — the badge is non-critical
     }
   }, [setUnreadCount]);
 

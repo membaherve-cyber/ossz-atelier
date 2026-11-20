@@ -7,7 +7,10 @@ import { requireUser } from "@/lib/auth";
 export const GET = withApi(async (req: Request) => {
   const user = await requireUser();
   const url = new URL(req.url);
-  const limit = Math.min(100, Number(url.searchParams.get("limit") ?? 50) || 50);
+  // Clamp to [1, 100] so a malformed/negative `limit` query never produces a
+  // Prisma `take` error (which would surface as a 500). `Number("abc")` -> NaN
+  // -> `|| 50` -> 50; `Number("-5")` -> -5 -> clamped to 1.
+  const limit = Math.max(1, Math.min(100, Number(url.searchParams.get("limit") ?? 50) || 50));
 
   const [notifications, unreadCount] = await Promise.all([
     db.notification.findMany({

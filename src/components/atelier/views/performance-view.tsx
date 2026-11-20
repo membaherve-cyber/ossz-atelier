@@ -290,8 +290,12 @@ export function PerformanceView() {
       const res = await api.get<PerformanceResponse>(
         `/api/atelier/performance${qs({ type: pType, value: periodValue })}`
       );
-      setData(res);
-      setDrafts({});
+      if (res && res.staff) {
+        setData(res);
+        setDrafts({});
+      } else {
+        setError(t("perf.loadErrorFallback"));
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : t("perf.loadErrorFallback"));
     } finally {
@@ -310,8 +314,10 @@ export function PerformanceView() {
       .get<{ config: PerformanceWeights }>("/api/atelier/performance/config")
       .then((res) => {
         if (cancelled) return;
-        setConfig(res.config);
-        setWeightsForm(toForm(res.config));
+        if (res && res.config) {
+          setConfig(res.config);
+          setWeightsForm(toForm(res.config));
+        }
       })
       .catch(() => undefined);
     return () => {

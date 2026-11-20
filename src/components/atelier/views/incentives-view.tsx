@@ -148,8 +148,10 @@ export function IncentivesView() {
   const loadSchemes = useCallback(async () => {
     try {
       const res = await api.get<{ schemes: IncentiveSchemeRecord[] }>("/api/atelier/incentives/schemes");
-      setSchemes(res.schemes);
-      setSelectedSchemeId((prev) => prev || res.schemes.find((s) => s.isActive)?.id || "");
+      const schemes = res.schemes ?? [];
+      setSchemes(schemes);
+      const activeId = schemes.find((s) => s.isActive)?.id ?? "";
+      setSelectedSchemeId((prev) => prev || activeId);
     } catch {
       setSchemes([]);
     }
@@ -158,7 +160,7 @@ export function IncentivesView() {
   const loadRecords = useCallback(async () => {
     try {
       const res = await api.get<{ records: IncentiveRecordRow[] }>("/api/atelier/incentives/records");
-      setRecords(res.records);
+      setRecords(res.records ?? []);
     } catch {
       setRecords([]);
     }

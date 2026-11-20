@@ -20,6 +20,7 @@ import { ReportsView } from "./views/reports-view";
 import { AuditView } from "./views/audit-view";
 import { StagesView } from "./views/stages-view";
 import { NotificationsView } from "./views/notifications-view";
+import { ErrorBoundary } from "./error-boundary";
 import { Scissors } from "lucide-react";
 
 export default function AtelierApp() {
@@ -50,7 +51,7 @@ export default function AtelierApp() {
     return <LoginView />;
   }
 
-  return <AppShell>{renderView(view)}</AppShell>;
+  return <AppShell><ErrorBoundary label={view}>{renderView(view)}</ErrorBoundary></AppShell>;
 }
 
 function renderView(view: string) {
