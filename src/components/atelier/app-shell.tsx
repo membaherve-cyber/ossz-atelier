@@ -69,10 +69,13 @@ function navFor(user: SessionUser): NavSection[] {
     {
       titleKey: "shell.section.production",
       items: [
+        // Fixed PRODUCTION-section order: Customers → Orders → Production →
+        // Create Tasks (matches the atelier workflow: register a customer,
+        // place their order, break it into production tasks).
+        { view: "customers", labelKey: "shell.nav.customers", icon: Users },
+        { view: "orders", labelKey: "shell.nav.orders", icon: Package },
         { view: "tasks", labelKey: "shell.nav.tasks", icon: Shirt },
         { view: "task-create", labelKey: "shell.nav.taskCreate", icon: ClipboardList },
-        { view: "orders", labelKey: "shell.nav.orders", icon: Package },
-        { view: "customers", labelKey: "shell.nav.customers", icon: Users },
       ],
     },
     {
