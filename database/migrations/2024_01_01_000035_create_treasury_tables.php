@@ -59,7 +59,7 @@ return new class extends Migration
             // Rapprochement bancaire (§4.4)
             $table->boolean('reconciled')->default(false);
             $table->timestamp('reconciled_at')->nullable();
-            $table->foreignId('recorded_by_id')->nullable();
+            $table->char('recorded_by_id', 36)->nullable();
             $table->string('recorded_by_name', 120)->nullable();
             $table->timestamps();
 

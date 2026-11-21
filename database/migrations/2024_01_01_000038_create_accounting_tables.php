@@ -70,7 +70,7 @@ return new class extends Migration
             $table->string('source_type', 40)->nullable();
             $table->char('source_id', 36)->nullable();
             $table->boolean('is_generated')->default(true);
-            $table->foreignId('posted_by_id')->nullable();
+            $table->char('posted_by_id', 36)->nullable();
             $table->string('posted_by_name', 120)->nullable();
             $table->timestamps();
 

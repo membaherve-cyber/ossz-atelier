@@ -19,7 +19,8 @@ return new class extends Migration
     {
         Schema::create('purchase_payments', function (Blueprint $table) {
             $table->char('id', 36)->primary();
-            $table->foreignId('purchase_id')->constrained('purchases')->cascadeOnDelete();
+            $table->char('purchase_id', 36);
+            $table->foreign('purchase_id')->references('id')->on('purchases')->cascadeOnDelete();
             $table->decimal('amount', 14, 2);
             $table->timestamp('payment_date');
             $table->string('method', 20)->default('CASH'); // Atelier::PAYMENT_METHODS
@@ -27,7 +28,7 @@ return new class extends Migration
             $table->foreign('treasury_account_id')->references('id')->on('treasury_accounts')->nullOnDelete();
             $table->string('reference', 60)->nullable(); // txn ref
             $table->string('note', 500)->nullable();
-            $table->foreignId('recorded_by_id')->nullable();
+            $table->char('recorded_by_id', 36)->nullable();
             $table->string('recorded_by_name', 120)->nullable();
             $table->timestamps();
 

@@ -32,7 +32,7 @@ return new class extends Migration
         });
 
         Schema::table('expenses', function (Blueprint $table) {
-            $table->foreignId('supplier_id')->nullable()->after('payee');
+            $table->char('supplier_id', 36)->nullable()->after('payee');
             $table->foreign('supplier_id')->references('id')->on('suppliers')->nullOnDelete();
         });
 

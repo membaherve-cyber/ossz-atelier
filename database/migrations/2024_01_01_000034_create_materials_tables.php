@@ -62,7 +62,8 @@ return new class extends Migration
 
         Schema::create('material_stock_movements', function (Blueprint $table) {
             $table->char('id', 36)->primary();
-            $table->foreignId('material_id')->constrained('materials')->cascadeOnDelete();
+            $table->char('material_id', 36);
+            $table->foreign('material_id')->references('id')->on('materials')->cascadeOnDelete();
             // Atelier::STOCK_MOVEMENT_KINDS
             $table->string('kind', 20);
             // Signed: + for IN movements, − for OUT movements
@@ -74,7 +75,7 @@ return new class extends Migration
             $table->string('source_type', 40)->nullable();
             $table->char('source_id', 36)->nullable();
             $table->string('note', 500)->nullable();
-            $table->foreignId('created_by_id')->nullable();
+            $table->char('created_by_id', 36)->nullable();
             $table->string('created_by_name', 120)->nullable();
             $table->timestamps();
 
@@ -85,20 +86,24 @@ return new class extends Migration
         Schema::create('material_issues', function (Blueprint $table) {
             $table->char('id', 36)->primary();
             $table->string('code', 20)->unique(); // REM-0001 (Codes::materialIssue)
-            $table->foreignId('order_id')->constrained('orders')->cascadeOnDelete();
-            $table->foreignId('garment_id')->nullable()->constrained('garment_components')->nullOnDelete();
-            $table->foreignId('task_id')->nullable()->constrained('production_tasks')->nullOnDelete();
+            $table->char('order_id', 36);
+            $table->foreign('order_id')->references('id')->on('orders')->cascadeOnDelete();
+            $table->char('garment_id', 36)->nullable();
+            $table->foreign('garment_id')->references('id')->on('garment_components')->nullOnDelete();
+            $table->char('task_id', 36)->nullable();
+            $table->foreign('task_id')->references('id')->on('production_tasks')->nullOnDelete();
             // Beneficiary employee (§5.1 four dimensions)
-            $table->foreignId('staff_id')->constrained('users');
+            $table->char('staff_id', 36);
+            $table->foreign('staff_id')->references('id')->on('users');
             $table->string('staff_name', 120);
             // OPEN | CLOSED | CANCELLED (Atelier::MATERIAL_ISSUE_STATUSES)
             $table->string('status', 12)->default('OPEN');
             $table->timestamp('issue_date');
             $table->string('note', 500)->nullable();
-            $table->foreignId('closed_by_id')->nullable();
+            $table->char('closed_by_id', 36)->nullable();
             $table->string('closed_by_name', 120)->nullable();
             $table->timestamp('closed_at')->nullable();
-            $table->foreignId('created_by_id')->nullable();
+            $table->char('created_by_id', 36)->nullable();
             $table->string('created_by_name', 120)->nullable();
             $table->timestamps();
 
@@ -111,7 +116,8 @@ return new class extends Migration
             $table->char('id', 36)->primary();
             $table->char('issue_id', 36);
             $table->foreign('issue_id')->references('id')->on('material_issues')->cascadeOnDelete();
-            $table->foreignId('material_id')->constrained('materials')->restrictOnDelete();
+            $table->char('material_id', 36);
+            $table->foreign('material_id')->references('id')->on('materials')->restrictOnDelete();
             $table->string('material_name', 190); // snapshot
             $table->string('unit', 12); // snapshot
             $table->decimal('qty_issued', 12, 3);
@@ -130,12 +136,12 @@ return new class extends Migration
             $table->decimal('qty_consumed', 12, 3)->default(0);
             $table->decimal('qty_returned', 12, 3)->default(0);
             $table->string('note', 500)->nullable(); // employee comment / justification
-            $table->foreignId('declared_by_id')->nullable(); // the employee
+            $table->char('declared_by_id', 36)->nullable(); // the employee
             $table->string('declared_by_name', 120)->nullable();
             $table->timestamp('declared_at');
             // PENDING | APPROVED | REJECTED (§5.8)
             $table->string('status', 12)->default('PENDING');
-            $table->foreignId('reviewed_by_id')->nullable();
+            $table->char('reviewed_by_id', 36)->nullable();
             $table->string('reviewed_by_name', 120)->nullable();
             $table->string('review_note', 500)->nullable(); // rejection motif / comment
             $table->timestamp('reviewed_at')->nullable();
@@ -161,19 +167,25 @@ return new class extends Migration
 
         Schema::create('material_transfers', function (Blueprint $table) {
             $table->char('id', 36)->primary();
-            $table->foreignId('from_staff_id')->constrained('users');
+            $table->char('from_staff_id', 36);
+            $table->foreign('from_staff_id')->references('id')->on('users');
             $table->string('from_staff_name', 120);
-            $table->foreignId('to_staff_id')->constrained('users');
+            $table->char('to_staff_id', 36);
+            $table->foreign('to_staff_id')->references('id')->on('users');
             $table->string('to_staff_name', 120);
-            $table->foreignId('order_id')->constrained('orders')->cascadeOnDelete();
-            $table->foreignId('garment_id')->nullable()->constrained('garment_components')->nullOnDelete();
-            $table->foreignId('task_id')->nullable()->constrained('production_tasks')->nullOnDelete();
-            $table->foreignId('material_id')->constrained('materials')->restrictOnDelete();
+            $table->char('order_id', 36);
+            $table->foreign('order_id')->references('id')->on('orders')->cascadeOnDelete();
+            $table->char('garment_id', 36)->nullable();
+            $table->foreign('garment_id')->references('id')->on('garment_components')->nullOnDelete();
+            $table->char('task_id', 36)->nullable();
+            $table->foreign('task_id')->references('id')->on('production_tasks')->nullOnDelete();
+            $table->char('material_id', 36);
+            $table->foreign('material_id')->references('id')->on('materials')->restrictOnDelete();
             $table->string('material_name', 190); // snapshot
             $table->string('unit', 12); // snapshot
             $table->decimal('qty', 12, 3);
             $table->string('note', 500)->nullable();
-            $table->foreignId('created_by_id')->nullable();
+            $table->char('created_by_id', 36)->nullable();
             $table->string('created_by_name', 120)->nullable();
             $table->timestamps();
 
@@ -183,13 +195,15 @@ return new class extends Migration
 
         Schema::create('task_work_logs', function (Blueprint $table) {
             $table->char('id', 36)->primary();
-            $table->foreignId('task_id')->constrained('production_tasks')->cascadeOnDelete();
-            $table->foreignId('staff_id')->constrained('users');
+            $table->char('task_id', 36);
+            $table->foreign('task_id')->references('id')->on('production_tasks')->cascadeOnDelete();
+            $table->char('staff_id', 36);
+            $table->foreign('staff_id')->references('id')->on('users');
             $table->string('staff_name', 120);
             $table->unsignedInteger('minutes');
             $table->date('logged_on');
             $table->string('note', 500)->nullable();
-            $table->foreignId('created_by_id')->nullable();
+            $table->char('created_by_id', 36)->nullable();
             $table->timestamps();
 
             $table->index(['task_id', 'logged_on']);

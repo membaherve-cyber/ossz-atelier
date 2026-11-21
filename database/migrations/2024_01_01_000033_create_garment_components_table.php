@@ -24,7 +24,8 @@ return new class extends Migration
     {
         Schema::create('garment_components', function (Blueprint $table) {
             $table->char('id', 36)->primary();
-            $table->foreignId('order_id')->constrained('orders')->cascadeOnDelete();
+            $table->char('order_id', 36);
+            $table->foreign('order_id')->references('id')->on('orders')->cascadeOnDelete();
             // Readable order-derived code: {ORDER_NUMBER}-V01 … (§5.2)
             $table->string('code', 64)->unique();
             $table->string('name', 120); // "Veste", "Chemise n°3"…

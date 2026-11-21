@@ -26,7 +26,7 @@ return new class extends Migration
             // ACTIVE | CLOSED (Atelier::BUDGET_STATUSES)
             $table->string('status', 10)->default('ACTIVE');
             $table->string('notes', 500)->nullable();
-            $table->foreignId('created_by_id')->nullable();
+            $table->char('created_by_id', 36)->nullable();
             $table->string('created_by_name', 120)->nullable();
             $table->timestamps();
         });
@@ -38,7 +38,8 @@ return new class extends Migration
             // REVENUE | EXPENSE (Atelier::BUDGET_LINE_KINDS)
             $table->string('kind', 10);
             // Null = the global line of its kind (not per category)
-            $table->foreignId('expense_category_id')->nullable()->constrained('expense_categories')->nullOnDelete();
+            $table->char('expense_category_id', 36)->nullable();
+            $table->foreign('expense_category_id')->references('id')->on('expense_categories')->nullOnDelete();
             $table->decimal('planned', 14, 2)->default(0);
             $table->string('note', 500)->nullable();
             $table->timestamps();
