@@ -40,6 +40,7 @@
         'stages' => request()->routeIs('stages.index'),
         'audit' => request()->routeIs('audit.index'),
         'notifications' => request()->routeIs('notifications.index'),
+        'dailyreport' => request()->routeIs('dailyreport.*'),
     ];
 
     // Inline SVG icon map (lucide paths; the $icon() helper wraps them in
