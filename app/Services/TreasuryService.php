@@ -246,7 +246,7 @@ final class TreasuryService
         ?string $sourceId = null,
         ?string $counterparty = null,
         ?string $note = null,
-        ?int $recordedById = null,
+        ?string $recordedById = null,
         ?string $recordedByName = null,
     ): TreasuryMovement {
         if (! in_array($direction, ['IN', 'OUT'], true)) {
