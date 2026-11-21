@@ -16,9 +16,16 @@ use DateTimeImmutable;
 final class Atelier
 {
     /**
-     * System roles (src/lib/permissions.ts ROLES).
+     * System roles. The Finance & Comptabilité module (spec v1.3 §12)
+     * adds three operational roles to the original trio:
+     *   - MANAGER    — responsable de production: assignments + validation
+     *                   of material declarations (§5.8)
+     *   - COMPTABLE  — accountant: accounting, treasury and financial
+     *                   reports (§12) + manual journal entries (§6)
+     *   - MAGASINIER — storekeeper: physical stock, issues with order /
+     *                   garment / employee assignment, restitutions (§12)
      */
-    public const ROLES = ['MANAGEMENT', 'ADMIN', 'STAFF'];
+    public const ROLES = ['MANAGEMENT', 'ADMIN', 'MANAGER', 'COMPTABLE', 'MAGASINIER', 'STAFF'];
 
     /**
      * Every permission key (verbatim from src/lib/permissions.ts PERMISSIONS).
@@ -60,6 +67,18 @@ final class Atelier
         'accounting.suppliers',
         'accounting.reports',
         'accounting.approve',
+        // Finance & Comptabilité module v1.3 — treasury (§4.4), materials
+        // & stock traceability (§5), general accounting (§6), budgets (§8).
+        'treasury.view',
+        'treasury.manage',
+        'materials.view',
+        'materials.manage',
+        'materials.issue',
+        'materials.declare',
+        'materials.validate',
+        'accounting.journal',
+        'budgets.view',
+        'budgets.manage',
     ];
 
     /**
@@ -121,6 +140,9 @@ final class Atelier
         'INCENTIVE_APPROVED',
         'PAYROLL_PAID',
         'ADVANCE_DISBURSED',
+        // Finance & Comptabilité module v1.3
+        'MATERIAL_ISSUE_RECEIVED',
+        'MATERIAL_DECLARATION_REVIEWED',
     ];
 
     /**
@@ -143,6 +165,82 @@ final class Atelier
      * out of staff notifications until Management finalizes it.
      */
     public const ORDER_STATUSES = ['DRAFT', 'REGISTERED'];
+
+    /**
+     * Treasury account kinds (§4.4) — caisse, banque, Mobile Money and
+     * other configurable accounts. `method` links an account to the
+     * payment methods it serves (Atelier::PAYMENT_METHODS).
+     */
+    public const TREASURY_KINDS = ['CASH', 'BANK', 'MOMO', 'OTHER'];
+
+    /**
+     * Treasury movement kinds (§4.4): every money in/out is traced to its
+     * source. TRANSFER_* pairs come from account-to-account transfers
+     * (neither a receipt nor an expense).
+     */
+    public const TREASURY_MOVEMENT_KINDS = [
+        'RECEIPT',        // customer payment received (§4.2)
+        'EXPENSE',        // expense paid out (§4.3)
+        'PURCHASE',       // supplier purchase paid (§4.6)
+        'PAYROLL',        // salary paid (§4.7)
+        'ADVANCE',        // staff advance disbursed (§4.7)
+        'TRANSFER_IN',    // received leg of an internal transfer (§4.4)
+        'TRANSFER_OUT',   // sent leg of an internal transfer (§4.4)
+        'DEPOSIT',        // manual cash-in / opening adjustment
+        'WITHDRAWAL',     // manual cash-out
+    ];
+
+    /**
+     * Material categories (§5.4) — tissus, doublures, boutons,
+     * fermetures, fils, entoilages, élastiques, autres accessoires.
+     */
+    public const MATERIAL_CATEGORIES = [
+        'FABRIC', 'LINING', 'BUTTONS', 'ZIPPERS', 'THREAD', 'INTERFACING', 'ELASTIC', 'ACCESSORY', 'OTHER',
+    ];
+
+    /**
+     * Material stock movement kinds (§5.5/§5.9/§10) — the stock ledger.
+     * Purchases feed stock (IN); issues to employees drain it (OUT);
+     * approved restitutions feed it back (IN); manual adjustments fix
+     * physical counts. Consumption itself never touches stock (the
+     * material already left at issue time).
+     */
+    public const STOCK_MOVEMENT_KINDS = ['PURCHASE_IN', 'ISSUE_OUT', 'RETURN_IN', 'ADJUSTMENT'];
+
+    /**
+     * MaterialIssue statuses (§5.6/§5.10) — OPEN while declarations can
+     * still arrive; CLOSED once the manager validates and the loss is
+     * computed; CANCELLED when the remise was recorded by mistake.
+     */
+    public const MATERIAL_ISSUE_STATUSES = ['OPEN', 'CLOSED', 'CANCELLED'];
+
+    /**
+     * MaterialDeclaration statuses (§5.8) — PENDING until the manager
+     * reviews; APPROVED declarations feed stock restitutions and cost
+     * imputation; REJECTED ones are kept with their motif, never deleted.
+     */
+    public const MATERIAL_DECLARATION_STATUSES = ['PENDING', 'APPROVED', 'REJECTED'];
+
+    /**
+     * Accounting account types for the SYSCOHADA chart (§6).
+     */
+    public const ACCOUNT_TYPES = ['ASSET', 'LIABILITY', 'EQUITY', 'REVENUE', 'EXPENSE'];
+
+    /**
+     * Accounting journals (§6) — VT ventes, AC achats, BQ banque,
+     * CS caisse, OD opérations diverses.
+     */
+    public const JOURNALS = ['VT', 'AC', 'BQ', 'CS', 'OD'];
+
+    /**
+     * Budget line kinds (§8) — planned revenue vs planned expense.
+     */
+    public const BUDGET_LINE_KINDS = ['REVENUE', 'EXPENSE'];
+
+    /**
+     * Budget statuses (§8).
+     */
+    public const BUDGET_STATUSES = ['ACTIVE', 'CLOSED'];
 
     /**
      * Customer payment methods (enhancement spec §6).
@@ -276,6 +374,32 @@ final class Atelier
         'DAILY_REPORT_RECIPIENT_UPDATED',
         'DAILY_REPORT_RECIPIENT_REMOVED',
         'DAILY_REPORT_SENT',
+        // Finance & Comptabilité module v1.3 — treasury (§4.4),
+        // materials & traceability (§5), general accounting (§6),
+        // budgets (§8), garments (§5.2), work time (§5.13)
+        'TREASURY_ACCOUNT_CREATED',
+        'TREASURY_ACCOUNT_UPDATED',
+        'TREASURY_MOVEMENT_RECORDED',
+        'TREASURY_TRANSFER_RECORDED',
+        'TREASURY_RECONCILED',
+        'GARMENT_CREATED',
+        'GARMENT_UPDATED',
+        'GARMENT_DELETED',
+        'MATERIAL_CREATED',
+        'MATERIAL_UPDATED',
+        'MATERIAL_ISSUE_RECORDED',
+        'MATERIAL_ISSUE_CLOSED',
+        'MATERIAL_ISSUE_CANCELLED',
+        'MATERIAL_DECLARATION_SUBMITTED',
+        'MATERIAL_DECLARATION_REVIEWED',
+        'MATERIAL_TRANSFER_RECORDED',
+        'WORK_TIME_LOGGED',
+        'PURCHASE_PAYMENT_RECORDED',
+        'JOURNAL_ENTRY_POSTED',
+        'JOURNAL_GENERATED_FROM_HISTORY',
+        'BUDGET_CREATED',
+        'BUDGET_UPDATED',
+        'BUDGET_CLOSED',
     ];
 
     /**

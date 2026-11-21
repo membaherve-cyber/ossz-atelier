@@ -72,4 +72,8 @@ return [
     // Calculation rules note
     'rulesTitle' => 'How these figures are calculated',
     'rulesBody' => 'Revenue counts registered order values, not money received. Payments received and outstanding balances are tracked separately, so a deposit never appears as full payment. Salaries come from approved payroll periods, and recovered staff advances are never counted as new expenses.',
+    'cardTreasury' => 'Treasury Balance',
+    'cardTreasuryHint' => 'Cash, bank and Mobile Money — as of now',
+    'cardSupplierDebts' => 'Supplier Debts',
+    'cardSupplierDebtsHint' => 'Unpaid supplier purchases — as of now',
 ];

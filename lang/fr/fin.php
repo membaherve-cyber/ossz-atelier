@@ -66,4 +66,8 @@ return [
 
     'rulesTitle' => 'Comment ces chiffres sont calculés',
     'rulesBody' => 'Le revenu compte la valeur des commandes enregistrées, et non l’argent encaissé. Les paiements reçus et les soldes dus sont suivis séparément : un acompte n’apparaît jamais comme un paiement complet. Les salaires proviennent des paies approuvées, et les avances staff récupérées ne sont jamais comptées comme de nouvelles dépenses.',
+    'cardTreasury' => 'Solde de Trésorerie',
+    'cardTreasuryHint' => 'Caisses, banques et Mobile Money — à ce jour',
+    'cardSupplierDebts' => 'Dettes Fournisseurs',
+    'cardSupplierDebtsHint' => 'Achats fournisseurs non payés — à ce jour',
 ];

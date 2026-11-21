@@ -48,4 +48,6 @@ return [
     'deleteTitle' => 'Delete customer',
     'deleteDesc' => '{name} will be permanently removed. This action cannot be undone.',
     'deleteAria' => 'Delete customer {name}',
+    'receivableBalance' => "Balance due",
+    'overdueBalance' => "Overdue",
 ];

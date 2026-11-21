@@ -4,11 +4,16 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Accounting;
 
+use App\Models\JournalEntry;
 use App\Models\Order;
 use App\Models\Payment;
+use App\Models\TreasuryAccount;
+use App\Models\TreasuryMovement;
 use App\Models\User;
+use App\Services\AccountingPostService;
 use App\Services\Audit;
 use App\Services\Codes;
+use App\Services\TreasuryService;
 use App\Support\Atelier;
 use App\Support\Money;
 use Carbon\Carbon;
@@ -129,6 +134,7 @@ class PaymentController
             'amount' => ['required', 'numeric', 'gt:0'],
             'paymentDate' => ['required', 'date'],
             'method' => ['nullable', 'string', Rule::in(Atelier::PAYMENT_METHODS)],
+            'treasuryAccount' => ['nullable', 'uuid', Rule::exists('treasury_accounts', 'id')],
             'txnRef' => ['nullable', 'string', 'max:100', Rule::unique('payments', 'txn_ref')],
             'notes' => ['nullable', 'string', 'max:4000'],
         ]);
@@ -176,6 +182,7 @@ class PaymentController
                 'currency' => Money::DEFAULT_CURRENCY,
                 'payment_date' => Carbon::parse((string) $data['paymentDate']),
                 'method' => (string) ($data['method'] ?? 'CASH'),
+                'treasury_account_id' => isset($data['treasuryAccount']) && $data['treasuryAccount'] !== '' ? $data['treasuryAccount'] : null,
                 'txn_ref' => $data['txnRef'] ?? null,
                 'notes' => $data['notes'] ?? null,
                 'recorded_by_id' => $me->id,
@@ -184,6 +191,11 @@ class PaymentController
         });
 
         $order = $payment->order;
+
+        // Finance module v1.3 §4.2/§4.4/§6 — the payment lands on its
+        // treasury account (movement) and posts its journal entry.
+        TreasuryService::recordForPayment($payment);
+        AccountingPostService::postPayment($payment, $me);
 
         Audit::log($me, 'PAYMENT_RECORDED', 'PAYMENT', $payment->id, [
             'reference' => $payment->reference,
@@ -308,6 +320,14 @@ class PaymentController
             'changedFields' => $changedColumns,
         ]);
 
+        // Finance module v1.3 — keep treasury + journal in sync with the
+        // edited payment (derived rows are rebuilt, never duplicated).
+        TreasuryMovement::query()->where('source_type', 'PAYMENT')->where('source_id', $payment->id)->delete();
+        JournalEntry::query()->where('source_type', 'PAYMENT')->where('source_id', $payment->id)->delete();
+        $payment->refresh();
+        TreasuryService::recordForPayment($payment);
+        AccountingPostService::postPayment($payment, $me);
+
         return redirect()
             ->back()
             ->with('success', __('pay.updatedToast'));
@@ -332,11 +352,33 @@ class PaymentController
             'orderNumber' => $payment->order?->order_number,
         ]);
 
+        // Finance module v1.3 — drop the derived treasury movement and
+        // journal entry so balances stay exact after deletion.
+        TreasuryMovement::query()->where('source_type', 'PAYMENT')->where('source_id', $payment->id)->delete();
+        JournalEntry::query()->where('source_type', 'PAYMENT')->where('source_id', $payment->id)->delete();
+
         $payment->delete();
 
         return redirect()
             ->back()
             ->with('success', __('pay.deletedToast'));
+    }
+
+    /**
+     * GET /payments/{id}/receipt (route perm accounting.payments) — the
+     * printable receipt of a customer payment (Finance spec v1.3 §4.2
+     * "édition de reçus"): clean print layout with the atelier header,
+     * the customer, the order, the amount and the payment method.
+     */
+    public function receipt(Request $request, string $id): View
+    {
+        $payment = Payment::query()
+            ->with(['order.customer', 'treasuryAccount:id,name'])
+            ->findOrFail($id);
+
+        return view('accounting.payments.receipt', [
+            'payment' => $payment,
+        ]);
     }
 
     // ------------------------------------------------------------------

@@ -57,6 +57,12 @@ class Expense extends Model
         return $this->belongsTo(User::class, 'responsible_staff_id');
     }
 
+    /** Optional supplier link on a current expense (spec v1.3 §4.3). */
+    public function supplier(): BelongsTo
+    {
+        return $this->belongsTo(Supplier::class, 'supplier_id');
+    }
+
     /**
      * Book one ledger row for a system source (incentive payment, paid
      * purchase) — idempotent via the unique (source_type, source_id)

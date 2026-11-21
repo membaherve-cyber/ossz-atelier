@@ -112,6 +112,9 @@
                         <th class="px-4 py-3">{{ __('cust.colEmail') }}</th>
                         <th class="px-4 py-3">{{ __('cust.colAddress') }}</th>
                         <th class="px-4 py-3 text-center">{{ __('cust.colOrders') }}</th>
+                        @if (\App\Services\Permissions::allows($me, 'accounting.view'))
+                            <th class="px-4 py-3 text-right">{{ __('cust.receivableBalance') }}</th>
+                        @endif
                         <th class="px-4 py-3">{{ __('cust.colRegistered') }}</th>
                         @if ($canManage)
                             <th class="px-4 py-3 text-right">{{ __('common.actions') }}</th>
@@ -133,6 +136,14 @@
                                     {{ $customer->ordersCount }}
                                 </span>
                             </td>
+                            @if (\App\Services\Permissions::allows($me, 'accounting.view'))
+                                <td class="whitespace-nowrap px-4 py-3 text-right">
+                                    <span class="tabular-nums {{ (float) $customer->receivable_balance > 0 ? 'font-semibold' : 'text-muted-foreground' }}">{{ \App\Support\Money::format($customer->receivable_balance) }}</span>
+                                    @if ((float) $customer->overdue_balance > 0)
+                                        <span class="block text-xs font-semibold text-red-700 tabular-nums">{{ __('cust.overdueBalance') }}: {{ \App\Support\Money::format($customer->overdue_balance) }}</span>
+                                    @endif
+                                </td>
+                            @endif
                             <td class="whitespace-nowrap px-4 py-3 text-muted-foreground">
                                 {{ $customer->created_at->locale(app()->getLocale())->translatedFormat('j M Y') }}
                             </td>

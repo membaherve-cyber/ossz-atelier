@@ -6,10 +6,12 @@ namespace App\Http\Controllers\Accounting;
 
 use App\Models\StaffAdvance;
 use App\Models\User;
+use App\Services\AccountingPostService;
 use App\Services\Audit;
 use App\Services\Codes;
 use App\Services\Notifier;
 use App\Services\Permissions;
+use App\Services\TreasuryService;
 use App\Support\Atelier;
 use App\Support\Money;
 use Carbon\Carbon;
@@ -215,6 +217,27 @@ class AdvanceController
         }
 
         $advance->forceFill(['status' => 'DISBURSED'])->save();
+
+        // Finance module v1.3 §4.7 — the disbursed advance leaves the
+        // treasury and posts its journal entry.
+        $method = (string) ($advance->method ?? 'CASH');
+        $account = TreasuryService::accountForMethod($method);
+        if ($account !== null) {
+            TreasuryService::record(
+                $account,
+                'OUT',
+                'ADVANCE',
+                (float) $advance->amount,
+                now(),
+                'ADVANCE',
+                $advance->id,
+                $advance->staff_name,
+                $advance->reference,
+                $me->id,
+                $me->name,
+            );
+        }
+        AccountingPostService::postAdvanceDisbursed($advance, $method, $me);
 
         Audit::log($me, 'ADVANCE_DISBURSED', 'ADVANCE', $advance->id, [
             'reference' => $advance->reference,

@@ -10,10 +10,12 @@ use App\Models\PayrollItem;
 use App\Models\SalaryProfile;
 use App\Models\StaffAdvance;
 use App\Models\User;
+use App\Services\AccountingPostService;
 use App\Services\Audit;
 use App\Services\Notifier;
 use App\Services\PayrollService;
 use App\Services\Permissions;
+use App\Services\TreasuryService;
 use App\Support\Atelier;
 use App\Support\Money;
 use Carbon\Carbon;
@@ -377,6 +379,32 @@ class PayrollController
             'netPay' => $item->net_pay,
             'paymentDate' => Carbon::parse((string) $data['paymentDate'])->format(DATE_ATOM),
         ]);
+
+        // Finance module v1.3 §4.7 — the salary payment leaves the
+        // treasury and posts its journal entry.
+        $method = (string) ($data['method'] ?? 'CASH');
+        $account = TreasuryService::accountForMethod($method);
+        if ($account !== null) {
+            TreasuryService::record(
+                $account,
+                'OUT',
+                'PAYROLL',
+                (float) $item->net_pay,
+                Carbon::parse((string) $data['paymentDate']),
+                'PAYROLL_ITEM',
+                $item->id,
+                $item->staff_name,
+                $payroll->label,
+                $me->id,
+                $me->name,
+            );
+        }
+        AccountingPostService::postPayrollItem([
+            'id' => $item->id,
+            'staff_name' => $item->staff_name,
+            'net_pay' => (float) $item->net_pay,
+            'payment_date' => $data['paymentDate'],
+        ], $method, $me);
 
         Notifier::users(
             [$item->staff_id],

@@ -35,6 +35,7 @@ class Order extends Model
     protected $casts = [
         'number_of_pieces' => 'integer',
         'total_value' => 'float',
+        'deposit_rate' => 'float',
         'order_date' => 'datetime',
         'expected_delivery_date' => 'datetime',
         'created_at' => 'datetime',
@@ -47,6 +48,40 @@ class Order extends Model
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class, 'customer_id');
+    }
+
+    /**
+     * The order's garments/pieces with readable codes (spec v1.3 §5.2).
+     */
+    public function garments(): HasMany
+    {
+        return $this->hasMany(GarmentComponent::class, 'order_id');
+    }
+
+    /**
+     * Material issues handed to employees for this order (§5.5).
+     */
+    public function materialIssues(): HasMany
+    {
+        return $this->hasMany(MaterialIssue::class, 'order_id');
+    }
+
+    /**
+     * Value (XAF) of materials actually consumed for this order:
+     * approved declarations valued at the issue-line cost (§7.4).
+     * Client-supplied materials are valued 0 (§5.15).
+     */
+    public function consumedMaterialsValue(): float
+    {
+        return (float) MaterialIssueLine::query()
+            ->whereIn('issue_id', MaterialIssue::query()
+                ->where('order_id', $this->id)
+                ->whereIn('status', ['OPEN', 'CLOSED'])
+                ->select('id'))
+            ->whereHas('declarations', fn ($query) => $query->where('status', 'APPROVED'))
+            ->withSum(['declarations as approved_consumed' => fn ($query) => $query->where('status', 'APPROVED')], 'qty_consumed')
+            ->get()
+            ->sum(static fn (MaterialIssueLine $line): float => round($line->approved_consumed * $line->unit_cost, 2));
     }
 
     /**

@@ -44,6 +44,8 @@
             ['label' => __('fin.cardSalaries'), 'hint' => __('fin.cardSalariesHint'), 'value' => \App\Support\Money::format($dash['salaries']), 'tone' => ''],
             ['label' => __('fin.cardOutstanding'), 'hint' => __('fin.cardOutstandingHint'), 'value' => \App\Support\Money::format($dash['outstandingBalances']), 'tone' => ''],
             ['label' => __('fin.cardAdvances'), 'hint' => __('fin.cardAdvancesHint'), 'value' => \App\Support\Money::format($dash['advancesOutstanding']), 'tone' => ''],
+            ['label' => __('fin.cardTreasury'), 'hint' => __('fin.cardTreasuryHint'), 'value' => \App\Support\Money::format($dash['treasuryTotal'] ?? 0), 'tone' => ''],
+            ['label' => __('fin.cardSupplierDebts'), 'hint' => __('fin.cardSupplierDebtsHint'), 'value' => \App\Support\Money::format($dash['supplierDebts'] ?? 0), 'tone' => ''],
             ['label' => __('fin.cardNetResult'), 'hint' => __('fin.cardNetResultHint'), 'value' => \App\Support\Money::format($dash['netResult']), 'tone' => $tone((float) $dash['netResult'])],
             ['label' => __('fin.cardMonthRevenue'), 'hint' => '', 'value' => \App\Support\Money::format($dash['monthRevenue']), 'tone' => ''],
             ['label' => __('fin.cardMonthExpenses'), 'hint' => '', 'value' => \App\Support\Money::format($dash['monthExpenses']), 'tone' => ''],

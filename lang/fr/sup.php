@@ -87,4 +87,17 @@ return [
     'purchaseCreated' => 'Achat enregistré.',
     'purchaseUpdated' => 'Achat mis à jour.',
     'purchaseDeleted' => 'Achat supprimé.',
+
+    // ---- Paiements des achats (Finance & Comptabilité v1.3) ------------------
+    'supplierBalance' => 'Solde dû',
+    'purchasePayments' => 'Paiements de l’achat',
+    'addPayment' => 'Enregistrer un paiement',
+    'paymentRecorded' => 'Paiement enregistré.',
+    'paidSoFar' => 'Déjà payé',
+    'remainingDue' => 'Reste à payer',
+    'paymentDate' => 'Date de paiement',
+    'amount' => 'Montant',
+    'paymentMethod' => 'Moyen',
+    'treasuryAccount' => 'Compte de trésorerie',
+    'errPaymentExceedsBalance' => "Le paiement dépasse le solde restant dû.",
 ];

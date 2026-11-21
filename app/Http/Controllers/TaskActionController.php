@@ -13,6 +13,7 @@ use App\Models\TaskProgressHistory;
 use App\Models\TaskStageState;
 use App\Models\TaskStageUpdate;
 use App\Models\TaskStatusChange;
+use App\Models\TaskWorkLog;
 use App\Models\User;
 use App\Services\Audit;
 use App\Services\Notifier;
@@ -1129,5 +1130,77 @@ class TaskActionController
     private function closedTaskError(ProductionTask $task): RedirectResponse
     {
         return $this->actionError($task, __('td.noActions').__('td.noActionsClosed'));
+    }
+
+    /**
+     * POST /tasks/{id}/worklog (route auth) — work-time log (Finance
+     * spec v1.3 §5.13): the assignee (or a supervisor) records minutes
+     * spent on the task for a given day. The task's total
+     * time_spent_minutes is kept in sync (sum of the logs).
+     */
+    public function workLog(Request $request, string $id): RedirectResponse
+    {
+        /** @var User $me */
+        $me = $request->user();
+
+        $task = ProductionTask::query()->findOrFail($id);
+
+        // STAFF scope: only the assignee logs time on their own task.
+        if ($me->role === 'STAFF' && $task->assigned_staff_id !== $me->id) {
+            abort(403);
+        }
+
+        $data = $request->validate([
+            'minutes' => ['required', 'integer', 'min:1', 'max:1440'],
+            'logged_on' => ['required', 'date'],
+            'note' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        TaskWorkLog::query()->create([
+            'task_id' => $task->id,
+            'staff_id' => $me->id,
+            'staff_name' => $me->name,
+            'minutes' => (int) $data['minutes'],
+            'logged_on' => $data['logged_on'],
+            'note' => $data['note'] ?? null,
+            'created_by_id' => $me->id,
+        ]);
+
+        $task->update([
+            'time_spent_minutes' => (int) TaskWorkLog::query()->where('task_id', $task->id)->sum('minutes'),
+        ]);
+
+        Audit::log($me, 'WORK_TIME_LOGGED', 'TASK', $task->id, [
+            'taskCode' => $task->code,
+            'minutes' => (int) $data['minutes'],
+            'loggedOn' => (string) $data['logged_on'],
+        ]);
+
+        return redirect()->back()->with('success', __('tasks.timeLogged'));
+    }
+
+    /**
+     * POST /tasks/{id}/rework (route perm production.manage.details) —
+     * toggle the "reprise" marker (Finance spec v1.3 §5.15): the task's
+     * time and materials stay imputed to the original order and show
+     * separately in the order profitability.
+     */
+    public function toggleRework(Request $request, string $id): RedirectResponse
+    {
+        /** @var User $me */
+        $me = $request->user();
+
+        $task = ProductionTask::query()->findOrFail($id);
+        $isRework = ! $task->is_rework;
+
+        $task->update(['is_rework' => $isRework]);
+
+        Audit::log($me, 'TASK_UPDATED', 'TASK', $task->id, [
+            'taskCode' => $task->code,
+            'changedFields' => ['isRework'],
+            'isRework' => $isRework,
+        ]);
+
+        return redirect()->back()->with('success', __('tasks.reworkToggled'));
     }
 }

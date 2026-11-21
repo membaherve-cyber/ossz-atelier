@@ -48,4 +48,6 @@ return [
     'deleteTitle' => 'Supprimer le client',
     'deleteDesc' => '{name} sera définitivement supprimé. Cette action est irréversible.',
     'deleteAria' => 'Supprimer le client {name}',
+    'receivableBalance' => "Solde dû",
+    'overdueBalance' => "En retard",
 ];

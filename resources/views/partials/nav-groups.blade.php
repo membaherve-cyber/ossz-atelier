@@ -26,13 +26,19 @@
         'orders' => request()->routeIs('orders.index'),
         'orders.show' => request()->routeIs('orders.show'),
         'customers' => request()->routeIs('customers.index'),
+        'materials' => request()->routeIs('materials.index'),
+        'materialIssues' => request()->routeIs('materials.issues.*'),
+        'materialValidation' => request()->routeIs('materials.validation'),
         'payments' => request()->routeIs('payments.index'),
         'expenses' => request()->routeIs('expenses.index'),
         'payroll' => request()->routeIs('payroll.index'),
         'advances' => request()->routeIs('advances.index'),
         'suppliers' => request()->routeIs('suppliers.index'),
+        'treasury' => request()->routeIs('treasury.*'),
         'accounting.dashboard' => request()->routeIs('accounting.dashboard'),
+        'accounting.general' => request()->routeIs('accounting.general', 'accounting.ledger', 'accounting.balance'),
         'accounting.reports' => request()->routeIs('accounting.reports'),
+        'budgets' => request()->routeIs('budgets.*'),
         'performance' => request()->routeIs('performance.index'),
         'incentives' => request()->routeIs('incentives.index'),
         'reports' => request()->routeIs('reports.index'),
@@ -67,6 +73,10 @@
         'clipboard' => '<rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/>',
         'bell' => '<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>',
         'mail' => '<rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>',
+        'boxes' => '<path d="M2.97 12.92A2 2 0 0 0 2 14.63v3.24a2 2 0 0 0 .97 1.71l3 1.8a2 2 0 0 0 2.06 0L12 19v-5.5l-5-3-4.03 2.42Z"/><path d="m7 16.5-4.74-2.85"/><path d="m7 16.5 5-3"/><path d="M7 16.5v5.17"/><path d="M12 13.5V19l3.97 2.38a2 2 0 0 0 2.06 0l3-1.8a2 2 0 0 0 .97-1.71v-3.24a2 2 0 0 0-.97-1.71L17 10.5l-5 3Z"/><path d="m17 16.5-5-3"/><path d="m17 16.5 4.74-2.85"/><path d="M17 16.5v5.17"/><path d="M7.97 4.42A2 2 0 0 0 7 6.13v4.37l5 3 5-3V6.13a2 2 0 0 0-.97-1.71l-3-1.8a2 2 0 0 0-2.06 0l-3 1.8Z"/><path d="M12 8 7.26 5.15"/><path d="m12 8 4.74-2.85"/><path d="M12 13.5V8"/>',
+        'landmark' => '<line x1="3" x2="21" y1="22" y2="22"/><line x1="6" x2="6" y1="18" y2="11"/><line x1="10" x2="10" y1="18" y2="11"/><line x1="14" x2="14" y1="18" y2="11"/><line x1="18" x2="18" y1="18" y2="11"/><polygon points="12 2 20 7 4 7"/>',
+        'bookOpen' => '<path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/>',
+        'target' => '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
     ];
 
     $icon = static fn (string $name): string => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"'
@@ -83,6 +93,7 @@
             'items' => [
                 ['route' => 'dashboard', 'active' => 'dashboard', 'label' => __('shell.nav.myDashboard'), 'icon' => 'home'],
                 ['route' => 'tasks.index', 'active' => 'tasks', 'label' => __('shell.nav.myTasks'), 'icon' => 'clipboard'],
+                ['route' => 'materials.issues.index', 'active' => 'materialIssues', 'label' => __('shell.nav.myMaterials'), 'icon' => 'boxes', 'can' => 'materials.declare'],
                 ['route' => 'notifications.index', 'active' => 'notifications', 'label' => __('shell.nav.notifications'), 'icon' => 'bell'],
             ],
         ];
@@ -100,6 +111,9 @@
                 ['route' => 'customers.index', 'active' => 'customers', 'label' => __('shell.nav.customers'), 'icon' => 'users', 'can' => 'customers.view'],
                 ['route' => 'orders.index', 'active' => 'orders', 'label' => __('shell.nav.orders'), 'icon' => 'package', 'can' => 'orders.view'],
                 ['route' => 'tasks.index', 'active' => 'tasks', 'label' => __('shell.nav.tasks'), 'icon' => 'shirt', 'can' => 'production.view.all'],
+                ['route' => 'materials.index', 'active' => 'materials', 'label' => __('shell.nav.materials'), 'icon' => 'boxes', 'can' => 'materials.view'],
+                ['route' => 'materials.issues.index', 'active' => 'materialIssues', 'label' => __('shell.nav.materialIssues'), 'icon' => 'boxes', 'can' => 'materials.issue'],
+                ['route' => 'materials.validation', 'active' => 'materialValidation', 'label' => __('shell.nav.materialValidation'), 'icon' => 'clipboard', 'can' => 'materials.validate'],
             ],
         ];
 
@@ -115,6 +129,9 @@
                     ['route' => 'payroll.index', 'active' => 'payroll', 'label' => __('shell.nav.payroll'), 'icon' => 'banknote'],
                     ['route' => 'advances.index', 'active' => 'advances', 'label' => __('shell.nav.advances'), 'icon' => 'coins'],
                     ['route' => 'suppliers.index', 'active' => 'suppliers', 'label' => __('shell.nav.suppliers'), 'icon' => 'truck'],
+                    ['route' => 'treasury.index', 'active' => 'treasury', 'label' => __('shell.nav.treasury'), 'icon' => 'landmark', 'can' => 'treasury.view'],
+                    ['route' => 'accounting.general', 'active' => 'accounting.general', 'label' => __('shell.nav.generalAccounting'), 'icon' => 'bookOpen', 'can' => 'accounting.journal'],
+                    ['route' => 'budgets.index', 'active' => 'budgets', 'label' => __('shell.nav.budgets'), 'icon' => 'target', 'can' => 'budgets.view'],
                     ['route' => 'accounting.reports', 'active' => 'accounting.reports', 'label' => __('shell.nav.financialReports'), 'icon' => 'fileChart'],
                 ],
             ];

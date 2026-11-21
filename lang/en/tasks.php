@@ -54,4 +54,16 @@ return [
     'previous' => 'Previous',
     'next' => 'Next',
     'pageOf' => 'Page {page} of {totalPages}',
+
+    // ---- Rework marker & time tracking (Finance & Comptabilité v1.3) ----
+    'rework' => 'Rework',
+    'reworkBadge' => 'REWORK',
+    'isRework' => 'This task is a rework (retouche)',
+    'reworkToggled' => 'Rework marker updated.',
+    'timeTracking' => 'Time tracking',
+    'minutes' => 'minutes',
+    'logTime' => 'Log time',
+    'timeLogged' => 'Time logged.',
+    'totalTime' => 'Total logged',
+    'workLogs' => 'Work logs',
 ];

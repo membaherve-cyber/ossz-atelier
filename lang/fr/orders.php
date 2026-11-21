@@ -202,4 +202,17 @@ return [
     'labourHint' => 'La main-d’œuvre n’est jamais allouée automatiquement — n’enregistrez que des allocations explicites et transparentes.',
     'labourAllocated' => 'Coût de main-d’œuvre alloué.',
     'errLabourAmount' => 'Saisissez le montant alloué.',
+
+    // ---- Pièces, matières & acompte (Finance & Comptabilité v1.3) -------------
+    'garmentsTitle' => 'Vêtements / pièces',
+    'garmentCode' => 'Code pièce',
+    'addGarment' => 'Ajouter une pièce',
+    'garmentName' => 'Nom de la pièce (ex. Veste n° 1)',
+    'garmentCreated' => 'Pièce ajoutée.',
+    'garmentUpdated' => 'Pièce mise à jour.',
+    'garmentDeleted' => 'Pièce supprimée.',
+    'garmentDeleteBlocked' => 'Cette pièce a des tâches ou des remises — réaffectez-les d’abord.',
+    'materialsSection' => 'Matières consommées',
+    'consumedMaterialsValue' => 'Matières consommées (validées)',
+    'depositRate' => 'Taux d’acompte (%)',
 ];

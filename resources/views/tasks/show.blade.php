@@ -27,8 +27,13 @@
         // showing the button to assignees would only lead to a 403 page.
         $canUnblock = $isSupervisor && $task->status === 'BLOCKED';
         $canCancel = $isSupervisor && ! $terminal;
+        // Rework marker toggle (Finance spec v1.3 §5.15) — same permission
+        // as tasks.update (perm production.manage.details: MANAGEMENT,
+        // ADMIN and MANAGER).
+        $canToggleRework = \App\Services\Permissions::allows(auth()->user(), 'production.manage.details');
+
         $noActions = ! $canAssign && ! $canEdit && ! $canSubmit && ! $canInspect && ! $canReady
-            && ! $canDeliver && ! $canReopen && ! $canBlock && ! $canUnblock && ! $canCancel;
+            && ! $canDeliver && ! $canReopen && ! $canBlock && ! $canUnblock && ! $canCancel && ! $canToggleRework;
 
         $taskDone = (int) $task->progress >= 100 || in_array($task->status, ['APPROVED', 'DELIVERED'], true);
         $taskOverdue = $task->isOverdue();
@@ -121,6 +126,16 @@
                     </div>
                 </div>
                 <div class="flex flex-wrap gap-1.5 shrink-0">
+                    @if ($task->garment)
+                        <span class="inline-flex items-center gap-1.5 rounded-full border bg-muted/40 px-2 py-0.5 text-[11px] font-semibold text-muted-foreground whitespace-nowrap">
+                            <span class="font-mono">{{ $task->garment->code }}</span>
+                            <span aria-hidden="true">·</span>
+                            {{ $task->garment->name }}
+                        </span>
+                    @endif
+                    @if ($task->is_rework)
+                        <span class="inline-flex items-center rounded-full border border-red-200 bg-red-50 px-2 py-0.5 text-[11px] font-semibold text-red-700 whitespace-nowrap">{{ __('tasks.reworkBadge') }}</span>
+                    @endif
                     <x-badges.status :status="$task->status"/>
                     <x-badges.priority :priority="$task->priority"/>
                     <x-badges.category :category="$task->category"/>
@@ -413,7 +428,7 @@
                             </button>
                         @endif
 
-                        @if ($canBlock || $canUnblock || $canReopen || $canCancel)
+                        @if ($canBlock || $canUnblock || $canReopen || $canCancel || $canToggleRework)
                             <div class="h-px bg-border my-3" role="separator"></div>
                         @endif
 
@@ -437,6 +452,17 @@
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11"/></svg>
                                 {{ __('td.reopenTask') }}
                             </button>
+                        @endif
+                        @if ($canToggleRework)
+                            <form method="POST" action="{{ route('tasks.rework', $task->id) }}"
+                                  onsubmit="return confirm('{{ __('tasks.isRework') }}')">
+                                <input type="hidden" name="_token" value="{{ csrf_token() }}" autocomplete="off">
+                                <button type="submit"
+                                        class="w-full inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm font-medium h-9 px-4 border border-amber-300 text-amber-800 hover:bg-amber-50 hover:text-amber-900 transition-colors">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+                                    {{ __('tasks.rework') }}
+                                </button>
+                            </form>
                         @endif
                         @if ($canCancel)
                             <button type="button" @click="reason = ''; dialog = 'cancel'"
@@ -607,6 +633,64 @@
                         <div class="mt-3">
                             <p class="text-xs font-medium text-muted-foreground uppercase tracking-wide">{{ __('tc.orderInstructions') }}</p>
                             <p class="text-sm mt-1 rounded-lg border bg-muted/30 p-3 whitespace-pre-wrap">{{ $task->order->instructions }}</p>
+                        </div>
+                    @endif
+                </div>
+            </section>
+
+            {{-- ---- Time tracking (full width, Finance spec v1.3 §5.13) ---- --}}
+            <section class="rounded-xl border bg-card text-card-foreground shadow-sm lg:col-span-3" aria-labelledby="task-timelog-title">
+                <div class="flex items-center justify-between gap-2 border-b p-6 pb-3">
+                    <h2 id="task-timelog-title" class="font-semibold text-base">{{ __('tasks.timeTracking') }}</h2>
+                    @if ((int) $task->time_spent_minutes > 0)
+                        <span class="text-xs font-semibold tabular-nums text-muted-foreground">{{ __('tasks.totalTime') }}: {{ $task->time_spent_minutes }} {{ __('tasks.minutes') }}</span>
+                    @else
+                        <span class="text-xs text-muted-foreground">—</span>
+                    @endif
+                </div>
+                <div class="p-6 pt-4 space-y-4">
+                    <form method="POST" action="{{ route('tasks.worklog', $task->id) }}" class="rounded-lg border bg-muted/30 p-3 space-y-2">
+                        <input type="hidden" name="_token" value="{{ csrf_token() }}" autocomplete="off">
+                        <p class="text-sm font-medium">{{ __('tasks.logTime') }}</p>
+                        <div class="flex flex-col sm:flex-row gap-2">
+                            <input type="number" name="minutes" min="1" max="1440" step="1" inputmode="numeric" required
+                                   placeholder="{{ __('tasks.minutes') }}" aria-label="{{ __('tasks.minutes') }}"
+                                   class="flex h-9 sm:w-24 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                            <input type="date" name="logged_on" value="{{ old('logged_on', now()->toDateString()) }}" required
+                                   aria-label="{{ __('sup.colDate') }}"
+                                   class="flex h-9 sm:w-44 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                            <input type="text" name="note" maxlength="500" placeholder="{{ __('td.dialog.noteOptional') }}"
+                                   aria-label="{{ __('td.dialog.noteOptional') }}"
+                                   class="flex h-9 flex-1 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                            <button type="submit"
+                                    class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm font-medium h-9 px-4 bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors">
+                                {{ __('tasks.logTime') }}
+                            </button>
+                        </div>
+                    </form>
+
+                    @if ($task->workLogs->isNotEmpty())
+                        <div class="overflow-x-auto rounded-lg border">
+                            <table class="w-full min-w-[480px] text-sm">
+                                <thead class="bg-muted/40 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                                    <tr>
+                                        <th class="px-4 py-2.5">{{ __('sup.colDate') }}</th>
+                                        <th class="px-4 py-2.5">{{ __('tasks.staff') }}</th>
+                                        <th class="px-4 py-2.5 text-right">{{ __('tasks.minutes') }}</th>
+                                        <th class="px-4 py-2.5">{{ __('orders.fieldNotes') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($task->workLogs as $workLog)
+                                        <tr class="border-t transition-colors hover:bg-muted/30">
+                                            <td class="whitespace-nowrap px-4 py-2.5 text-muted-foreground">{{ $workLog->logged_on?->locale($locale)->translatedFormat('d M Y') }}</td>
+                                            <td class="px-4 py-2.5 font-medium">{{ $workLog->staff_name }}</td>
+                                            <td class="px-4 py-2.5 text-right font-semibold tabular-nums">{{ $workLog->minutes }}</td>
+                                            <td class="max-w-56 px-4 py-2.5"><span class="block truncate text-muted-foreground" title="{{ $workLog->note }}">{{ $workLog->note ?? '—' }}</span></td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
                         </div>
                     @endif
                 </div>

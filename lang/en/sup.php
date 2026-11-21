@@ -89,4 +89,17 @@ return [
     'purchaseCreated' => 'Purchase recorded.',
     'purchaseUpdated' => 'Purchase updated.',
     'purchaseDeleted' => 'Purchase deleted.',
+
+    // ---- Purchase payments (Finance & Comptabilité v1.3) -------------------
+    'supplierBalance' => 'Balance due',
+    'purchasePayments' => 'Purchase payments',
+    'addPayment' => 'Record a payment',
+    'paymentRecorded' => 'Payment recorded.',
+    'paidSoFar' => 'Paid so far',
+    'remainingDue' => 'Remaining due',
+    'paymentDate' => 'Payment date',
+    'amount' => 'Amount',
+    'paymentMethod' => 'Method',
+    'treasuryAccount' => 'Treasury account',
+    'errPaymentExceedsBalance' => "The payment exceeds the remaining balance due.",
 ];

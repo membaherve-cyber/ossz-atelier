@@ -23,6 +23,12 @@
             'PARTIAL' => 'bg-orange-50 text-orange-700 border-orange-200',
             'PAID' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
         ];
+
+        // Active treasury accounts for the purchase-payment selects —
+        // empty value = auto-route by payment method (Finance spec §4.4).
+        // Fetched inline (single query) because the index controller does
+        // not pass them.
+        $treasuryAccounts = \App\Models\TreasuryAccount::query()->active()->orderBy('name')->get();
     @endphp
 
     <div class="space-y-5"
@@ -95,6 +101,15 @@
                             @if ($supplier->materials)
                                 <p class="mt-1 line-clamp-2 text-xs text-muted-foreground" title="{{ $supplier->materials }}">{{ $supplier->materials }}</p>
                             @endif
+                            @php
+                                // Balance due across all purchases (Finance spec
+                                // v1.3 §4.6) — Σ totals − Σ paid, never negative.
+                                $supplierBalance = max(0, ($supplier->purchases_total ?? 0) - ($supplier->purchases_paid ?? 0));
+                            @endphp
+                            <div class="mt-3 flex items-center justify-between gap-2">
+                                <p class="text-xs font-medium uppercase tracking-wide text-muted-foreground">{{ __('sup.supplierBalance') }}</p>
+                                <p class="text-sm font-semibold tabular-nums {{ $supplierBalance > 0 ? 'font-bold text-red-700' : 'text-muted-foreground' }}">{{ \App\Support\Money::format($supplierBalance) }}</p>
+                            </div>
                             <div class="mt-3 flex items-center justify-end gap-1 border-t pt-3">
                                 <button type="button" @click="$dispatch('supplier-edit-{{ $supplier->id }}')"
                                         aria-label="{{ __('common.edit') }} — {{ $supplier->name }}"
@@ -304,9 +319,21 @@
                                     <td class="px-4 py-3">
                                         <span class="inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap {{ $paymentPalette[$purchase->payment_status] ?? $paymentPalette['UNPAID'] }}">{{ __('labels.purchPayStatus.'.$purchase->payment_status) }}</span>
                                     </td>
-                                    <td class="whitespace-nowrap px-4 py-3 text-right font-semibold tabular-nums">{{ \App\Support\Money::format($purchase->total_amount) }}</td>
+                                    <td class="whitespace-nowrap px-4 py-3 text-right">
+                                        <span class="font-semibold tabular-nums">{{ \App\Support\Money::format($purchase->total_amount) }}</span>
+                                        @if ((float) $purchase->amount_paid > 0)
+                                            <span class="block text-xs text-muted-foreground tabular-nums">{{ __('sup.paidSoFar') }} {{ \App\Support\Money::format($purchase->amount_paid) }}</span>
+                                        @endif
+                                    </td>
                                     <td class="px-4 py-3">
                                         <div class="flex items-center justify-end gap-1">
+                                            @if ($purchase->balanceDue() > 0)
+                                                <button type="button" @click="$dispatch('purchase-pay-{{ $purchase->id }}')"
+                                                        aria-label="{{ __('sup.addPayment') }} — {{ $purchase->reference }}"
+                                                        class="inline-flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" aria-hidden="true"><rect width="20" height="14" x="2" y="5" rx="2"/><path d="M2 10h20"/></svg>
+                                                </button>
+                                            @endif
                                             @if ($purchase->receipt_path)
                                                 <a href="{{ route('purchases.receipt', $purchase->id) }}" target="_blank" rel="noopener"
                                                    aria-label="{{ __('sup.viewReceipt') }} — {{ $purchase->reference }}"
@@ -374,9 +401,21 @@
                             </div>
                             <div class="mt-3 flex items-end justify-between gap-3">
                                 <p class="text-xs text-muted-foreground">{{ $purchase->purchase_date->locale(app()->getLocale())->translatedFormat('j M Y') }}</p>
-                                <p class="text-lg font-bold tabular-nums">{{ \App\Support\Money::format($purchase->total_amount) }}</p>
+                                <span class="text-right">
+                                    <span class="block text-lg font-bold tabular-nums">{{ \App\Support\Money::format($purchase->total_amount) }}</span>
+                                    @if ((float) $purchase->amount_paid > 0)
+                                        <span class="block text-xs text-muted-foreground tabular-nums">{{ __('sup.paidSoFar') }} {{ \App\Support\Money::format($purchase->amount_paid) }}</span>
+                                    @endif
+                                </span>
                             </div>
                             <div class="mt-3 flex items-center justify-end gap-1 border-t pt-3">
+                                @if ($purchase->balanceDue() > 0)
+                                    <button type="button" @click="$dispatch('purchase-pay-{{ $purchase->id }}')"
+                                            aria-label="{{ __('sup.addPayment') }} — {{ $purchase->reference }}"
+                                            class="inline-flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" aria-hidden="true"><rect width="20" height="14" x="2" y="5" rx="2"/><path d="M2 10h20"/></svg>
+                                    </button>
+                                @endif
                                 @if ($purchase->receipt_path)
                                     <a href="{{ route('purchases.receipt', $purchase->id) }}" target="_blank" rel="noopener"
                                        aria-label="{{ __('sup.viewReceipt') }} — {{ $purchase->reference }}"
@@ -620,6 +659,123 @@
                                         </button>
                                     </div>
                                 </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Record purchase payment (Finance spec v1.3 §4.6) --}}
+                    <div x-data="{ open: {{ $errors->any() && old('formId') === 'purchase-pay-'.$purchase->id ? 'true' : 'false' }} }" @purchase-pay-{{ $purchase->id }}.window="open = true">
+                        <div x-show="open" style="display: none;" x-cloak
+                             class="fixed inset-0 z-50 flex items-end justify-center p-0 sm:items-center sm:p-4"
+                             role="dialog" aria-modal="true" aria-label="{{ __('sup.addPayment') }}"
+                             @keydown.escape.window="open = false">
+                            <div class="absolute inset-0 bg-black/50 backdrop-blur-[2px]" @click="open = false" aria-hidden="true"
+                                 x-transition.opacity.duration.200ms></div>
+                            <div class="relative max-h-[90vh] w-full overflow-y-auto rounded-t-2xl bg-card shadow-xl sm:max-w-lg sm:rounded-lg"
+                                 x-transition:enter="transition ease-out duration-200"
+                                 x-transition:enter-start="opacity-0 translate-y-6 sm:translate-y-0 sm:scale-95"
+                                 x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                                 x-transition:leave="transition ease-in duration-150"
+                                 x-transition:leave-start="opacity-100"
+                                 x-transition:leave-end="opacity-0 translate-y-6 sm:translate-y-0 sm:scale-95">
+                                <div class="flex items-start justify-between gap-4 border-b px-5 py-4">
+                                    <div class="min-w-0">
+                                        <h2 class="text-base font-semibold">{{ __('sup.addPayment') }}</h2>
+                                        <p class="mt-0.5 text-sm text-muted-foreground">{{ $purchase->reference }} · {{ $purchase->supplier_name }}</p>
+                                    </div>
+                                    <button type="button" @click="open = false"
+                                            aria-label="{{ __('common.close') }}"
+                                            class="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                                    </button>
+                                </div>
+                                <div class="space-y-4 px-5 py-4">
+                                    <div class="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-muted/40 px-3 py-2.5">
+                                        <span class="inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap {{ $paymentPalette[$purchase->payment_status] ?? $paymentPalette['UNPAID'] }}">{{ __('labels.purchPayStatus.'.$purchase->payment_status) }}</span>
+                                        <p class="text-sm text-muted-foreground">
+                                            {{ __('sup.paidSoFar') }}:
+                                            <span class="font-semibold tabular-nums text-foreground">{{ \App\Support\Money::format($purchase->amount_paid) }}</span>
+                                            <span aria-hidden="true">/</span>
+                                            <span class="font-semibold tabular-nums">{{ \App\Support\Money::format($purchase->total_amount) }}</span>
+                                        </p>
+                                    </div>
+
+                                    @if ($purchase->payments->isNotEmpty())
+                                        <div class="space-y-1.5">
+                                            @foreach ($purchase->payments as $purchasePayment)
+                                                <div class="flex items-center justify-between gap-2 text-sm">
+                                                    <span class="min-w-0">
+                                                        <span class="font-medium">{{ __('labels.payMethod.'.$purchasePayment->method) }}</span>
+                                                        <span class="block text-xs text-muted-foreground">
+                                                            {{ $purchasePayment->payment_date->locale(app()->getLocale())->translatedFormat('j M Y') }}@if ($purchasePayment->reference) · {{ $purchasePayment->reference }}@endif
+                                                        </span>
+                                                    </span>
+                                                    <span class="font-semibold tabular-nums">{{ \App\Support\Money::format($purchasePayment->amount) }}</span>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    @endif
+
+                                    <form method="POST" action="{{ route('purchases.payments.store', $purchase->id) }}">
+                                        @csrf
+                                        <input type="hidden" name="formId" value="purchase-pay-{{ $purchase->id }}" />
+                                        <div class="grid gap-4 sm:grid-cols-2">
+                                            <div>
+                                                <label for="pur-pay-amount-{{ $purchase->id }}" class="mb-1.5 block text-sm font-medium">{{ __('sup.amount') }}</label>
+                                                <input type="number" id="pur-pay-amount-{{ $purchase->id }}" name="amount" step="0.01" min="0.01" max="{{ $purchase->balanceDue() }}" value="{{ old('amount') }}" required
+                                                       class="mt-1 w-full rounded-md border border-input bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
+                                                @error('amount')
+                                                    <span class="mt-1 text-xs text-red-600" role="alert">{{ $message }}</span>
+                                                @enderror
+                                            </div>
+                                            <div>
+                                                <label for="pur-pay-date-{{ $purchase->id }}" class="mb-1.5 block text-sm font-medium">{{ __('sup.paymentDate') }}</label>
+                                                <input type="date" id="pur-pay-date-{{ $purchase->id }}" name="paymentDate" value="{{ old('paymentDate', now()->toDateString()) }}" required
+                                                       class="mt-1 w-full rounded-md border border-input bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
+                                                @error('paymentDate')
+                                                    <span class="mt-1 text-xs text-red-600" role="alert">{{ $message }}</span>
+                                                @enderror
+                                            </div>
+                                            <div>
+                                                <label for="pur-pay-method-{{ $purchase->id }}" class="mb-1.5 block text-sm font-medium">{{ __('sup.paymentMethod') }}</label>
+                                                <select id="pur-pay-method-{{ $purchase->id }}" name="method"
+                                                        class="mt-1 w-full rounded-md border border-input bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
+                                                    @foreach ($methods as $methodOption)
+                                                        <option value="{{ $methodOption }}" {{ old('method', 'CASH') === $methodOption ? 'selected' : '' }}>{{ __('labels.payMethod.'.$methodOption) }}</option>
+                                                    @endforeach
+                                                </select>
+                                                @error('method')
+                                                    <span class="mt-1 text-xs text-red-600" role="alert">{{ $message }}</span>
+                                                @enderror
+                                            </div>
+                                            <div>
+                                                <label for="pur-pay-account-{{ $purchase->id }}" class="mb-1.5 block text-sm font-medium">{{ __('sup.treasuryAccount') }}</label>
+                                                <select id="pur-pay-account-{{ $purchase->id }}" name="treasuryAccount"
+                                                        class="mt-1 w-full rounded-md border border-input bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
+                                                    <option value="">— {{ __('gen.generatedBadge') }} —</option>
+                                                    @foreach ($treasuryAccounts as $treasuryAccount)
+                                                        <option value="{{ $treasuryAccount->id }}" {{ old('treasuryAccount') === $treasuryAccount->id ? 'selected' : '' }}>{{ $treasuryAccount->name }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="sm:col-span-2">
+                                                <label for="pur-pay-ref-{{ $purchase->id }}" class="mb-1.5 block text-sm font-medium">{{ __('sup.colReference') }}</label>
+                                                <input type="text" id="pur-pay-ref-{{ $purchase->id }}" name="reference" value="{{ old('reference') }}" maxlength="60"
+                                                       class="mt-1 w-full rounded-md border border-input bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
+                                            </div>
+                                        </div>
+                                        <div class="mt-4 flex justify-end gap-2">
+                                            <button type="button" @click="open = false"
+                                                    class="inline-flex items-center gap-2 rounded-md border border-input bg-card px-4 py-2.5 text-sm font-semibold transition-colors hover:bg-muted/60">
+                                                {{ __('common.cancel') }}
+                                            </button>
+                                            <button type="submit"
+                                                    class="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 btn-press">
+                                                {{ __('sup.addPayment') }}
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
                             </div>
                         </div>
                     </div>

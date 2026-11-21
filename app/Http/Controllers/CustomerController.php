@@ -66,6 +66,34 @@ class CustomerController
 
         $customers = $customers->orderBy('name')->get();
 
+        // Finance module v1.3 §4.5 — per-customer receivable: Σ order
+        // values − Σ payments of the customer's REGISTERED orders. Overdue
+        // = outstanding with the expected delivery date in the past.
+        $customers->each(static function (Customer $customer): void {
+            $orders = $customer->orders()->where('status', 'REGISTERED')
+                ->withSum('payments as paid_total', 'amount')
+                ->get(['id', 'total_value', 'expected_delivery_date']);
+
+            $outstanding = 0.0;
+            $overdue = 0.0;
+
+            foreach ($orders as $order) {
+                $balance = round((float) ($order->total_value ?? 0) - (float) ($order->paid_total ?? 0), 2);
+
+                if ($balance > 0.005) {
+                    $outstanding += $balance;
+
+                    if ($order->expected_delivery_date !== null
+                        && $order->expected_delivery_date->isPast()) {
+                        $overdue += $balance;
+                    }
+                }
+            }
+
+            $customer->setAttribute('receivable_balance', round($outstanding, 2));
+            $customer->setAttribute('overdue_balance', round($overdue, 2));
+        });
+
         return view('customers.index', [
             'customers' => $customers,
             'filters' => [

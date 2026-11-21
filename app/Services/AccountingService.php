@@ -9,6 +9,7 @@ use App\Models\PayrollItem;
 use App\Models\Payment;
 use App\Models\Purchase;
 use App\Models\StaffAdvance;
+use App\Services\TreasuryService;
 use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
@@ -145,6 +146,14 @@ final class AccountingService
         $series = self::monthlySeries($from, $to);
         $categoryBreakdown = self::expenseCategoryBreakdown($from, $to);
 
+        // Finance module v1.3 §4.4 — treasury snapshot (all accounts,
+        // derived balances) + supplier debts (§4.6).
+        $treasury = TreasuryService::overview();
+        $supplierDebts = (float) Purchase::query()
+            ->whereIn('payment_status', ['UNPAID', 'PARTIAL'])
+            ->selectRaw('COALESCE(SUM(total_amount), 0) - COALESCE(SUM(amount_paid), 0) AS due')
+            ->value('due');
+
         return [
             'revenue' => $revenue,
             'paymentsReceived' => $paymentsReceived,
@@ -159,6 +168,9 @@ final class AccountingService
             'monthExpenses' => $monthExpenses,
             'series' => $series,
             'categoryBreakdown' => $categoryBreakdown,
+            'treasuryTotal' => $treasury['total'],
+            'treasuryAccounts' => $treasury['accounts'],
+            'supplierDebts' => round($supplierDebts, 2),
         ];
     }
 

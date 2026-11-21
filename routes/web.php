@@ -1,12 +1,15 @@
 <?php
 
 use App\Http\Controllers\Accounting\AdvanceController;
+use App\Http\Controllers\Accounting\BudgetController;
 use App\Http\Controllers\Accounting\DashboardController as AccountingDashboardController;
 use App\Http\Controllers\Accounting\ExpenseController;
 use App\Http\Controllers\Accounting\FinancialReportController;
+use App\Http\Controllers\Accounting\GeneralAccountingController;
 use App\Http\Controllers\Accounting\PaymentController;
 use App\Http\Controllers\Accounting\PayrollController;
 use App\Http\Controllers\Accounting\SupplierController;
+use App\Http\Controllers\Accounting\TreasuryController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\AuditController;
 use App\Http\Controllers\DailyReportController;
@@ -14,6 +17,7 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\IncentiveController;
 use App\Http\Controllers\LocaleController;
+use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PerformanceController;
@@ -133,6 +137,18 @@ Route::post('/tasks/{id}/update', [TaskActionController::class, 'update'])
     ->name('tasks.update')
     ->middleware('perm:production.manage.details');
 
+// Work-time log (Finance spec v1.3 §5.13) — the employee (or a
+// supervisor) records minutes spent on the task.
+Route::post('/tasks/{id}/worklog', [TaskActionController::class, 'workLog'])
+    ->name('tasks.worklog')
+    ->middleware('auth');
+
+// Reprise / rework marker (§5.15) — retouche after essayage; time and
+// materials stay imputed to the original order and show separately.
+Route::post('/tasks/{id}/rework', [TaskActionController::class, 'toggleRework'])
+    ->name('tasks.rework')
+    ->middleware('perm:production.manage.details');
+
 // --------------------------------------------------------------------------
 // Orders — the unified order registration + garment-piece task assignment
 // workflow (enhancement spec §3) plus the dedicated order details page.
@@ -164,6 +180,20 @@ Route::post('/orders/{id}/finalize', [OrderController::class, 'finalize'])
 Route::post('/orders/{id}/labour', [OrderController::class, 'allocateLabour'])
     ->name('orders.labour') // explicit labour cost allocation (spec §11)
     ->middleware('perm:accounting.payments');
+
+// Garments / pieces of an order (Finance spec v1.3 §5.2) — readable
+// order-derived codes, explicit piece → order relation.
+Route::post('/orders/{id}/garments', [OrderController::class, 'storeGarment'])
+    ->name('orders.garments.store')
+    ->middleware('perm:orders.manage');
+
+Route::post('/garments/{id}/update', [OrderController::class, 'updateGarment'])
+    ->name('garments.update')
+    ->middleware('perm:orders.manage');
+
+Route::post('/garments/{id}/delete', [OrderController::class, 'destroyGarment'])
+    ->name('garments.destroy')
+    ->middleware('perm:orders.manage');
 
 Route::post('/orders/{id}/delete', [OrderController::class, 'destroy'])
     ->name('orders.destroy') // only when the order has no tasks
@@ -313,6 +343,11 @@ Route::post('/payments/{id}/delete', [PaymentController::class, 'destroy'])
     ->name('payments.destroy')
     ->middleware('perm:accounting.payments');
 
+// Printable receipt of a customer payment (Finance spec v1.3 §4.2)
+Route::get('/payments/{id}/receipt', [PaymentController::class, 'receipt'])
+    ->name('payments.receipt')
+    ->middleware('perm:accounting.payments');
+
 // Expenses (spec §7)
 Route::get('/expenses', [ExpenseController::class, 'index'])
     ->name('expenses.index')
@@ -435,10 +470,157 @@ Route::get('/purchases/{id}/receipt', [SupplierController::class, 'purchaseRecei
     ->name('purchases.receipt')
     ->middleware('perm:accounting.suppliers');
 
+// Purchase payment instalments (Finance spec v1.3 §4.6) — engagement and
+// settlement are distinct events; status derived from the payments.
+Route::post('/purchases/{id}/payments', [SupplierController::class, 'storePurchasePayment'])
+    ->name('purchases.payments.store')
+    ->middleware('perm:accounting.suppliers');
+
 // Financial reports (spec §12) — CSV export via ?export=csv
 Route::get('/accounting/reports', [FinancialReportController::class, 'index'])
     ->name('accounting.reports')
     ->middleware('perm:accounting.reports');
+
+// --------------------------------------------------------------------------
+// TREASURY (Finance spec v1.3 §4.4) — multi-account treasury: caisse,
+// banque, MTN MoMo, Orange Money + configurable accounts. Read side
+// treasury.view; writes (accounts, transfers, movements, reconcile)
+// need treasury.manage (Comptable / Management / Admin).
+// --------------------------------------------------------------------------
+Route::get('/treasury', [TreasuryController::class, 'index'])
+    ->name('treasury.index')
+    ->middleware('perm:treasury.view');
+
+Route::post('/treasury/accounts', [TreasuryController::class, 'storeAccount'])
+    ->name('treasury.accounts.store')
+    ->middleware('perm:treasury.manage');
+
+Route::post('/treasury/accounts/{id}', [TreasuryController::class, 'updateAccount'])
+    ->name('treasury.accounts.update')
+    ->middleware('perm:treasury.manage');
+
+Route::post('/treasury/transfer', [TreasuryController::class, 'transfer'])
+    ->name('treasury.transfer')
+    ->middleware('perm:treasury.manage');
+
+Route::post('/treasury/movement', [TreasuryController::class, 'storeMovement'])
+    ->name('treasury.movement')
+    ->middleware('perm:treasury.manage');
+
+Route::post('/treasury/movements/{id}/reconcile', [TreasuryController::class, 'toggleReconcile'])
+    ->name('treasury.reconcile')
+    ->middleware('perm:treasury.manage');
+
+// --------------------------------------------------------------------------
+// MATERIALS & STOCK (Finance spec v1.3 §5) — the traceability chain.
+// Master + ledger need materials.view; issues to employees need
+// materials.issue; declarations need materials.declare (STAFF holds it,
+// controller-scoped to their own issues); validation/closure needs
+// materials.validate (Manager).
+// --------------------------------------------------------------------------
+Route::get('/materials', [MaterialController::class, 'index'])
+    ->name('materials.index')
+    ->middleware('perm:materials.view');
+
+Route::post('/materials', [MaterialController::class, 'store'])
+    ->name('materials.store')
+    ->middleware('perm:materials.manage');
+
+// NOTE: create before {id} — route order matters.
+Route::get('/materials/issues/create', [MaterialController::class, 'createIssue'])
+    ->name('materials.issues.create')
+    ->middleware('perm:materials.issue');
+
+Route::get('/materials/issues', [MaterialController::class, 'issues'])
+    ->name('materials.issues.index')
+    ->middleware('auth'); // scoped in controller (own issues for STAFF)
+
+Route::post('/materials/issues', [MaterialController::class, 'storeIssue'])
+    ->name('materials.issues.store')
+    ->middleware('perm:materials.issue');
+
+Route::get('/materials/issues/{id}', [MaterialController::class, 'showIssue'])
+    ->name('materials.issues.show')
+    ->middleware('auth'); // scoped in controller
+
+Route::post('/materials/issues/{id}/close', [MaterialController::class, 'closeIssue'])
+    ->name('materials.issues.close')
+    ->middleware('perm:materials.validate');
+
+Route::post('/materials/issues/{id}/cancel', [MaterialController::class, 'cancelIssue'])
+    ->name('materials.issues.cancel')
+    ->middleware('perm:materials.issue');
+
+Route::post('/materials/lines/{id}/declare', [MaterialController::class, 'declare'])
+    ->name('materials.declare')
+    ->middleware('perm:materials.declare');
+
+Route::get('/materials/validation', [MaterialController::class, 'validationQueue'])
+    ->name('materials.validation')
+    ->middleware('perm:materials.validate');
+
+Route::post('/materials/declarations/{id}/review', [MaterialController::class, 'reviewDeclaration'])
+    ->name('materials.declarations.review')
+    ->middleware('perm:materials.validate');
+
+Route::post('/materials/transfers', [MaterialController::class, 'storeTransfer'])
+    ->name('materials.transfers.store')
+    ->middleware('perm:materials.issue');
+
+// Material master edit — registered AFTER the literal /materials/* POST
+// routes so it can never shadow them ({id} is constrained to a UUID).
+Route::post('/materials/{id}', [MaterialController::class, 'update'])
+    ->name('materials.update')
+    ->middleware('perm:materials.manage')
+    ->where('id', '[0-9a-f-]{36}');
+
+// --------------------------------------------------------------------------
+// GENERAL ACCOUNTING (Finance spec v1.3 §6, SYSCOHADA) — chart of
+// accounts, journal, grand livre, trial balance, manual OD entries and
+// retroactive generation. Comptable / Management / Admin (accounting.journal).
+// --------------------------------------------------------------------------
+Route::get('/accounting/general', [GeneralAccountingController::class, 'index'])
+    ->name('accounting.general')
+    ->middleware('perm:accounting.journal');
+
+Route::post('/accounting/general/entry', [GeneralAccountingController::class, 'storeEntry'])
+    ->name('accounting.general.entry')
+    ->middleware('perm:accounting.journal');
+
+Route::post('/accounting/general/generate', [GeneralAccountingController::class, 'generate'])
+    ->name('accounting.general.generate')
+    ->middleware('perm:accounting.journal');
+
+Route::get('/accounting/ledger/{id}', [GeneralAccountingController::class, 'ledger'])
+    ->name('accounting.ledger')
+    ->middleware('perm:accounting.journal');
+
+Route::get('/accounting/balance', [GeneralAccountingController::class, 'balance'])
+    ->name('accounting.balance')
+    ->middleware('perm:accounting.journal');
+
+Route::post('/accounting/accounts', [GeneralAccountingController::class, 'storeAccount'])
+    ->name('accounting.accounts.store')
+    ->middleware('perm:accounting.journal');
+
+// --------------------------------------------------------------------------
+// BUDGETS (Finance spec v1.3 §8) — planned vs real, overrun alerts.
+// --------------------------------------------------------------------------
+Route::get('/budgets', [BudgetController::class, 'index'])
+    ->name('budgets.index')
+    ->middleware('perm:budgets.view');
+
+Route::post('/budgets', [BudgetController::class, 'store'])
+    ->name('budgets.store')
+    ->middleware('perm:budgets.manage');
+
+Route::post('/budgets/{id}/lines', [BudgetController::class, 'storeLine'])
+    ->name('budgets.lines.store')
+    ->middleware('perm:budgets.manage');
+
+Route::post('/budgets/{id}/close', [BudgetController::class, 'close'])
+    ->name('budgets.close')
+    ->middleware('perm:budgets.manage');
 
 // --------------------------------------------------------------------------
 // DAILY BUSINESS-HEALTH E-MAIL (enhancement) — automated daily report to

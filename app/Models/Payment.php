@@ -39,4 +39,10 @@ class Payment extends Model
     {
         return $this->belongsTo(Customer::class, 'customer_id');
     }
+
+    /** Treasury account the payment landed on (spec v1.3 §4.2/§4.4). */
+    public function treasuryAccount(): BelongsTo
+    {
+        return $this->belongsTo(TreasuryAccount::class, 'treasury_account_id');
+    }
 }

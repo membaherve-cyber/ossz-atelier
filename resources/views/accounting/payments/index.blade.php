@@ -138,6 +138,11 @@
                                 <td class="max-w-36 px-4 py-3"><span class="block truncate text-muted-foreground">{{ $payment->recorded_by_name ?? '—' }}</span></td>
                                 <td class="px-4 py-3">
                                     <div class="flex items-center justify-end gap-1">
+                                        <a href="{{ route('payments.receipt', $payment->id) }}" target="_blank" rel="noopener"
+                                           aria-label="{{ __('sup.receiptLink') }} — {{ $payment->reference }}"
+                                           class="inline-flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" aria-hidden="true"><path d="M6 9V3h12v6"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg>
+                                        </a>
                                         <button type="button" @click="$dispatch('pay-edit-{{ $payment->id }}')"
                                                 aria-label="{{ __('common.edit') }} — {{ $payment->reference }}"
                                                 class="inline-flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
@@ -206,6 +211,11 @@
                             <p class="text-lg font-bold tabular-nums">{{ \App\Support\Money::format($payment->amount) }}</p>
                         </div>
                         <div class="mt-3 flex items-center justify-end gap-1 border-t pt-3">
+                            <a href="{{ route('payments.receipt', $payment->id) }}" target="_blank" rel="noopener"
+                               aria-label="{{ __('sup.receiptLink') }} — {{ $payment->reference }}"
+                               class="inline-flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" aria-hidden="true"><path d="M6 9V3h12v6"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg>
+                            </a>
                             <button type="button" @click="$dispatch('pay-edit-{{ $payment->id }}')"
                                     aria-label="{{ __('common.edit') }} — {{ $payment->reference }}"
                                     class="inline-flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
@@ -393,6 +403,11 @@
                 <form method="POST" action="{{ route('payments.store') }}">
                     @csrf
                     <input type="hidden" name="formId" value="payment-create" />
+                    @php
+                        // Treasury accounts for the optional routing select —
+                        // empty value = auto-route by payment method (§4.4).
+                        $treasuryAccounts = \App\Models\TreasuryAccount::query()->active()->orderBy('name')->get();
+                    @endphp
                     <div class="grid gap-4 px-5 py-4 sm:grid-cols-2">
                         <div class="sm:col-span-2">
                             <label for="payment-order" class="mb-1.5 block text-sm font-medium">{{ __('pay.fieldOrder') }}</label>
@@ -446,6 +461,16 @@
                                     class="mt-1 w-full rounded-md border border-input bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
                                 @foreach ($methods as $methodOption)
                                     <option value="{{ $methodOption }}">{{ __('labels.payMethod.'.$methodOption) }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label for="payment-treasury" class="mb-1.5 block text-sm font-medium">{{ __('sup.treasuryAccount') }}</label>
+                            <select id="payment-treasury" name="treasuryAccount"
+                                    class="mt-1 w-full rounded-md border border-input bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
+                                <option value="">— {{ __('gen.generatedBadge') }} —</option>
+                                @foreach ($treasuryAccounts as $treasuryAccount)
+                                    <option value="{{ $treasuryAccount->id }}" {{ old('treasuryAccount') === $treasuryAccount->id ? 'selected' : '' }}>{{ $treasuryAccount->name }}</option>
                                 @endforeach
                             </select>
                         </div>

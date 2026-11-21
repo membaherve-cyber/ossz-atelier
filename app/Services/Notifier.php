@@ -47,6 +47,9 @@ final class Notifier
         'INCENTIVE_APPROVED' => 'Incentive approved',
         'PAYROLL_PAID' => 'Salary paid',
         'ADVANCE_DISBURSED' => 'Advance received',
+        // Finance & Comptabilité module v1.3 (§5.6/§5.8)
+        'MATERIAL_ISSUE_RECEIVED' => 'Materials handed to you',
+        'MATERIAL_DECLARATION_REVIEWED' => 'Material declaration reviewed',
     ];
 
     /**

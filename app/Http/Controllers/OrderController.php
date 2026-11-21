@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AuditLog;
 use App\Models\Customer;
+use App\Models\GarmentComponent;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Models\ProductionStage;
@@ -14,6 +15,7 @@ use App\Models\TaskAssignment;
 use App\Models\TaskStageState;
 use App\Models\TaskStatusChange;
 use App\Models\User;
+use App\Services\AccountingPostService;
 use App\Services\Audit;
 use App\Services\Codes;
 use App\Services\Notifier;
@@ -496,6 +498,12 @@ class OrderController
                 'labourAllocations' => function (HasMany $query): void {
                     $query->orderByDesc('created_at');
                 },
+                'garments' => function (HasMany $query): void {
+                    $query->orderBy('code');
+                },
+                'materialIssues' => function (HasMany $query): void {
+                    $query->with(['lines.material:id,name,unit', 'staff:id,name'])->orderByDesc('issue_date');
+                },
             ])
             ->withSum('payments as paid_total', 'amount')
             ->findOrFail($id);
@@ -652,11 +660,101 @@ class OrderController
                 'orderNumber' => $order->order_number,
                 'changedFields' => $this->prismaFieldNames($changedColumns),
             ]);
+
+            // Finance module v1.3 §6 — a value change on a REGISTERED
+            // order re-posts its revenue entry so the journal never
+            // shows a stale amount (derived row rebuilt, not duplicated).
+            if (in_array('total_value', $changedColumns, true) && $order->status === 'REGISTERED') {
+                \App\Models\JournalEntry::query()
+                    ->where('source_type', 'ORDER')
+                    ->where('source_id', $order->id)
+                    ->delete();
+                AccountingPostService::postOrderRevenue($order->refresh(), $me);
+            }
         }
 
         return redirect()
             ->back()
             ->with('success', __('orders.updatedToast'));
+    }
+
+    /**
+     * POST /orders/{id}/garments (route perm orders.manage) — add a
+     * garment/piece to an order with its readable order-derived code
+     * (Finance spec v1.3 §5.2: {ORDER_NUMBER}-V01 …).
+     */
+    public function storeGarment(Request $request, string $id): RedirectResponse
+    {
+        $order = Order::query()->findOrFail($id);
+
+        $data = $request->validate([
+            'name' => ['required', 'string', 'min:2', 'max:120'],
+            'notes' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        $garment = GarmentComponent::query()->create([
+            'order_id' => $order->id,
+            'code' => GarmentComponent::nextCodeFor($order),
+            'name' => $data['name'],
+            'notes' => $data['notes'] ?? null,
+        ]);
+
+        Audit::log($request->user(), 'GARMENT_CREATED', 'GARMENT', $garment->id, [
+            'code' => $garment->code,
+            'name' => $garment->name,
+            'orderNumber' => $order->order_number,
+        ]);
+
+        return redirect()->back()->with('success', __('orders.garmentCreated'));
+    }
+
+    /**
+     * POST /garments/{id}/update (route perm orders.manage) — rename a
+     * garment / adjust its notes. The code itself is immutable (§5.2).
+     */
+    public function updateGarment(Request $request, string $id): RedirectResponse
+    {
+        $garment = GarmentComponent::query()->findOrFail($id);
+
+        $data = $request->validate([
+            'name' => ['required', 'string', 'min:2', 'max:120'],
+            'notes' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        $garment->update([
+            'name' => $data['name'],
+            'notes' => $data['notes'] ?? null,
+        ]);
+
+        Audit::log($request->user(), 'GARMENT_UPDATED', 'GARMENT', $garment->id, [
+            'code' => $garment->code,
+            'name' => $garment->name,
+        ]);
+
+        return redirect()->back()->with('success', __('orders.garmentUpdated'));
+    }
+
+    /**
+     * POST /garments/{id}/delete (route perm orders.manage) — remove a
+     * garment only when nothing references it (tasks, issues — §5.2
+     * identifiants immuables / non réutilisables).
+     */
+    public function destroyGarment(Request $request, string $id): RedirectResponse
+    {
+        $garment = GarmentComponent::query()->findOrFail($id);
+
+        if ($garment->tasks()->exists() || $garment->materialIssues()->exists()) {
+            return redirect()->back()->with('error', __('orders.garmentDeleteBlocked'));
+        }
+
+        Audit::log($request->user(), 'GARMENT_DELETED', 'GARMENT', $garment->id, [
+            'code' => $garment->code,
+            'orderNumber' => $garment->order?->order_number,
+        ]);
+
+        $garment->delete();
+
+        return redirect()->back()->with('success', __('orders.garmentDeleted'));
     }
 
     /**
@@ -676,6 +774,10 @@ class OrderController
         }
 
         $order->forceFill(['status' => 'REGISTERED'])->save();
+
+        // Finance module v1.3 §6 — the registered order's value is the
+        // revenue event (DR 411 / CR 701); collections post separately.
+        AccountingPostService::postOrderRevenue($order->refresh(), $me);
 
         Audit::log($me, 'ORDER_FINALIZED', 'ORDER', $order->id, [
             'orderNumber' => $order->order_number,

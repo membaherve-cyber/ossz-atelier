@@ -202,4 +202,17 @@ return [
     'labourHint' => 'Labour is never auto-allocated — record explicit, transparent allocations only.',
     'labourAllocated' => 'Labour cost allocated.',
     'errLabourAmount' => 'Enter the allocated amount.',
+
+    // ---- Garments / pieces, materials & deposit (Finance & Comptabilité v1.3) ----
+    'garmentsTitle' => 'Garments / pieces',
+    'garmentCode' => 'Piece code',
+    'addGarment' => 'Add a piece',
+    'garmentName' => 'Piece name (e.g. Vest no. 1)',
+    'garmentCreated' => 'Piece added.',
+    'garmentUpdated' => 'Piece updated.',
+    'garmentDeleted' => 'Piece deleted.',
+    'garmentDeleteBlocked' => 'This piece has tasks or material issues — reassign them first.',
+    'materialsSection' => 'Materials consumed',
+    'consumedMaterialsValue' => 'Materials consumed (approved)',
+    'depositRate' => 'Deposit rate (%)',
 ];

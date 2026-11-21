@@ -171,6 +171,148 @@
                     @endif
                 </section>
 
+                {{-- Garments / pieces (Finance spec v1.3 §5.2) --}}
+                <section class="rounded-xl border bg-card p-4 sm:p-6">
+                    <h2 class="mb-3 font-semibold">{{ __('orders.garmentsTitle') }}</h2>
+
+                    @if ($canManage)
+                        <form method="POST" action="{{ route('orders.garments.store', $order->id) }}"
+                              class="mb-4 flex flex-col gap-2 sm:flex-row">
+                            @csrf
+                            <input type="text" name="name" value="{{ old('name') }}" placeholder="{{ __('orders.garmentName') }}" maxlength="120" required
+                                   class="h-11 w-full rounded-md border border-input bg-card px-3 py-1 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50" />
+                            <button type="submit"
+                                    class="inline-flex min-h-[44px] items-center justify-center gap-1.5 whitespace-nowrap rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 btn-press">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                                {{ __('orders.addGarment') }}
+                            </button>
+                        </form>
+                    @endif
+
+                    @if ($order->garments->isEmpty())
+                        <div class="flex flex-col items-center justify-center gap-2 py-8 text-center">
+                            <div class="rounded-full bg-muted p-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-6 text-muted-foreground" aria-hidden="true"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"/></svg>
+                            </div>
+                            <p class="text-sm text-muted-foreground">{{ __('orders.garmentName') }}</p>
+                        </div>
+                    @else
+                        <div class="overflow-x-auto rounded-lg border">
+                            <table class="w-full min-w-[560px] text-sm">
+                                <thead class="bg-muted/40 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                                    <tr>
+                                        <th class="px-4 py-3">{{ __('orders.garmentCode') }}</th>
+                                        <th class="px-4 py-3">{{ __('orders.reviewPiece') }}</th>
+                                        <th class="px-4 py-3">{{ __('orders.fieldNotes') }}</th>
+                                        @if ($canManage)
+                                            <th class="px-4 py-3 text-right">{{ __('common.actions') }}</th>
+                                        @endif
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($order->garments as $garment)
+                                        <tr class="border-t transition-colors hover:bg-muted/30">
+                                            <td class="whitespace-nowrap px-4 py-3 font-mono text-[11px] font-semibold tracking-wide text-muted-foreground">{{ $garment->code }}</td>
+                                            <td class="px-4 py-3 font-medium">{{ $garment->name }}</td>
+                                            <td class="max-w-56 px-4 py-3"><span class="block truncate text-muted-foreground" title="{{ $garment->notes }}">{{ $garment->notes ?? '—' }}</span></td>
+                                            @if ($canManage)
+                                                <td class="px-4 py-3">
+                                                    <div class="flex items-center justify-end gap-1">
+                                                        <form method="POST" action="{{ route('garments.update', $garment->id) }}"
+                                                              class="flex items-center gap-1">
+                                                            @csrf
+                                                            <input type="hidden" name="notes" value="{{ $garment->notes }}" />
+                                                            <input type="text" name="name" value="{{ old('name', $garment->name) }}" maxlength="120" required aria-label="{{ __('orders.garmentName') }}"
+                                                                   class="h-8 w-32 rounded-md border border-input bg-card px-2 py-1 text-xs shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50" />
+                                                            <button type="submit"
+                                                                    aria-label="{{ __('common.save') }} — {{ $garment->code }}"
+                                                                    class="inline-flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+                                                            </button>
+                                                        </form>
+                                                        <form method="POST" action="{{ route('garments.destroy', $garment->id) }}"
+                                                              onsubmit="return confirm('{{ __('common.delete') }}')">
+                                                            @csrf
+                                                            <button type="submit"
+                                                                    aria-label="{{ __('common.delete') }} — {{ $garment->code }}"
+                                                                    class="inline-flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-red-50 hover:text-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </td>
+                                            @endif
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @endif
+                </section>
+
+                @if ($canSeeFinancials)
+                    {{-- Materials consumed (Finance spec v1.3 §5.5/§7.4) --}}
+                    <section class="rounded-xl border bg-card p-4 sm:p-6">
+                        <h2 class="mb-3 font-semibold">{{ __('orders.materialsSection') }}</h2>
+
+                        <div class="flex items-center justify-between gap-2 rounded-lg bg-muted/40 px-3 py-2.5">
+                            <p class="text-sm font-medium">{{ __('orders.consumedMaterialsValue') }}</p>
+                            <p class="text-sm font-bold tabular-nums">{{ Money::format($order->consumedMaterialsValue()) }}</p>
+                        </div>
+
+                        @if ($order->materialIssues->isNotEmpty())
+                            <div class="mt-4 overflow-x-auto rounded-lg border">
+                                <table class="w-full min-w-[640px] text-sm">
+                                    <thead class="bg-muted/40 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                                        <tr>
+                                            <th class="px-4 py-3">{{ __('sup.colReference') }}</th>
+                                            <th class="px-4 py-3">{{ __('sup.colDate') }}</th>
+                                            <th class="px-4 py-3">{{ __('tasks.staff') }}</th>
+                                            <th class="px-4 py-3">{{ __('tasks.status') }}</th>
+                                            <th class="px-4 py-3">{{ __('mat.lines') }}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($order->materialIssues as $issue)
+                                            @php
+                                                $issueLines = $issue->lines->take(2);
+                                                $issueMoreLines = max(0, $issue->lines->count() - 2);
+                                            @endphp
+                                            <tr class="border-t transition-colors hover:bg-muted/30">
+                                                <td class="whitespace-nowrap px-4 py-3">
+                                                    <a href="{{ route('materials.issues.show', $issue->id) }}"
+                                                       class="font-mono text-[11px] font-semibold tracking-wide text-primary hover:underline">{{ $issue->code }}</a>
+                                                </td>
+                                                <td class="whitespace-nowrap px-4 py-3 text-muted-foreground">{{ $issue->issue_date->locale(app()->getLocale())->translatedFormat('j M Y') }}</td>
+                                                <td class="px-4 py-3">{{ $issue->staff?->name ?? '—' }}</td>
+                                                <td class="px-4 py-3">
+                                                    @if ($issue->status === 'OPEN')
+                                                        <span class="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap text-amber-700">{{ __('mat.st_'.$issue->status) }}</span>
+                                                    @elseif ($issue->status === 'CANCELLED')
+                                                        <span class="inline-flex items-center rounded-full border border-red-200 bg-red-50 px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap text-red-700">{{ __('mat.st_'.$issue->status) }}</span>
+                                                    @else
+                                                        <span class="inline-flex items-center rounded-full border border-stone-200 bg-stone-100 px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap text-stone-600">{{ __('mat.st_'.$issue->status) }}</span>
+                                                    @endif
+                                                </td>
+                                                <td class="max-w-64 px-4 py-3 text-muted-foreground">
+                                                    <span class="block truncate">
+                                                        @foreach ($issueLines as $issueLine)
+                                                            {{ $issueLine->material_name }} × {{ $issueLine->qty_issued }} {{ $issueLine->unit }}@if (! $loop->last || $issueMoreLines > 0), @endif
+                                                        @endforeach
+                                                        @if ($issueMoreLines > 0)
+                                                            <span class="font-semibold text-foreground">+{{ $issueMoreLines }}</span>
+                                                        @endif
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @endif
+                    </section>
+                @endif
+
                 {{-- Activity history --}}
                 <section class="rounded-xl border bg-card p-4 sm:p-6">
                     <h2 class="mb-3 font-semibold">{{ __('orders.detailActivity') }}</h2>

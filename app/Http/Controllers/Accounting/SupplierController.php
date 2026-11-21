@@ -9,10 +9,13 @@ use App\Models\ExpenseCategory;
 use App\Models\Order;
 use App\Models\Purchase;
 use App\Models\PurchaseItem;
+use App\Models\PurchasePayment;
 use App\Models\Supplier;
 use App\Models\User;
+use App\Services\AccountingPostService;
 use App\Services\Audit;
 use App\Services\Codes;
+use App\Services\TreasuryService;
 use App\Support\Atelier;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
@@ -58,10 +61,12 @@ class SupplierController
         return view('accounting.suppliers.index', [
             'suppliers' => Supplier::query()
                 ->withCount('purchases')
+                ->withSum('purchases as purchases_total', 'total_amount')
+                ->withSum('purchases as purchases_paid', 'amount_paid')
                 ->orderBy('name')
                 ->get(),
             'purchases' => Purchase::query()
-                ->with(['supplier', 'order'])
+                ->with(['supplier', 'order', 'payments'])
                 ->orderByDesc('purchase_date')
                 ->orderByDesc('created_at')
                 ->paginate(self::PER_PAGE)
@@ -76,6 +81,77 @@ class SupplierController
             'methods' => Atelier::PAYMENT_METHODS,
             'tab' => $tab,
         ]);
+    }
+
+    /**
+     * POST /purchases/{id}/payments (route perm accounting.suppliers) —
+     * record one supplier payment instalment (Finance spec v1.3 §4.6):
+     * the engagement and its settlement are distinct events. The
+     * purchase's amount_paid / payment_status are derived from the
+     * payment rows; the PAID transition books the single cost-ledger
+     * expense exactly as the legacy status-flip path does.
+     */
+    public function storePurchasePayment(Request $request, string $id): RedirectResponse
+    {
+        /** @var User $me */
+        $me = $request->user();
+
+        $purchase = Purchase::query()->findOrFail($id);
+
+        $data = $request->validate([
+            'amount' => ['required', 'numeric', 'gt:0'],
+            'paymentDate' => ['required', 'date'],
+            'method' => ['nullable', 'string', Rule::in(Atelier::PAYMENT_METHODS)],
+            'treasuryAccount' => ['nullable', 'uuid', Rule::exists('treasury_accounts', 'id')],
+            'reference' => ['nullable', 'string', 'max:60'],
+            'note' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        $amount = round((float) $data['amount'], 2);
+
+        if ($amount > $purchase->balanceDue() + 0.005) {
+            return redirect()
+                ->back()
+                ->with('error', __('sup.errPaymentExceedsBalance'));
+        }
+
+        $wasPaid = $purchase->payment_status === 'PAID';
+
+        $payment = PurchasePayment::query()->create([
+            'purchase_id' => $purchase->id,
+            'amount' => $amount,
+            'payment_date' => Carbon::parse((string) $data['paymentDate']),
+            'method' => (string) ($data['method'] ?? 'CASH'),
+            'treasury_account_id' => $data['treasuryAccount'] ?? null,
+            'reference' => $data['reference'] ?? null,
+            'note' => $data['note'] ?? null,
+            'recorded_by_id' => $me->id,
+            'recorded_by_name' => $me->name,
+        ]);
+
+        $purchase->refreshPaymentState();
+
+        // Finance module v1.3 §4.4/§6 — the payment leaves the treasury
+        // and posts its journal entry.
+        TreasuryService::recordForPurchasePayment($payment->refresh(), (string) $purchase->supplier_name);
+        AccountingPostService::postPurchasePayment($payment->refresh(), $purchase->refresh(), $me);
+
+        // The PAID transition books the single cost-ledger expense,
+        // mirroring the legacy status-flip path (idempotent).
+        if (! $wasPaid && $purchase->payment_status === 'PAID') {
+            $this->bookPurchaseExpense($purchase->refresh(), $me);
+        }
+
+        Audit::log($me, 'PURCHASE_PAYMENT_RECORDED', 'PURCHASE', $purchase->id, [
+            'reference' => $purchase->reference,
+            'supplierName' => $purchase->supplier_name,
+            'amount' => $amount,
+            'paymentStatus' => $purchase->payment_status,
+        ]);
+
+        return redirect()
+            ->back()
+            ->with('success', __('sup.paymentRecorded'));
     }
 
     /**

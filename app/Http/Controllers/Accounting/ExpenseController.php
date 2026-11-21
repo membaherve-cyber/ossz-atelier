@@ -8,9 +8,11 @@ use App\Models\Expense;
 use App\Models\ExpenseCategory;
 use App\Models\Order;
 use App\Models\User;
+use App\Services\AccountingPostService;
 use App\Services\Audit;
 use App\Services\Codes;
 use App\Services\Permissions;
+use App\Services\TreasuryService;
 use App\Support\Atelier;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
@@ -202,6 +204,15 @@ class ExpenseController
             'status' => $expense->status,
         ]);
 
+        // Finance module v1.3 — a directly-PAID expense leaves the
+        // treasury and posts its journal entry immediately (§4.3/§6).
+        if ($expense->status === 'PAID') {
+            TreasuryService::recordForExpense($expense);
+            AccountingPostService::postExpense($expense, 'PAID', $me);
+        } elseif ($expense->status === 'APPROVED') {
+            AccountingPostService::postExpense($expense, 'APPROVED', $me);
+        }
+
         return redirect()
             ->back()
             ->with('success', __('exp.createdToast'));
@@ -356,6 +367,11 @@ class ExpenseController
                 'date_paid' => $expense->date_paid ?? Carbon::today(),
             ])->save();
 
+            // Finance module v1.3 §4.3/§4.4/§6 — settlement leaves the
+            // treasury and posts its journal entry.
+            TreasuryService::recordForExpense($expense);
+            AccountingPostService::postExpense($expense, 'PAID', $me);
+
             $toast = 'exp.paidToast';
         } elseif ($decision === 'reject') {
             if (! in_array($expense->status, ['PENDING', 'DRAFT'], true)) {
@@ -380,6 +396,10 @@ class ExpenseController
                 'approved_by_name' => $me->name,
                 'approved_at' => now(),
             ])->save();
+
+            // Finance module v1.3 §6 — the approved charge is booked
+            // against the supplier debt (401) until settlement.
+            AccountingPostService::postExpense($expense, 'APPROVED', $me);
 
             $toast = 'exp.approvedToast';
         }

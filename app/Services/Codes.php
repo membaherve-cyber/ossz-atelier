@@ -100,6 +100,14 @@ final class Codes
     }
 
     /**
+     * Next material issue (remise) reference: REM-0001, REM-0002, ...
+     */
+    public static function materialIssue(): string
+    {
+        return self::next('REM', 4, 'material_issues', 'code');
+    }
+
+    /**
      * Generate the next free code for the given entity kind and run
      * $attempt with it. If the insert inside $attempt trips the unique
      * constraint (concurrent request grabbed the same code), a fresh code
@@ -126,6 +134,7 @@ final class Codes
             'expense' => self::expense(...),
             'advance' => self::advance(...),
             'purchase' => self::purchase(...),
+            'materialIssue' => self::materialIssue(...),
             default => throw new InvalidArgumentException("Unknown code kind [{$kind}]."),
         };
 

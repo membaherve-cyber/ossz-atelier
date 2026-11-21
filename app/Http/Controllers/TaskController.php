@@ -420,6 +420,7 @@ class TaskController
         $task = ProductionTask::query()
             ->with([
                 'order.customer',
+                'garment',
                 'assignedStaff',
                 'stageStates.stage',
                 'comments.user',
@@ -427,6 +428,9 @@ class TaskController
                 'statusChanges.user',
                 'progressHistories',
                 'inspections.inspector',
+                'workLogs' => function ($query): void {
+                    $query->latest('logged_on')->latest();
+                },
             ])
             ->findOrFail($id);
 

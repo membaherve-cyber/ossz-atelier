@@ -54,4 +54,16 @@ return [
     'previous' => 'Précédent',
     'next' => 'Suivant',
     'pageOf' => 'Page {page} sur {totalPages}',
+
+    // ---- Marqueur de reprise & temps passé (Finance & Comptabilité v1.3) ----
+    'rework' => 'Reprise',
+    'reworkBadge' => 'REPRISE',
+    'isRework' => 'Cette tâche est une reprise (retouche)',
+    'reworkToggled' => 'Marqueur de reprise mis à jour.',
+    'timeTracking' => 'Temps passé',
+    'minutes' => 'minutes',
+    'logTime' => 'Enregistrer du temps',
+    'timeLogged' => 'Temps enregistré.',
+    'totalTime' => 'Total enregistré',
+    'workLogs' => 'Journal de temps',
 ];

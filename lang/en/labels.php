@@ -28,6 +28,7 @@ return [
         'SEWING' => 'Sewing/Stitching Only',
         'FINISHING' => 'Finishing',
         'IRONING' => 'Ironing Only',
+        'REWORK' => 'Rework',
         'OTHER' => 'Other Activity',
     ],
     'stageState' => [
@@ -40,6 +41,9 @@ return [
         'MANAGEMENT' => 'Management',
         'ADMIN' => 'Admin',
         'STAFF' => 'Staff',
+        'MANAGER' => 'Manager (production lead)',
+        'COMPTABLE' => 'Accountant',
+        'MAGASINIER' => 'Storekeeper',
     ],
     'inspection' => [
         'APPROVED' => 'Approved',
@@ -142,5 +146,7 @@ return [
         'INCENTIVE_APPROVED' => 'Incentive approved',
         'PAYROLL_PAID' => 'Salary paid',
         'ADVANCE_DISBURSED' => 'Advance received',
+        'MATERIAL_ISSUE_RECEIVED' => 'Materials handed to you',
+        'MATERIAL_DECLARATION_REVIEWED' => 'Material declaration reviewed',
     ],
 ];

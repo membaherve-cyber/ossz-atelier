@@ -37,6 +37,8 @@ class ProductionTask extends Model
     protected $casts = [
         'progress' => 'integer',
         'quantity' => 'integer',
+        'is_rework' => 'boolean',
+        'time_spent_minutes' => 'integer',
         'deadline' => 'datetime',
         'completed_at' => 'datetime',
         'delivered_at' => 'datetime',
@@ -54,6 +56,18 @@ class ProductionTask extends Model
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class, 'order_id');
+    }
+
+    /** The exact garment/piece this task works on (spec v1.3 §5.1). */
+    public function garment(): BelongsTo
+    {
+        return $this->belongsTo(GarmentComponent::class, 'garment_id');
+    }
+
+    /** Work-time logs (§5.13). */
+    public function workLogs(): HasMany
+    {
+        return $this->hasMany(TaskWorkLog::class, 'task_id');
     }
 
     /** The staff member the task is assigned to (nullable). */
