@@ -221,7 +221,9 @@
             <div class="border-b px-5 py-4">
                 <h2 class="text-base font-semibold">{{ __('mat.declarations') }}</h2>
             </div>
-            @php($declarationCount = $issue->lines->sum(static fn ($line): int => $line->declarations->count()))
+            @php
+                $declarationCount = $issue->lines->sum(static fn ($line): int => $line->declarations->count());
+            @endphp
             @if ($declarationCount === 0)
                 <div class="px-5 py-8 text-center text-sm text-muted-foreground">—</div>
             @else

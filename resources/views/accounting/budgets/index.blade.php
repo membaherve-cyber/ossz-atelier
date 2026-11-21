@@ -59,7 +59,9 @@
             {{-- Budget cards --}}
             <div class="space-y-4">
                 @foreach ($budgets as $budget)
-                    @php($comparison = $budget->comparison)
+                    @php
+                        $comparison = $budget->comparison;
+                    @endphp
                     <section class="rounded-lg border bg-card">
                         <div class="flex flex-col justify-between gap-3 border-b px-5 py-4 sm:flex-row sm:items-start">
                             <div class="min-w-0">
