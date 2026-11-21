@@ -162,12 +162,72 @@ chmod -R ug+w storage bootstrap/cache
 
 ## Updating
 
+Two paths to ship an update — **A** (SSH or cPanel Terminal, recommended) or
+**B** (File Manager + phpMyAdmin, no terminal needed).
+
+### 10A. Update via terminal (recommended)
+
+One command — it downloads the current zip from GitHub, backs up code AND
+database, syncs files (never touches `.env` / `storage` / `vendor`), runs
+any new migrations, clears caches and live-checks the site:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/membaherve-cyber/ossz-atelier/laravel/deploy/update-2026-11-20-admin-parity-daily-report.sh -o update.sh
+bash update.sh
+```
+
+(`update.sh` may also be uploaded manually from `deploy/` in the package.)
+
+For later releases the manual equivalent is:
+
 ```bash
 cd ~/atelier.osszcollection.com
-git pull            # or upload changed files
+# unzip the new package over the app (keep .env, storage/, vendor/)
 php artisan migrate --force
 php artisan optimize:clear
 ```
+
+### 10B. Update without a terminal (File Manager + phpMyAdmin)
+
+1. Download `ossz-atelier.zip` from the GitHub repo (`download/` folder) to
+   your computer.
+2. cPanel → **File Manager** → go to `public_html/atelier` → **Upload** the
+   zip into that folder → back in File Manager right-click the zip →
+   **Extract** → confirm overwrite/merge. Delete the zip afterwards.
+   (`.env`, `storage/` and `vendor/` are not inside the zip, so they are
+   never touched.)
+3. cPanel → **phpMyAdmin** → select the app database → **SQL** tab → paste
+   the whole content of `deploy/manual-sql-daily-report-tables.sql` from
+   the package → **Go**. This creates the three `daily_report_*` tables and
+   seeds `info@osszcollection.com` as the default recipient.
+4. In File Manager, check that `bootstrap/cache/` contains no `config.php`
+   or `routes-*.php` files (delete them if present — the last deploy cleared
+   caches, so normally there are none).
+5. Browse to `https://atelier.osszcollection.com/login` and hard-refresh
+   (Ctrl+F5): **Administration → Daily Report** is now in the sidebar.
+
+### Verifying this release (admin full access + daily report)
+
+Logged out, these URLs must respond:
+
+- `/daily-report` → **403** (route exists, guest blocked; **404 = the new
+  build is not deployed yet**)
+- `/accounting` → 403, `/login` → 200, `/up` → 200
+
+Logged in as `admin@atelier.com` or `management@atelier.com`:
+
+- Sidebar shows the **ACCOUNTING** section and **Administration → Daily
+  Report** for BOTH roles (admin now has full access to every feature)
+- Daily Report page → **Send Report Now** delivers to the distribution list
+  (`info@osszcollection.com` by default — check that inbox)
+- "Send Test to My Inbox" goes to the **logged-in account's own e-mail
+  address** — the demo accounts (`…@atelier.com`) are not real mailboxes.
+  To test delivery to your real inbox, first create a Management (or Admin)
+  account with your real e-mail under **Users & Roles**, log in with it,
+  then click Send Test. E-mail addresses cannot be changed later, so use a
+  new account.
+- If the send fails with a transport error, mail is not configured yet —
+  see §6 (`.env` `MAIL_*` settings), then try again.
 
 ## Troubleshooting
 
