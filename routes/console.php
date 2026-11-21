@@ -5,7 +5,6 @@ use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
 use Illuminate\Support\Facades\Schema;
-use Throwable;
 
 /*
 |--------------------------------------------------------------------------
@@ -39,7 +38,7 @@ try {
             $reportTimezone = $settings->timezone()->getName();
         }
     }
-} catch (Throwable) {
+} catch (\Throwable) {
     // Fresh installation (table not migrated yet) — defaults apply.
 }
 
