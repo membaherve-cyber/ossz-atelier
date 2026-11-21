@@ -340,7 +340,7 @@ class MaterialController
                 'task:id,code,garment_piece,category',
                 'staff:id,name',
                 'lines.material:id,name,unit,is_client_supplied',
-                'lines.declarations' => static fn (Builder $query) => $query->latest(),
+                'lines.declarations' => static fn ($query) => $query->latest(),
                 'lines.losses',
             ])
             ->findOrFail($id);
