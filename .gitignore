@@ -21,3 +21,6 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+
+# Next.js build cache (accidentally committed in 209fd51 — never again)
+.next/
