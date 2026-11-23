@@ -64,7 +64,7 @@ cPanel → **Terminal** (or SSH):
 cd ~/atelier.osszcollection.com
 php artisan key:generate --force
 php artisan migrate --force
-php artisan db:seed --force   # demo dataset + demo accounts
+php artisan db:seed --force   # demo dataset + accounts (passwords from SEED_*_PASSWORD env)
 ```
 
 > If the cPanel PHP CLI differs from the site PHP, prefix with the version, e.g. `/opt/cpanel/ea-php82/root/usr/bin/php artisan …`
@@ -156,8 +156,10 @@ chmod -R ug+w storage bootstrap/cache
 ## 9. First login + hardening
 
 - Browse to `https://atelier.osszcollection.com` → you are redirected to `/login`
-- Sign in with `management@atelier.com` / `Atelier@2026`
-- **Users & Roles → Reset Password** for every demo account
+- Sign in with `management@osszcollection.com` and the password you set as
+  `SEED_MANAGEMENT_PASSWORD` (or the generated password printed by the seeder)
+- Set `SEED_MANAGEMENT_PASSWORD` / `SEED_ADMIN_PASSWORD` / `SEED_STAFF_PASSWORD`
+  in `.env` before seeding to control the account passwords
 - Verify the language switch (EN / FR) and the bell notifications
 
 ## Updating
@@ -214,14 +216,14 @@ Logged out, these URLs must respond:
   build is not deployed yet**)
 - `/accounting` → 403, `/login` → 200, `/up` → 200
 
-Logged in as `admin@atelier.com` or `management@atelier.com`:
+Logged in as `admin@osszcollection.com` or `management@osszcollection.com`:
 
 - Sidebar shows the **ACCOUNTING** section and **Administration → Daily
   Report** for BOTH roles (admin now has full access to every feature)
 - Daily Report page → **Send Report Now** delivers to the distribution list
   (`info@osszcollection.com` by default — check that inbox)
 - "Send Test to My Inbox" goes to the **logged-in account's own e-mail
-  address** — the demo accounts (`…@atelier.com`) are not real mailboxes.
+  address**.
   To test delivery to your real inbox, first create a Management (or Admin)
   account with your real e-mail under **Users & Roles**, log in with it,
   then click Send Test. E-mail addresses cannot be changed later, so use a

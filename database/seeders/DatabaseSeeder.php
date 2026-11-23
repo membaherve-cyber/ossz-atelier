@@ -33,8 +33,16 @@ use Illuminate\Support\Facades\Hash;
  * the 12 configurable production stages, the performance configuration,
  * incentive schemes and a realistic demo dataset matching the
  * specification scenario (John Doe / OSSZ-2026-001 three-piece suit,
- * allocated to Hamidou and Lawal) plus historical completed work for
- * the performance and incentive modules.
+ * allocated to the atelier staff account) plus historical completed work
+ * for the performance and incentive modules.
+ *
+ * Accounts (passwords come from SEED_MANAGEMENT_PASSWORD / SEED_ADMIN_PASSWORD /
+ * SEED_STAFF_PASSWORD so real credentials are never committed to this public
+ * repository; a random password is generated and printed once when a variable
+ * is unset):
+ *   MANAGEMENT  management@osszcollection.com  (Aminata Sow)
+ *   ADMIN       admin@osszcollection.com       (David Nkeng)
+ *   STAFF       info@osszcollection.com        (OSSZ Collection)
  *
  * Codes (USR-001, CUST-0001, TASK-0001 …) are the EXACT codes from the
  * reference seed — the Codes service is deliberately NOT used here so
@@ -45,8 +53,35 @@ use Illuminate\Support\Facades\Hash;
  */
 class DatabaseSeeder extends Seeder
 {
-    /** Shared password for every seeded demo account. */
-    private const DEMO_PASSWORD = 'Atelier@2026';
+    /**
+     * Resolved account passwords: ['role', 'email', 'env', 'password',
+     * 'generated']. Passwords are read from the environment
+     * (SEED_MANAGEMENT_PASSWORD / SEED_ADMIN_PASSWORD / SEED_STAFF_PASSWORD)
+     * so real credentials are never committed to this (public) repository;
+     * a random password is generated (and printed once) when a variable is
+     * unset.
+     *
+     * @var array<int, array<string, string|bool>>
+     */
+    private array $seedPasswords = [];
+
+    /** Resolve the password for a seeded account from env (or generate one). */
+    private function accountPassword(string $role, string $email): string
+    {
+        $envKey = 'SEED_'.$role.'_PASSWORD';
+        $fromEnv = env($envKey);
+
+        if (is_string($fromEnv) && $fromEnv !== '') {
+            $this->seedPasswords[] = ['role' => $role, 'email' => $email, 'env' => $envKey, 'password' => $fromEnv, 'generated' => false];
+
+            return $fromEnv;
+        }
+
+        $password = 'Ossz-'.bin2hex(random_bytes(6));
+        $this->seedPasswords[] = ['role' => $role, 'email' => $email, 'env' => $envKey, 'password' => $password, 'generated' => true];
+
+        return $password;
+    }
 
     /**
      * Configurable production stages (specification checklist):
@@ -67,7 +102,7 @@ class DatabaseSeeder extends Seeder
         ['other', 'Other', 12, 'ALL'],
     ];
 
-    /** @var array<string, User> demo accounts, keyed by first name (aminata, david, hamidou, lawal, ngozi). */
+    /** @var array<string, User> accounts, keyed by first name (aminata, david, ossz). */
     private array $users = [];
 
     /** @var array<string, Customer> demo customers, keyed by first name (john, amina). */
@@ -104,12 +139,13 @@ class DatabaseSeeder extends Seeder
         $this->seedHistoryAndExtras();   // §7 comments, §8 notifications, §9 assessments/incentives, §10 audit
 
         echo "Seed complete.\n";
-        echo 'Demo accounts (password: '.self::DEMO_PASSWORD."):\n";
-        echo "  MANAGEMENT  management@atelier.com\n";
-        echo "  ADMIN       admin@atelier.com\n";
-        echo "  STAFF       hamidou@atelier.com\n";
-        echo "  STAFF       lawal@atelier.com\n";
-        echo "  STAFF       ngozi@atelier.com\n";
+        echo "Accounts (passwords come from SEED_*_PASSWORD env variables; generated ones are printed here once):\n";
+        foreach ($this->seedPasswords as $entry) {
+            $source = $entry['generated']
+                ? $entry['password'].'  (GENERATED — set '.$entry['env'].' in .env to control it)'
+                : '(set via '.$entry['env'].')';
+            echo '  '.str_pad((string) $entry['role'], 10).' '.$entry['email'].'  password: '.$source."\n";
+        }
     }
 
     /*
@@ -119,59 +155,41 @@ class DatabaseSeeder extends Seeder
     */
 
     /**
-     * Create the five demo accounts: one MANAGEMENT, one ADMIN and
-     * three STAFF users (USR-001…USR-005), all sharing the demo
-     * password hashed with bcrypt (Hash::make).
+     * Create the three role accounts (USR-001…USR-003): MANAGEMENT, ADMIN
+     * and the single STAFF account (the company inbox,
+     * info@osszcollection.com, which replaces the former demo staff
+     * logins). Passwords come from the SEED_*_PASSWORD environment
+     * variables (see accountPassword()).
      */
     private function seedUsers(): void
     {
         $this->users['aminata'] = User::create([
             'code' => 'USR-001',
             'name' => 'Aminata Sow',
-            'email' => 'management@atelier.com',
+            'email' => 'management@osszcollection.com',
             'phone' => '+237 677 000 001',
             'job_title' => 'Atelier Director',
-            'password_hash' => Hash::make(self::DEMO_PASSWORD),
+            'password_hash' => Hash::make($this->accountPassword('MANAGEMENT', 'management@osszcollection.com')),
             'role' => 'MANAGEMENT',
         ]);
 
         $this->users['david'] = User::create([
             'code' => 'USR-002',
             'name' => 'David Nkeng',
-            'email' => 'admin@atelier.com',
+            'email' => 'admin@osszcollection.com',
             'phone' => '+237 677 000 002',
             'job_title' => 'Production Administrator',
-            'password_hash' => Hash::make(self::DEMO_PASSWORD),
+            'password_hash' => Hash::make($this->accountPassword('ADMIN', 'admin@osszcollection.com')),
             'role' => 'ADMIN',
         ]);
 
-        $this->users['hamidou'] = User::create([
+        $this->users['ossz'] = User::create([
             'code' => 'USR-003',
-            'name' => 'Hamidou Abdoul',
-            'email' => 'hamidou@atelier.com',
+            'name' => 'OSSZ Collection',
+            'email' => 'info@osszcollection.com',
             'phone' => '+237 677 000 003',
-            'job_title' => 'Master Tailor',
-            'password_hash' => Hash::make(self::DEMO_PASSWORD),
-            'role' => 'STAFF',
-        ]);
-
-        $this->users['lawal'] = User::create([
-            'code' => 'USR-004',
-            'name' => 'Lawal Sani',
-            'email' => 'lawal@atelier.com',
-            'phone' => '+237 677 000 004',
-            'job_title' => 'Tailor',
-            'password_hash' => Hash::make(self::DEMO_PASSWORD),
-            'role' => 'STAFF',
-        ]);
-
-        $this->users['ngozi'] = User::create([
-            'code' => 'USR-005',
-            'name' => 'Ngozi Okafor',
-            'email' => 'ngozi@atelier.com',
-            'phone' => '+237 677 000 005',
-            'job_title' => 'Finisher & Ironing',
-            'password_hash' => Hash::make(self::DEMO_PASSWORD),
+            'job_title' => 'Atelier Production',
+            'password_hash' => Hash::make($this->accountPassword('STAFF', 'info@osszcollection.com')),
             'role' => 'STAFF',
         ]);
     }
@@ -368,8 +386,7 @@ class DatabaseSeeder extends Seeder
         $kaftan = $this->orders['kaftan'];
         $aminata = $this->users['aminata'];
         $david = $this->users['david'];
-        $hamidou = $this->users['hamidou'];
-        $lawal = $this->users['lawal'];
+        $ossz = $this->users['ossz'];
 
         // ------------------------------------------------------------------
         // 5. Current live production (John Doe three-piece suit).
@@ -384,7 +401,7 @@ class DatabaseSeeder extends Seeder
             'priority' => 'HIGH',
             'status' => 'ONGOING',
             'progress' => 60,
-            'assigned_staff_id' => $hamidou->id,
+            'assigned_staff_id' => $ossz->id,
             'created_at' => $this->daysAgo(15),
             'stage_states' => [
                 ['assigned', 'COMPLETED'],
@@ -401,20 +418,20 @@ class DatabaseSeeder extends Seeder
                 ['other', 'NOT_APPLICABLE'],
             ],
             'stage_updates' => [
-                ['stage_code' => 'assigned', 'from' => 'NOT_STARTED', 'to' => 'COMPLETED', 'by' => 'hamidou', 'at' => $this->daysAgo(15)],
-                ['stage_code' => 'ongoing', 'from' => 'NOT_STARTED', 'to' => 'COMPLETED', 'by' => 'hamidou', 'at' => $this->daysAgo(14)],
-                ['stage_code' => 'cutting', 'from' => 'NOT_STARTED', 'to' => 'IN_PROGRESS', 'by' => 'hamidou', 'at' => $this->daysAgo(12)],
-                ['stage_code' => 'cutting', 'from' => 'IN_PROGRESS', 'to' => 'COMPLETED', 'by' => 'hamidou', 'at' => $this->daysAgo(10)],
-                ['stage_code' => 'sewing', 'from' => 'NOT_STARTED', 'to' => 'IN_PROGRESS', 'by' => 'hamidou', 'at' => $this->daysAgo(8)],
+                ['stage_code' => 'assigned', 'from' => 'NOT_STARTED', 'to' => 'COMPLETED', 'by' => 'ossz', 'at' => $this->daysAgo(15)],
+                ['stage_code' => 'ongoing', 'from' => 'NOT_STARTED', 'to' => 'COMPLETED', 'by' => 'ossz', 'at' => $this->daysAgo(14)],
+                ['stage_code' => 'cutting', 'from' => 'NOT_STARTED', 'to' => 'IN_PROGRESS', 'by' => 'ossz', 'at' => $this->daysAgo(12)],
+                ['stage_code' => 'cutting', 'from' => 'IN_PROGRESS', 'to' => 'COMPLETED', 'by' => 'ossz', 'at' => $this->daysAgo(10)],
+                ['stage_code' => 'sewing', 'from' => 'NOT_STARTED', 'to' => 'IN_PROGRESS', 'by' => 'ossz', 'at' => $this->daysAgo(8)],
             ],
             'status_chain' => [
                 ['to' => 'ASSIGNED', 'by' => 'aminata', 'at' => $this->daysAgo(15)],
-                ['to' => 'ONGOING', 'by' => 'hamidou', 'at' => $this->daysAgo(14)],
+                ['to' => 'ONGOING', 'by' => 'ossz', 'at' => $this->daysAgo(14)],
             ],
             'progress_history' => [
-                ['from' => 0, 'to' => 25, 'by' => 'hamidou', 'at' => $this->daysAgo(14), 'note' => 'Fabric cut, assembly started.'],
-                ['from' => 25, 'to' => 45, 'by' => 'hamidou', 'at' => $this->daysAgo(8)],
-                ['from' => 45, 'to' => 60, 'by' => 'hamidou', 'at' => $this->daysAgo(2), 'note' => 'Body assembled, sleeves set.'],
+                ['from' => 0, 'to' => 25, 'by' => 'ossz', 'at' => $this->daysAgo(14), 'note' => 'Fabric cut, assembly started.'],
+                ['from' => 25, 'to' => 45, 'by' => 'ossz', 'at' => $this->daysAgo(8)],
+                ['from' => 45, 'to' => 60, 'by' => 'ossz', 'at' => $this->daysAgo(2), 'note' => 'Body assembled, sleeves set.'],
             ],
         ]);
 
@@ -427,7 +444,7 @@ class DatabaseSeeder extends Seeder
             'priority' => 'HIGH',
             'status' => 'ONGOING',
             'progress' => 80,
-            'assigned_staff_id' => $hamidou->id,
+            'assigned_staff_id' => $ossz->id,
             'created_at' => $this->daysAgo(15),
             'stage_states' => [
                 ['assigned', 'COMPLETED'],
@@ -444,21 +461,21 @@ class DatabaseSeeder extends Seeder
                 ['other', 'NOT_APPLICABLE'],
             ],
             'stage_updates' => [
-                ['stage_code' => 'assigned', 'from' => 'NOT_STARTED', 'to' => 'COMPLETED', 'by' => 'hamidou', 'at' => $this->daysAgo(15)],
-                ['stage_code' => 'ongoing', 'from' => 'NOT_STARTED', 'to' => 'COMPLETED', 'by' => 'hamidou', 'at' => $this->daysAgo(15, 12)],
-                ['stage_code' => 'cutting', 'from' => 'NOT_STARTED', 'to' => 'COMPLETED', 'by' => 'hamidou', 'at' => $this->daysAgo(11)],
-                ['stage_code' => 'sewing', 'from' => 'NOT_STARTED', 'to' => 'COMPLETED', 'by' => 'hamidou', 'at' => $this->daysAgo(7)],
-                ['stage_code' => 'fitting', 'from' => 'NOT_STARTED', 'to' => 'COMPLETED', 'by' => 'hamidou', 'at' => $this->daysAgo(4)],
-                ['stage_code' => 'finishing', 'from' => 'NOT_STARTED', 'to' => 'IN_PROGRESS', 'by' => 'hamidou', 'at' => $this->daysAgo(2)],
+                ['stage_code' => 'assigned', 'from' => 'NOT_STARTED', 'to' => 'COMPLETED', 'by' => 'ossz', 'at' => $this->daysAgo(15)],
+                ['stage_code' => 'ongoing', 'from' => 'NOT_STARTED', 'to' => 'COMPLETED', 'by' => 'ossz', 'at' => $this->daysAgo(15, 12)],
+                ['stage_code' => 'cutting', 'from' => 'NOT_STARTED', 'to' => 'COMPLETED', 'by' => 'ossz', 'at' => $this->daysAgo(11)],
+                ['stage_code' => 'sewing', 'from' => 'NOT_STARTED', 'to' => 'COMPLETED', 'by' => 'ossz', 'at' => $this->daysAgo(7)],
+                ['stage_code' => 'fitting', 'from' => 'NOT_STARTED', 'to' => 'COMPLETED', 'by' => 'ossz', 'at' => $this->daysAgo(4)],
+                ['stage_code' => 'finishing', 'from' => 'NOT_STARTED', 'to' => 'IN_PROGRESS', 'by' => 'ossz', 'at' => $this->daysAgo(2)],
             ],
             'status_chain' => [
                 ['to' => 'ASSIGNED', 'by' => 'aminata', 'at' => $this->daysAgo(15)],
-                ['to' => 'ONGOING', 'by' => 'hamidou', 'at' => $this->daysAgo(15, 12)],
+                ['to' => 'ONGOING', 'by' => 'ossz', 'at' => $this->daysAgo(15, 12)],
             ],
             'progress_history' => [
-                ['from' => 0, 'to' => 30, 'by' => 'hamidou', 'at' => $this->daysAgo(14)],
-                ['from' => 30, 'to' => 60, 'by' => 'hamidou', 'at' => $this->daysAgo(7)],
-                ['from' => 60, 'to' => 80, 'by' => 'hamidou', 'at' => $this->daysAgo(3), 'note' => 'Fitting done, finishing hem.'],
+                ['from' => 0, 'to' => 30, 'by' => 'ossz', 'at' => $this->daysAgo(14)],
+                ['from' => 30, 'to' => 60, 'by' => 'ossz', 'at' => $this->daysAgo(7)],
+                ['from' => 60, 'to' => 80, 'by' => 'ossz', 'at' => $this->daysAgo(3), 'note' => 'Fitting done, finishing hem.'],
             ],
         ]);
 
@@ -470,7 +487,7 @@ class DatabaseSeeder extends Seeder
             'priority' => 'HIGH',
             'status' => 'ONGOING',
             'progress' => 30,
-            'assigned_staff_id' => $lawal->id,
+            'assigned_staff_id' => $ossz->id,
             'created_at' => $this->daysAgo(14),
             'stage_states' => [
                 ['assigned', 'COMPLETED'],
@@ -487,17 +504,17 @@ class DatabaseSeeder extends Seeder
                 ['other', 'NOT_APPLICABLE'],
             ],
             'stage_updates' => [
-                ['stage_code' => 'assigned', 'from' => 'NOT_STARTED', 'to' => 'COMPLETED', 'by' => 'lawal', 'at' => $this->daysAgo(14)],
-                ['stage_code' => 'ongoing', 'from' => 'NOT_STARTED', 'to' => 'COMPLETED', 'by' => 'lawal', 'at' => $this->daysAgo(13)],
-                ['stage_code' => 'cutting', 'from' => 'NOT_STARTED', 'to' => 'IN_PROGRESS', 'by' => 'lawal', 'at' => $this->daysAgo(9)],
+                ['stage_code' => 'assigned', 'from' => 'NOT_STARTED', 'to' => 'COMPLETED', 'by' => 'ossz', 'at' => $this->daysAgo(14)],
+                ['stage_code' => 'ongoing', 'from' => 'NOT_STARTED', 'to' => 'COMPLETED', 'by' => 'ossz', 'at' => $this->daysAgo(13)],
+                ['stage_code' => 'cutting', 'from' => 'NOT_STARTED', 'to' => 'IN_PROGRESS', 'by' => 'ossz', 'at' => $this->daysAgo(9)],
             ],
             'status_chain' => [
                 ['to' => 'ASSIGNED', 'by' => 'aminata', 'at' => $this->daysAgo(14)],
-                ['to' => 'ONGOING', 'by' => 'lawal', 'at' => $this->daysAgo(13)],
+                ['to' => 'ONGOING', 'by' => 'ossz', 'at' => $this->daysAgo(13)],
             ],
             'progress_history' => [
-                ['from' => 0, 'to' => 15, 'by' => 'lawal', 'at' => $this->daysAgo(13)],
-                ['from' => 15, 'to' => 30, 'by' => 'lawal', 'at' => $this->daysAgo(4)],
+                ['from' => 0, 'to' => 15, 'by' => 'ossz', 'at' => $this->daysAgo(13)],
+                ['from' => 15, 'to' => 30, 'by' => 'ossz', 'at' => $this->daysAgo(4)],
             ],
         ]);
 
@@ -538,7 +555,7 @@ class DatabaseSeeder extends Seeder
             'priority' => 'NORMAL',
             'status' => 'DELIVERED',
             'progress' => 100,
-            'assigned_staff_id' => $hamidou->id,
+            'assigned_staff_id' => $ossz->id,
             'created_by_id' => $aminata->id,
             'completed_at' => $this->daysAgo(14),
             'delivered_at' => $this->daysAgo(12),
@@ -549,8 +566,8 @@ class DatabaseSeeder extends Seeder
 
         TaskAssignment::create([
             'task_id' => $t6->id,
-            'staff_id' => $hamidou->id,
-            'staff_name' => $hamidou->name,
+            'staff_id' => $ossz->id,
+            'staff_name' => $ossz->name,
             'assigned_by_id' => $aminata->id,
             'assigned_by_name' => $aminata->name,
             'type' => 'ASSIGN',
@@ -562,8 +579,8 @@ class DatabaseSeeder extends Seeder
                 'task_id' => $t6->id,
                 'stage_id' => $this->stages[$code],
                 'state' => $state,
-                'updated_by_id' => $hamidou->id,
-                'updated_by_name' => $hamidou->name,
+                'updated_by_id' => $ossz->id,
+                'updated_by_name' => $ossz->name,
                 'updated_at' => $this->daysAgo(14),
             ]);
         }
@@ -591,8 +608,8 @@ class DatabaseSeeder extends Seeder
 
         TaskProgressHistory::create([
             'task_id' => $t6->id,
-            'user_id' => $hamidou->id,
-            'user_name' => $hamidou->name,
+            'user_id' => $ossz->id,
+            'user_name' => $ossz->name,
             'previous_progress' => 0,
             'new_progress' => 40,
             'source' => 'MANUAL',
@@ -601,8 +618,8 @@ class DatabaseSeeder extends Seeder
 
         TaskProgressHistory::create([
             'task_id' => $t6->id,
-            'user_id' => $hamidou->id,
-            'user_name' => $hamidou->name,
+            'user_id' => $ossz->id,
+            'user_name' => $ossz->name,
             'previous_progress' => 40,
             'new_progress' => 100,
             'source' => 'MANUAL',
@@ -628,7 +645,7 @@ class DatabaseSeeder extends Seeder
             'priority' => 'NORMAL',
             'status' => 'DELIVERED',
             'progress' => 100,
-            'assigned_staff_id' => $hamidou->id,
+            'assigned_staff_id' => $ossz->id,
             'created_by_id' => $david->id,
             'completed_at' => $this->daysAgo(8),
             'delivered_at' => $this->daysAgo(7),
@@ -639,8 +656,8 @@ class DatabaseSeeder extends Seeder
 
         TaskAssignment::create([
             'task_id' => $t7->id,
-            'staff_id' => $hamidou->id,
-            'staff_name' => $hamidou->name,
+            'staff_id' => $ossz->id,
+            'staff_name' => $ossz->name,
             'assigned_by_id' => $david->id,
             'assigned_by_name' => $david->name,
             'type' => 'ASSIGN',
@@ -652,8 +669,8 @@ class DatabaseSeeder extends Seeder
                 'task_id' => $t7->id,
                 'stage_id' => $this->stages[$code],
                 'state' => $state,
-                'updated_by_id' => $hamidou->id,
-                'updated_by_name' => $hamidou->name,
+                'updated_by_id' => $ossz->id,
+                'updated_by_name' => $ossz->name,
                 'updated_at' => $this->daysAgo(8),
             ]);
         }
@@ -695,7 +712,7 @@ class DatabaseSeeder extends Seeder
             'priority' => 'NORMAL',
             'status' => 'DELIVERED',
             'progress' => 100,
-            'assigned_staff_id' => $lawal->id,
+            'assigned_staff_id' => $ossz->id,
             'created_by_id' => $aminata->id,
             'completed_at' => $this->daysAgo(9),
             'delivered_at' => $this->daysAgo(7),
@@ -706,8 +723,8 @@ class DatabaseSeeder extends Seeder
 
         TaskAssignment::create([
             'task_id' => $t8->id,
-            'staff_id' => $lawal->id,
-            'staff_name' => $lawal->name,
+            'staff_id' => $ossz->id,
+            'staff_name' => $ossz->name,
             'assigned_by_id' => $aminata->id,
             'assigned_by_name' => $aminata->name,
             'type' => 'ASSIGN',
@@ -719,8 +736,8 @@ class DatabaseSeeder extends Seeder
                 'task_id' => $t8->id,
                 'stage_id' => $this->stages[$code],
                 'state' => $state,
-                'updated_by_id' => $lawal->id,
-                'updated_by_name' => $lawal->name,
+                'updated_by_id' => $ossz->id,
+                'updated_by_name' => $ossz->name,
                 'updated_at' => $this->daysAgo(9),
             ]);
         }
@@ -775,7 +792,7 @@ class DatabaseSeeder extends Seeder
             'priority' => 'NORMAL',
             'status' => 'DELIVERED',
             'progress' => 100,
-            'assigned_staff_id' => $hamidou->id,
+            'assigned_staff_id' => $ossz->id,
             'created_by_id' => $aminata->id,
             'completed_at' => $this->daysAgo(58),
             'delivered_at' => $this->daysAgo(55),
@@ -786,8 +803,8 @@ class DatabaseSeeder extends Seeder
 
         TaskAssignment::create([
             'task_id' => $t9->id,
-            'staff_id' => $hamidou->id,
-            'staff_name' => $hamidou->name,
+            'staff_id' => $ossz->id,
+            'staff_name' => $ossz->name,
             'assigned_by_id' => $aminata->id,
             'assigned_by_name' => $aminata->name,
             'type' => 'ASSIGN',
@@ -799,8 +816,8 @@ class DatabaseSeeder extends Seeder
                 'task_id' => $t9->id,
                 'stage_id' => $this->stages[$code],
                 'state' => $state,
-                'updated_by_id' => $hamidou->id,
-                'updated_by_name' => $hamidou->name,
+                'updated_by_id' => $ossz->id,
+                'updated_by_name' => $ossz->name,
                 'updated_at' => $this->daysAgo(58),
             ]);
         }
@@ -830,8 +847,7 @@ class DatabaseSeeder extends Seeder
     {
         $aminata = $this->users['aminata'];
         $david = $this->users['david'];
-        $hamidou = $this->users['hamidou'];
-        $lawal = $this->users['lawal'];
+        $ossz = $this->users['ossz'];
         $john = $this->customers['john'];
         $suit = $this->orders['suit'];
         $t1 = $this->tasks['t1'];
@@ -844,16 +860,16 @@ class DatabaseSeeder extends Seeder
 
         TaskComment::create([
             'task_id' => $t1->id,
-            'user_id' => $hamidou->id,
-            'user_name' => $hamidou->name,
+            'user_id' => $ossz->id,
+            'user_name' => $ossz->name,
             'message' => 'Jacket body assembled. Will set the sleeves tomorrow.',
             'created_at' => $this->daysAgo(5),
         ]);
 
         TaskComment::create([
             'task_id' => $t3->id,
-            'user_id' => $lawal->id,
-            'user_name' => $lawal->name,
+            'user_id' => $ossz->id,
+            'user_name' => $ossz->name,
             'message' => 'Waiting for the vest lining fabric promised by the customer. Production is stalled.',
             'is_issue' => true,
             'created_at' => $this->daysAgo(3, 11),
@@ -864,7 +880,7 @@ class DatabaseSeeder extends Seeder
         // ------------------------------------------------------------------
 
         Notification::create([
-            'user_id' => $hamidou->id,
+            'user_id' => $ossz->id,
             'type' => 'TASK_ASSIGNED',
             'title' => 'New task assigned',
             'message' => "You were assigned {$t1->code} — Jacket (OSSZ-2026-001).",
@@ -873,7 +889,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         Notification::create([
-            'user_id' => $hamidou->id,
+            'user_id' => $ossz->id,
             'type' => 'TASK_ASSIGNED',
             'title' => 'New task assigned',
             'message' => "You were assigned {$t2->code} — Trousers (OSSZ-2026-001).",
@@ -882,7 +898,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         Notification::create([
-            'user_id' => $lawal->id,
+            'user_id' => $ossz->id,
             'type' => 'TASK_ASSIGNED',
             'title' => 'New task assigned',
             'message' => "You were assigned {$t3->code} — Vest (OSSZ-2026-001).",
@@ -894,7 +910,7 @@ class DatabaseSeeder extends Seeder
             'user_id' => $aminata->id,
             'type' => 'ISSUE_REPORTED',
             'title' => 'Production issue reported',
-            'message' => "{$lawal->name} reported an issue on {$t3->code} — Vest: missing lining fabric.",
+            'message' => "{$ossz->name} reported an issue on {$t3->code} — Vest: missing lining fabric.",
             'task_id' => $t3->id,
             'created_at' => $this->daysAgo(3, 11),
         ]);
@@ -903,7 +919,7 @@ class DatabaseSeeder extends Seeder
             'user_id' => $david->id,
             'type' => 'ISSUE_REPORTED',
             'title' => 'Production issue reported',
-            'message' => "{$lawal->name} reported an issue on {$t3->code} — Vest: missing lining fabric.",
+            'message' => "{$ossz->name} reported an issue on {$t3->code} — Vest: missing lining fabric.",
             'task_id' => $t3->id,
             'created_at' => $this->daysAgo(3, 11),
         ]);
@@ -937,29 +953,25 @@ class DatabaseSeeder extends Seeder
             ->startOfMonth()
             ->format('Y-m');
 
-        StaffAssessment::create([
-            'staff_id' => $hamidou->id,
-            'staff_name' => $hamidou->name,
-            'period' => $lastMonthPeriod,
-            'score' => 88,
-            'comments' => 'Excellent craftsmanship and autonomy.',
-            'updated_at' => $this->daysAgo(5),
-        ]);
+        $monthBeforePeriod = Carbon::now()
+            ->subMonthsNoOverflow(2)
+            ->startOfMonth()
+            ->format('Y-m');
 
         StaffAssessment::create([
-            'staff_id' => $lawal->id,
-            'staff_name' => $lawal->name,
+            'staff_id' => $ossz->id,
+            'staff_name' => $ossz->name,
             'period' => $lastMonthPeriod,
-            'score' => 65,
-            'comments' => 'Good effort; watch deadlines and pressing quality.',
+            'score' => 84,
+            'comments' => 'Excellent craftsmanship and autonomy.',
             'updated_at' => $this->daysAgo(5),
         ]);
 
         IncentiveRecord::create([
             'scheme_id' => $this->monthlyScheme->id,
             'scheme_name' => $this->monthlyScheme->name,
-            'staff_id' => $hamidou->id,
-            'staff_name' => $hamidou->name,
+            'staff_id' => $ossz->id,
+            'staff_name' => $ossz->name,
             'period' => $lastMonthPeriod,
             'performance_score' => 82.4,
             'eligible' => true,
@@ -977,9 +989,9 @@ class DatabaseSeeder extends Seeder
         IncentiveRecord::create([
             'scheme_id' => $this->monthlyScheme->id,
             'scheme_name' => $this->monthlyScheme->name,
-            'staff_id' => $lawal->id,
-            'staff_name' => $lawal->name,
-            'period' => $lastMonthPeriod,
+            'staff_id' => $ossz->id,
+            'staff_name' => $ossz->name,
+            'period' => $monthBeforePeriod,
             'performance_score' => 48.6,
             'eligible' => false,
             'proposed_amount' => 0,
@@ -988,8 +1000,8 @@ class DatabaseSeeder extends Seeder
             'approved_by_name' => $aminata->name,
             'approval_comments' => 'Below the 75/100 threshold for this month.',
             'payment_status' => 'UNPAID',
-            'created_at' => $this->daysAgo(5),
-            'updated_at' => $this->daysAgo(5),
+            'created_at' => $this->daysAgo(35),
+            'updated_at' => $this->daysAgo(35),
         ]);
 
         // ------------------------------------------------------------------
@@ -1042,7 +1054,7 @@ class DatabaseSeeder extends Seeder
             'action' => 'TASK_ASSIGNED',
             'entity_type' => 'TASK',
             'entity_id' => $t1->id,
-            'details' => $this->encodeDetails(['staff' => $hamidou->name]),
+            'details' => $this->encodeDetails(['staff' => $ossz->name]),
             'created_at' => $this->daysAgo(15),
         ]);
 
@@ -1052,7 +1064,7 @@ class DatabaseSeeder extends Seeder
             'action' => 'TASK_ASSIGNED',
             'entity_type' => 'TASK',
             'entity_id' => $t2->id,
-            'details' => $this->encodeDetails(['staff' => $hamidou->name]),
+            'details' => $this->encodeDetails(['staff' => $ossz->name]),
             'created_at' => $this->daysAgo(15),
         ]);
 
@@ -1062,13 +1074,13 @@ class DatabaseSeeder extends Seeder
             'action' => 'TASK_ASSIGNED',
             'entity_type' => 'TASK',
             'entity_id' => $t3->id,
-            'details' => $this->encodeDetails(['staff' => $lawal->name]),
+            'details' => $this->encodeDetails(['staff' => $ossz->name]),
             'created_at' => $this->daysAgo(14),
         ]);
 
         AuditLog::create([
-            'user_id' => $hamidou->id,
-            'user_name' => $hamidou->name,
+            'user_id' => $ossz->id,
+            'user_name' => $ossz->name,
             'action' => 'PROGRESS_UPDATED',
             'entity_type' => 'TASK',
             'entity_id' => $t1->id,
@@ -1077,8 +1089,8 @@ class DatabaseSeeder extends Seeder
         ]);
 
         AuditLog::create([
-            'user_id' => $lawal->id,
-            'user_name' => $lawal->name,
+            'user_id' => $ossz->id,
+            'user_name' => $ossz->name,
             'action' => 'ISSUE_REPORTED',
             'entity_type' => 'TASK',
             'entity_id' => $t3->id,
@@ -1091,7 +1103,7 @@ class DatabaseSeeder extends Seeder
             'user_name' => $aminata->name,
             'action' => 'INCENTIVE_APPROVED',
             'entity_type' => 'INCENTIVE',
-            'entity_id' => $hamidou->id,
+            'entity_id' => $ossz->id,
             'details' => $this->encodeDetails(['period' => $lastMonthPeriod, 'amount' => 25000]),
             'created_at' => $this->daysAgo(4),
         ]);
@@ -1123,8 +1135,7 @@ class DatabaseSeeder extends Seeder
     private function createTask(array $opts): ProductionTask
     {
         $aminata = $this->users['aminata'];
-        $hamidou = $this->users['hamidou'];
-        $lawal = $this->users['lawal'];
+        $ossz = $this->users['ossz'];
 
         $task = ProductionTask::create([
             'code' => $opts['code'],
@@ -1155,9 +1166,9 @@ class DatabaseSeeder extends Seeder
                 'stage_id' => $this->stages[$stageCode],
                 'state' => $state,
                 'updated_by_id' => $opts['assigned_staff_id'] ?? null,
-                'updated_by_name' => ($opts['assigned_staff_id'] ?? null) === $hamidou->id
-                    ? $hamidou->name
-                    : $lawal->name,
+                'updated_by_name' => ($opts['assigned_staff_id'] ?? null) === $ossz->id
+                    ? $ossz->name
+                    : '',
                 'updated_at' => $opts['created_at'],
             ]);
         }
@@ -1172,9 +1183,9 @@ class DatabaseSeeder extends Seeder
                 'task_id' => $task->id,
                 'stage_id' => $this->stages[$update['stage_code']],
                 'stage_name' => $this->stageName($update['stage_code']),
-                'user_id' => $update['by'] === 'hamidou'
-                    ? $hamidou->id
-                    : ($update['by'] === 'lawal' ? $lawal->id : $aminata->id),
+                'user_id' => $update['by'] === 'ossz'
+                    ? $ossz->id
+                    : $aminata->id,
                 'user_name' => $this->users[$update['by']]->name,
                 'previous_state' => $update['from'],
                 'new_state' => $update['to'],
@@ -1203,7 +1214,7 @@ class DatabaseSeeder extends Seeder
         foreach ($opts['progress_history'] ?? [] as $entry) {
             TaskProgressHistory::create([
                 'task_id' => $task->id,
-                'user_id' => $entry['by'] === 'hamidou' ? $hamidou->id : $lawal->id,
+                'user_id' => $ossz->id,
                 'user_name' => $this->users[$entry['by']]->name,
                 'previous_progress' => $entry['from'],
                 'new_progress' => $entry['to'],
@@ -1218,9 +1229,9 @@ class DatabaseSeeder extends Seeder
             TaskAssignment::create([
                 'task_id' => $task->id,
                 'staff_id' => $opts['assigned_staff_id'],
-                'staff_name' => $opts['assigned_staff_id'] === $hamidou->id
-                    ? $hamidou->name
-                    : ($opts['assigned_staff_id'] === $lawal->id ? $lawal->name : ''),
+                'staff_name' => $opts['assigned_staff_id'] === $ossz->id
+                    ? $ossz->name
+                    : '',
                 'assigned_by_id' => $aminata->id,
                 'assigned_by_name' => $aminata->name,
                 'type' => 'ASSIGN',
@@ -1285,8 +1296,8 @@ class DatabaseSeeder extends Seeder
     }
 
     /**
-     * User id for a status-chain actor key ('aminata', 'david',
-     * 'hamidou'; anything else resolves to Lawal — faithful port of
+     * User id for a status-chain actor key ('aminata', 'david', 'ossz';
+     * anything else resolves to the staff account — faithful port of
      * prisma/seed.ts).
      */
     private function statusActorId(string $by): string
@@ -1294,8 +1305,7 @@ class DatabaseSeeder extends Seeder
         return match ($by) {
             'aminata' => $this->users['aminata']->id,
             'david' => $this->users['david']->id,
-            'hamidou' => $this->users['hamidou']->id,
-            default => $this->users['lawal']->id,
+            default => $this->users['ossz']->id,
         };
     }
 

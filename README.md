@@ -87,19 +87,24 @@ php artisan db:seed
 
 Point the web server document root at `public/` (see [DEPLOYMENT.md](DEPLOYMENT.md) for shared-hosting notes).
 
-## Demo accounts
+## Accounts
 
-Seeded by `php artisan db:seed` (password for every account: `Atelier@2026`):
+Seeded by `php artisan db:seed`. Passwords are read from the environment
+(`SEED_MANAGEMENT_PASSWORD`, `SEED_ADMIN_PASSWORD`, `SEED_STAFF_PASSWORD`); when
+a variable is unset, a random password is generated and printed once by the
+seeder. Set them in `.env` before seeding (quote values containing `#`):
 
-| Role       | Email                    | Sees                                              |
-|------------|--------------------------|---------------------------------------------------|
-| MANAGEMENT | management@atelier.com   | Everything: orders, tasks, performance, incentives, audit |
-| ADMIN      | admin@atelier.com        | Production, customers, users, stages, reports (no audit) |
-| STAFF      | hamidou@atelier.com      | Own dashboard + own tasks only                    |
-| STAFF      | lawal@atelier.com        | Own dashboard + own tasks only                    |
-| STAFF      | ngozi@atelier.com        | Own dashboard + own tasks only                    |
+| Role       | Email                         | Sees                                        |
+|------------|-------------------------------|---------------------------------------------|
+| MANAGEMENT | management@osszcollection.com | Everything: orders, tasks, performance, incentives, audit |
+| ADMIN      | admin@osszcollection.com      | Production, customers, users, stages, reports, audit |
+| STAFF      | info@osszcollection.com       | Own dashboard + own tasks only              |
 
-> Change these passwords before going live (Users & Roles → Reset Password).
+```env
+SEED_MANAGEMENT_PASSWORD="..."
+SEED_ADMIN_PASSWORD="..."
+SEED_STAFF_PASSWORD="..."
+```
 
 ## Project structure
 

@@ -253,7 +253,7 @@
                                 </div>
                                 <div>
                                     <label for="new-email" class="mb-1.5 block text-sm font-medium">{{ __('users.email') }}</label>
-                                    <input type="email" id="new-email" name="email" value="{{ old('email') }}" placeholder="name@atelier.com" required
+                                    <input type="email" id="new-email" name="email" value="{{ old('email') }}" placeholder="name@osszcollection.com" required
                                            class="h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50" />
                                     @error('email')
                                         <p class="mt-1.5 text-xs text-destructive">{{ $message }}</p>

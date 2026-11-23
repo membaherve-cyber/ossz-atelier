@@ -101,25 +101,21 @@
                 </button>
             </form>
 
-            {{-- Demo accounts --}}
+            {{-- System accounts (emails only — passwords are provided by Management) --}}
             <div class="mt-8 rounded-lg border bg-muted/40 p-4">
                 <p class="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">{{ __('login.demoTitle') }}</p>
                 <ul class="space-y-1.5 text-xs">
                     <li class="flex flex-wrap items-center justify-between gap-2">
                         <span class="text-muted-foreground">{{ __('login.demoManagement') }}</span>
-                        <span class="font-mono">management@atelier.com</span>
+                        <span class="font-mono">management@osszcollection.com</span>
                     </li>
                     <li class="flex flex-wrap items-center justify-between gap-2">
                         <span class="text-muted-foreground">{{ __('login.demoAdmin') }}</span>
-                        <span class="font-mono">admin@atelier.com</span>
+                        <span class="font-mono">admin@osszcollection.com</span>
                     </li>
                     <li class="flex flex-wrap items-center justify-between gap-2">
-                        <span class="text-muted-foreground">{{ __('login.demoStaffHamidou') }}</span>
-                        <span class="font-mono">hamidou@atelier.com</span>
-                    </li>
-                    <li class="flex flex-wrap items-center justify-between gap-2">
-                        <span class="text-muted-foreground">{{ __('login.demoStaffLawal') }}</span>
-                        <span class="font-mono">lawal@atelier.com</span>
+                        <span class="text-muted-foreground">{{ __('login.demoStaff') }}</span>
+                        <span class="font-mono">info@osszcollection.com</span>
                     </li>
                 </ul>
             </div>
