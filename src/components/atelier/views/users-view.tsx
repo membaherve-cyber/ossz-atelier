@@ -437,7 +437,7 @@ export function UsersView() {
                 type="email"
                 value={createForm.email}
                 onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })}
-                placeholder="name@atelier.com"
+                placeholder="name@osszcollection.com"
               />
             </div>
             <div className="grid gap-1.5">

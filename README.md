@@ -62,17 +62,18 @@ Create a `.env` file (see `.env.example` spirit — a single variable is needed)
 DATABASE_URL=file:/absolute/path/to/project/db/custom.db
 ```
 
-## Demo Accounts
+## Accounts
 
-All demo accounts share the password **`Atelier@2026`**.
+Three role accounts, seeded by `bun prisma/seed.ts`. Passwords are read from
+the environment (`SEED_MANAGEMENT_PASSWORD`, `SEED_ADMIN_PASSWORD`,
+`SEED_STAFF_PASSWORD`); when a variable is unset, a random password is
+generated and printed once by the seed.
 
-| Role      | Email                    |
-| --------- | ------------------------ |
-| Management| `management@atelier.com` |
-| Admin     | `admin@atelier.com`      |
-| Staff     | `hamidou@atelier.com`    |
-| Staff     | `lawal@atelier.com`      |
-| Staff     | `ngozi@atelier.com`      |
+| Role      | Email                       | Name           |
+| --------- | --------------------------- | -------------- |
+| Management| `management@osszcollection.com` | Aminata Sow |
+| Admin     | `admin@osszcollection.com`  | David Nkeng    |
+| Staff     | `info@osszcollection.com`   | OSSZ Collection |
 
 ## Project Structure
 

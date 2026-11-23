@@ -22,7 +22,7 @@ const entries: DictEntries = {
     fr: "Utilisez le compte qui vous a été fourni par la direction.",
   },
   "login.email": { en: "Email address", fr: "Adresse e-mail" },
-  "login.emailPlaceholder": { en: "you@atelier.com", fr: "vous@atelier.com" },
+  "login.emailPlaceholder": { en: "you@osszcollection.com", fr: "vous@osszcollection.com" },
   "login.password": { en: "Password", fr: "Mot de passe" },
   "login.passwordPlaceholder": { en: "Your password", fr: "Votre mot de passe" },
   "login.showPassword": { en: "Show password", fr: "Afficher le mot de passe" },
@@ -34,13 +34,12 @@ const entries: DictEntries = {
     fr: "Impossible de se connecter. Veuillez réessayer.",
   },
   "login.demoTitle": {
-    en: "Demo accounts (password: Atelier@2026)",
-    fr: "Comptes de démonstration (mot de passe : Atelier@2026)",
+    en: "System accounts (passwords are provided by Management)",
+    fr: "Comptes du système (mots de passe fournis par la direction)",
   },
   "login.demoManagement": { en: "Management", fr: "Direction" },
   "login.demoAdmin": { en: "Admin", fr: "Admin" },
-  "login.demoStaffHamidou": { en: "Staff (Hamidou)", fr: "Personnel (Hamidou)" },
-  "login.demoStaffLawal": { en: "Staff (Lawal)", fr: "Personnel (Lawal)" },
+  "login.demoStaff": { en: "Staff", fr: "Personnel" },
   "login.logoAlt": { en: "OSSZ Atelier logo", fr: "Logo OSSZ Atelier" },
 };
 

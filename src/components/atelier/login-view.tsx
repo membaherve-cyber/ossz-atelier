@@ -37,10 +37,9 @@ export function LoginView() {
   }
 
   const demoAccounts = [
-    { label: t("login.demoManagement"), email: "management@atelier.com" },
-    { label: t("login.demoAdmin"), email: "admin@atelier.com" },
-    { label: t("login.demoStaffHamidou"), email: "hamidou@atelier.com" },
-    { label: t("login.demoStaffLawal"), email: "lawal@atelier.com" },
+    { label: t("login.demoManagement"), email: "management@osszcollection.com" },
+    { label: t("login.demoAdmin"), email: "admin@osszcollection.com" },
+    { label: t("login.demoStaff"), email: "info@osszcollection.com" },
   ];
 
   return (
@@ -155,7 +154,6 @@ export function LoginView() {
                   type="button"
                   onClick={() => {
                     setEmail(acc.email);
-                    setPassword("Atelier@2026");
                   }}
                   className="rounded-full border bg-background px-3 py-1.5 text-xs font-medium hover:bg-accent transition-colors"
                 >
